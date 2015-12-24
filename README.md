@@ -41,18 +41,16 @@ export default function()
     // host: optional
     port: 3000,
 
+    // Http Urls to javascripts and (optionally) CSS styles 
+    // which will be insterted into the <head/> element of the resulting Html webpage
+    // (as <script src="..."/> and <link rel="style" href="..."/> respectively)
     assets: () =>
     {
+      return {
+        javascript: { main: '/assets/main.js' }
 
-      // require() isn't used here to prevent Webpack 
-      // from including everything in the bundle during build process
-      //
-      
-      let assets
-
-      if (development || !assets)
-      {
-        assets = JSON.parse(fs.readFileSync(webpack_assets_path))
+        // optional
+        styles: { main: '/assets/main.css' }
       }
     },
     
