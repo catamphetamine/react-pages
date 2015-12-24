@@ -1,0 +1,1 @@
+module.exports = require('./babel-transpiled-modules/page-server/web server')

@@ -1,0 +1,61 @@
+{
+  "name": "react-isomorphic-render",
+  "version": "1.0.0",
+  "description": "Isomorphic rendering with React, Redux, React-router and Redux-router. Includes support for Webpack",
+  "main": "babel-transpiled-modules/index.js",
+  "dependencies": {
+    "react-document-meta": "^2.0.0",
+    "koa": "1.1.2",
+    "bluebird": "^3.1.1",
+    "superagent": "^1.6.1",
+    "redux-devtools": "^3.0.0-beta-3",
+    "redux-devtools-dock-monitor": "^1.0.0-beta-3",
+    "redux-devtools-log-monitor": "^1.0.0-beta-3",
+    "redux-router": "^1.0.0-beta5",
+    "hoist-non-react-statics": "^1.0.3",
+    "react-router": "^1.0.3",
+    "scroll-behavior": "^0.3.0",
+    "history": "^1.17.0"
+  },
+  "devDependencies": {
+    "babel": "^5.8.34",
+    "istanbul": "^0.4.1",
+    "mocha": "^2.3.4",
+    "npm-run-all": "^1.4.0",
+    "rimraf": "^2.5.0"
+  },
+  "peerDependencies": {
+    "react": "*",
+    "react-dom": "*",
+    "redux": "*"
+  },
+  "scripts": {
+    "test": "mocha --compilers js:babel/register-without-polyfill --colors --bail --reporter spec test/ --recursive",
+    "test-coverage": "istanbul cover node_modules/mocha/bin/_mocha -- --compilers js:babel/register-without-polyfill --colors --reporter dot test/ --recursive",
+    "test-travis": "istanbul cover node_modules/mocha/bin/_mocha --report lcovonly -- --compilers js:babel/register --colors --reporter spec test/ --recursive",
+    "gh-pages": "webpack --action=gh-pages --colors --config ./config",
+    "deploy-gh-pages": "TARGET=gh-pages node ./config/deploy-gh-pages.js",
+    "clean-for-build": "rimraf ./babel-transpiled-modules/**/*",
+    "build-modules": "babel ./source --optional runtime --out-dir ./babel-transpiled-modules --source-maps",
+    "build": "npm-run-all clean-for-build build-modules",
+    "commit-new-build": "git commit --all --message=\"Update build\"",
+    "prepublish": "npm-run-all test build",
+    "watch": "babel scripts/watch.js | node"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/halt-hammerzeit/react-isomorphic-render.git"
+  },
+  "keywords": [
+    "react",
+    "isomorphic",
+    "redux",
+    "webpack"
+  ],
+  "author": "Halt Hammerzeit <halt.hammerzeit.at@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/halt-hammerzeit/react-isomorphic-render/issues"
+  },
+  "homepage": "https://github.com/halt-hammerzeit/react-isomorphic-render#readme"
+}

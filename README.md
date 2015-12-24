@@ -1,0 +1,289 @@
+# react-isomorphic-render
+
+[![NPM Version][npm-image]][npm-url]
+[![NPM Downloads][downloads-image]][downloads-url]
+
+<!---
+[![Build Status][travis-image]][travis-url]
+[![Test Coverage][coveralls-image]][coveralls-url]
+-->
+
+<!---
+[![Gratipay][gratipay-image]][gratipay-url]
+-->
+
+Is a module providing support for isomorphic (universal) rendering with React, React-router, Redux, Redux-router. Also allows for Webpack bundler.
+
+## Installation
+
+```bash
+$ npm install react-isomorphic-render --save
+```
+
+## Usage
+
+See [webapp](https://github.com/halt-hammerzeit/webapp) and [webpack-react-redux-isomorphic-render-example](https://github.com/halt-hammerzeit/webpack-react-redux-isomorphic-render-example) as references.
+
+Create your webpage rendering server
+
+```javascript
+import webpage_server from 'react-isomorphic-render/page-server/web server'
+
+export default function()
+{
+  // starts webpage rendering server
+  webpage_server
+  ({
+    // enable/disable development mode (true/false)
+    development: _development_,
+
+    // on which Http host and port to start the webpage rendering server
+    // host: optional
+    port: 3000,
+
+    assets: () =>
+    {
+
+      // require() isn't used here to prevent Webpack 
+      // from including everything in the bundle during build process
+      //
+      
+      let assets
+
+      if (development || !assets)
+      {
+        assets = JSON.parse(fs.readFileSync(webpack_assets_path))
+      }
+    },
+    
+    // wraps React page component into arbitrary markup (e.g. Redux Provider)
+    markup_wrapper: (component, {store}) => <Provider store={store} key="provider">{component}</Provider>,
+
+    // a function to create Redux store (explained below)
+    create_store: (data, options) => ...,
+
+    // will be inserted into server rendered webpage <head/>
+    // (use `key`s to prevent React warning)
+    head: () =>
+    {
+      // clear require() cache for hot reload in development mode
+      if (_development_)
+      {
+        delete require.cache[require.resolve('assets/icon.png')]
+      }
+
+      return 
+      [
+        <link rel="shortcut icon" href={require('assets/icon.png')} key="1"/>
+      ]
+    },
+
+    // body: optional, extra <body/> content
+
+    // this CSS will be inserted into server rendered webpage <head/> <style/> tag 
+    // (when in development mode only - removes rendering flicker)
+    styles: () =>
+    {
+      // clear require() cache for hot reload in development mode
+      if (_development_)
+      {
+        delete require.cache[require.resolve('assets/style.scss')]
+      }
+
+      return require('assets/style.scss').toString()
+    }
+  })
+}
+```
+
+And also write your client-side rendering code
+
+```javascript
+import render         from '../react-isomorphic-render/redux/client'
+
+import markup_wrapper from './markup wrapper'
+import create_store   from './redux/store'
+import create_routes  from './routes'
+
+// styles need to be included on the client side
+require.include('../../assets/styles/style.scss')
+
+// renders the webpage on the client side
+render
+({
+  // enable/disable development mode (true/false)
+  development: _development_,
+
+  // the DOM element where React markup will be rendered
+  to: document.getElementById('react_markup'),
+
+  // a function to create Redux store (explained below)
+  create_store: (data, options) => ...,
+
+  // creates React-router routes
+  create_routes: store => <Route path="/" component={Layout}>...</Route>,
+
+  // wraps React page component into arbitrary markup (e.g. Redux Provider)
+  markup_wrapper: (component, {store}) => <Provider store={store} key="provider">{component}</Provider>,
+})
+```
+
+`create_store` function would look like this
+
+```javascript
+import create_store from 'react-isomorphic-render/redux/store'
+
+export default function(data, { development, development_tools, server, http_request })
+{
+  const options =
+  {
+    // enable/disable development mode (true/false)
+    development : development,
+
+    // get Redux reducers
+    get_reducers() { return require('./reducers') },
+
+    // Redux store data
+    data,
+
+    // creates React-router routes
+    create_routes: store => <Route path="/" component={Layout}>...</Route>,
+  }
+
+  // server-specific settings
+  if (server)
+  {
+    options.server = true
+
+    // authentication cookies will be copied from this Http request
+    options.http_request = http_request
+
+    // Http host and port for data fetching when `preload`ing pages on the server
+    options.host = configuration.web_server.http.host
+    options.port = configuration.web_server.http.port
+  }
+
+  const { store, reload } = create_store(options)
+
+  // client side hot module reload for Redux reducers
+  // http://webpack.github.io/docs/hot-module-replacement.html#accept
+  if (development && module.hot)
+  {
+    // this path must be equal to the path in `get_reducers` function above
+    module.hot.accept('./reducers', reload)
+  }
+
+  return store
+}
+```
+
+Your React pages would look like this
+
+```javascript
+import { webpage_title } from 'react-isomorphic-render/webpage head'
+import preload from 'react-isomorphic-render/redux/preload'
+
+@preload
+(
+  function(get_state, dispatch)
+  {
+    return dispatch(function()
+    {
+      return {
+        promise: http => http.get('/api/users').then(ids => Promise.map(ids, id => http.get(`/api/users/${id}`))),
+        events: ['GET_USERS_PENDING', 'GET_USERS_SUCCESS', 'GET_USERS_FAILURE']
+      }
+    })
+  }
+)
+@connect
+(
+  store => ({ users: store.users.users }),
+  dispatch => bind_action_creators({ some_action }, dispatch)
+)
+export default class Page extends Component
+{
+  static propTypes =
+  {
+    users       : PropTypes.array,
+    some_action : PropTypes.func.isRequired
+  }
+
+  render()
+  {
+    return (
+      <div>
+        <webpage_title("Users")/>
+        <ul>{users.map(user => <li>{user.name}</li>)}</ul>
+      </div>
+    )
+  }
+}
+```
+
+Now go to http://localhost:3000 and you should see your React webpage rendered with navigation working.
+
+## Contributing
+
+After cloning this repo, ensure dependencies are installed by running:
+
+```sh
+npm install
+```
+
+This module is written in ES6 and uses [Babel](http://babeljs.io/) for ES5
+transpilation. Widely consumable JavaScript can be produced by running:
+
+```sh
+npm run build
+```
+
+Once `npm run build` has run, you may `import` or `require()` directly from
+node.
+
+After developing, the full test suite can be evaluated by running:
+
+```sh
+npm test
+```
+
+While actively developing, one can use (personally I don't use it)
+
+```sh
+npm run watch
+```
+
+in a terminal. This will watch the file system and run tests automatically 
+whenever you save a js file.
+
+When you're ready to test your new functionality on a real project, you can run
+
+```sh
+npm pack
+```
+
+It will `build`, `test` and then create a `.tgz` archive which you can then install in your project folder
+
+```sh
+npm install [module name with version].tar.gz
+```
+
+## License
+
+[MIT](LICENSE)
+[npm-image]: https://img.shields.io/npm/v/react-isomorphic-render.svg
+[npm-url]: https://npmjs.org/package/react-isomorphic-render
+[downloads-image]: https://img.shields.io/npm/dm/react-isomorphic-render.svg
+[downloads-url]: https://npmjs.org/package/react-isomorphic-render
+
+<!---
+[travis-image]: https://img.shields.io/travis/halt-hammerzeit/react-isomorphic-render/master.svg
+[travis-url]: https://travis-ci.org/halt-hammerzeit/react-isomorphic-render
+[coveralls-image]: https://img.shields.io/coveralls/halt-hammerzeit/react-isomorphic-render/master.svg
+[coveralls-url]: https://coveralls.io/r/halt-hammerzeit/react-isomorphic-render?branch=master
+-->
+
+<!---
+[gratipay-image]: https://img.shields.io/gratipay/dougwilson.svg
+[gratipay-url]: https://gratipay.com/dougwilson/
+-->
