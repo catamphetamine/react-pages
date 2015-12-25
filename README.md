@@ -80,8 +80,7 @@ export default function()
         delete require.cache[require.resolve('assets/icon.png')]
       }
 
-      return 
-      [
+      return [
         <link rel="shortcut icon" href={require('assets/icon.png')} key="1"/>
       ]
     },
