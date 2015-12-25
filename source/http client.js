@@ -19,7 +19,7 @@ export default class http_client
 			this.server = true
 		}
 		
-		this.host = host || 'localhost'
+		this.host = host
 		this.port = port || 80
 		this.prefix = prefix || ''
 

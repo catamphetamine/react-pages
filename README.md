@@ -27,7 +27,7 @@ See [webapp](https://github.com/halt-hammerzeit/webapp) and [webpack-react-redux
 Create your webpage rendering server
 
 ```javascript
-import webpage_server from 'react-isomorphic-render/page-server/web server'
+import webpage_server from 'react-isomorphic-render/page-server'
 
 export default function()
 {
@@ -37,9 +37,19 @@ export default function()
     // enable/disable development mode (true/false)
     development: _development_,
 
+    // enable/disable Redux development tools (true/false)
+    // development_tools: _development_tools_,
+
     // on which Http host and port to start the webpage rendering server
     // host: optional
     port: 3000,
+
+    // Http host and port for executing all client-side ajax requests on server-side
+    web_server:
+    {
+      host: '192.168.0.1',
+      port: 80
+    },
 
     // Http Urls to javascripts and (optionally) CSS styles 
     // which will be insterted into the <head/> element of the resulting Html webpage
@@ -58,7 +68,7 @@ export default function()
     markup_wrapper: (component, {store}) => <Provider store={store} key="provider">{component}</Provider>,
 
     // a function to create Redux store (explained below)
-    create_store: (data, options) => ...,
+    create_store,
 
     // will be inserted into server rendered webpage <head/>
     // (use `key`s to prevent React warning)
@@ -97,7 +107,7 @@ export default function()
 And also write your client-side rendering code
 
 ```javascript
-import render         from '../react-isomorphic-render/redux/client'
+import { render }     from 'react-isomorphic-render/redux'
 
 import markup_wrapper from './markup wrapper'
 import create_store   from './redux/store'
@@ -112,63 +122,44 @@ render
   // enable/disable development mode (true/false)
   development: _development_,
 
+  // enable/disable Redux development tools (true/false)
+  // development_tools: _development_tools_,
+
   // the DOM element where React markup will be rendered
   to: document.getElementById('react_markup'),
 
   // a function to create Redux store (explained below)
-  create_store: (data, options) => ...,
+  create_store,
 
   // creates React-router routes
   create_routes: store => <Route path="/" component={Layout}>...</Route>,
 
   // wraps React page component into arbitrary markup (e.g. Redux Provider)
-  markup_wrapper: (component, {store}) => <Provider store={store} key="provider">{component}</Provider>,
+  markup_wrapper: (component, {store}) => <Provider store={store} key="provider">{component}</Provider>
 })
 ```
 
 `create_store` function would look like this
 
 ```javascript
-import create_store from 'react-isomorphic-render/redux/store'
+import { create_store } from 'react-isomorphic-render/redux'
 
-export default function(data, { development, development_tools, server, http_request })
+export default function(options)
 {
-  const options =
-  {
-    // enable/disable development mode (true/false)
-    development : development,
+  // get Redux reducers
+  const get_reducers = () => require('./path/to/reducers')
 
-    // get Redux reducers
-    get_reducers() { return require('./reducers') },
+  // creates React-router routes
+  const create_routes = store => <Route path="/" component={Layout}>...</Route>
 
-    // Redux store data
-    data,
-
-    // creates React-router routes
-    create_routes: store => <Route path="/" component={Layout}>...</Route>,
-  }
-
-  // server-specific settings
-  if (server)
-  {
-    options.server = true
-
-    // authentication cookies will be copied from this Http request
-    options.http_request = http_request
-
-    // Http host and port for data fetching when `preload`ing pages on the server
-    options.host = configuration.web_server.http.host
-    options.port = configuration.web_server.http.port
-  }
-
-  const { store, reload } = create_store(options)
+  const { store, reload } = create_store(get_reducers, create_routes, options)
 
   // client side hot module reload for Redux reducers
   // http://webpack.github.io/docs/hot-module-replacement.html#accept
-  if (development && module.hot)
+  if (_development_ && module.hot)
   {
     // this path must be equal to the path in `get_reducers` function above
-    module.hot.accept('./reducers', reload)
+    module.hot.accept('./path/to/reducers', reload)
   }
 
   return store

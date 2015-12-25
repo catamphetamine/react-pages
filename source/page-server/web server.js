@@ -1,15 +1,20 @@
 import fs   from 'fs'
 import path from 'path'
 
-import koa from 'koa'
+import koa        from 'koa'
+import koa_locale from 'koa-locale'
 
 import render from './render'
 
-export default function start_web_server({ development, development_tools, assets, host, port, log, disable_server_side_rendering, create_store, markup_wrapper, head, body, styles })
+export default function start_web_server({ development, localize, assets, host, port, web_server, log, disable_server_side_rendering, create_store, markup_wrapper, head, body, styles })
 {
 	log = log || console
 
 	const web = koa()
+
+	// get locale from Http request
+	// (the second parameter is the Http Get parameter name)
+	koa_locale(web, 'locale')
 
 	// handle errors
 
@@ -40,7 +45,9 @@ export default function start_web_server({ development, development_tools, asset
 		yield render
 		({
 			development,
-			development_tools,
+
+			localize,
+			preferred_locale: this.getLocaleFromQuery() || this.getLocaleFromCookie() || this.getLocaleFromHeader(),
 
 			assets,
 
@@ -66,7 +73,9 @@ export default function start_web_server({ development, development_tools, asset
 
 			head,
 			body,
-			styles
+			styles,
+
+			web_server
 		})
 	}
 

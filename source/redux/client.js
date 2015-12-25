@@ -1,10 +1,22 @@
 import { client } from './render'
-import dev_tools from './dev tools'
+import dev_tools  from './dev tools'
+import { exists } from '../helpers'
 
 export default function({ development, development_tools, to, create_store, create_routes, markup_wrapper })
 {
+	// international
+
+	const language = document.documentElement.getAttribute('lang')
+
+	const localized_messages = window._localized_messages
+
+	if (localized_messages)
+	{
+		delete window._localized_messages
+	}
+
 	// create Redux store
-	const store = create_store(window._flux_store_data, { development, development_tools })
+	const store = create_store({ data: window._flux_store_data })
 	delete window._flux_store_data
 
 	// render page (on the client side)
@@ -13,6 +25,13 @@ export default function({ development, development_tools, to, create_store, crea
 		development,
 		markup_wrapper : (component, options) =>
 		{
+			// international
+			if (localized_messages)
+			{
+				options.locale   = language
+				options.messages = localized_messages
+			}
+
 			const wrapped_component = markup_wrapper(component, options)
 
 			if (!development_tools)

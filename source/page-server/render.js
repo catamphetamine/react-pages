@@ -5,39 +5,51 @@ import React from 'react'
 
 import fs from 'fs'
 
-import Html           from './html'
+import Html from './html'
 
-import { server as render }     from '../redux/render'
+import { server as render } from '../redux/render'
 
 // isomorphic (universal) rendering (middleware).
 // will be used in web_application.use(...)
-export default function({ development, development_tools, assets, request, respond, fail, redirect, disable_server_side_rendering, log, create_store, markup_wrapper, head, body, styles })
+export default function({ development, localize, preferred_locale, assets, request, respond, fail, redirect, disable_server_side_rendering, log, create_store, markup_wrapper, head, body, styles, web_server })
 {
-	// // force refresh webpack stats to get new "hash" value
-	// // on the next require(webpack-assets.json) call
-	// if (development)
-	// {
-	// 	delete require.cache[webpack_assets_path]
-	// }
-
-	// // require() cache will be flushed for Webpack stats
-	// // on every webpage refresh when in development mode
-	// //
-	// require(_webpack_assets_path_)
-
 	// create Redux store
-	const store = create_store(undefined, { http_request: request, development, development_tools, server: true })
+	const store = create_store({ development: development, server: true, http_request: request, host: web_server.host, port: web_server.port })
+
+	// internationalization
+
+	let language
+	let messages
+
+	if (localize)
+	{
+		const result = localize(store, preferred_locale)
+
+		language = result.language
+		messages = result.messages
+	}
 
 	// render the web page
 	return render
 	({
 		disable_server_side_rendering,
 		url: request.originalUrl.replace(/\?$/, ''),
-		markup_wrapper: component => markup_wrapper(component, { store }),
+		markup_wrapper: component => 
+		{
+			let options = { store }
+
+			if (localize)
+			{
+				options.locale   = language
+				options.messages = messages
+			}
+
+			return markup_wrapper(component, options)
+		},
 		html:
 		{
-			with_rendering: component => <Html development={development} assets={assets()} head={head} body={body} styles={styles} store={store} component={component}/>,
-			without_rendering:     () => <Html development={development} assets={assets()} head={head} body={body} styles={styles} store={store}/>
+			with_rendering: component => <Html development={development} assets={assets()} language={language} messages={messages} head={head} body={body} styles={styles} store={store} component={component}/>,
+			without_rendering:     () => <Html development={development} assets={assets()} language={language} messages={messages} head={head} body={body} styles={styles} store={store}/>
 		},
 		store
 	})

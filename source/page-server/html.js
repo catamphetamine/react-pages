@@ -22,12 +22,14 @@ export default class Html extends Component
 		store       : PropTypes.object.isRequired,
 		head        : PropTypes.func,
 		body        : PropTypes.func,
-		styles      : PropTypes.func
+		styles      : PropTypes.func,
+		language    : PropTypes.string,
+		messages    : PropTypes.object
 	}
 
 	render()
 	{
-		const { development, assets, component, store, head, body, styles } = this.props
+		const { development, assets, component, store, head, body, styles, language, messages } = this.props
 
 		// when server-side rendering is disabled, component will be undefined
 		// (but server-side rendering is always enabled so this "if" condition may be removed)
@@ -35,7 +37,7 @@ export default class Html extends Component
 
 		const html = 
 		(
-			<html>
+			<html lang={language}>
 				<head>
 					{/* webpage title and various meta tags */}
 					{server_generated_webpage_head()}
@@ -75,6 +77,8 @@ export default class Html extends Component
 					<div id="react_markup" dangerouslySetInnerHTML={{__html: content}}/>
 
 					{ body ? body() : null }
+
+					{ messages ? <script dangerouslySetInnerHTML={{__html: `window._localized_messages=${JSON.stringify(messages)}`}} charSet="UTF-8"/> : null }
 
 					{/* Flux store data will be reloaded into the store on the client */}
 					<script dangerouslySetInnerHTML={{__html: `window._flux_store_data=${JSON.stringify(store.getState())}`}} charSet="UTF-8"/>

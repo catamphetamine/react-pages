@@ -76,7 +76,7 @@ function makeRouteHooksSafe(create_routes)
 	return store => makeHooksSafe(createRoutes(create_routes(store)), store)
 }
 
-export default function({ development, development_tools, server, get_reducers, data, create_routes, http_request, host, port }) 
+export default function(get_reducers, create_routes, { development, development_tools, server, data, http_request, host, port }) 
 {
 	create_routes          = server ? create_routes : makeRouteHooksSafe(create_routes)
 	const reduxReactRouter = server ? reduxReactRouter_server : reduxReactRouter_client
