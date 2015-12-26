@@ -64,15 +64,15 @@ webpage_server
       icon: require('../assets/icon.png')
     }
   },
-  
-  // wraps React page component into arbitrary markup (e.g. Redux Provider)
-  markup_wrapper: (component, {store}) => <Provider store={store} key="provider">{component}</Provider>,
 
   // a function to create Redux store (explained below)
   create_store,
 
   // creates React-router routes (explained below)
   create_routes,
+  
+  // wraps React page component into arbitrary markup (explained below)
+  markup_wrapper,
 
   // will be inserted into server rendered webpage <head/>
   // (use `key`s to prevent React warning)
@@ -118,9 +118,9 @@ render
 
   // creates React-router routes (explained below)
   create_routes,
-
-  // wraps React page component into arbitrary markup (e.g. Redux Provider)
-  markup_wrapper: (component, {store}) => <Provider store={store} key="provider">{component}</Provider>
+  
+  // wraps React page component into arbitrary markup (explained below)
+  markup_wrapper
 })
 ```
 
@@ -151,6 +151,16 @@ export default function(store)
     <Route path="blog" component={Blog}/>
     <Route path="about" component={About}/>
   </Route>
+}
+```
+
+The `markup_wrapper` function would look like this (nothing special about it)
+
+```javascript
+export default function(component, {store})
+{
+  // wraps React page component into arbitrary markup (e.g. Redux Provider)
+  return <Provider store={store} key="provider">{component}</Provider>
 }
 ```
 
