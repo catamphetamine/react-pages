@@ -181,16 +181,10 @@ function fetch_users()
   }
 }
 
-@preload
-(
-  function(get_state, dispatch)
-  {
-    return dispatch(fetch_users)
-  }
-)
+@preload((get_state, dispatch) => dispatch(fetch_users))
 @connect
 (
-  store => ({ users: store.users.users }),
+  store    => ({ users: store.users.users }),
   dispatch => bindActionCreators({ fetch_users }, dispatch)
 )
 export default class Page extends Component
