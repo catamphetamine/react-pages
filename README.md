@@ -204,7 +204,7 @@ export default class Page extends Component
   {
     return (
       <div>
-        <webpage_title("Users")/>
+        <title("Users")/>
         <ul>{users.map(user => <li>{user.name}</li>)}</ul>
         <button onClick={this.props.action}>Action</button>
       </div>
