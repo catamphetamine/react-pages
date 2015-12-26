@@ -181,7 +181,7 @@ function fetch_users()
   }
 }
 
-@preload((get_state, dispatch) => dispatch(fetch_users))
+@preload(dispatch => dispatch(fetch_users))
 @connect
 (
   store    => ({ users: store.users.users }),
@@ -208,9 +208,7 @@ export default class Page extends Component
 }
 ```
 
-Now go to http://localhost:3000 and you should see your React webpage rendered with navigation working.
-
-Having that thing working one can then set up the main web server like this
+The final step is to set up the main web server like this
 
  * All Http GET requests starting with `/assets` return static files
  * All Http GET requests starting with `/api` call REST API methods

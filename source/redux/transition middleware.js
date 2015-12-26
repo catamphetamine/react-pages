@@ -8,7 +8,7 @@ const get_data_dependencies = (components, getState, dispatch, location, params,
 	return components
 		.filter(component => component[method_name]) // only look at ones with a static preload()
 		.map(component => component[method_name])    // pull out fetch data methods
-		.map(preload => preload(getState, dispatch, location, params))  // call fetch data methods and save promises
+		.map(preload => preload(dispatch, getState, location, params))  // call fetch data methods and save promises
 }
 
 const locations_are_equal = (a, b) => (a.pathname === b.pathname) && (a.search === b.search)

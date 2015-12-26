@@ -1,6 +1,11 @@
 1.2.0 / 26.12.2015
 ===================
 
+  * changed `preload` arguments order
+
+1.2.0 / 26.12.2015
+===================
+
   * simplified website "favicon" insertion into <head/>
   * `styles` parameter renamed to `style`
 
