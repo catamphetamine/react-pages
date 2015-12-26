@@ -22,14 +22,14 @@ export default class Html extends Component
 		store       : PropTypes.object.isRequired,
 		head        : PropTypes.func,
 		body        : PropTypes.func,
-		styles      : PropTypes.func,
+		style       : PropTypes.func,
 		language    : PropTypes.string,
 		messages    : PropTypes.object
 	}
 
 	render()
 	{
-		const { development, assets, component, store, head, body, styles, language, messages } = this.props
+		const { development, assets, component, store, head, body, style, language, messages } = this.props
 
 		// when server-side rendering is disabled, component will be undefined
 		// (but server-side rendering is always enabled so this "if" condition may be removed)
@@ -67,9 +67,11 @@ export default class Html extends Component
 					    (caused by Webpack style-loader mounting CSS styles 
 					     through javascript after page load)
 					    by mounting the entire CSS stylesheet in a <style/> tag */}
-					{ development && styles ? <style dangerouslySetInnerHTML={{__html: styles()}} charSet="UTF-8"/> : null }
+					{ development && style ? <style dangerouslySetInnerHTML={{__html: style()}} charSet="UTF-8"/> : null }
 
 					{ head ? head() : null }
+
+					{ assets.icon ? <link rel="shortcut icon" href={assets.icon}/> : null }
 				</head>
 
 				<body>

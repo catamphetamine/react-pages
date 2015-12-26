@@ -29,64 +29,64 @@ Create your webpage rendering server
 ```javascript
 import webpage_server from 'react-isomorphic-render/page-server'
 
-export default function()
-{
-  // starts webpage rendering server
-  webpage_server
-  ({
-    // enable/disable development mode (true/false)
-    development: _development_,
+// starts webpage rendering server
+webpage_server
+({
+  // enable/disable development mode (true/false)
+  development: _development_,
 
-    // on which Http host and port to start the webpage rendering server
-    // host: optional
-    port: 3000,
+  // on which Http host and port to start the webpage rendering server
+  // host: optional
+  port: 3000,
 
-    // Http host and port for executing all client-side ajax requests on server-side
-    web_server:
-    {
-      host: '192.168.0.1',
-      port: 80
-    },
+  // Http host and port for executing all client-side ajax requests on server-side
+  web_server:
+  {
+    host: '192.168.0.1',
+    port: 80
+  },
 
-    // Http Urls to javascripts and (optionally) CSS styles 
-    // which will be insterted into the <head/> element of the resulting Html webpage
-    // (as <script src="..."/> and <link rel="style" href="..."/> respectively)
-    assets: () =>
-    {
-      return {
-        javascript: { main: '/assets/main.js' }
+  // Http Urls to javascripts and (optionally) CSS styles 
+  // which will be insterted into the <head/> element of the resulting Html webpage
+  // (as <script src="..."/> and <link rel="style" href="..."/> respectively)
+  //
+  // Also a website "favicon", if any.
+  //
+  assets: () =>
+  {
+    return {
+      javascript: { main: '/assets/main.js' },
 
-        // optional
-        styles: { main: '/assets/main.css' }
-      }
-    },
-    
-    // wraps React page component into arbitrary markup (e.g. Redux Provider)
-    markup_wrapper: (component, {store}) => <Provider store={store} key="provider">{component}</Provider>,
+      // optional
+      styles: { main: '/assets/main.css' },
 
-    // a function to create Redux store (explained below)
-    create_store,
-
-    // creates React-router routes
-    create_routes: store => <Route path="/" component={Layout}>...</Route>,
-
-    // will be inserted into server rendered webpage <head/>
-    // (use `key`s to prevent React warning)
-    head: () => [ <link rel="shortcut icon" href={require('assets/icon.png')} key="1"/> ],
-
-    // body: optional, extra <body/> content
-
-    // this CSS will be inserted into server rendered webpage <head/> <style/> tag 
-    // (when in development mode only - removes rendering flicker)
-    styles: () =>
-    {
-      // clear require() cache for hot reload in development mode
-      if (_development_) { delete require.cache[require.resolve('assets/style.scss')] }
-
-      return require('assets/style.scss').toString()
+      // "favicon" (optional)
+      icon: require('../assets/icon.png')
     }
-  })
-}
+  },
+  
+  // wraps React page component into arbitrary markup (e.g. Redux Provider)
+  markup_wrapper: (component, {store}) => <Provider store={store} key="provider">{component}</Provider>,
+
+  // a function to create Redux store (explained below)
+  create_store,
+
+  // creates React-router routes (explained below)
+  create_routes,
+
+  // will be inserted into server rendered webpage <head/>
+  // (use `key`s to prevent React warning)
+  // (optional)
+  // head: () => [...]
+
+  // extra <body/> content
+  // (optional)
+  // body: () => ...
+
+  // (is used only in development mode - removes client-side rendering flicker)
+  // this CSS will be inserted into server rendered webpage <head/> <style/> tag 
+  style: () => require('../assets/style.scss').toString()
+})
 ```
 
 And also write your client-side rendering code
@@ -116,8 +116,8 @@ render
   // a function to create Redux store (explained below)
   create_store,
 
-  // creates React-router routes
-  create_routes: store => <Route path="/" component={Layout}>...</Route>,
+  // creates React-router routes (explained below)
+  create_routes,
 
   // wraps React page component into arbitrary markup (e.g. Redux Provider)
   markup_wrapper: (component, {store}) => <Provider store={store} key="provider">{component}</Provider>
@@ -135,6 +135,22 @@ export default function(options)
 {
   return create_store(reducers, options)
   // Webpack Hot Module Replacement can be added (see example projects for reference)
+}
+```
+
+The `create_routes` function would look like this (nothing special about it)
+
+```javascript
+export default function(store)
+{
+  // `store` can be used in `onEnter` hooks of `Route`s.
+  // For example, to implement user authorization.
+  //
+  <Route path="/" component={Layout}>
+    <IndexRoute component={Home}/>
+    <Route path="blog" component={Blog}/>
+    <Route path="about" component={About}/>
+  </Route>
 }
 ```
 
