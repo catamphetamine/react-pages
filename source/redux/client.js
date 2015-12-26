@@ -16,7 +16,7 @@ export default function({ development, development_tools, to, create_store, crea
 	}
 
 	// create Redux store
-	const store = create_store({ data: window._flux_store_data })
+	const store = create_store({ data: window._flux_store_data, create_routes })
 	delete window._flux_store_data
 
 	// render page (on the client side)

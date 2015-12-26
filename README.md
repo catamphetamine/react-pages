@@ -70,6 +70,9 @@ export default function()
     // a function to create Redux store (explained below)
     create_store,
 
+    // creates React-router routes
+    create_routes: store => <Route path="/" component={Layout}>...</Route>,
+
     // will be inserted into server rendered webpage <head/>
     // (use `key`s to prevent React warning)
     head: () =>
@@ -138,30 +141,17 @@ render
 })
 ```
 
-`create_store` function would look like this
+In the simplest case, `create_store` function would look like this
 
 ```javascript
 import { create_store } from 'react-isomorphic-render/redux'
 
+import reducers from './path/to/reducers'
+
 export default function(options)
 {
-  // get Redux reducers
-  const get_reducers = () => require('./path/to/reducers')
-
-  // creates React-router routes
-  const create_routes = store => <Route path="/" component={Layout}>...</Route>
-
-  const { store, reload } = create_store(get_reducers, create_routes, options)
-
-  // client side hot module reload for Redux reducers
-  // http://webpack.github.io/docs/hot-module-replacement.html#accept
-  if (_development_ && module.hot)
-  {
-    // this path must be equal to the path in `get_reducers` function above
-    module.hot.accept('./path/to/reducers', reload)
-  }
-
-  return store
+  return create_store(reducers, options)
+  // Webpack Hot Module Replacement can be added (see example projects for reference)
 }
 ```
 

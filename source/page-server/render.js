@@ -11,10 +11,10 @@ import { server as render } from '../redux/render'
 
 // isomorphic (universal) rendering (middleware).
 // will be used in web_application.use(...)
-export default function({ development, localize, preferred_locale, assets, request, respond, fail, redirect, disable_server_side_rendering, log, create_store, markup_wrapper, head, body, styles, web_server })
+export default function({ development, localize, preferred_locale, assets, request, respond, fail, redirect, disable_server_side_rendering, log, create_store, create_routes, markup_wrapper, head, body, styles, web_server })
 {
 	// create Redux store
-	const store = create_store({ development: development, server: true, http_request: request, host: web_server.host, port: web_server.port })
+	const store = create_store({ development: development, create_routes, server: true, http_request: request, host: web_server.host, port: web_server.port })
 
 	// internationalization
 
