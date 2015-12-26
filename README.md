@@ -172,32 +172,33 @@ import { preload }            from 'react-isomorphic-render/redux'
 import { connect }            from 'react-redux'
 import { bindActionCreators } from 'redux'
 
-function action() { alert('(ﾟｰﾟ)(｡_｡)') }
+// fetches the list of users from the server
+function fetch_users()
+{
+  return {
+    promise: http => http.get('/api/users').then(ids => Promise.map(ids, id => http.get(`/api/users/${id}`))),
+    events: ['GET_USERS_PENDING', 'GET_USERS_SUCCESS', 'GET_USERS_FAILURE']
+  }
+}
 
 @preload
 (
   function(get_state, dispatch)
   {
-    return dispatch(function()
-    {
-      return {
-        promise: http => http.get('/api/users').then(ids => Promise.map(ids, id => http.get(`/api/users/${id}`))),
-        events: ['GET_USERS_PENDING', 'GET_USERS_SUCCESS', 'GET_USERS_FAILURE']
-      }
-    })
+    return dispatch(fetch_users)
   }
 )
 @connect
 (
   store => ({ users: store.users.users }),
-  dispatch => bindActionCreators({ action }, dispatch)
+  dispatch => bindActionCreators({ fetch_users }, dispatch)
 )
 export default class Page extends Component
 {
   static propTypes =
   {
-    users  : PropTypes.array.isRequired,
-    action : PropTypes.func.isRequired
+    users       : PropTypes.array.isRequired,
+    fetch_users : PropTypes.func.isRequired
   }
 
   render()
@@ -206,7 +207,7 @@ export default class Page extends Component
       <div>
         <title("Users")/>
         <ul>{users.map(user => <li>{user.name}</li>)}</ul>
-        <button onClick={this.props.action}>Action</button>
+        <button onClick={this.props.fetch_users}>Refresh</button>
       </div>
     )
   }
