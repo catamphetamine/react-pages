@@ -167,8 +167,12 @@ export default function(component, {store})
 And React pages would look like this
 
 ```javascript
-import { webpage_title } from 'react-isomorphic-render/webpage head'
-import preload from 'react-isomorphic-render/redux/preload'
+import { title }              from 'react-isomorphic-render'
+import { preload }            from 'react-isomorphic-render/redux'
+import { connect }            from 'react-redux'
+import { bindActionCreators } from 'redux'
+
+function action() { alert('(ﾟｰﾟ)(｡_｡)') }
 
 @preload
 (
@@ -186,14 +190,14 @@ import preload from 'react-isomorphic-render/redux/preload'
 @connect
 (
   store => ({ users: store.users.users }),
-  dispatch => bind_action_creators({ some_button_action }, dispatch)
+  dispatch => bindActionCreators({ action }, dispatch)
 )
 export default class Page extends Component
 {
   static propTypes =
   {
-    users              : PropTypes.array.isRequired,
-    some_button_action : PropTypes.func.isRequired
+    users  : PropTypes.array.isRequired,
+    action : PropTypes.func.isRequired
   }
 
   render()
@@ -202,6 +206,7 @@ export default class Page extends Component
       <div>
         <webpage_title("Users")/>
         <ul>{users.map(user => <li>{user.name}</li>)}</ul>
+        <button onClick={this.props.action}>Action</button>
       </div>
     )
   }
