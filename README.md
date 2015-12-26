@@ -12,7 +12,7 @@
 [![Gratipay][gratipay-image]][gratipay-url]
 -->
 
-Is a module providing support for isomorphic (universal) rendering with React, React-router, Redux, Redux-router. Also allows for Webpack bundler.
+Is a module providing support for isomorphic (universal) rendering with React, React-router, Redux, Redux-router. Also allows for Webpack bundler. Allows for locale detection and therefore internationalization of the app.
 
 ## Installation
 
@@ -36,9 +36,6 @@ export default function()
   ({
     // enable/disable development mode (true/false)
     development: _development_,
-
-    // enable/disable Redux development tools (true/false)
-    // development_tools: _development_tools_,
 
     // on which Http host and port to start the webpage rendering server
     // host: optional
@@ -75,18 +72,7 @@ export default function()
 
     // will be inserted into server rendered webpage <head/>
     // (use `key`s to prevent React warning)
-    head: () =>
-    {
-      // clear require() cache for hot reload in development mode
-      if (_development_)
-      {
-        delete require.cache[require.resolve('assets/icon.png')]
-      }
-
-      return [
-        <link rel="shortcut icon" href={require('assets/icon.png')} key="1"/>
-      ]
-    },
+    head: () => [ <link rel="shortcut icon" href={require('assets/icon.png')} key="1"/> ],
 
     // body: optional, extra <body/> content
 
@@ -95,10 +81,7 @@ export default function()
     styles: () =>
     {
       // clear require() cache for hot reload in development mode
-      if (_development_)
-      {
-        delete require.cache[require.resolve('assets/style.scss')]
-      }
+      if (_development_) { delete require.cache[require.resolve('assets/style.scss')] }
 
       return require('assets/style.scss').toString()
     }
@@ -141,7 +124,7 @@ render
 })
 ```
 
-In the simplest case, `create_store` function would look like this
+In the simplest case the `create_store` function would look like this
 
 ```javascript
 import { create_store } from 'react-isomorphic-render/redux'
@@ -155,7 +138,7 @@ export default function(options)
 }
 ```
 
-Your React pages would look like this
+And React pages would look like this
 
 ```javascript
 import { webpage_title } from 'react-isomorphic-render/webpage head'
@@ -177,14 +160,14 @@ import preload from 'react-isomorphic-render/redux/preload'
 @connect
 (
   store => ({ users: store.users.users }),
-  dispatch => bind_action_creators({ some_action }, dispatch)
+  dispatch => bind_action_creators({ some_button_action }, dispatch)
 )
 export default class Page extends Component
 {
   static propTypes =
   {
-    users       : PropTypes.array,
-    some_action : PropTypes.func.isRequired
+    users              : PropTypes.array.isRequired,
+    some_button_action : PropTypes.func.isRequired
   }
 
   render()
@@ -200,6 +183,14 @@ export default class Page extends Component
 ```
 
 Now go to http://localhost:3000 and you should see your React webpage rendered with navigation working.
+
+Having that thing working one can then set up the main web server like this
+
+ * All Http GET requests starting with `/assets` return static files
+ * All Http GET requests starting with `/api` call REST API methods
+ * All the other Http GET requests are proxied to `http://localhost:3000` for webpage rendering
+
+(see the aforementioned example projects for reference)
 
 ## Contributing
 
