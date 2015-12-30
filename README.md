@@ -57,10 +57,11 @@ webpage_server
     return {
       javascript: { main: '/assets/main.js' },
 
-      // optional
+      // (optional)
       styles: { main: '/assets/main.css' },
 
-      // URL of your "favicon" (optional).
+      // (optional)
+      // URL of your "favicon".
       // If you're using Webpack then the URL is the result of a require() call.
       icon: require('../assets/icon.png')
     }
@@ -75,17 +76,20 @@ webpage_server
   // wraps React page component into arbitrary markup (explained below)
   markup_wrapper,
 
-  // will be inserted into server rendered webpage <head/>
-  // (use `key`s to prevent React warning)
   // (optional)
+  // returns an array of React elements
+  // which will be inserted into server rendered webpage's <head/>
+  // (use `key`s to prevent React warning)
   // head: () => [...]
 
-  // extra <body/> content
   // (optional)
+  // returns either a React element or an array of React elements
+  // which will be inserted into server rendered webpage's <body/>
   // body: () => ...
 
-  // (is used only in development mode - removes client-side rendering flicker)
-  // This CSS text will be inserted into server rendered webpage <head/> <style/> tag.
+  // (optional)
+  // (is used only in development mode - removes Ctrl + R (F5) flicker)
+  // This CSS text will be inserted into server rendered webpage's <head/> <style/> tag.
   // If you're using Webpack then the CSS text is the result of a require() call.
   style: () => require('../assets/style.scss').toString()
 })
