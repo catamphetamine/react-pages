@@ -60,7 +60,8 @@ webpage_server
       // optional
       styles: { main: '/assets/main.css' },
 
-      // "favicon" (optional)
+      // URL of your "favicon" (optional).
+      // If you're using Webpack then the URL is the result of a require() call.
       icon: require('../assets/icon.png')
     }
   },
@@ -84,7 +85,8 @@ webpage_server
   // body: () => ...
 
   // (is used only in development mode - removes client-side rendering flicker)
-  // this CSS will be inserted into server rendered webpage <head/> <style/> tag 
+  // This CSS text will be inserted into server rendered webpage <head/> <style/> tag.
+  // If you're using Webpack then the CSS text is the result of a require() call.
   style: () => require('../assets/style.scss').toString()
 })
 ```
