@@ -216,6 +216,16 @@ The final step is to set up the main web server like this
 
 (see the aforementioned example projects for reference)
 
+## Gotchas
+
+This library is build system agnostic: you can use your favourite Grunt, Gulp, Browserify, RequireJS, Webpack, etc.
+
+If you're using Webpack though either make sure your React components don't contain asset `require()` calls (images, styles, fonts, etc) or make those asset `require()` calls work on Node.js with the use of either [webpack-isomorphic-tools](https://github.com/halt-hammerzeit/webpack-isomorphic-tools) or a separate `target: "node"` Webpack build. Yes, Webpack is that stubborn when making it work on the server.
+
+## Suggestions
+
+This library is (semi)open to suggestions on adding new functionality, removing existing functionality, refactoring, etc. This whole thing is evolving fast, things change rapidly.
+
 ## Contributing
 
 After cloning this repo, ensure dependencies are installed by running:
