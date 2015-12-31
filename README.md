@@ -149,11 +149,13 @@ export default function(store)
   // `store` can be used in `onEnter` hooks of `Route`s.
   // For example, to implement user authorization.
   //
-  <Route path="/" component={Layout}>
-    <IndexRoute component={Home}/>
-    <Route path="blog" component={Blog}/>
-    <Route path="about" component={About}/>
-  </Route>
+  return (
+    <Route path="/" component={Layout}>
+      <IndexRoute component={Home}/>
+      <Route path="blog" component={Blog}/>
+      <Route path="about" component={About}/>
+    </Route>
+  )
 }
 ```
 
