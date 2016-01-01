@@ -5,7 +5,7 @@ import React from 'react'
 
 export function webpage_title(title)
 {
-	return <DocumentMeta title={title}/>
+	return <DocumentMeta title={title} extend/>
 }
 
 export function webpage_head(title, description, meta)
