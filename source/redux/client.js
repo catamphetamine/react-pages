@@ -59,6 +59,6 @@ export default function({ development, development_tools, to, create_store, crea
 		},
 		create_routes,
 		store,
-		to
+		to: to || document.getElementById('react_markup')
 	})
 }

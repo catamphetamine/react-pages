@@ -35,6 +35,13 @@ export default class Html extends Component
 		// (but server-side rendering is always enabled so this "if" condition may be removed)
 		const content = component ? ReactDOMServer.renderToString(component) : ''
 
+		let react_markup = <div id="react_markup" dangerouslySetInnerHTML={{__html: content}}/>
+
+		if (body)
+		{
+			react_markup = body(react_markup)
+		}
+
 		const html = 
 		(
 			<html lang={language}>
@@ -75,10 +82,7 @@ export default class Html extends Component
 				</head>
 
 				<body>
-					{/* rendered React page */}
-					<div id="react_markup" dangerouslySetInnerHTML={{__html: content}}/>
-
-					{ body ? body() : null }
+					{react_markup}
 
 					{ messages ? <script dangerouslySetInnerHTML={{__html: `window._localized_messages=${JSON.stringify(messages)}`}} charSet="UTF-8"/> : null }
 

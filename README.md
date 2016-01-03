@@ -83,9 +83,10 @@ webpage_server
   // head: () => [...]
 
   // (optional)
+  // allows for wrapping React page component with arbitrary markup.
   // returns either a React element or an array of React elements
   // which will be inserted into server rendered webpage's <body/>
-  // body: () => ...
+  // body: react_page_component => react_page_component
 
   // (optional)
   // (is used only in development mode - removes Ctrl + R (F5) flicker)
@@ -112,9 +113,6 @@ render
 
   // enable/disable Redux development tools (true/false)
   // development_tools: _development_tools_,
-
-  // the DOM element where React markup will be rendered
-  to: document.getElementById('react_markup'),
 
   // a function to create Redux store (explained below)
   create_store,
