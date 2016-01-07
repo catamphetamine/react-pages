@@ -25,13 +25,41 @@ export default function middleware(http_client)
 			next({ ...rest, type: Request })
 
 			// returning promise from a middleware is not required.
-			// can be used like: store.dispatch({ ... }).then(...)
-			return promise(http_client).then
-			(
-				result => next({ ...rest, result, type: Success }),
-				error  => next({ ...rest, error,  type: Failure })
-				// error => Promise.reject(next({...rest, error, type: Failure}))
-			)
+			//
+			// can be used like: this.props.dispatch(action()).then(...)
+			//
+			// or most likely as: this.props.bound_action().then(...)
+			//
+			// or even most likely as:
+			//
+			// async do_something()
+			// {
+			// 	try
+			// 	{
+			// 		const result = await this.props.bound_action({ ... })
+			// 	}
+			// 	catch (error)
+			// 	{
+			// 		alert(error.status)
+			// 	}
+			// }
+			//
+			return new Promise((resolve, reject) =>
+			{
+				promise(http_client).then
+				(
+					result =>
+					{
+						next({ ...rest, result, type: Success })
+						resolve(result)
+					},
+					error =>
+					{
+						next({ ...rest, error,  type: Failure })
+						reject(error)
+					}
+				)
+			})
 		}
 	}
 }

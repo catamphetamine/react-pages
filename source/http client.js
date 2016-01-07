@@ -87,7 +87,8 @@ export default class http_client
 					{
 						if (error)
 						{
-							console.error(error.stack)
+							// superagent would have already output the error to console
+							// console.error(error.stack)
 							
 							return reject(error) // (response && response.body) || 
 						}

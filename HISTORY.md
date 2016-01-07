@@ -1,3 +1,8 @@
+1.4.1 / 07.01.2016
+==================
+
+  * can now use `Promise`s returned from Redux dispatched actions
+
 1.4.0 / 03.01.2016
 ==================
 

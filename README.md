@@ -208,6 +208,30 @@ export default class Page extends Component
       </div>
     )
   }
+
+  // Observing action result example.
+  //
+  // Suppose you make a `delete_users()` function 
+  // analagous to the `fetch_users()` function.
+  //
+  // Then you can call it like this:
+  //
+  // <button onClick={::this.delete_users}>Delete all users</button>
+  //
+  // (async/await Babel syntax is used here; can be rewritten as usual Promises)
+  //
+  async delete_users()
+  {
+    try
+    {
+      const count = await this.props.delete_users()
+      alert(`Deleted ${count} users`)
+    }
+    catch (error)
+    {
+      alert(error)
+    }
+  }
 }
 ```
 
