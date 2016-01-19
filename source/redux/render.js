@@ -6,23 +6,27 @@ import { ReduxRouter } from 'redux-router'
 import React          from 'react'
 import ReactDOMServer from 'react-dom/server'
 
-// returns nothing.
+// returns a Promise for React component.
+//
 // renders directly to the "to" DOM element.
 // (to allow for faster DOM mutations instead of simple slow Html code replacement)
-export function client({ development, markup_wrapper, create_routes, store, to })
+export function client({ development, render, create_routes, store, to })
 {
-	const component = <ReduxRouter routes={create_routes({store})} />
+	let router_element = <ReduxRouter routes={create_routes({store})} />
 
-	default_client_render
-	({
-		development, 
-		component: markup_wrapper(component, {store}),
-		to
+	return render(router_element, {store}).then(element =>
+	{
+		return default_client_render
+		({
+			development, 
+			element,
+			to
+		})
 	})
 }
 
 // returns a Promise resolving to Html code.
-export function server({ disable_server_side_rendering, markup_wrapper, html, url, store })
+export function server({ disable_server_side_rendering, render, render_html, url, store })
 {
 	if (disable_server_side_rendering)
 	{
@@ -65,17 +69,17 @@ export function server({ disable_server_side_rendering, markup_wrapper, html, ur
 
 			store.getState().router.then(() => 
 			{
-				const component = <ReduxRouter/>
+				const child_element = <ReduxRouter/>
 
 				const status = get_status_from_routes(router_state.routes)
 
 				resolve({ status, markup: '<!doctype html>\n' +
-					ReactDOMServer.renderToString(html.with_rendering(markup_wrapper(component, {store}))) })
+					ReactDOMServer.renderToString(render_html(render(child_element, {store}))) })
 			})
 			.catch(error =>
 			{
 				// log.error(error)
-				error.markup = default_server_render({ html }) // let client render error page or re-request data
+				error.markup = default_server_render({ render_html }) // let client render error page or re-request data
 				throw error
 			})
 		}))

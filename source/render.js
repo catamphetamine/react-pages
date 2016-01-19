@@ -2,12 +2,13 @@ import React                 from 'react'
 import ReactDOM              from 'react-dom'
 import ReactDOMServer        from 'react-dom/server'
 
-// returns nothing.
+// returns React component (for the element that was rendered).
+//
 // renders directly to the "to" DOM element.
 // (to allow for faster DOM mutations instead of simple slow Html code replacement)
-export function client({ development, component, to })
+export function client({ development, element, to })
 {
-	ReactDOM.render(component, to)
+	const component = ReactDOM.render(element, to)
 
 	if (development)
 	{
@@ -18,10 +19,12 @@ export function client({ development, component, to })
 			console.error('Server-side React render was discarded. Make sure that your initial render does not contain any client-side code.')
 		}
 	}
+
+	return component
 }
 
 // returns Html code.
-export function server({ html })
+export function server({ render_html })
 {
-	return '<!doctype html>\n' + ReactDOMServer.renderToString(html.without_rendering())
+	return '<!doctype html>\n' + ReactDOMServer.renderToString(render_html())
 }

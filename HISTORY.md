@@ -1,3 +1,10 @@
+2.0.0 / 19.01.2016
+==================
+
+  * changed `markup_wrapper` from a function to a React component
+  * internationalization messages are now not passed from server to client but are instead loaded during client-side rendering (to allow for Hot Module Replacement aka hot reload)
+  * extensive refactoring and some minor features added
+
 1.4.1 / 07.01.2016
 ==================
 

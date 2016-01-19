@@ -18,39 +18,35 @@ export default function({ development, localize, preferred_locale, assets, reque
 
 	// internationalization
 
-	let language
+	let locale
 	let messages
 
 	if (localize)
 	{
 		const result = localize(store, preferred_locale)
 
-		language = result.language
+		locale   = result.locale
 		messages = result.messages
 	}
+
+	const entry_point = 'main' // may examine request.originalUrl to determine Webpack entry point
 
 	// render the web page
 	return render
 	({
 		disable_server_side_rendering,
 		url: request.originalUrl.replace(/\?$/, ''),
-		markup_wrapper: component => 
+		render: (child_element, props) => 
 		{
-			let options = { store }
-
 			if (localize)
 			{
-				options.locale   = language
-				options.messages = messages
+				props.locale   = locale
+				props.messages = messages
 			}
 
-			return markup_wrapper(component, options)
+			return React.createElement(markup_wrapper, props, child_element)
 		},
-		html:
-		{
-			with_rendering: component => <Html development={development} assets={assets()} language={language} messages={messages} head={head} body={body} style={style} store={store} component={component}/>,
-			without_rendering:     () => <Html development={development} assets={assets()} language={language} messages={messages} head={head} body={body} style={style} store={store}/>
-		},
+		render_html: element => <Html development={development} assets={assets()} entry_point={entry_point} locale={locale} head={head} body={body} style={style} store={store}>{element}</Html>,
 		store
 	})
 	.then(({ status, markup, redirect_to }) =>

@@ -2,6 +2,7 @@ import React, { Component, PropTypes } from 'react'
 import ReactDOMServer from 'react-dom/server'
 
 import { server_generated_webpage_head } from '../webpage head'
+import { get_language_from_locale } from '../helpers'
 
 /**
  * Wrapper component containing HTML metadata and boilerplate tags.
@@ -18,33 +19,33 @@ export default class Html extends Component
 	{
 		development : PropTypes.bool,
 		assets      : PropTypes.object.isRequired,
-		component   : PropTypes.node,
+		content     : PropTypes.node,
 		store       : PropTypes.object.isRequired,
 		head        : PropTypes.func,
 		body        : PropTypes.func,
 		style       : PropTypes.func,
-		language    : PropTypes.string,
-		messages    : PropTypes.object
+		locale      : PropTypes.string,
+		entry_point : PropTypes.string.isRequired
 	}
 
 	render()
 	{
-		const { development, assets, component, store, head, body, style, language, messages } = this.props
+		const { development, assets, store, head, body, style, locale, entry_point } = this.props
 
-		// when server-side rendering is disabled, component will be undefined
+		// when server-side rendering is disabled, content will be undefined
 		// (but server-side rendering is always enabled so this "if" condition may be removed)
-		const content = component ? ReactDOMServer.renderToString(component) : ''
+		let content_markup = this.props.children ? ReactDOMServer.renderToString(this.props.children) : ''
 
-		let react_markup = <div id="react_markup" dangerouslySetInnerHTML={{__html: content}}/>
+		let content_element = <div id="react_markup" dangerouslySetInnerHTML={{__html: content_markup}}/>
 
 		if (body)
 		{
-			react_markup = body(react_markup)
+			content_element = body(content_element)
 		}
 
 		const html = 
 		(
-			<html lang={language}>
+			<html lang={locale ? get_language_from_locale(locale) : ''}>
 				<head>
 					{/* webpage title and various meta tags */}
 					{server_generated_webpage_head()}
@@ -82,9 +83,11 @@ export default class Html extends Component
 				</head>
 
 				<body>
-					{react_markup}
+					{/* React page content */}
+					{content_element}
 
-					{ messages ? <script dangerouslySetInnerHTML={{__html: `window._localized_messages=${JSON.stringify(messages)}`}} charSet="UTF-8"/> : null }
+					{/* locale for international messages */}
+					<script dangerouslySetInnerHTML={{__html: `window._locale=${JSON.stringify(locale)}`}} charSet="UTF-8"/>
 
 					{/* Flux store data will be reloaded into the store on the client */}
 					<script dangerouslySetInnerHTML={{__html: `window._flux_store_data=${JSON.stringify(store.getState())}`}} charSet="UTF-8"/>
@@ -97,12 +100,7 @@ export default class Html extends Component
 					
 					{/* current application "entry" point javascript
 					    (currently there is only one entry point: "main") */}
-					{Object.keys(assets.javascript)
-						.filter(script => script !== 'common')
-						.map((script, i) =>
-							<script src={assets.javascript[script]} key={i} charSet="UTF-8"/>
-						)
-					}
+					<script src={assets.javascript[entry_point]} charSet="UTF-8"/>
 				</body>
 			</html>
 		)

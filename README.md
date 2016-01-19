@@ -86,7 +86,7 @@ webpage_server
   // allows for wrapping React page component with arbitrary markup.
   // returns either a React element or an array of React elements
   // which will be inserted into server rendered webpage's <body/>
-  // body: react_page_component => react_page_component
+  // body: react_page_element => react_page_element
 
   // (optional)
   // (is used only in development mode - removes Ctrl + R (F5) flicker)
@@ -157,13 +157,22 @@ export default function(store)
 }
 ```
 
-The `markup_wrapper` function would look like this (nothing special about it)
+The `markup_wrapper` component would look like this (nothing special about it)
 
 ```javascript
-export default function(component, {store})
+export default class Wrapper extends React.Component
 {
+  static propTypes = 
+  {
+    store : React.PropTypes.object.isRequired
+  }
+
   // wraps React page component into arbitrary markup (e.g. Redux Provider)
-  return <Provider store={store} key="provider">{component}</Provider>
+  //
+  render()
+  {
+    return <Provider store={this.props.store} key="provider">{this.props.children}</Provider>
+  }
 }
 ```
 

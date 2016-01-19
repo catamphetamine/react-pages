@@ -40,6 +40,14 @@ export default function start_web_server({ development, localize, assets, host, 
 
 	function* rendering()
 	{
+		// Material-UI asks for this,
+		// but this isn't right,
+		// because Node.js serves requests asynchronously
+		// and therefore two different web browsers 
+		// may be asking for a rendered page simultaneously.
+		//
+		// global.navigator = { userAgent: request.headers['user-agent'] }
+
 		// these parameters are for Koa app.
 		// they can be modified to work with Express app if needed.
 		yield render
