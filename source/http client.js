@@ -90,6 +90,23 @@ export default class http_client
 							// superagent would have already output the error to console
 							// console.error(error.stack)
 							
+							if (response)
+							{
+								let text = response.text
+								const code = parseInt(text)
+
+								if (text)
+								{
+									error.message = text
+
+									if (!isNaN(code))
+									{
+										error.code = code
+										// error.message = error.message.split(' ').shift() then .join()
+									}
+								}
+							}
+
 							return reject(error) // (response && response.body) || 
 						}
 
