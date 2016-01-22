@@ -3,12 +3,37 @@ import { ROUTER_DID_CHANGE } from 'redux-router/lib/constants'
 // returns a promise which resolves when all the required preload()s are resolved
 const get_data_dependencies = (components, getState, dispatch, location, params, options = {}) =>
 {
+	// determine if it's `preload` or `preload_deferred`
 	const method_name = options.deferred ? 'preload_deferred' : 'preload'
 
+	// calls all `preload` (or `preload_deferred`) methods 
+	// (in parallel)
+	function preload_all()
+	{
+		return Promise.all
+		(
+			components
+				.filter(component => component[method_name]) // only look at ones with a static preload()
+				.map(component => component[method_name])    // pull out fetch data methods
+				.map(preload => preload(dispatch, getState, location, params))  // call fetch data methods and save promises
+		)
+	}
+
+	// if `preload_deferred` then just call them all
+	if (options.deferred)
+	{
+		return preload_all()
+	}
+
+	// if there are `preload_blocking` methods on the React-Router component chain,
+	// then finish them first (sequentially, because it's a waterfall model).
 	return components
-		.filter(component => component[method_name]) // only look at ones with a static preload()
-		.map(component => component[method_name])    // pull out fetch data methods
-		.map(preload => preload(dispatch, getState, location, params))  // call fetch data methods and save promises
+		.filter(component => component.preload_blocking) // only look at ones with a static preload_blocking()
+		.map(component => component.preload_blocking)    // pull out fetch data methods
+		.reduce((previous, preload) => previous.then(() => preload(dispatch, getState, location, params)), Promise.resolve())
+	
+		// first finish `preload_blocking` methods, then call all `preload`s
+		.then(preload_all)
 }
 
 const locations_are_equal = (a, b) => (a.pathname === b.pathname) && (a.search === b.search)
@@ -35,7 +60,7 @@ export default function(server)
 		const promise = new Promise(resolve =>
 		{
 			// preload all the required data
-			Promise.all(get_data_dependencies(components, getState, dispatch, location, params))
+			get_data_dependencies(components, getState, dispatch, location, params)
 			// check for errors
 			.catch(error => console.error(error.stack || error))
 			// then
@@ -44,7 +69,7 @@ export default function(server)
 				// proceed
 				next(action)
 				// preload all the deferred required data (if any)
-				Promise.all(get_data_dependencies(components, getState, dispatch, location, params, { deferred: true }))
+				get_data_dependencies(components, getState, dispatch, location, params, { deferred: true })
 				// check for errors
 				.catch(error => console.error(error.stack || error))
 				// done
