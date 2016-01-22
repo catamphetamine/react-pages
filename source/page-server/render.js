@@ -11,10 +11,10 @@ import { server as render } from '../redux/render'
 
 // isomorphic (universal) rendering (middleware).
 // will be used in web_application.use(...)
-export default function({ development, localize, preferred_locale, assets, request, respond, fail, redirect, disable_server_side_rendering, log, create_store, create_routes, markup_wrapper, head, body, style, web_server })
+export default function({ development, localize, preferred_locale, assets, url, http_client, respond, fail, redirect, disable_server_side_rendering, log, create_store, create_routes, markup_wrapper, head, body, style })
 {
 	// create Redux store
-	const store = create_store({ development, create_routes, server: true, http_request: request, host: web_server.host, port: web_server.port })
+	const store = create_store({ development, create_routes, server: true, http_client })
 
 	// internationalization
 
@@ -29,13 +29,13 @@ export default function({ development, localize, preferred_locale, assets, reque
 		messages = result.messages
 	}
 
-	const entry_point = 'main' // may examine request.originalUrl to determine Webpack entry point
+	const entry_point = 'main' // may examine `url` to determine Webpack entry point
 
 	// render the web page
 	return render
 	({
 		disable_server_side_rendering,
-		url: request.originalUrl.replace(/\?$/, ''),
+		url,
 		render: (child_element, props) => 
 		{
 			if (localize)

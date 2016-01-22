@@ -12,7 +12,7 @@
 [![Gratipay][gratipay-image]][gratipay-url]
 -->
 
-Is a module providing support for isomorphic (universal) rendering with React, React-router, Redux, Redux-router. Also allows for Webpack bundler. Allows for locale detection and therefore internationalization of the app.
+Is a module providing support for isomorphic (universal) rendering with React, React-router, Redux, Redux-router. Also allows for Webpack bundler. Allows for locale detection and therefore internationalization of the app. Also it handles Http Cookies mutation correctly (and saves you hours of hair-pulling cookie debugging by doing that).
 
 ## Installation
 

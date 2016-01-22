@@ -4,7 +4,8 @@ import path from 'path'
 import koa        from 'koa'
 import koa_locale from 'koa-locale'
 
-import render from './render'
+import http_client from '../http client'
+import render      from './render'
 
 export default function start_web_server({ development, localize, assets, host, port, web_server, log, disable_server_side_rendering, create_store, create_routes, markup_wrapper, head, body, style })
 {
@@ -40,6 +41,9 @@ export default function start_web_server({ development, localize, assets, host, 
 
 	function* rendering()
 	{
+		// isomorphic http api calls
+		const _http_client = new http_client({ host: web_server.host, port: web_server.port, clone_request: this.request })
+	
 		// Material-UI asks for this,
 		// but this isn't right,
 		// because Node.js serves requests asynchronously
@@ -59,7 +63,10 @@ export default function start_web_server({ development, localize, assets, host, 
 
 			assets,
 
-			request : this.request, 
+			url : this.request.originalUrl.replace(/\?$/, ''),
+
+			http_client : _http_client, 
+
 			respond : ({ markup, status }) =>
 			{
 				this.body = markup
@@ -82,10 +89,10 @@ export default function start_web_server({ development, localize, assets, host, 
 
 			head,
 			body,
-			style,
-
-			web_server
+			style
 		})
+
+		this.set('set-cookie', _http_client.cookies)
 	}
 
 	web.use(rendering)

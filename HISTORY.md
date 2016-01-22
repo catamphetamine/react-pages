@@ -1,3 +1,9 @@
+2.1.0 / 22.01.2016
+==================
+
+  * Now correctly manages Http Cookies (allows for cookie modification on server-side)
+  * Added blocking preload methods for Reat-Routed Components
+
 2.0.0 / 19.01.2016
 ==================
 

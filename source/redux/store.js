@@ -5,8 +5,6 @@ import transition_middleware from './transition middleware'
 
 import dev_tools from './dev tools'
 
-import http_client from '../http client'
-
 import { routerStateReducer } from 'redux-router'
 
 import { createRoutes } from 'react-router/lib/RouteUtils'
@@ -81,7 +79,7 @@ function makeRouteHooksSafe(create_routes)
 	return store => makeHooksSafe(createRoutes(create_routes(store)), store)
 }
 
-export default function(get_reducers, { development, development_tools, server, data, create_routes, http_request, host, port }) 
+export default function(get_reducers, { development, development_tools, server, data, create_routes, http_client }) 
 {
 	// whether to return a `reload()` function to hot reload store
 	let reloadable = true
@@ -105,7 +103,7 @@ export default function(get_reducers, { development, development_tools, server, 
 	const createHistory    = server ? createHistory_server : use_scroll(createHistory_client)
 
 	// Redux middleware
-	const middleware = [asynchronous_middleware(new http_client({ host, port, clone_request: http_request })), transition_middleware(server)]
+	const middleware = [asynchronous_middleware(http_client), transition_middleware(server)]
 	
 	// Store creation function
 	let create_store

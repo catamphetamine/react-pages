@@ -4,6 +4,8 @@ import { client } from './render'
 import dev_tools  from './dev tools'
 import { exists } from '../helpers'
 
+import http_client from '../http client'
+
 export default function({ development, development_tools, to, create_store, create_routes, markup_wrapper, load_localized_messages })
 {
 	// international
@@ -16,7 +18,7 @@ export default function({ development, development_tools, to, create_store, crea
 	}
 
 	// create Redux store
-	const store = create_store({ data: window._flux_store_data, create_routes })
+	const store = create_store({ data: window._flux_store_data, create_routes, http_client: new http_client() })
 	delete window._flux_store_data
 
 	function render_react()

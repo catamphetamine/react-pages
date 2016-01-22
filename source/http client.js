@@ -6,17 +6,14 @@ export default class http_client
 	// Optionally takes an Http Request as a reference to mimic (for example, cookies).
 	// This feature is used for Api calls during server side rendering 
 	// (this way server side Http Api calls mimic client side Http Api calls).
-	constructor({ host, port, prefix, clone_request })
+	constructor(options = {})
 	{
-		if (typeof clone_request === 'string')
-		{
-			prefix = clone_request
-			clone_request = undefined
-		}
+		const { host, port, prefix, clone_request } = options
 
 		if (clone_request)
 		{
 			this.server = true
+			this.cookies = clone_request.get('cookie')
 		}
 		
 		this.host = host
@@ -70,12 +67,9 @@ export default class http_client
 
 					// server side only
 					// (copies user authentication cookies to retain session specific data)
-					if (clone_request)
+					if (this.cookies)
 					{
-						if (clone_request.get('cookie'))
-						{
-							request.set('cookie', clone_request.get('cookie'))
-						}
+						request.set('cookie', this.cookies)
 					}
 
 					if (options && options.locale)
@@ -85,6 +79,19 @@ export default class http_client
 
 					request.end((error, response) => 
 					{
+						if (response)
+						{
+							if (response.get('set-cookie'))
+							{
+								this.cookies = response.get('set-cookie')
+							}
+						}
+
+						if (!error && response)
+						{
+							error = response.error
+						}
+
 						if (error)
 						{
 							// superagent would have already output the error to console
