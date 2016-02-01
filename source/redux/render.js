@@ -55,13 +55,8 @@ export function server({ disable_server_side_rendering, render, render_html, url
 				return reject(new Error('No router state'))
 			}
 
-			// Workaround redux-router query string issue:
-			// https://github.com/rackt/redux-router/issues/106
-			if (router_state.location.search && !router_state.location.query)
-			{
-				router_state.location.query = query_string.parse(router_state.location.search)
-			}
-
+			// one can set a `status` prop for a react-router `Route`
+			// to be returned as an Http response status code (404, etc)
 			const get_status_from_routes = matched_routes =>
 			{
 				return matched_routes.reduce((previous, current) => (current && current.status) || (previous && current.status))
