@@ -21,64 +21,6 @@ import createHistory_client from 'history/lib/createBrowserHistory'
 // Possibly currently doesn't make any difference
 import use_scroll from 'scroll-behavior/lib/useStandardScroll'
 
-// @stevoland wrote this for `react-redux-universal-hot-example`.
-// I'm not sure if it's needed anymore.
-//
-// Wrap the hooks so they don't fire if they're called before
-// the store is initialised. This only happens when doing the first
-// client render of a route that has an onEnter hook
-function makeHooksSafe(routes, store)
-{
-	if (Array.isArray(routes))
-	{
-		return routes.map((route) => makeHooksSafe(route, store))
-	}
-
-	const onEnter = routes.onEnter
-
-	if (onEnter)
-	{
-		routes.onEnter = function safeOnEnter(...args)
-		{
-			try
-			{
-				store.getState()
-			}
-			catch (err)
-			{
-				if (onEnter.length === 3)
-				{
-					args[2]()
-				}
-
-				// There's no store yet so ignore the hook
-				return
-			}
-
-			onEnter.apply(null, args)
-		}
-	}
-
-	if (routes.childRoutes)
-	{
-		makeHooksSafe(routes.childRoutes, store)
-	}
-
-	if (routes.indexRoute)
-	{
-		makeHooksSafe(routes.indexRoute, store)
-	}
-
-	return routes
-}
-
-// @stevoland wrote this for `react-redux-universal-hot-example`.
-// I'm not sure if it's needed anymore.
-function makeRouteHooksSafe(create_routes)
-{
-	return store => makeHooksSafe(createRoutes(create_routes(store)), store)
-}
-
 export default function(get_reducers, { development, development_tools, server, data, create_routes, http_client }) 
 {
 	// whether to return a `reload()` function to hot reload store
@@ -98,7 +40,6 @@ export default function(get_reducers, { development, development_tools, server, 
 	}
 
 	// server-side and client-side specifics
-	create_routes          = server ? create_routes : makeRouteHooksSafe(create_routes)
 	const reduxReactRouter = server ? reduxReactRouter_server : reduxReactRouter_client
 	const createHistory    = server ? createHistory_server : use_scroll(createHistory_client)
 

@@ -60,15 +60,20 @@ export default function({ development, localize, preferred_locale, assets, url, 
 	},
 	error =>
 	{
-		log.error(error)
+		if (error.redirect_to)
+		{
+			return redirect(error.redirect_to)
+		}
 
-		if (error.markup)
-		{
-			respond({ markup: error.markup, status: 500 })
-		}
-		else
-		{
-			fail(error)
-		}
+		fail(error)
+
+		// if (error.markup)
+		// {
+		// 	respond({ markup: error.markup, status: error.status || 500 })
+		// }
+		// else
+		// {
+		// 	fail(error)
+		// }
 	})
 }

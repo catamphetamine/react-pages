@@ -62,7 +62,7 @@ export function server({ disable_server_side_rendering, render, render_html, url
 				return matched_routes.reduce((previous, current) => (current && current.status) || (previous && current.status))
 			}
 
-			store.getState().router.then(() => 
+			return store.getState().router.then(() => 
 			{
 				const child_element = <ReduxRouter/>
 
@@ -74,8 +74,8 @@ export function server({ disable_server_side_rendering, render, render_html, url
 			.catch(error =>
 			{
 				// log.error(error)
-				error.markup = default_server_render({ render_html }) // let client render error page or re-request data
-				throw error
+				// error.markup = default_server_render({ render_html }) // let client render error page or re-request data
+				reject(error)
 			})
 		}))
 	})
