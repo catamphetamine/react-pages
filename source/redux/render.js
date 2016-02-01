@@ -41,7 +41,7 @@ export function server({ disable_server_side_rendering, render, render_html, url
 			{
 				return resolve
 				({
-					redirect: redirect_location.pathname + redirect_location.search
+					redirect_to: redirect_location.pathname + redirect_location.search
 				})
 			}
 
