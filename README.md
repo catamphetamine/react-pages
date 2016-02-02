@@ -78,7 +78,7 @@ webpage_server
 
   // (optional)
   // handles errors (can redirect to special error pages if needed)
-  // on_error: (error, { url, redirect }) => throw error
+  // on_error: (error, { url, redirect }) => redirect(`/error?url=${encode(url)}&error=${error.code}`)
 
   // (optional)
   // returns an array of React elements
@@ -154,8 +154,9 @@ export default function(store)
   return (
     <Route path="/" component={Layout}>
       <IndexRoute component={Home}/>
-      <Route path="blog" component={Blog}/>
+      <Route path="blog"  component={Blog}/>
       <Route path="about" component={About}/>
+      <Route path="*"     component={Page_not_found} status={404}/>
     </Route>
   )
 }
