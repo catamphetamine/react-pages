@@ -89,7 +89,7 @@ export default function(server, on_error, dispatch_event)
 				on_error(error,
 				{
 					error, 
-					url      : action.payload.location,
+					url      : action.payload.location.pathname + action.payload.location.search,
 
 					// for some strange reason the `dispatch` function 
 					// from the middleware parameters doesn't work here 
