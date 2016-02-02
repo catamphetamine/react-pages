@@ -1,4 +1,13 @@
+// enables support for @preload() annotation
+// (which preloads data required for displaying certain pages)
+//
+// takes effect if the `dispatch`ed message has 
+// { type: ROUTER_DID_CHANGE }
+//
+// in all the other cases it will do nothing
+
 import { ROUTER_DID_CHANGE } from 'redux-router/lib/constants'
+import { replaceState }      from 'redux-router'
 
 // returns a promise which resolves when all the required preload()s are resolved
 // (`preload_deferred` is not used anywhere currently; maybe it will get removed from the code)
@@ -39,30 +48,68 @@ const get_data_dependencies = (components, getState, dispatch, location, params,
 
 const locations_are_equal = (a, b) => (a.pathname === b.pathname) && (a.search === b.search)
 
-export default function(server)
+export default function(server, on_error, dispatch_event)
 {
 	return ({ getState, dispatch }) => next => action =>
 	{
-		// on navigation
+		// if it isn't a React-router navigation event then do nothing
 		if (action.type !== ROUTER_DID_CHANGE)
 		{
-			// proceed
+			// do nothing
 			return next(action)
 		}
 
-		// do nothing if it's taking place on the client and the location hasn't changed
+		// if the location hasn't changed then do nothing
+		// (it seemed to be a kind of a weird semi-bug, maybe now it's obsolete
+		//  and maybe this if condition can be removed in the future)
 		if (getState().router && locations_are_equal(action.payload.location, getState().router.location))
 		{
+			// do nothing
 			return next(action)
+		}
+
+		// on the server side any error arising here 
+		// will be handled by webpage rendering server.
+		// explicit error handling here is only needed for the client.
+		//
+		let error_handler
+		//
+		if (!server)
+		{
+			// outputs error to the console by default
+			on_error = on_error || (error => console.error(error.stack || error))
+
+			// Promise error handler
+			error_handler = error => 
+			{
+				// finish the current Redux middleware chain
+				next(action)
+				
+				// handle the error (for example, redirect to an error page)
+				on_error(error,
+				{
+					error, 
+					url      : action.payload.location,
+
+					// for some strange reason the `dispatch` function 
+					// from the middleware parameters doesn't work here 
+					// when `redirect()`ing from this `on_error` handler
+					redirect : to => dispatch_event(replaceState(null, to)),
+
+					// not used really
+					proceed  : () => next(action)
+				})
+			}
 		}
 
 		const { components, location, params } = action.payload
 
+		// will return this Promise
 		const promise = 
 			// preload all the required data
 			get_data_dependencies(components, getState, dispatch, location, params)
 			// proceed with routing
-			.then(() => next(action))
+			.then(() => next(action), error_handler)
 
 			// // check for errors
 			// .catch(error =>
@@ -87,6 +134,7 @@ export default function(server)
 			// 	}
 			// })
 
+		// on the server side
 		if (server)
 		{
 			// router state is null until ReduxRouter is created (on the client) 
@@ -99,6 +147,8 @@ export default function(server)
 		//
 		// returning promise from a middleware is not required.
 		// can be used like: store.dispatch({ ... }).then(...)
+		// if all the previous middlewares do `return next(action)`
+		// (which is the case when navigating React-router routes)
 		return promise
 	}
 }

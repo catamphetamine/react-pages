@@ -1,7 +1,7 @@
 import { createStore, combineReducers, applyMiddleware, compose } from 'redux'
 
-import asynchronous_middleware from './asynchronous middleware'
-import transition_middleware from './transition middleware'
+import asynchronous_middleware from './middleware/asynchronous middleware'
+import preloading_middleware from './middleware/preloading middleware'
 
 import dev_tools from './dev tools'
 
@@ -21,9 +21,10 @@ import createHistory_client from 'history/lib/createBrowserHistory'
 // Possibly currently doesn't make any difference
 import use_scroll from 'scroll-behavior/lib/useStandardScroll'
 
-export default function(get_reducers, { development, development_tools, server, data, create_routes, http_client }) 
+export default function(get_reducers, { development, development_tools, server, data, create_routes, http_client, on_error })
 {
-	// whether to return a `reload()` function to hot reload store
+	// whether to return a `reload()` helper function 
+	// to hot reload web application's Redux reducers
 	let reloadable = true
 
 	// allows simplified store creation 
@@ -41,10 +42,32 @@ export default function(get_reducers, { development, development_tools, server, 
 
 	// server-side and client-side specifics
 	const reduxReactRouter = server ? reduxReactRouter_server : reduxReactRouter_client
-	const createHistory    = server ? createHistory_server : use_scroll(createHistory_client)
+	const createHistory    = server ? createHistory_server    : use_scroll(createHistory_client)
 
-	// Redux middleware
-	const middleware = [asynchronous_middleware(http_client), transition_middleware(server)]
+	// Redux middleware chain
+	const middleware = 
+	[
+		// enables support for Ajax Http requests
+		//
+		// takes effect if the `dispatch`ed message has 
+		// { promise: ... }
+		//
+		// in all the other cases it will do nothing
+		//
+		asynchronous_middleware(http_client),
+
+		// enables support for @preload() annotation
+		// (which preloads data required for displaying certain pages)
+		//
+		// takes effect if the `dispatch`ed message has 
+		// { type: ROUTER_DID_CHANGE }
+		//
+		// in all the other cases it will do nothing
+		//
+		// (passing the additional `dispatch`ing function as the 3rd parameter)
+		//
+		preloading_middleware(server, on_error, event => store.dispatch(event))
+	]
 	
 	// Store creation function
 	let create_store
@@ -69,10 +92,12 @@ export default function(get_reducers, { development, development_tools, server, 
 		create_store = applyMiddleware(...middleware)(createStore)
 	}
 
-	// keeps react-router state in Redux
+	// enable redux-router (adds its own middleware)
+	// (redux-router keeps react-router state in Redux)
 	create_store = reduxReactRouter({ getRoutes: create_routes, createHistory })(create_store)
 
-	// adds redux-router reducers to the list of all reducers
+	// adds redux-router reducers to the list of all reducers.
+	// overall Redux reducer = web application reducers + redux-router reducer
 	const overall_reducer = () =>
 	{
 		const model = get_reducers()
@@ -80,7 +105,9 @@ export default function(get_reducers, { development, development_tools, server, 
 		return combineReducers(model)
 	}
 
-	// create store
+	// create Redux store 
+	// with the overall Redux reducer 
+	// and the initial Redux store data (aka "the state")
 	const store = create_store(overall_reducer(), data)
 	
 	// // client side hot module reload for Redux reducers attempt
@@ -94,10 +121,15 @@ export default function(get_reducers, { development, development_tools, server, 
 	// 	})
 	// }
 
+	// return the created Redux store
+
+	// if no hot reload is needed, then simply return the Redux store
 	if (!reloadable)
 	{
 		return store
 	}
 
+	// return the Redux store and the `reload` helper function:
+	// it gives the web application means to hot reload its Redux reducers
 	return { store, reload: () => store.replaceReducer(overall_reducer()) }
 }
