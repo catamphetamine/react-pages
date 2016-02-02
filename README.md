@@ -255,6 +255,8 @@ The final step is to set up the main web server like this
  * For example, all Http GET requests starting with `/api` call REST API methods
  * All the other Http GET requests are proxied to `http://localhost:3000` for webpage rendering
 
+(proxying can be easily set up with [http-proxy](https://github.com/nodejitsu/node-http-proxy))
+
 (see the aforementioned example projects for reference)
 
 ## Gotchas
