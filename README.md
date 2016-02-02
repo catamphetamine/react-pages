@@ -77,6 +77,10 @@ webpage_server
   markup_wrapper,
 
   // (optional)
+  // handles errors (can redirect to special error pages if needed)
+  // on_error: (error, { url, redirect }) => throw error
+
+  // (optional)
   // returns an array of React elements
   // which will be inserted into server rendered webpage's <head/>
   // (use `key`s to prevent React warning)

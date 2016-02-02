@@ -1,6 +1,7 @@
 import { ROUTER_DID_CHANGE } from 'redux-router/lib/constants'
 
 // returns a promise which resolves when all the required preload()s are resolved
+// (`preload_deferred` is not used anywhere currently; maybe it will get removed from the code)
 const get_data_dependencies = (components, getState, dispatch, location, params, options = {}) =>
 {
 	// determine if it's `preload` or `preload_deferred`
@@ -57,25 +58,34 @@ export default function(server)
 
 		const { components, location, params } = action.payload
 
-		const promise = new Promise(resolve =>
-		{
+		const promise = 
 			// preload all the required data
 			get_data_dependencies(components, getState, dispatch, location, params)
-			// check for errors
-			.catch(error => console.error(error.stack || error))
+			// proceed with routing
+			.then(() => next(action))
+
+			// // check for errors
+			// .catch(error =>
+			// {
+			// 	console.error(error.stack || error)
+			// })
 			// then
-			.then(() =>
-			{
-				// proceed
-				next(action)
-				// preload all the deferred required data (if any)
-				get_data_dependencies(components, getState, dispatch, location, params, { deferred: true })
-				// check for errors
-				.catch(error => console.error(error.stack || error))
-				// done
-				.then(resolve)
-			})
-		})
+			// .then(() =>
+			// {
+			// 	// proceed with routing
+			// 	next(action)
+			//
+			// 	// if on client-side
+			// 	if (!server)
+			// 	{
+			// 		// preload all the deferred required data (if any)
+			// 		get_data_dependencies(components, getState, dispatch, location, params, { deferred: true })
+			// 		// check for errors
+			// 		.catch(error => console.error(error.stack || error))
+			// 		// done
+			// 		.then(resolve)
+			// 	}
+			// })
 
 		if (server)
 		{

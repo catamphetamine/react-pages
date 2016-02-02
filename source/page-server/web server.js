@@ -7,7 +7,7 @@ import koa_locale from 'koa-locale'
 import http_client from '../http client'
 import render      from './render'
 
-export default function start_web_server({ development, localize, assets, host, port, web_server, log, disable_server_side_rendering, create_store, create_routes, markup_wrapper, head, body, style })
+export default function start_web_server({ development, localize, assets, host, port, web_server, log, disable_server_side_rendering, create_store, create_routes, markup_wrapper, head, body, style, on_error })
 {
 	log = log || console
 
@@ -52,6 +52,10 @@ export default function start_web_server({ development, localize, assets, host, 
 		//
 		// global.navigator = { userAgent: request.headers['user-agent'] }
 
+		const url = this.request.originalUrl.replace(/\?$/, '')
+
+		const redirect = to => this.redirect(to)
+
 		// these parameters are for Koa app.
 		// they can be modified to work with Express app if needed.
 		yield render
@@ -63,7 +67,7 @@ export default function start_web_server({ development, localize, assets, host, 
 
 			assets,
 
-			url : this.request.originalUrl.replace(/\?$/, ''),
+			url,
 
 			http_client : _http_client, 
 
@@ -76,8 +80,20 @@ export default function start_web_server({ development, localize, assets, host, 
 					this.status = status
 				}
 			}, 
-			fail     : error => this.throw(error), 
-			redirect : to => this.redirect(to),
+			fail     : error =>
+			{
+				if (on_error)
+				{
+					return on_error(error,
+					{
+						redirect,
+						url
+					})
+				}
+
+				throw error
+			}, 
+			redirect,
 
 			disable_server_side_rendering,
 			log,
