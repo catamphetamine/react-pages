@@ -21,7 +21,7 @@ import createHistory_client from 'history/lib/createBrowserHistory'
 // Possibly currently doesn't make any difference
 import use_scroll from 'scroll-behavior/lib/useStandardScroll'
 
-export default function(get_reducers, { development, development_tools, server, data, create_routes, http_client, on_error })
+export default function(get_reducers, { development, development_tools, server, data, create_routes, http_client, on_preload_error })
 {
 	// whether to return a `reload()` helper function 
 	// to hot reload web application's Redux reducers
@@ -66,7 +66,7 @@ export default function(get_reducers, { development, development_tools, server, 
 		//
 		// (passing the additional `dispatch`ing function as the 3rd parameter)
 		//
-		preloading_middleware(server, on_error, event => store.dispatch(event))
+		preloading_middleware(server, on_preload_error, event => store.dispatch(event))
 	]
 	
 	// Store creation function

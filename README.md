@@ -142,7 +142,7 @@ export default function(options)
   // (optional)
   // handles errors occurring inside `@preload()` of pages on the client side
   // (can redirect to special error pages if needed)
-  // options.on_error = (error, { url, redirect }) => redirect(`/error?url=${encode(url)}&error=${error.code}`)
+  // options.on_preload_error = (error, { url, redirect }) => redirect(`/error?url=${encode(url)}&error=${error.code}`)
 
   return create_store(reducers, options)
   // Webpack Hot Module Replacement can be added (see example projects for reference)

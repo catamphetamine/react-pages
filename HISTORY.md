@@ -1,3 +1,8 @@
+2.1.6 / 03.02.2016
+==================
+
+  * Added `on_preload_error` error handler for client side rendering (used for 401 and 403 redirects, for example)
+
 2.1.4 / 02.02.2016
 ==================
 
