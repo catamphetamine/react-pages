@@ -23,6 +23,7 @@ export default class Html extends Component
 		store       : PropTypes.object.isRequired,
 		head        : PropTypes.func,
 		body        : PropTypes.func,
+		body_end    : PropTypes.func,
 		style       : PropTypes.func,
 		locale      : PropTypes.string,
 		entry_point : PropTypes.string.isRequired
@@ -30,7 +31,7 @@ export default class Html extends Component
 
 	render()
 	{
-		const { development, assets, store, head, body, style, locale, entry_point } = this.props
+		const { development, assets, store, head, body, body_end, style, locale, entry_point } = this.props
 
 		// when server-side rendering is disabled, content will be undefined
 		// (but server-side rendering is always enabled so this "if" condition may be removed)
@@ -101,6 +102,9 @@ export default class Html extends Component
 					{/* current application "entry" point javascript
 					    (currently there is only one entry point: "main") */}
 					<script src={assets.javascript[entry_point]} charSet="UTF-8"/>
+
+					{/* support adding arbitrary markup to body end */}
+					{ body_end ? body_end() : null }
 				</body>
 			</html>
 		)

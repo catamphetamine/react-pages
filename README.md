@@ -86,16 +86,23 @@ webpage_server
   // on_error: (error, { url, redirect }) => redirect(`/error?url=${encode(url)}&error=${error.code}`)
 
   // (optional)
-  // returns an array of React elements
+  // returns an array of React elements.
   // which will be inserted into server rendered webpage's <head/>
   // (use `key`s to prevent React warning)
   // head: () => [...]
 
   // (optional)
+  // returns a React element.
   // allows for wrapping React page component with arbitrary markup.
   // returns either a React element or an array of React elements
   // which will be inserted into server rendered webpage's <body/>
   // body: react_page_element => react_page_element
+
+  // (optional)
+  // returns an array of React elements.
+  // allows adding arbitrary React components to the end of the <body/>
+  // (use `key`s to prevent React warning)
+  // body_end: () => [...]
 
   // (optional)
   // (is used only in development mode - removes Ctrl + R (F5) flicker)
@@ -192,7 +199,7 @@ export default class Wrapper extends React.Component
 }
 ```
 
-And React pages would look like this (use `@preload()` helper to load the neccessary data before the page is rendered)
+And, finally, React pages would look like this (use `@preload()` helper to load the neccessary data before the page is rendered)
 
 ```javascript
 import { title }              from 'react-isomorphic-render'

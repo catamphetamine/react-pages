@@ -12,7 +12,7 @@ import { server as react_render } from '../render'
 
 // isomorphic (universal) rendering (middleware).
 // will be used in web_application.use(...)
-export default function({ development, localize, preferred_locale, assets, url, http_client, respond, fail, redirect, disable_server_side_rendering, log, create_store, create_routes, markup_wrapper, head, body, style })
+export default function({ development, localize, preferred_locale, assets, url, http_client, respond, fail, redirect, disable_server_side_rendering, log, create_store, create_routes, markup_wrapper, head, body, body_end, style })
 {
 	// create Redux store
 	let store
@@ -44,7 +44,9 @@ export default function({ development, localize, preferred_locale, assets, url, 
 	return render
 	({
 		disable_server_side_rendering,
+		
 		url,
+
 		create_page_element: (child_element, props) => 
 		{
 			if (localize)
@@ -55,7 +57,21 @@ export default function({ development, localize, preferred_locale, assets, url, 
 
 			return React.createElement(markup_wrapper, props, child_element)
 		},
-		render_html: element => <Html development={development} assets={assets()} entry_point={entry_point} locale={locale} head={head} body={body} style={style} store={store}>{element}</Html>,
+
+		render_html: element => <Html 
+			development={development} 
+			assets={assets()} 
+			entry_point={entry_point} 
+			locale={locale} 
+			head={head} 
+			body={body} 
+			body_end={body_end} 
+			style={style} 
+			store={store}>
+
+			{element}
+		</Html>,
+
 		store,
 
 		// create_routes is only used for pure React-router rendering
