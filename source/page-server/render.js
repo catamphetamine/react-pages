@@ -7,14 +7,19 @@ import fs from 'fs'
 
 import Html from './html'
 
-import { server as render } from '../redux/render'
+import { server as redux_render } from '../redux/render'
+import { server as react_render } from '../render'
 
 // isomorphic (universal) rendering (middleware).
 // will be used in web_application.use(...)
 export default function({ development, localize, preferred_locale, assets, url, http_client, respond, fail, redirect, disable_server_side_rendering, log, create_store, create_routes, markup_wrapper, head, body, style })
 {
 	// create Redux store
-	const store = create_store({ development, create_routes, server: true, http_client })
+	let store
+	if (create_store)
+	{
+		store = create_store({ development, create_routes, server: true, http_client })
+	}
 
 	// internationalization
 
@@ -31,12 +36,16 @@ export default function({ development, localize, preferred_locale, assets, url, 
 
 	const entry_point = 'main' // may examine `url` to determine Webpack entry point
 
+	// if Redux is being used, then render for Redux.
+	// else render for pure React.
+	const render = store ? redux_render : react_render
+
 	// render the web page
 	return render
 	({
 		disable_server_side_rendering,
 		url,
-		render: (child_element, props) => 
+		create_page_element: (child_element, props) => 
 		{
 			if (localize)
 			{
@@ -47,7 +56,10 @@ export default function({ development, localize, preferred_locale, assets, url, 
 			return React.createElement(markup_wrapper, props, child_element)
 		},
 		render_html: element => <Html development={development} assets={assets()} entry_point={entry_point} locale={locale} head={head} body={body} style={style} store={store}>{element}</Html>,
-		store
+		store,
+
+		// create_routes is only used for pure React-router rendering
+		create_routes: store ? undefined : create_routes
 	})
 	.then(({ status, markup, redirect_to }) =>
 	{

@@ -6,15 +6,15 @@ import { ReduxRouter } from 'redux-router'
 import React          from 'react'
 import ReactDOMServer from 'react-dom/server'
 
-// returns a Promise for React component.
-//
 // renders directly to the "to" DOM element.
-// (to allow for faster DOM mutations instead of simple slow Html code replacement)
-export function client({ development, render, create_routes, store, to })
+//
+// returns a Promise resolving to the rendered React component
+//
+export function client({ development, create_page_element, create_routes, store, to })
 {
-	let router_element = <ReduxRouter routes={create_routes({store})} />
+	const router_element = <ReduxRouter routes={create_routes({store})} />
 
-	return render(router_element, {store}).then(element =>
+	return create_page_element(router_element, {store}).then(element =>
 	{
 		return default_client_render
 		({
@@ -25,14 +25,16 @@ export function client({ development, render, create_routes, store, to })
 	})
 }
 
-// returns a Promise resolving to Html code.
-export function server({ disable_server_side_rendering, render, render_html, url, store })
+// returns a Promise resolving to { status, markup, redirect_to }.
+//
+export function server({ disable_server_side_rendering, create_page_element, render_html, url, store })
 {
 	// I guess no one actually disabled their server side rendering
 	// so this if condition may be removed (along with the flag) in the future
 	if (disable_server_side_rendering)
 	{
-		return Promise.resolve({ markup: default_server_render({ html }) })
+		// render the empty <Html/> component into Html markup string
+		return default_server_render({ render_html })
 	}
 
 	// return a Promise
@@ -82,17 +84,18 @@ export function server({ disable_server_side_rendering, render, render_html, url
 				// Http response status code
 				const status = get_http_response_status_code_for_the_chosen_route(router_state.routes)
 
+				// React page content element
+				const page_element = create_page_element(<ReduxRouter/>, {store})
+
 				// render the page's React component
-				resolve
-				({
-					status, 
-					markup: '<!doctype html>\n' + ReactDOMServer.renderToString(render_html(render(<ReduxRouter/>, {store})))
-				})
+				default_server_render({ render_html, page_element }).then
+				(
+					result => resolve({ status, markup: result.markup }),
+					reject
+				)
 			})
 			.catch(error =>
 			{
-				// log.error(error)
-				// error.markup = default_server_render({ render_html }) // let client render error page or re-request data
 				reject(error)
 			})
 		}))
