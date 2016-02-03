@@ -96,8 +96,9 @@ export default function(server, on_error, dispatch_event)
 					// when `redirect()`ing from this `on_error` handler
 					redirect : to => dispatch_event(replaceState(null, to)),
 
-					// not used really
-					proceed  : () => next(action)
+					// // finish the current Redux middleware chain
+					// // (not used really)
+					// proceed  : () => next(action)
 				})
 			}
 		}

@@ -11,7 +11,7 @@ export default function(parameters)
 {
 	return function(Wrapped)
 	{
-		class Wrapper extends Component
+		class Preload extends Component
 		{
 			render()
 			{
@@ -34,10 +34,17 @@ export default function(parameters)
 			preload_blocking = parameters.blocking
 		}
 
-		Wrapper.preload = preload
-		Wrapper.preload_blocking = preload_blocking
-		Wrapper.preload_deferred = preload_deferred
+		Preload.preload = preload
+		Preload.preload_blocking = preload_blocking
+		Preload.preload_deferred = preload_deferred
 
-		return hoist_statics(Wrapper, Wrapped)
+		Preload.displayName = `Preload(${get_display_name(Wrapped)})`
+		
+		return hoist_statics(Preload, Wrapped)
 	}
+}
+
+function get_display_name(Wrapped)
+{
+	return Wrapped.displayName || Wrapped.name || 'Component'
 }
