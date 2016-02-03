@@ -139,6 +139,7 @@ In the simplest case the `create_store` function would look like this
 ```javascript
 import { create_store } from 'react-isomorphic-render/redux'
 
+// your Redux reducers
 import reducers from './path/to/reducers'
 
 export default function(options)
@@ -191,7 +192,7 @@ export default class Wrapper extends React.Component
 }
 ```
 
-And React pages would look like this
+And React pages would look like this (use `@preload()` helper to load the neccessary data before the page is rendered)
 
 ```javascript
 import { title }              from 'react-isomorphic-render'
@@ -227,7 +228,7 @@ export default class Page extends Component
     return (
       <div>
         <title("Users")/>
-        <ul>{users.map(user => <li>{user.name}</li>)}</ul>
+        <ul>{this.props.users.map(user => <li>{user.name}</li>)}</ul>
         <button onClick={this.props.fetch_users}>Refresh</button>
       </div>
     )
@@ -259,11 +260,13 @@ export default class Page extends Component
 }
 ```
 
-The final step is to set up the main web server like this
+The final step is to set up the main web server to proxy all Http requests for webpages to the webpage rendering server you've set up.
 
- * For example, all Http GET requests starting with `/assets` return static files
- * For example, all Http GET requests starting with `/api` call REST API methods
- * All the other Http GET requests are proxied to `http://localhost:3000` for webpage rendering
+An example of how Http request routing on your web server can be set up:
+
+ * all Http GET requests starting with `/assets` return static files from your `assets` folder
+ * all Http requests starting with `/api` call your REST API methods
+ * all the other Http GET requests are proxied to `http://localhost:3000` for webpage rendering
 
 (proxying can be easily set up with [http-proxy](https://github.com/nodejitsu/node-http-proxy))
 
