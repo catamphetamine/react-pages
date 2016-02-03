@@ -11,8 +11,29 @@ import { replaceState }      from 'redux-router'
 
 // returns a promise which resolves when all the required preload()s are resolved
 // (`preload_deferred` is not used anywhere currently; maybe it will get removed from the code)
-const get_data_dependencies = (components, getState, dispatch, location, params, options = {}) =>
+const get_data_dependencies = (server, components, getState, dispatch, location, params, options = {}) =>
 {
+	// skip @preload()ing the root React component on the client-side
+	// because it has already been preloaded on the server-side.
+	//
+	// in other words, `@preload()`ing for the root `<Route/>` 
+	// is now done only on the server side.
+	// (so that it doesn't `@preload()` the root `<Route/>`
+	//  each time a user navigates the website)
+	//
+	// if you have `disable_server_side_rendering` set to true then this will be a bug.
+	// however `disable_server_side_rendering` is not a documented feature
+	// therefore it's not officially supported and therefore it's not really a bug.
+	//
+	// if someone needs `disable_server_side_rendering`
+	// with @preload()ing on the root React component
+	// then they can submit a Pull Request fixing this.
+	//
+	if (!server)
+	{
+		components = components.slice(1)
+	}
+
 	// determine if it's `preload` or `preload_deferred`
 	const method_name = options.deferred ? 'preload_deferred' : 'preload'
 
@@ -108,7 +129,7 @@ export default function(server, on_error, dispatch_event)
 		// will return this Promise
 		const promise = 
 			// preload all the required data
-			get_data_dependencies(components, getState, dispatch, location, params)
+			get_data_dependencies(server, components, getState, dispatch, location, params)
 			// proceed with routing
 			.then(() => next(action), error_handler)
 
