@@ -13,28 +13,42 @@ import { replaceState }      from 'redux-router'
 // (`preload_deferred` is not used anywhere currently; maybe it will get removed from the code)
 const get_data_dependencies = (server, components, getState, dispatch, location, params, options = {}) =>
 {
-	// skip @preload()ing the root React component on the client-side
-	// because it has already been preloaded on the server-side.
+	// on the client side:
 	//
-	// in other words, `@preload()`ing for the root `<Route/>` 
-	// is now done only on the server side.
-	// (so that it doesn't `@preload()` the root `<Route/>`
-	//  each time a user navigates the website)
+	// take the previous route components 
+	// and the next route components,
+	// and compare them side-by-side
+	// filtering out the same top level components.
 	//
-	// if you have `disable_server_side_rendering` set to true then this will be a bug.
+	// therefore @preload() methods won't be called
+	// for those top level components which remain the same.
+	//
+	// (e.g. the main <Route/> will be @preload()ed only once - on the server side)
+	//
+	// ("getState().router" means "is on the client side now")
+	//
+	if (getState().router)
+	{
+		let previous_route_components = getState().router.components
+
+		while (previous_route_components[0] === components[0])
+		{
+			previous_route_components = previous_route_components.slice(1)
+			components                = components.slice(1)
+		}
+	}
+
+	// if you have `disable_server_side_rendering` set to true 
+	// then there is a possibility @preload() won't work for top level components.
 	// however `disable_server_side_rendering` is not a documented feature
 	// therefore it's not officially supported and therefore it's not really a bug.
 	//
 	// if someone needs `disable_server_side_rendering`
 	// with @preload()ing on the root React component
 	// then they can submit a Pull Request fixing this.
-	//
-	if (!server)
-	{
-		components = components.slice(1)
-	}
 
 	// determine if it's `preload` or `preload_deferred`
+	// (`preload_deferred` actually isn't used anymore)
 	const method_name = options.deferred ? 'preload_deferred' : 'preload'
 
 	// calls all `preload` (or `preload_deferred`) methods 
@@ -80,12 +94,13 @@ export default function(server, on_error, dispatch_event)
 			return next(action)
 		}
 
-		// if the location hasn't changed then do nothing
-		// (it seemed to be a kind of a weird semi-bug, maybe now it's obsolete
-		//  and maybe this if condition can be removed in the future)
+		// when routing is initialized on the client side
+		// then ROUTER_DID_CHANGE event will be fired,
+		// so ignore this event.
+		// ("getState().router" means "is on the client side now")
 		if (getState().router && locations_are_equal(action.payload.location, getState().router.location))
 		{
-			// do nothing
+			// ignore the event
 			return next(action)
 		}
 

@@ -1,7 +1,7 @@
 2.1.10 / 04.02.2016
 ===================
 
-  * `@preload()`ing for the root `<Route/>` is now done only on the server side (so that it doesn't `@preload()` the root `<Route/>` each time a user navigates the website)
+  * Optimized `@preload()`ing for top level components
 
 2.1.6 / 03.02.2016
 ==================
