@@ -12,15 +12,50 @@ import ReactDOMServer from 'react-dom/server'
 //
 export function client({ development, create_page_element, create_routes, store, to })
 {
-	const router_element = <ReduxRouter routes={create_routes({store})} />
+	// In short, Redux-router performs react-router routing asynchronously
+	// which allows preloading pages before showing them.
+	//
+	// Explanation:
+	//
+	// Redux-router's <ReduxRouter/> React component
+	// wraps React-router's <RoutingContext/>,
+	// which provides render()ing pages but doesn't do Url matching.
+	//
+	// Also Redux-router creates a special history listener
+	// which does match a Url to a corresponding react-router route
+	// (React-router's useRoutes() helper function)
+	// https://github.com/rackt/react-router/blob/1fb4f7abb9a7f32a82fb3bc15ace7012fead7885/modules/useRoutes.js#L6-L16
+	//
+	// Now, when user clicks a React-router hyperlink,
+	// history is updated with `pushState` event,
+	// then it performs React-router route matching for this new Url,
+	// gives this new React-router route info to Redux-router
+	// which emits 'ROUTER_DID_CHANGE' Redux event.
+	//
+	// When @preload() helper middleware detects such a 'ROUTER_DID_CHANGE' event
+	// it pauses further propagation of this event,
+	// @preload()s all the <Route/> React components in the new React-router route chain
+	// and then, when all the @preload()ing Promises are resolved,
+	// it allows further propagation of that paused 'ROUTER_DID_CHANGE' event,
+	// which eventually reaches the final Redux-router middleware
+	// which listens for this 'ROUTER_DID_CHANGE' event too
+	// and upon detecting it this last middleware writes the new Url to Redux store
+	// triggering a render() method call for the root <ReduxRouter/> React component
+	// (see the beginning of this explanation) and the new page is finally rendered.
+	//
+	const router_element = <ReduxRouter routes={create_routes({store})}/>
 
+	// wraps <ReduxRouter/> with arbitrary React components (e.g. Redux <Provider/>),
+	// loads internationalization messages,
+	// and then renders the wrapped React page element to DOM
 	return create_page_element(router_element, {store}).then(element =>
 	{
+		// render the wrapped React page element to DOM
 		return default_client_render
 		({
-			development, 
-			element,
-			to
+			development, // development mode flag
+			element,     // wrapped React page element
+			to           // DOM element containing React markup
 		})
 	})
 }
