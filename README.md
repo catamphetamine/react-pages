@@ -181,6 +181,7 @@ export default function(store)
 The `markup_wrapper` component would look like this (nothing special about it)
 
 ```javascript
+// can be also a "React pure component"
 export default class Wrapper extends React.Component
 {
   static propTypes = 
