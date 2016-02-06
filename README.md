@@ -24,8 +24,6 @@ $ npm install react-isomorphic-render --save
 
 See [webapp](https://github.com/halt-hammerzeit/webapp) and [webpack-react-redux-isomorphic-render-example](https://github.com/halt-hammerzeit/webpack-react-redux-isomorphic-render-example) as references.
 
-This library can also be used for simple `React + React-router` rendering, without using `Redux`.
-
 The following usage example is for `React + React-router + Redux` setup.
 
 Create your webpage rendering server

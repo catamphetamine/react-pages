@@ -2,7 +2,7 @@ import React          from 'react'
 import ReactDOM       from 'react-dom'
 import ReactDOMServer from 'react-dom/server'
 
-import { Router, match, RouterContext, browserHistory } from 'react-router'
+import { Router, RoutingContext, useRoutes, match, RouterContext, browserHistory } from 'react-router'
 
 // renders directly to the "to" DOM element.
 //
@@ -29,6 +29,8 @@ export function client({ development, element, create_page_element, to, create_r
 	}
 
 	// in case of pure React-router rendering, perform routing first
+	// (<RoutingContext/> and useRoutes(history).listen() can be used here instead
+	//  for asynchronous routing, that is to implement <Route/> React component @preload()ing)
 	if (!element && create_routes)
 	{
 		const router_element = <Router history={browserHistory} routes={create_routes()}/>
@@ -36,7 +38,7 @@ export function client({ development, element, create_page_element, to, create_r
 		return create_page_element(router_element, {store}).then(element => render_page_element({ element }))
 	}
 
-	// just render the passed in element
+	// Redux is being used - just render the passed in element
 	return render_page_element(element)
 }
 
