@@ -9,9 +9,12 @@
 import { ROUTER_DID_CHANGE } from 'redux-router/lib/constants'
 import { replaceState }      from 'redux-router'
 
-// returns a promise which resolves when all the required preload()s are resolved
-// (`preload_deferred` is not used anywhere currently; maybe it will get removed from the code)
-const get_data_dependencies = (server, components, getState, dispatch, location, params, options = {}) =>
+// Returns function returning a Promise 
+// which resolves when all the required preload()s are resolved.
+//
+// If no preloading is needed, then returns nothing.
+//
+const preloader = (server, components, getState, dispatch, location, params, options = {}) =>
 {
 	// on the client side:
 	//
@@ -47,38 +50,78 @@ const get_data_dependencies = (server, components, getState, dispatch, location,
 	// with @preload()ing on the root React component
 	// then they can submit a Pull Request fixing this.
 
-	// determine if it's `preload` or `preload_deferred`
-	// (`preload_deferred` actually isn't used anymore)
-	const method_name = options.deferred ? 'preload_deferred' : 'preload'
-
-	// calls all `preload` (or `preload_deferred`) methods 
-	// (in parallel)
-	function preload_all()
+	// finds all `preload` (or `preload_deferred`) methods 
+	// (they will be executed in parallel)
+	function get_preloaders(method_name)
 	{
-		return Promise.all
-		(
-			components
-				.filter(component => component && component[method_name]) // only look at ones with a static preload()
-				.map(component => component[method_name])    // pull out fetch data methods
-				.map(preload => preload(dispatch, getState, location, params))  // call fetch data methods and save promises
-		)
+		// find all `preload` methods on the React-Router component chain
+		return components
+			.filter(component => component && component[method_name]) // only look at ones with a static preload()
+			.map(component => component[method_name]) // pull out preloading methods
+			.map(preload => () => preload(dispatch, getState, location, params)) // bind arguments
 	}
 
-	// if `preload_deferred` then just call them all
-	if (options.deferred)
+	// get all `preload_blocking` methods on the React-Router component chain
+	const blocking_preloads = get_preloaders('preload_blocking')
+
+	// get all `preload` methods on the React-Router component chain
+	const preloads = get_preloaders('preload')
+
+	// calls all `preload` methods on the React-Router component chain
+	// (in parallel) and returns a Promise
+	const preload_all = () => 
 	{
-		return preload_all()
+		return Promise.all((preloads || []).map(preload =>
+		{
+			const promise = preload()
+
+			// sanity check
+			if (!promise.then)
+			{
+				return Promise.reject(`Preload function didn't return a Promise:`, preload)
+				// throw new Error(`Preload function didn't return a Promise:`, preload)
+			}
+
+			return promise
+		}))
+	}
+
+	// calls all `preload_blocking` methods on the React-Router component chain
+	// (sequentially) and returns a Promise
+	const preload_all_blocking = () =>
+	{
+		return (blocking_preloads || []).reduce((previous, preload) =>
+		{
+			return previous.then(() =>
+			{
+				const promise = preload()
+				
+				// sanity check
+				if (!promise.then)
+				{
+					return Promise.reject(`Preload function didn't return a Promise:`, preload)
+					// throw new Error(`Preload function didn't return a Promise:`, preload)
+				}
+
+				return promise
+			})
+		}, 
+		Promise.resolve())
 	}
 
 	// if there are `preload_blocking` methods on the React-Router component chain,
-	// then finish them first (sequentially, because it's a waterfall model).
-	return components
-		.filter(component => component && component.preload_blocking) // only look at ones with a static preload_blocking()
-		.map(component => component.preload_blocking)    // pull out fetch data methods
-		.reduce((previous, preload) => previous.then(() => preload(dispatch, getState, location, params)), Promise.resolve())
-	
+	// then finish them first (sequentially)
+	if (blocking_preloads.length > 0)
+	{
 		// first finish `preload_blocking` methods, then call all `preload`s
-		.then(preload_all)
+		return () => preload_all_blocking().then(preload_all)
+	}
+
+	// no `preload_blocking` methods, just call all `preload`s, if any
+	if (preloads.length > 0)
+	{
+		return preload_all
+	}
 }
 
 const locations_are_equal = (a, b) => (a.pathname === b.pathname) && (a.search === b.search)
@@ -141,12 +184,40 @@ export default function(server, on_error, dispatch_event)
 
 		const { components, location, params } = action.payload
 
+		// preload all the required data for this route
+		const preload = preloader(server, components, getState, dispatch, location, params)
+
+		// if nothing to preload, just move to the next middleware
+		if (!preload)
+		{
+			return next(action)
+		}
+		
+		dispatch({ type: Preload_started })
+
 		// will return this Promise
 		const promise = 
-			// preload all the required data
-			get_data_dependencies(server, components, getState, dispatch, location, params)
+			// preload this route
+			preload()
 			// proceed with routing
-			.then(() => next(action), error_handler)
+			.then
+			(
+				() =>
+				{
+					dispatch({ type: Preload_finished })
+
+					next(action)
+				}, 
+				error =>
+				{
+					dispatch({ type: Preload_failed, error })
+
+					if (error_handler)
+					{
+						error_handler(error)
+					}
+				}
+			)
 
 			// // check for errors
 			// .catch(error =>
@@ -189,3 +260,7 @@ export default function(server, on_error, dispatch_event)
 		return promise
 	}
 }
+
+export const Preload_started  = '@@react-isomorphic-render/redux/preload started'
+export const Preload_finished = '@@react-isomorphic-render/redux/preload finished'
+export const Preload_failed   = '@@react-isomorphic-render/redux/preload failed'

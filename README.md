@@ -278,6 +278,62 @@ An example of how Http request routing on your web server can be set up:
 
 (see the aforementioned example projects for reference)
 
+## Page preloading
+
+As you have noticed in the example above, a `@preload()` helper is used to preload a web page. It is used to preload pages before rendering them on the server side. This is a powerful feature.
+
+On the client side, when a user navigates a link, first it changes the Url in the address bar, then it waits for the next page to preload, and when the page is fully loaded it displays the page to the user. If preloading a page can take some time one may want to add a "spinner" to inform the user that the navigation action needs some time. It can be done by adding a Redux reducer listening to these three Redux events:
+
+```javascript
+import { Preload_started, Preload_finished, Preload_failed } from 'react-isomorphic-render/redux'
+
+export default function(state = {}, event = {})
+{
+  switch (event.type)
+  {
+    case Preload_started  : return { ...state, pending: true,  error: false }
+    case Preload_finished : return { ...state, pending: false }
+    case Preload_failed   : return { ...state, pending: false, error: event.error }
+    default               : return state
+  }
+}
+```
+
+```javascript
+import React       from 'react'
+import { connect } from 'react-redux'
+
+export default connect(model => ({ pending: model.preload.pending, error: model.preload.error }))
+(function Spinner(props)
+{
+  return <div className={"preloading " + (props.pending ? "preloading-show" : "")}/>
+})
+```
+
+```css
+.preloading
+{
+  position: fixed;
+
+  top    : 0;
+  left   : 0;
+  right  : 0;
+  bottom : 0;
+
+  z-index: 1;
+
+  background-color: rgba(0, 0, 0, 0.2);
+
+  display: none;
+}
+
+.preloading-show
+{
+  display: block;
+  cursor: wait;
+}
+```
+
 ## Gotchas
 
 This library is build system agnostic: you can use your favourite Grunt, Gulp, Browserify, RequireJS, Webpack, etc.

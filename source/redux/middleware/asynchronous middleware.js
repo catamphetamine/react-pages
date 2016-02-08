@@ -27,6 +27,18 @@ export default function middleware(http_client)
 				return next(action)
 			}
 
+			// sanity check
+			if (typeof promise !== 'function')
+			{
+				throw new Error(`"promise" property must be a function returning a promise`)
+			}
+
+			// sanity check
+			if (!events || events.length !== 3)
+			{
+				throw new Error(`"events" property must be an array of events: e.g. ['pending', 'success', 'error']`)
+			}
+
 			// event names
 			const [Request, Success, Failure] = events
 
@@ -58,7 +70,15 @@ export default function middleware(http_client)
 			return new Promise((resolve, reject) =>
 			{
 				// perform Http request
-				promise(http_client).then
+				const promised = promise(http_client)
+
+				// sanity check
+				if (!promised.then)
+				{
+					throw new Error(`"promise" function must return a Promise. Got:`, promised)
+				}
+
+				promised.then
 				(
 					// if the Http request succeeded
 					//
