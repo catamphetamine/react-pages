@@ -39,7 +39,7 @@ export default function({ development, to, render, create_page_element, create_r
 				// if no i18n is required, then simply create Page element
 				if (!locale)
 				{
-					return Promise.resolve(create_page_element(element, props))
+					return Promise.resolve(create_page_element(element, props, markup_wrapper))
 				}
 
 				// translation loading function must be passed
