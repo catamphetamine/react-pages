@@ -1,3 +1,8 @@
+2.1.12 / 08.02.2016
+===================
+
+  * Added `@preload()`ing events for preload status indication
+
 2.1.10 / 04.02.2016
 ===================
 
