@@ -95,7 +95,7 @@ const preloader = (server, components, getState, dispatch, location, params, opt
 			return previous.then(() =>
 			{
 				const promise = preload()
-				
+
 				// sanity check
 				if (!promise.then)
 				{
@@ -248,7 +248,9 @@ export default function(server, on_error, dispatch_event)
 			// router state is null until ReduxRouter is created (on the client) 
 			// so we can use router state variable to store the promise 
 			// to let the server know when it can render
-			getState().router = promise
+			//
+			// (this promise is later .then()-ned in ./source/redux/render.js)
+			getState().router = promise || Promise.resolve()
 		}
 
 		// preload() then proceed

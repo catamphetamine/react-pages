@@ -114,6 +114,8 @@ export function server({ disable_server_side_rendering, create_page_element, ren
 
 			// routing process succeeded.
 			// render the page's React component.
+			//
+			// (this promise was previously set by "preloading middleware")
 			store.getState().router.then(() => 
 			{
 				// Http response status code
