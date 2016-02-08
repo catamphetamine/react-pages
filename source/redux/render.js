@@ -114,9 +114,19 @@ export function server({ disable_server_side_rendering, create_page_element, ren
 
 			// routing process succeeded.
 			// render the page's React component.
-			//
-			// (this promise was previously set by "preloading middleware")
-			store.getState().router.then(() => 
+			
+			// this promise was previously set by "preloading middleware"
+			// if there were any @preload() calls on the current route components
+			let promise = store.getState().router
+
+			// if nothing is being preloaded, create a dummy Promise
+			if (typeof promise.then !== 'function')
+			{
+				promise = Promise.resolve()
+			}
+
+			// after everything is preloaded, render the page
+			promise.then(() => 
 			{
 				// Http response status code
 				const status = get_http_response_status_code_for_the_chosen_route(router_state.routes)

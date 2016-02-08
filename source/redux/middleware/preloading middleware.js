@@ -245,12 +245,19 @@ export default function(server, on_error, dispatch_event)
 		// on the server side
 		if (server)
 		{
-			// router state is null until ReduxRouter is created (on the client) 
-			// so we can use router state variable to store the promise 
-			// to let the server know when it can render
+			// router state is null until ReduxRouter is created 
+			// in the next middleware call, so until that next middleware is called
+			// we can use this router state variable to store the promise 
+			// to let the server know when it can render the page.
 			//
-			// (this promise is later .then()-ned in ./source/redux/render.js)
-			getState().router = promise || Promise.resolve()
+			// this variable will be instantly available
+			// (and therefore .then()-nable)
+			// in ./source/redux/render.js,
+			// and when everything is preloaded (asynchronously), 
+			// then the next middleware is called,
+			// which replaces this variable with the proper Redux-router router state. 
+			//
+			getState().router = promise
 		}
 
 		// preload() then proceed
