@@ -280,9 +280,9 @@ An example of how Http request routing on your web server can be set up:
 
 ## Page preloading
 
-As you have noticed in the example above, a `@preload()` helper is used to preload a web page. It is used to preload pages before rendering them on the server side. This is a powerful feature.
+As you have noticed in the (Redux) example above, `@preload()` helper is called to preload a web page before display. It is used to preload pages before rendering them (both on the server side and on the client side). This is a powerful feature.
 
-On the client side, when a user navigates a link, first it changes the Url in the address bar, then it waits for the next page to preload, and when the page is fully loaded it displays the page to the user. If preloading a page can take some time one may want to add a "spinner" to inform the user that the navigation action needs some time. It can be done by adding a Redux reducer listening to these three Redux events:
+On the client side, when a user navigates a link, first it changes the Url in the address bar, then it waits for the next page to preload, and when the page is fully loaded it displays the page to the user. If preloading a page can take some time one may want to add a "spinner" to inform the user that the navigation process needs some time. It can be done by adding a Redux reducer listening to these three Redux events:
 
 ```javascript
 import { Preload_started, Preload_finished, Preload_failed } from 'react-isomorphic-render/redux'
