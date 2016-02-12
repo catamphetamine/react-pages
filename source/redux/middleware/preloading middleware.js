@@ -192,8 +192,19 @@ export default function(server, on_error, dispatch_event)
 		{
 			return next(action)
 		}
+
+		// // `window.__preloading_page` holds client side page preloading status.
+		// // can be used to cancel navigation.
+
+		// if (!server && window.__preloading_page && window.__preloading_page.pending)
+		// {
+		// 	// window.__preloading_page.promise.cancel()
+		// 	window.__preloading_page.pending = false
+		// }
 		
 		dispatch({ type: Preload_started })
+
+		// const preloading = { pending: true }
 
 		// will return this Promise
 		const promise = 
@@ -204,12 +215,22 @@ export default function(server, on_error, dispatch_event)
 			(
 				() =>
 				{
+					// if (!preloading.pending)
+					// {
+					// 	return
+					// }
+
 					dispatch({ type: Preload_finished })
 
 					next(action)
 				}, 
 				error =>
 				{
+					// if (!preloading.pending)
+					// {
+					// 	return
+					// }
+					
 					dispatch({ type: Preload_failed, error })
 
 					if (error_handler)
@@ -218,29 +239,13 @@ export default function(server, on_error, dispatch_event)
 					}
 				}
 			)
+			.finally(() => getState().preloading = false)
 
-			// // check for errors
-			// .catch(error =>
-			// {
-			// 	console.error(error.stack || error)
-			// })
-			// then
-			// .then(() =>
-			// {
-			// 	// proceed with routing
-			// 	next(action)
-			//
-			// 	// if on client-side
-			// 	if (!server)
-			// 	{
-			// 		// preload all the deferred required data (if any)
-			// 		get_data_dependencies(components, getState, dispatch, location, params, { deferred: true })
-			// 		// check for errors
-			// 		.catch(error => console.error(error.stack || error))
-			// 		// done
-			// 		.then(resolve)
-			// 	}
-			// })
+		// if (!server)
+		// {
+		// 	preloading.promise = promise
+		// 	window.__preloading_page = preloading
+		// }
 
 		// on the server side
 		if (server)
@@ -260,13 +265,13 @@ export default function(server, on_error, dispatch_event)
 			getState().router = promise
 		}
 
-		// preload() then proceed
-		//
-		// returning promise from a middleware is not required.
-		// can be used like: store.dispatch({ ... }).then(...)
-		// if all the previous middlewares do `return next(action)`
-		// (which is the case when navigating React-router routes)
-		return promise
+		// // preload() then proceed
+		// //
+		// // returning promise from a middleware is not required.
+		// // can be used like: store.dispatch({ ... }).then(...)
+		// // if all the previous middlewares do `return next(action)`
+		// // (which is the case when navigating React-router routes)
+		// return promise
 	}
 }
 

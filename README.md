@@ -154,6 +154,10 @@ export default function(options)
   // (can redirect to special error pages if needed)
   // options.on_preload_error = (error, { url, redirect }) => redirect(`/error?url=${encode(url)}&error=${error.code}`)
 
+  // (optional)
+  // user can add his own middleware to the `middleware` list
+  // options.middleware = middleware => ...
+
   return create_store(reducers, options)
   // Webpack Hot Module Replacement can be added (see example projects for reference)
 }

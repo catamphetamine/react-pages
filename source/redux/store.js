@@ -21,7 +21,7 @@ import createHistory_client from 'history/lib/createBrowserHistory'
 // Possibly currently doesn't make any difference
 import use_scroll from 'scroll-behavior/lib/useStandardScroll'
 
-export default function(get_reducers, { development, development_tools, server, data, create_routes, http_client, on_preload_error })
+export default function(get_reducers, { development, development_tools, server, data, create_routes, http_client, on_preload_error, middleware })
 {
 	// whether to return a `reload()` helper function 
 	// to hot reload web application's Redux reducers
@@ -45,7 +45,7 @@ export default function(get_reducers, { development, development_tools, server, 
 	const createHistory    = server ? createHistory_server    : use_scroll(createHistory_client)
 
 	// Redux middleware chain
-	const middleware = 
+	let middleware_chain = 
 	[
 		// enables support for Ajax Http requests
 		//
@@ -68,6 +68,12 @@ export default function(get_reducers, { development, development_tools, server, 
 		//
 		preloading_middleware(server, on_preload_error, event => store.dispatch(event))
 	]
+
+	// user may supply his own middleware
+	if (middleware)
+	{
+		middleware_chain = middleware(middleware_chain)
+	}
 	
 	// Store creation function
 	let create_store
@@ -79,7 +85,7 @@ export default function(get_reducers, { development, development_tools, server, 
 
 		create_store = compose
 		(
-			applyMiddleware(...middleware),
+			applyMiddleware(...middleware_chain),
 			// Provides support for DevTools:
 			dev_tools.instrument(),
 			// Lets you write ?debug_session=<name> in address bar to persist debug sessions
@@ -89,7 +95,7 @@ export default function(get_reducers, { development, development_tools, server, 
 	} 
 	else
 	{
-		create_store = applyMiddleware(...middleware)(createStore)
+		create_store = applyMiddleware(...middleware_chain)(createStore)
 	}
 
 	// enable redux-router (adds its own middleware)
