@@ -239,7 +239,7 @@ export default function(server, on_error, dispatch_event)
 					}
 				}
 			)
-			.finally(() => getState().preloading = false)
+			// .finally(() => preloading.pending = false)
 
 		// if (!server)
 		// {
