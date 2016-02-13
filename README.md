@@ -338,6 +338,45 @@ export default connect(model => ({ pending: model.preload.pending, error: model.
 }
 ```
 
+## Utilities
+
+```javascript
+import { head, title, meta } from 'react-isomorphic-render'
+
+// sets specific webpage <head/> tags
+head
+(
+  title = 'WebApp',
+  description = 'A generic web application boilerplate',
+  meta =
+  {
+    // <meta charset="utf-8" />
+    charSet: 'utf-8',
+
+    name:
+    {
+      // all <meta name="..." content="..."/> tags go here
+      viewport: 'width=device-width, initial-scale=1.0, user-scalable=no'
+    },
+
+    property:
+    {
+      // all <meta property="..." content="..."/> tags go here
+      'og:site_name': title,
+      'og:locale': 'ru_RU',
+      'og:title': title,
+      'og:description': description,
+    }
+  }
+)
+
+// webpage title will be replaced with this one
+title('New webpage title')
+
+// will add additional <meta/> tags to the webpage <head/>
+meta({ ... same `meta` as above ... })
+```
+
 ## Gotchas
 
 This library is build system agnostic: you can use your favourite Grunt, Gulp, Browserify, RequireJS, Webpack, etc.

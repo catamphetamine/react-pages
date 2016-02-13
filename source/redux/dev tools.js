@@ -6,7 +6,7 @@ export default function dev_tools()
 {
 	return createDevTools
 	(
-		<DockMonitor toggleVisibilityKey="H" changePositionKey="Q">
+		<DockMonitor toggleVisibilityKey="ctrl-H" changePositionKey="ctrl-Q">
 			<LogMonitor />
 		</DockMonitor>
 	)
