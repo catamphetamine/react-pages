@@ -1,6 +1,6 @@
 {
   "name": "react-isomorphic-render",
-  "version": "2.1.17",
+  "version": "2.1.18",
   "description": "Isomorphic rendering with React, Redux, React-router and Redux-router. Includes support for Webpack",
   "main": "babel-transpiled-modules/index.js",
   "dependencies": {
