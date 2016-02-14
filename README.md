@@ -340,6 +340,8 @@ export default connect(model => ({ pending: model.preload.pending, error: model.
 
 ## Utilities
 
+### Setting webpage title, description, <meta/> tags
+
 ```javascript
 import { head, title, meta } from 'react-isomorphic-render'
 
@@ -375,6 +377,28 @@ title('New webpage title')
 
 // will add additional <meta/> tags to the webpage <head/>
 meta({ ... same `meta` as above ... })
+```
+
+### Determining current location
+
+```javascript
+@connect(model => ({ location: model.router.location }))
+class Component extends React.Component
+{
+  render()
+  {
+    return <span>{this.props.location}</span>
+  }
+}
+```
+
+### Changing current location
+
+```javascript
+import { goto, redirect } from 'redux-router'
+
+// usage example:
+// this.props.dispatch(redirect('/items/1?color=red'))
 ```
 
 ## Gotchas
