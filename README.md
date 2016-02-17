@@ -87,20 +87,27 @@ webpage_server
   // returns an array of React elements.
   // which will be inserted into server rendered webpage's <head/>
   // (use `key`s to prevent React warning)
-  // head: () => [...]
+  // head: () => React element or an array of React elements
 
   // (optional)
   // returns a React element.
-  // allows for wrapping React page component with arbitrary markup.
+  // allows for wrapping React page component with arbitrary markup
+  // (or doing whatever else can be done with a React element).
   // returns either a React element or an array of React elements
   // which will be inserted into server rendered webpage's <body/>
   // body: react_page_element => react_page_element
 
   // (optional)
   // returns an array of React elements.
+  // allows adding arbitrary React components to the start of the <body/>
+  // (use `key`s to prevent React warning when returning an array of React elements)
+  // body_start: () => React element or an array of React elements
+
+  // (optional)
+  // returns an array of React elements.
   // allows adding arbitrary React components to the end of the <body/>
-  // (use `key`s to prevent React warning)
-  // body_end: () => [...]
+  // (use `key`s to prevent React warning when returning an array of React elements)
+  // body_end: () => React element or an array of React elements
 
   // (optional)
   // (is used only in development mode - removes Ctrl + R (F5) flicker)

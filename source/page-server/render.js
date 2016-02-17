@@ -12,7 +12,7 @@ import { server as react_render } from '../render'
 
 // isomorphic (universal) rendering (middleware).
 // will be used in web_application.use(...)
-export default function({ development, localize, preferred_locale, assets, url, http_client, respond, fail, redirect, disable_server_side_rendering, log, create_store, create_routes, markup_wrapper, head, body, body_end, style })
+export default function({ development, localize, preferred_locale, assets, url, http_client, respond, fail, redirect, disable_server_side_rendering, log, create_store, create_routes, markup_wrapper, head, body, body_start, body_end, style })
 {
 	// create Redux store
 	let store
@@ -65,6 +65,7 @@ export default function({ development, localize, preferred_locale, assets, url, 
 			locale={locale} 
 			head={head} 
 			body={body} 
+			body_start={body_start}
 			body_end={body_end} 
 			style={style} 
 			store={store}>

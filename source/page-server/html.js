@@ -23,6 +23,7 @@ export default class Html extends Component
 		store       : PropTypes.object.isRequired,
 		head        : PropTypes.func,
 		body        : PropTypes.func,
+		body_start  : PropTypes.func,
 		body_end    : PropTypes.func,
 		style       : PropTypes.func,
 		locale      : PropTypes.string,
@@ -31,7 +32,7 @@ export default class Html extends Component
 
 	render()
 	{
-		const { development, assets, store, head, body, body_end, style, locale, entry_point } = this.props
+		const { development, assets, store, head, body, body_start, body_end, style, locale, entry_point } = this.props
 
 		// when server-side rendering is disabled, content will be undefined
 		// (but server-side rendering is always enabled so this "if" condition may be removed)
@@ -84,6 +85,9 @@ export default class Html extends Component
 				</head>
 
 				<body>
+					{/* support adding arbitrary markup to body start */}
+					{ body_start ? body_start() : null }
+
 					{/* React page content */}
 					{content_element}
 

@@ -13,7 +13,7 @@
     "redux-devtools": "^3.0.0-beta-3",
     "redux-devtools-dock-monitor": "^1.0.0-beta-3",
     "redux-devtools-log-monitor": "^1.0.0-beta-3",
-    "redux-router": "^1.0.0-beta5",
+    "redux-router": "^1.0.0-beta7",
     "scroll-behavior": "^0.3.0",
     "superagent": "^1.6.1"
   },

@@ -7,7 +7,7 @@ import koa_locale from 'koa-locale'
 import http_client from '../http client'
 import render      from './render'
 
-export default function start_web_server({ development, localize, assets, host, port, web_server, log, disable_server_side_rendering, create_store, create_routes, markup_wrapper, head, body, body_end, style, on_error })
+export default function start_web_server({ development, localize, assets, host, port, web_server, log, disable_server_side_rendering, create_store, create_routes, markup_wrapper, head, body, body_start, body_end, style, on_error })
 {
 	log = log || console
 
@@ -105,6 +105,7 @@ export default function start_web_server({ development, localize, assets, host, 
 
 			head,
 			body,
+			body_start,
 			body_end,
 			style
 		})
