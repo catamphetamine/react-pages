@@ -20,7 +20,6 @@ export default function(parameters)
 		}
 
 		let preload
-		let preload_deferred
 		let preload_blocking
 
 		if (typeof parameters === 'function')
@@ -30,13 +29,11 @@ export default function(parameters)
 		else
 		{
 			preload          = parameters.preload
-			preload_deferred = parameters.deferred
 			preload_blocking = parameters.blocking
 		}
 
-		Preload.preload = preload
+		Preload.preload          = preload
 		Preload.preload_blocking = preload_blocking
-		Preload.preload_deferred = preload_deferred
 
 		Preload.displayName = `Preload(${get_display_name(Wrapped)})`
 		

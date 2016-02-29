@@ -120,7 +120,7 @@ export function server({ disable_server_side_rendering, create_page_element, ren
 			let promise = store.getState().router
 
 			// if nothing is being preloaded, create a dummy Promise
-			if (typeof promise.then !== 'function')
+			if (!promise || typeof promise.then !== 'function')
 			{
 				promise = Promise.resolve()
 			}

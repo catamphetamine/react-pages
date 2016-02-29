@@ -73,26 +73,7 @@ const preloader = (server, components, getState, dispatch, location, params, opt
 	{
 		return Promise.all((preloads || []).map(preload =>
 		{
-			const promise = preload()
-
-			// sanity check
-			if (!promise.then)
-			{
-				return Promise.reject(`Preload function didn't return a Promise:`, preload)
-				// throw new Error(`Preload function didn't return a Promise:`, preload)
-			}
-
-			return promise
-		}))
-	}
-
-	// calls all `preload_blocking` methods on the React-Router component chain
-	// (sequentially) and returns a Promise
-	const preload_all_blocking = () =>
-	{
-		return (blocking_preloads || []).reduce((previous, preload) =>
-		{
-			return previous.then(() =>
+			try
 			{
 				const promise = preload()
 
@@ -104,6 +85,39 @@ const preloader = (server, components, getState, dispatch, location, params, opt
 				}
 
 				return promise
+			}
+			catch (error)
+			{
+				return Promise.reject(error)
+			}
+		}))
+	}
+
+	// calls all `preload_blocking` methods on the React-Router component chain
+	// (sequentially) and returns a Promise
+	const preload_all_blocking = () =>
+	{
+		return (blocking_preloads || []).reduce((previous, preload) =>
+		{
+			return previous.then(() =>
+			{
+				try
+				{
+					const promise = preload()
+
+					// sanity check
+					if (!promise.then)
+					{
+						return Promise.reject(`Preload function didn't return a Promise:`, preload)
+						// throw new Error(`Preload function didn't return a Promise:`, preload)
+					}
+
+					return promise
+				}
+				catch (error)
+				{
+					return Promise.reject(error)
+				}
 			})
 		}, 
 		Promise.resolve())
@@ -147,41 +161,34 @@ export default function(server, on_error, dispatch_event)
 			return next(action)
 		}
 
-		// on the server side any error arising here 
-		// will be handled by webpage rendering server.
-		// explicit error handling here is only needed for the client.
-		//
-		let error_handler
-		//
-		if (!server)
+		// outputs error to the console by default
+		on_error = on_error || (error => console.error(error.stack || error))
+
+		// Promise error handler
+		const error_handler = error => 
 		{
-			// outputs error to the console by default
-			on_error = on_error || (error => console.error(error.stack || error))
-
-			// Promise error handler
-			error_handler = error => 
+			// finish the current Redux middleware chain
+			next(action)
+			
+			// handle the error (for example, redirect to an error page)
+			on_error(error,
 			{
-				// finish the current Redux middleware chain
-				next(action)
-				
-				// handle the error (for example, redirect to an error page)
-				on_error(error,
-				{
-					error, 
-					url      : action.payload.location.pathname + action.payload.location.search,
+				error, 
+				url      : action.payload.location.pathname + action.payload.location.search,
 
-					// for some strange reason the `dispatch` function 
-					// from the middleware parameters doesn't work here 
-					// when `redirect()`ing from this `on_error` handler
-					redirect : to => dispatch_event(replaceState(null, to)),
+				// for some strange reason the `dispatch` function 
+				// from the middleware parameters doesn't work here 
+				// when `redirect()`ing from this `on_error` handler
+				redirect : to => dispatch_event(replaceState(null, to)),
 
-					// // finish the current Redux middleware chain
-					// // (not used really)
-					// proceed  : () => next(action)
-				})
-			}
+				// // finish the current Redux middleware chain
+				// // (not used really)
+				// proceed  : () => next(action)
+			})
 		}
 
+		// all these three properties are the next React-router state
+		// (taken from `history.listen(function(error, nextRouterState))`)
 		const { components, location, params } = action.payload
 
 		// preload all the required data for this route
@@ -230,13 +237,18 @@ export default function(server, on_error, dispatch_event)
 					// {
 					// 	return
 					// }
+
+					// reset the Promise temporarily placed into the router state 
+					// by the code below
+					// (fixes "Invariant Violation: `mapStateToProps` must return an object. Instead received [object Promise]")
+					if (server)
+					{
+						getState().router = null
+					}
 					
 					dispatch({ type: Preload_failed, error })
 
-					if (error_handler)
-					{
-						error_handler(error)
-					}
+					error_handler(error)
 				}
 			)
 			// .finally(() => preloading.pending = false)
@@ -264,14 +276,6 @@ export default function(server, on_error, dispatch_event)
 			//
 			getState().router = promise
 		}
-
-		// // preload() then proceed
-		// //
-		// // returning promise from a middleware is not required.
-		// // can be used like: store.dispatch({ ... }).then(...)
-		// // if all the previous middlewares do `return next(action)`
-		// // (which is the case when navigating React-router routes)
-		// return promise
 	}
 }
 
