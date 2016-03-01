@@ -94,8 +94,11 @@ export default class Html extends Component
 					{/* locale for international messages */}
 					<script dangerouslySetInnerHTML={{__html: `window._locale=${JSON.stringify(locale)}`}} charSet="UTF-8"/>
 
+					{/* JSON Date deserializer */}
+					<script dangerouslySetInnerHTML={{__html: define_json_parser}} charSet="UTF-8"/>
+
 					{/* Flux store data will be reloaded into the store on the client */}
-					<script dangerouslySetInnerHTML={{__html: `window._flux_store_data=${JSON.stringify(store.getState())}`}} charSet="UTF-8"/>
+					<script dangerouslySetInnerHTML={{__html: `window._flux_store_data=JSON.parse(${JSON.stringify(JSON.stringify(store.getState()))}, JSON.date_parser)`}} charSet="UTF-8"/>
 
 					{/* javascripts */}
 
@@ -116,3 +119,26 @@ export default class Html extends Component
 		return html
 	}
 }
+
+// JSON date deserializer
+// use as the second, 'reviver' argument to JSON.parse(json, JSON.date_parser);
+//
+// http://stackoverflow.com/questions/14488745/javascript-json-date-deserialization/23691273#23691273
+//
+const define_json_parser =
+`
+if (!JSON.date_parser)
+{
+	var ISO = /^(\\d{4})-(\\d{2})-(\\d{2})T(\\d{2}):(\\d{2}):(\\d{2}(?:\\.\\d*))(?:Z|(\\+|-)([\\d|:]*))?$/;
+
+	JSON.date_parser = function(key, value)
+	{
+		if (typeof value === 'string' && ISO.test(value))
+		{
+			return new Date(value)
+		}
+
+		return value
+	}
+}
+`

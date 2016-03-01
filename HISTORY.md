@@ -1,3 +1,13 @@
+2.1.22 / 01.03.2016
+===================
+
+  * Added support for `Date`s in Redux state
+
+2.1.21 / 29.02.2016
+===================
+
+  * Fixed occasional "Invariant Violation: `mapStateToProps` must return an object. Instead received [object Promise]" Redux error
+
 2.1.12 / 08.02.2016
 ===================
 
