@@ -5,7 +5,7 @@
 //
 // in all the other cases it will do nothing
 
-export default function middleware(http_client)
+export default function middleware(http_client, { promise_event_naming })
 {
 	return ({ dispatch, getState }) =>
 	{
@@ -17,7 +17,7 @@ export default function middleware(http_client)
 			// 	return action(dispatch, getState)
 			// }
 
-			const { promise, events, ...rest } = action
+			let { promise, event, events, ...rest } = action
 
 			// if the dispatched message doesn't have a `promise` field
 			// then do nothing
@@ -31,6 +31,12 @@ export default function middleware(http_client)
 			if (typeof promise !== 'function')
 			{
 				throw new Error(`"promise" property must be a function returning a promise`)
+			}
+
+			// generate the three event names automatically based on a base event name
+			if (typeof event === 'string')
+			{
+				events = promise_event_naming(event)
 			}
 
 			// sanity check

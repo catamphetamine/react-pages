@@ -44,6 +44,9 @@ export default function(get_reducers, { development, development_tools, server, 
 	const reduxReactRouter = server ? reduxReactRouter_server : reduxReactRouter_client
 	const createHistory    = server ? createHistory_server    : use_scroll(createHistory_client)
 
+	// generates the three promise event names automatically based on a base event name
+	const promise_event_naming = event_name => [`${event_name} pending`, `${event_name} done`, `${event_name} failed`]
+
 	// Redux middleware chain
 	let middleware_chain = 
 	[
@@ -54,7 +57,7 @@ export default function(get_reducers, { development, development_tools, server, 
 		//
 		// in all the other cases it will do nothing
 		//
-		asynchronous_middleware(http_client),
+		asynchronous_middleware(http_client, { promise_event_naming }),
 
 		// enables support for @preload() annotation
 		// (which preloads data required for displaying certain pages)
