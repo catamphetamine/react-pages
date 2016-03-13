@@ -27,7 +27,29 @@ export default function start_web_server({ development, localize, assets, host, 
 		}
 		catch (error)
 		{
+			// if the error is caught here it means that `on_error` didn't resolve it
+
+			// // `superagent` puts the errored "text/html" response 
+			// // into `error.message` for some reason
+			// if (starts_with(error.message, '<!DOCTYPE html>'))
+			// {
+			// 	this.body = error.message
+			// }
+
+			// if it's development mode and 'http client' got a response error
+			// with html stack trace page, then just display that html page
+
+			if (development && error.html)
+			{
+				this.status = error.code
+				this.body   = error.html
+				this.type   = 'html'
+
+				return
+			}
+
 			// log the error
+			console.log('[react-isomorphic-render] Webpage rendering server error')
 			log.error(error)
 
 			this.status = typeof error.code === 'number' ? error.code : 500
@@ -80,7 +102,7 @@ export default function start_web_server({ development, localize, assets, host, 
 					this.status = status
 				}
 			}, 
-			fail     : error =>
+			fail    : error =>
 			{
 				if (on_error)
 				{
@@ -120,6 +142,7 @@ export default function start_web_server({ development, localize, assets, host, 
 	{
 		if (error)
 		{
+			console.log('[react-isomorphic-render] Webpage rendering server shutdown due to an error')
 			return log.error(error)
 		}
 

@@ -1,5 +1,7 @@
 import superagent from 'superagent'
 
+import { starts_with } from './helpers'
+
 export default class http_client
 {
 	// Constructs a new instance of Api Client.
@@ -96,25 +98,38 @@ export default class http_client
 						{
 							// superagent would have already output the error to console
 							// console.error(error.stack)
-							
+
+							console.log('[react-isomorphic-render] (http request error)')
+
 							if (response)
 							{
-								let text = response.text
-								const code = parseInt(text)
+								error.code = response.status
 
-								if (text)
+								if (starts_with(response.get('content-type'), 'text/plain'))
 								{
-									error.message = text
+									// let text = response.text
+									// const code = parseInt(text)
 
-									if (!isNaN(code))
-									{
-										error.code = code
-										// error.message = error.message.split(' ').shift() then .join()
-									}
+									// if (text)
+									// {
+									// 	error.message = text
+
+									// 	if (!isNaN(code))
+									// 	{
+									// 		error.code = code
+									// 		// error.message = error.message.split(' ').shift() then .join()
+									// 	}
+									// }
+
+									error.message = response.text
+								}
+								else if (starts_with(response.get('content-type'), 'text/html'))
+								{
+									error.html = response.text
 								}
 							}
 
-							return reject(error) // (response && response.body) || 
+							return reject(error)
 						}
 
 						resolve(response.body)
