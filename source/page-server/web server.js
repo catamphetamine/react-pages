@@ -7,6 +7,8 @@ import koa_locale from 'koa-locale'
 import http_client from '../http client'
 import render      from './render'
 
+import render_stack_trace from './html stack trace'
+
 export default function start_web_server({ development, localize, assets, host, port, web_server, log, disable_server_side_rendering, create_store, create_routes, markup_wrapper, head, body, body_start, body_end, style, on_error })
 {
 	log = log || console
@@ -28,24 +30,21 @@ export default function start_web_server({ development, localize, assets, host, 
 		catch (error)
 		{
 			// if the error is caught here it means that `on_error` didn't resolve it
+			// (or threw it)
 
-			// // `superagent` puts the errored "text/html" response 
-			// // into `error.message` for some reason
-			// if (starts_with(error.message, '<!DOCTYPE html>'))
-			// {
-			// 	this.body = error.message
-			// }
-
-			// if it's development mode and 'http client' got a response error
-			// with html stack trace page, then just display that html page
-
-			if (development && error.html)
+			// show error stack trace in development mode for easier debugging
+			if (development)
 			{
-				this.status = error.code
-				this.body   = error.html
-				this.type   = 'html'
+				const { response_status, response_body } = render_stack_trace(error)
 
-				return
+				if (response_body)
+				{
+					this.status = response_status || 500
+					this.body = response_body
+					this.type = 'html'
+
+					return
+				}
 			}
 
 			// log the error
