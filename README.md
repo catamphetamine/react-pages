@@ -114,6 +114,14 @@ webpage_server
   // This CSS text will be inserted into server rendered webpage's <head/> <style/> tag.
   // If you're using Webpack then the CSS text is the result of a require() call.
   style: () => require('../assets/style.scss').toString()
+
+  // (optional)
+  // supports preloading data before performing page rendering
+  // preload: async (http_client) => Nothing or initial Flux store data
+
+  // (optional)
+  // supports internationalization
+  // localize: async (store, preferred_locale) => { locale, messages }
 })
 ```
 

@@ -105,25 +105,13 @@ export default class http_client
 							{
 								error.code = response.status
 
-								if (starts_with(response.get('content-type'), 'text/plain'))
+								const content_type = response.get('content-type').split(';')[0].trim()
+
+								if (content_type === 'text/plain')
 								{
-									// let text = response.text
-									// const code = parseInt(text)
-
-									// if (text)
-									// {
-									// 	error.message = text
-
-									// 	if (!isNaN(code))
-									// 	{
-									// 		error.code = code
-									// 		// error.message = error.message.split(' ').shift() then .join()
-									// 	}
-									// }
-
 									error.message = response.text
 								}
-								else if (starts_with(response.get('content-type'), 'text/html'))
+								else if (content_type === 'text/html')
 								{
 									error.html = response.text
 								}

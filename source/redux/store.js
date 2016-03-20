@@ -109,9 +109,9 @@ export default function(get_reducers, { development, development_tools, server, 
 	// overall Redux reducer = web application reducers + redux-router reducer
 	const overall_reducer = () =>
 	{
-		const model = get_reducers()
-		model.router = routerStateReducer
-		return combineReducers(model)
+		const reducers = get_reducers()
+		reducers.router = routerStateReducer
+		return combineReducers(reducers)
 	}
 
 	// create Redux store 

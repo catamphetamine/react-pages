@@ -63,9 +63,10 @@ export function html_stack_trace(stack_trace)
 
 	for (let line of lines)
 	{
-		if (!line.starts_with('at'))
+		if (line.indexOf('at') !== 0)
 		{
 			line = line.replace(/^Error: /, '')
+			line = line.replace(/:$/, '')
 
 			group = { title: line, lines: [] }
 			groups.push(group)
@@ -83,12 +84,11 @@ export function html_stack_trace(stack_trace)
 				const file_line_number = line_parts[3]
 
 				line = 
-				`
-					<span class="file-path">${escape_html(path.basename(file_path))}</span><!--
-					--><span class="colon">:</span><!--
-					--><span class="line-number">${file_line_number}</span>
-					<span class="method">${escape_html(method_path)}</span>
-				`
+				{
+					file_path        : file_path,
+					file_line_number : file_line_number,
+					method_path      : method_path
+				}
 			}
 			else
 			{
@@ -102,18 +102,91 @@ export function html_stack_trace(stack_trace)
 					if (file_path === 'native')
 					{
 						line = 
-						`
-							<span class="method">${escape_html(method_path)}</span>
-						`
+						{
+							method_path : method_path
+						}
 					}
 					else
 					{
+
 						line = 
-						`
-							<span class="file-path">${escape_html(path.basename(file_path))}</span>
-							<span class="method">${escape_html(method_path)}</span>
-						`
+						{
+							file_path   : file_path,
+							method_path : method_path
+						}
 					}
+				}
+				else
+				{
+					const line_parts_file_line_column = line.match(/^(.*):(\d+):(\d+)$/)
+
+					if (line_parts_file_line_column)
+					{
+						const file_path        = line_parts_file_line_column[1]
+						const file_line_number = line_parts_file_line_column[2]
+
+						line = 
+						{
+							file_path        : file_path,
+							file_line_number : file_line_number
+						}
+					}
+				}
+			}
+
+			function print_file_path(file_path)
+			{
+				file_path = file_path.replace(/\\/g, '/')
+
+				// replace "/node_modules/xxx/" with "/[xxx]/",
+				// and also substitute project name
+				const node_modules = file_path.indexOf('/node_modules/')
+				if (node_modules >= 0)
+				{
+					const before = file_path.slice(0, node_modules).split('/')
+					const rest = file_path.substring(node_modules + '/node_modules/'.length).split('/')
+					const node_module = rest.shift()
+
+					file_path = `[${before[before.length - 1]}]/[${node_module}]/${rest.join('/')}`
+				}
+
+				return file_path
+			}
+
+			if (typeof line !== 'string')
+			{
+				const line_info = line
+
+				line = ''
+
+				if (line_info.file_path)
+				{
+					line += `<span class="file-name">${path.basename(line_info.file_path)}</span>`
+				}
+
+				if (line_info.file_line_number)
+				{
+					line += `<span class="colon">:</span><span class="line-number">${line_info.file_line_number}</span>`
+				}
+
+				if (line_info.method_path)
+				{
+					if (line.length > 0)
+					{
+						line += ' '
+					}
+
+					line += `<span class="method">${escape_html(line_info.method_path)}</span>`
+				}
+
+				if (line_info.file_path)
+				{	
+					line += 
+					`
+						<div class="file-path">
+							${print_file_path(escape_html(line_info.file_path)).split('/').join('<span class="file-path-separator">/</span>')}
+						</div>
+					`
 				}
 			}
 
@@ -121,11 +194,11 @@ export function html_stack_trace(stack_trace)
 		}
 	}
 
-	const groups_markup = groups.map(group =>
+	const groups_markup = groups.map((group, i) =>
 	{
 		const markup =
 		`
-			<h1>${escape_html(group.title)}</h1>
+			<h1 ${i === 0 ? '' : 'class="secondary"' }>${escape_html(group.title)}</h1>
 			<ul>${group.lines.map(line => '<li>' + line + '</li>').join('')}</ul>
 		`
 
@@ -140,6 +213,12 @@ export function html_stack_trace(stack_trace)
 				<title>Error</title>
 
 				<style>
+					html
+					{
+						font-family : Monospace, Arial;
+						font-size   : 20pt;
+					}
+
 					body
 					{
 						margin-top    : 1.6em;
@@ -147,20 +226,47 @@ export function html_stack_trace(stack_trace)
 
 						margin-left   : 2.3em;
 						margin-right  : 2.3em;
+					}
 
-						font-family : Monospace, Arial;
-						font-size   : 20pt;
+					h1
+					{
+						font-size : 1.4rem;
+						color     : #C44100;
+					}
+
+					h1.secondary
+					{
+						font-weight : normal;
+						color       : #7f7f7f;
+					}
+
+					ul
+					{
+						margin-top : 2em;
 					}
 
 					ul li 
 					{
-						margin-bottom   : 1em;
+						margin-bottom   : 1.5em;
 						list-style-type : none;
+						font-size       : 1.2rem;
 					}
 
 					.file-path
 					{
-						font-weight: bold;
+						color         : #7f7f7f;
+						margin-top    : 0.8em;
+						font-size     : 1rem;
+					}
+
+					.file-path-separator
+					{
+						color : #c0c0c0;
+					}
+
+					.file-name
+					{
+						font-weight : bold;
 					}
 
 					.line-number

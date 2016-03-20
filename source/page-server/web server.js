@@ -9,7 +9,7 @@ import render      from './render'
 
 import render_stack_trace from './html stack trace'
 
-export default function start_web_server({ development, localize, assets, host, port, web_server, log, disable_server_side_rendering, create_store, create_routes, markup_wrapper, head, body, body_start, body_end, style, on_error })
+export default function start_web_server({ development, preload, localize, assets, host, port, web_server, log, disable_server_side_rendering, create_store, create_routes, markup_wrapper, head, body, body_start, body_end, style, on_error })
 {
 	log = log || console
 
@@ -35,15 +35,23 @@ export default function start_web_server({ development, localize, assets, host, 
 			// show error stack trace in development mode for easier debugging
 			if (development)
 			{
-				const { response_status, response_body } = render_stack_trace(error)
-
-				if (response_body)
+				try
 				{
-					this.status = response_status || 500
-					this.body = response_body
-					this.type = 'html'
+					const { response_status, response_body } = render_stack_trace(error)
 
-					return
+					if (response_body)
+					{
+						this.status = response_status || 500
+						this.body = response_body
+						this.type = 'html'
+
+						return
+					}
+				}
+				catch (error)
+				{
+					console.log('(couldn\'t render error stack trace)')
+					console.log(error.stack || error)
 				}
 			}
 
@@ -64,7 +72,7 @@ export default function start_web_server({ development, localize, assets, host, 
 	{
 		// isomorphic http api calls
 		const _http_client = new http_client({ host: web_server.host, port: web_server.port, clone_request: this.request })
-	
+
 		// Material-UI asks for this,
 		// but this isn't right,
 		// because Node.js serves requests asynchronously
@@ -83,6 +91,7 @@ export default function start_web_server({ development, localize, assets, host, 
 		({
 			development,
 
+			preload,
 			localize,
 			preferred_locale: this.getLocaleFromQuery() || this.getLocaleFromCookie() || this.getLocaleFromHeader(),
 
