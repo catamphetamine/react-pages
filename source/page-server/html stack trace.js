@@ -1,5 +1,3 @@
-import path from 'path'
-
 export default function render_stack_trace(error)
 {
 	// supports custom `html` for an error
@@ -55,7 +53,7 @@ export default function render_stack_trace(error)
 	}
 }
 
-export function html_stack_trace(stack_trace)
+export function parse_stack_trace(stack_trace)
 {
 	const lines = stack_trace.split('\n').map(line => line.trim())
 	const groups = []
@@ -134,72 +132,29 @@ export function html_stack_trace(stack_trace)
 				}
 			}
 
-			function print_file_path(file_path)
+			if (line.file_path)
 			{
-				file_path = file_path.replace(/\\/g, '/')
-
-				// replace "/node_modules/xxx/" with "/[xxx]/",
-				// and also substitute project name
-				const node_modules = file_path.indexOf('/node_modules/')
-				if (node_modules >= 0)
-				{
-					const before = file_path.slice(0, node_modules).split('/')
-					const rest = file_path.substring(node_modules + '/node_modules/'.length).split('/')
-					const node_module = rest.shift()
-
-					file_path = `[${before[before.length - 1]}]/[${node_module}]/${rest.join('/')}`
-				}
-
-				return file_path
-			}
-
-			if (typeof line !== 'string')
-			{
-				const line_info = line
-
-				line = ''
-
-				if (line_info.file_path)
-				{
-					line += `<span class="file-name">${path.basename(line_info.file_path)}</span>`
-				}
-
-				if (line_info.file_line_number)
-				{
-					line += `<span class="colon">:</span><span class="line-number">${line_info.file_line_number}</span>`
-				}
-
-				if (line_info.method_path)
-				{
-					if (line.length > 0)
-					{
-						line += ' '
-					}
-
-					line += `<span class="method">${escape_html(line_info.method_path)}</span>`
-				}
-
-				if (line_info.file_path)
-				{	
-					line += 
-					`
-						<div class="file-path">
-							${print_file_path(escape_html(line_info.file_path)).split('/').join('<span class="file-path-separator">/</span>')}
-						</div>
-					`
-				}
+				line.file_name = basename(line.file_path)
+				line.file_path = transform_file_path(line.file_path)
 			}
 
 			group.lines.push(line)
 		}
 	}
 
+	return groups
+}
+
+export function html_stack_trace(error)
+{
+	const groups = parse_stack_trace(error)
+
 	const groups_markup = groups.map((group, i) =>
 	{
 		const markup =
 		`
 			<h1 ${i === 0 ? '' : 'class="secondary"' }>${escape_html(group.title)}</h1>
-			<ul>${group.lines.map(line => '<li>' + line + '</li>').join('')}</ul>
+			<ul>${group.lines.map(line => '<li>' + line_markup(line) + '</li>').join('')}</ul>
 		`
 
 		return markup
@@ -296,7 +251,86 @@ export function html_stack_trace(stack_trace)
 	return html
 }
 
+function line_markup(line_info)
+{
+	if (typeof line_info === 'string')
+	{
+		return line_info
+	}
+
+	let line = ''
+
+	if (line_info.file_path)
+	{
+		line += `<span class="file-name">${line_info.file_name}</span>`
+	}
+
+	if (line_info.file_line_number)
+	{
+		line += `<span class="colon">:</span><span class="line-number">${line_info.file_line_number}</span>`
+	}
+
+	if (line_info.method_path)
+	{
+		if (line.length > 0)
+		{
+			line += ' '
+		}
+
+		line += `<span class="method">${escape_html(line_info.method_path)}</span>`
+	}
+
+	if (line_info.file_path)
+	{	
+		line += 
+		`
+			<div class="file-path">
+				${escape_html(line_info.file_path).split('/').join('<span class="file-path-separator">/</span>')}
+			</div>
+		`
+	}
+
+	return line
+}
+
 function escape_html(text)
 {
 	return text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+}
+
+function basename(path)
+{
+	let index = path.lastIndexOf('/')
+
+	if (index >= 0)
+	{
+		return path.substring(index + 1)
+	}
+
+	index = path.lastIndexOf('\\')
+	if (index >= 0)
+	{
+		return path.substring(index + 1)
+	}
+
+	return path
+}
+
+function transform_file_path(file_path)
+{
+	file_path = file_path.replace(/\\/g, '/')
+
+	// replace "/node_modules/xxx/" with "/[xxx]/",
+	// and also substitute project name
+	const node_modules = file_path.indexOf('/node_modules/')
+	if (node_modules >= 0)
+	{
+		const before = file_path.slice(0, node_modules).split('/')
+		const rest = file_path.substring(node_modules + '/node_modules/'.length).split('/')
+		const node_module = rest.shift()
+
+		file_path = `[${before[before.length - 1]}]/[${node_module}]/${rest.join('/')}`
+	}
+
+	return file_path
 }
