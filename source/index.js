@@ -1,6 +1,6 @@
 // just an npm package helper
 
-import { pushState, replaceState } from 'redux-router'
+import { push, replace } from 'redux-router'
 
 import { webpage_head, webpage_title, webpage_meta } from './webpage head'
 
@@ -12,5 +12,5 @@ import client from './client'
 
 export { client as render }
 
-export const goto     = url => pushState(null, url)
-export const redirect = url => replaceState(null, url)
+export const goto     = url => push(url)
+export const redirect = url => replace(url)

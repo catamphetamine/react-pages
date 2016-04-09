@@ -414,10 +414,12 @@ class Component extends React.Component
 ### Changing current location
 
 ```javascript
-import { goto, redirect } from 'redux-router'
+import { goto, redirect } from 'react-isomorphic-render'
 
-// usage example:
-// this.props.dispatch(redirect('/items/1?color=red'))
+// usage example
+// (`goto` navigates to a URL while adding a new entry in browsing history,
+//  `redirect` does the same without modifying browsing history)
+// this.props.dispatch(goto('/items/1?color=red'))
 ```
 
 ## Gotchas

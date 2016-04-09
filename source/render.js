@@ -2,7 +2,7 @@ import React          from 'react'
 import ReactDOM       from 'react-dom'
 import ReactDOMServer from 'react-dom/server'
 
-import { Router, RoutingContext, useRoutes, match, RouterContext, browserHistory } from 'react-router'
+import { Router, match, RouterContext, browserHistory } from 'react-router'
 
 // renders directly to the "to" DOM element.
 //
@@ -29,7 +29,7 @@ export function client({ development, element, create_page_element, to, create_r
 	}
 
 	// in case of pure React-router rendering, perform routing first
-	// (<RoutingContext/> and useRoutes(history).listen() can be used here instead
+	// (<RouterContext/> and useRoutes(history).listen() can be used here instead
 	//  for asynchronous routing, that is to implement <Route/> React component @preload()ing)
 	if (!element && create_routes)
 	{
@@ -104,9 +104,6 @@ export function server({ disable_server_side_rendering, render_html, render, cre
 				return reject(error)
 			}
 
-			// You can also check render_props.components or render_props.routes for
-			// your "not found" component or route respectively, and send a 404 as
-			// below, if you're using a catch-all route.
 			resolve({ markup: to_html(render(<RouterContext {...render_props}/>)) })
 		})
 	})

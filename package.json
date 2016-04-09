@@ -12,7 +12,7 @@
     "redux-devtools": "^3.1.1",
     "redux-devtools-dock-monitor": "^1.1.0",
     "redux-devtools-log-monitor": "^1.0.5",
-    "redux-router": "^1.0.0-beta8",
+    "redux-router": "^2.0.0-beta1",
     "scroll-behavior": "^0.3.4",
     "superagent": "^1.6.1"
   },
@@ -20,6 +20,7 @@
     "babel": "^5.8.34",
     "istanbul": "^0.4.1",
     "mocha": "^2.3.4",
+    "chai": "^3.5.0",
     "npm-run-all": "^1.4.0",
     "rimraf": "^2.5.0"
   },
