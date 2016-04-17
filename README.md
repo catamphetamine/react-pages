@@ -12,7 +12,7 @@
 [![Gratipay][gratipay-image]][gratipay-url]
 -->
 
-Is a module providing support for isomorphic (universal) rendering with React, React-router, Redux, Redux-router. Also allows for Webpack bundler. Allows for locale detection and therefore internationalization of the app. Also it handles Http Cookies mutation correctly (both on client and server).
+Is a module providing support for isomorphic (universal) rendering with React, React-router, Redux, Redux-router. Also allows for Webpack bundler. Allows for locale detection and therefore internationalization of the app. Also it handles Http Cookies mutation correctly (both on client and server). And when paired with Redux it certainly knows how to preload web pages before rendering them on the server – it wouldn't be called "isomorphic" otherwise.
 
 ## Installation
 
@@ -24,7 +24,7 @@ $ npm install react-isomorphic-render --save
 
 See [webapp](https://github.com/halt-hammerzeit/webapp) and [webpack-react-redux-isomorphic-render-example](https://github.com/halt-hammerzeit/webpack-react-redux-isomorphic-render-example) as references.
 
-The following usage example is for `React + React-router + Redux` setup.
+The following usage example is for `React + React-router + Redux` setup (the one I'm using in my projects).
 
 Create your webpage rendering server
 
