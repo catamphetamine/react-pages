@@ -53,7 +53,8 @@ export default class http_client
 
 				return new Promise((resolve, reject) =>
 				{
-					const request = superagent[http_method](url)
+					const agent = this.server ? superagent.agent() : superagent
+					const request = agent[http_method](url)
 
 					if (data)
 					{
@@ -81,13 +82,21 @@ export default class http_client
 
 					request.end((error, response) => 
 					{
-						if (response)
-						{
-							if (response.get('set-cookie'))
-							{
-								this.cookies = response.get('set-cookie')
-							}
-						}
+						// this turned out to be a lame way of handling cookies,
+						// because cookies are sent in request 
+						// with no additional parameters
+						// such as `path`, `httpOnly` and `expires`,
+						// so there were cookie duplication issues.
+						//
+						// now superagent.agent() handles cookies correctly.
+						//
+						// if (response)
+						// {
+						// 	if (response.get('set-cookie'))
+						// 	{
+						// 		this.cookies = response.get('set-cookie')
+						// 	}
+						// }
 
 						if (!error && response)
 						{

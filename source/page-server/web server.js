@@ -140,7 +140,15 @@ export default function start_web_server({ development, preload, localize, asset
 			style
 		})
 
-		this.set('set-cookie', _http_client.cookies)
+		// this turned out to be a lame way to do it,
+		// because cookies are sent in request 
+		// with no additional parameters
+		// such as `path`, `httpOnly` and `expires`,
+		// so there were cookie duplication issues.
+		//
+		// now superagent.agent() handles cookies correctly.
+		//
+		// this.set('set-cookie', _http_client.cookies)
 	}
 
 	web.use(rendering)
