@@ -1,6 +1,8 @@
 import React, { Component } from 'react'
 import hoist_statics from 'hoist-non-react-statics'
 
+import { Preload_method_name, Preload_blocking_method_name } from './middleware/preloading middleware'
+
 /*
   Note:
     When this decorator is used, it MUST be the first (outermost) decorator.
@@ -32,8 +34,8 @@ export default function(parameters)
 			preload_blocking = parameters.blocking
 		}
 
-		Preload.preload          = preload
-		Preload.preload_blocking = preload_blocking
+		Preload[Preload_method_name]          = preload
+		Preload[Preload_blocking_method_name] = preload_blocking
 
 		Preload.displayName = `Preload(${get_display_name(Wrapped)})`
 		

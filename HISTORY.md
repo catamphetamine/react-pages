@@ -1,3 +1,8 @@
+2.1.31 / 27.04.2016
+===================
+
+  * Fixed infinite looping page freeze when navigating to the same `<Route/>`
+
 2.1.29 / 09.04.2016
 ===================
 

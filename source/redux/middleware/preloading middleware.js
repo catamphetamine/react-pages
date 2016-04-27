@@ -9,6 +9,9 @@
 import { ROUTER_DID_CHANGE } from 'redux-router/lib/constants'
 import { replaceState }      from 'redux-router'
 
+export const Preload_method_name          = '__react_preload___'
+export const Preload_blocking_method_name = '__react_preload_blocking__'
+
 // Returns function returning a Promise 
 // which resolves when all the required preload()s are resolved.
 //
@@ -28,13 +31,19 @@ const preloader = (server, components, getState, dispatch, location, params, opt
 	//
 	// (e.g. the main <Route/> will be @preload()ed only once - on the server side)
 	//
+	// at the same time, at least one component should be preloaded,
+	// because a route might have a form of "/users/xxx",
+	// and therefore after navigating from "/users/xxx" to "/users/yyy"
+	// the last component in the chain still needs to be reloaded
+	// even though it has remained the same.
+	//
 	// ("getState().router" means "is on the client side now")
 	//
 	if (getState().router)
 	{
 		let previous_route_components = getState().router.components
 
-		while (previous_route_components[0] === components[0])
+		while (components.length > 1 && previous_route_components[0] === components[0])
 		{
 			previous_route_components = previous_route_components.slice(1)
 			components                = components.slice(1)
@@ -62,10 +71,10 @@ const preloader = (server, components, getState, dispatch, location, params, opt
 	}
 
 	// get all `preload_blocking` methods on the React-Router component chain
-	const blocking_preloads = get_preloaders('preload_blocking')
+	const blocking_preloads = get_preloaders(Preload_blocking_method_name)
 
 	// get all `preload` methods on the React-Router component chain
-	const preloads = get_preloaders('preload')
+	const preloads = get_preloaders(Preload_method_name)
 
 	// calls all `preload` methods on the React-Router component chain
 	// (in parallel) and returns a Promise
