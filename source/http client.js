@@ -157,15 +157,17 @@ export default class http_client
 //
 // http://stackoverflow.com/questions/14488745/javascript-json-date-deserialization/23691273#23691273
 
-const ISO = /^(\\d{4})-(\\d{2})-(\\d{2})T(\\d{2}):(\\d{2}):(\\d{2}(?:\\.\\d*))(?:Z|(\\+|-)([\\d|:]*))?$/
+const ISO = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2}(?:\.\d*))(?:Z|(\+|-)([\d|:]*))?$/
 
 function parse_dates(object)
 {
 	if (object instanceof Array)
 	{
-		for (let element of object)
+		let i = 0
+		while (i < object.length)
 		{
-			parse_dates(element)
+			object[i] = parse_dates(object[i])
+			i++
 		}
 	}
 	else if (is_object(object))
