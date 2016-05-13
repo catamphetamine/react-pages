@@ -161,17 +161,27 @@ const ISO = /^(\\d{4})-(\\d{2})-(\\d{2})T(\\d{2}):(\\d{2}):(\\d{2}(?:\\.\\d*))(?
 
 function parse_dates(object)
 {
-	for (let key of Object.keys(object))
+	if (object instanceof Array)
 	{
-		const value = object[key]
-		if (typeof value === 'string' && ISO.test(value))
+		for (let element of object)
 		{
-			object[key] = new Date(value)
+			parse_dates(object)
 		}
-		else if (is_object(value))
+	}
+	else if (is_object(object))
+	{
+		for (let key of Object.keys(object))
 		{
-			// proceed recursively
-			parse_dates(value)
+			const value = object[key]
+			if (typeof value === 'string' && ISO.test(value))
+			{
+				object[key] = new Date(value)
+			}
+			else
+			{
+				// proceed recursively
+				parse_dates(value)
+			}
 		}
 	}
 
