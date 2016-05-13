@@ -1,6 +1,6 @@
 import superagent from 'superagent'
 
-import { starts_with } from './helpers'
+import { is_object, starts_with } from './helpers'
 
 export default class http_client
 {
@@ -129,7 +129,7 @@ export default class http_client
 							return reject(error)
 						}
 
-						resolve(response.body)
+						resolve(parse_dates(response.body))
 					})
 				})
 			}
@@ -150,4 +150,30 @@ export default class http_client
 		// Prepend prefix to relative URL, to proxy to API server.
 		return this.prefix + normalized_path
 	}
+}
+
+// JSON date deserializer
+// use as the second, 'reviver' argument to JSON.parse(json, JSON.date_parser);
+//
+// http://stackoverflow.com/questions/14488745/javascript-json-date-deserialization/23691273#23691273
+
+const ISO = /^(\\d{4})-(\\d{2})-(\\d{2})T(\\d{2}):(\\d{2}):(\\d{2}(?:\\.\\d*))(?:Z|(\\+|-)([\\d|:]*))?$/
+
+function parse_dates(object)
+{
+	for (let key of Object.keys(object))
+	{
+		const value = object[key]
+		if (typeof value === 'string' && ISO.test(value))
+		{
+			object[key] = new Date(value)
+		}
+		else if (is_object(value))
+		{
+			// proceed recursively
+			parse_dates(value)
+		}
+	}
+
+	return object
 }
