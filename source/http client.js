@@ -165,7 +165,7 @@ function parse_dates(object)
 	{
 		for (let element of object)
 		{
-			parse_dates(object)
+			parse_dates(element)
 		}
 	}
 	else if (is_object(object))
