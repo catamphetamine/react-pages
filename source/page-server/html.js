@@ -45,12 +45,23 @@ export default class Html extends Component
 			content_element = body(content_element)
 		}
 
+		const webpage_head = server_generated_webpage_head()
+
+		const html_attributes = webpage_head.htmlAttributes.toComponent()
+
+		if (locale)
+		{
+			html_attributes.lang = get_language_from_locale(locale)
+		}
+
 		const html = 
 		(
-			<html lang={locale ? get_language_from_locale(locale) : ''}>
+			<html {...html_attributes}>
 				<head>
 					{/* webpage title and various meta tags */}
-					{server_generated_webpage_head()}
+					{webpage_head.title.toComponent()}
+					{webpage_head.meta.toComponent()}
+					{webpage_head.link.toComponent()}
 
 					{/* (will be done only in production mode
 					     with webpack extract text plugin) 

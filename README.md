@@ -363,35 +363,27 @@ export default connect(model => ({ pending: model.preload.pending, error: model.
 
 ### Setting webpage title, description, <meta/> tags
 
+Uses [react-helmet](https://github.com/nfl/react-helmet) under the hood.
+
 ```javascript
 import { head, title, meta } from 'react-isomorphic-render'
 
+const meta =
+[
+  // <meta charset="utf-8"/>
+  { charset: 'utf-8' },
+
+  // <meta name="..." content="..."/>
+  { name: 'viewport', content: 'width=device-width, initial-scale=1.0, user-scalable=no' },
+
+  // <meta property="..." content="..."/>
+  { property: 'og:title',       content: 'International Bodybuilders Club' },
+  { property: 'og:description', content: 'Do some push ups' },
+  { property: 'og:locale',      content: 'ru-RU' }
+]
+
 // sets specific webpage <head/> tags
-head
-(
-  title = 'WebApp',
-  description = 'A generic web application boilerplate',
-  meta =
-  {
-    // <meta charset="utf-8" />
-    charSet: 'utf-8',
-
-    name:
-    {
-      // all <meta name="..." content="..."/> tags go here
-      viewport: 'width=device-width, initial-scale=1.0, user-scalable=no'
-    },
-
-    property:
-    {
-      // all <meta property="..." content="..."/> tags go here
-      'og:site_name': title,
-      'og:locale': 'ru_RU',
-      'og:title': title,
-      'og:description': description,
-    }
-  }
-)
+head('WebApp', meta)
 
 // webpage title will be replaced with this one
 title('New webpage title')

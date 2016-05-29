@@ -1,3 +1,9 @@
+3.0.0 / 29.05.2016
+===================
+
+  * Migrated from `react-document-meta` to `react-helmet` (nothing special). Breaking changes: `meta` is now a `react-helmet` `meta` array, and the `head()` function now takes only two parameters - `title` and `meta` - therefore omitting `description` parameter.
+
+
 2.1.31 / 27.04.2016
 ===================
 
