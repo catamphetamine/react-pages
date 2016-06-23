@@ -392,6 +392,16 @@ title('New webpage title')
 meta({ ... same `meta` as above ... })
 ```
 
+### Locale detection
+
+This library performs the following locale detection steps for each webpage rendering HTTP request:
+
+ * Checks the `locale` query parameter (if it's an HTTP GET request)
+ * Checks the `locale` cookie
+ * Checks the `Accept-Language` HTTP header
+ 
+For more info see [`koa-locale`](https://www.npmjs.com/package/koa-locale).
+
 ### Determining current location
 
 ```javascript
