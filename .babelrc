@@ -1,6 +1,23 @@
 {
-	"stage"    : 0,
-	"optional" : ["runtime"],
-	"loose"    : "all",
-	"plugins": []
+	"presets":
+	[
+		"react",
+		"es2015",
+		"stage-0"
+	],
+
+	"plugins":
+	[
+		"transform-runtime",
+		"add-module-exports",
+		"transform-react-display-name"
+	],
+
+	"env":
+	{
+		"development":
+		{
+			"plugins": []
+		}
+	}
 }
