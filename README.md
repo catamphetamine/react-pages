@@ -430,7 +430,7 @@ import { goto, redirect } from 'react-isomorphic-render'
 
 This library is build system agnostic: you can use your favourite Grunt, Gulp, Browserify, RequireJS, Webpack, etc.
 
-If you're using Webpack though either make sure your React components don't contain asset `require()` calls (images, styles, fonts, etc) or make those asset `require()` calls work on Node.js with the use of either [webpack-isomorphic-tools](https://github.com/halt-hammerzeit/webpack-isomorphic-tools) or a separate `target: "node"` Webpack build. Yes, Webpack is that stubborn when making it work on the server.
+If you're using Webpack then make sure you either build your server-side code with Webpack too (so that asset `require()` calls (images, styles, fonts, etc) inside React components work, see [universal-webpack](https://github.com/halt-hammerzeit/universal-webpack)) or use [webpack-isomorphic-tools](https://github.com/halt-hammerzeit/webpack-isomorphic-tools).
 
 ## Suggestions
 
