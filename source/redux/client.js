@@ -1,6 +1,7 @@
 // client side rendering function
 
 import React from 'react'
+import ReactDOM from 'react-dom'
 
 import { client as client_render } from './render'
 import dev_tools                   from './dev tools'
