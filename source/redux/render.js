@@ -61,7 +61,7 @@ export function render_on_client({ development, development_tools, create_page_e
 		})
 
 		// if Redux-devtools aren't enabled, then just return the Page elemnt
-		if (!development_tools)
+		if (!development || !development_tools)
 		{
 			return component
 		}
