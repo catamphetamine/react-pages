@@ -122,6 +122,7 @@ webpage_server
   // (optional)
   // supports internationalization
   // localize: async (store, preferred_locale) => { locale, messages }
+  // (or same without `async`: (store, preferred_locale) => Promise.resolve({ locale, messages }))
 })
 ```
 
@@ -150,7 +151,12 @@ render
   create_routes,
   
   // wraps React page component into arbitrary markup (explained below)
-  markup_wrapper
+  markup_wrapper,
+
+  // (optional)
+  // supports internationalization
+  // load_localized_messages: async locale => messages
+  // (or same without `async`: locale => Promise.resolve(messages))
 })
 ```
 

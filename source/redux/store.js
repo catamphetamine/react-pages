@@ -3,7 +3,7 @@ import { createStore, combineReducers, applyMiddleware, compose } from 'redux'
 import asynchronous_middleware from './middleware/asynchronous middleware'
 import preloading_middleware from './middleware/preloading middleware'
 
-import dev_tools from './dev tools'
+import DevTools from './dev tools'
 
 import { routerStateReducer } from 'redux-router'
 
@@ -15,11 +15,7 @@ import { reduxReactRouter as reduxReactRouter_server } from 'redux-router/server
 import createHistory_server from 'history/lib/createMemoryHistory'
 import createHistory_client from 'history/lib/createBrowserHistory'
 
-// Three different types of scroll behavior available.
-// Documented at https://github.com/rackt/scroll-behavior
-//
-// Possibly currently doesn't make any difference
-import use_scroll from 'scroll-behavior/lib/useStandardScroll'
+import use_scroll from 'scroll-behavior'
 
 export default function(get_reducers, { development, development_tools, server, data, create_routes, http_client, on_preload_error, middleware })
 {
@@ -42,7 +38,13 @@ export default function(get_reducers, { development, development_tools, server, 
 
 	// server-side and client-side specifics
 	const reduxReactRouter = server ? reduxReactRouter_server : reduxReactRouter_client
-	const createHistory    = server ? createHistory_server    : use_scroll(createHistory_client)
+	// const createHistory    = server ? createHistory_server    : createHistory_client
+
+	// `scroll-behavior@0.7.0`
+	// because it jumps to top when navigating the app
+	// while navigation is asynchronous and takes some time to finish,
+	// therefore it creates a scrollbar "jumping" effect.
+	const createHistory    = server ? createHistory_server    : () => use_scroll(createHistory_client())
 
 	// generates the three promise event names automatically based on a base event name
 	const promise_event_naming = event_name => [`${event_name} pending`, `${event_name} done`, `${event_name} failed`]
@@ -90,7 +92,7 @@ export default function(get_reducers, { development, development_tools, server, 
 		(
 			applyMiddleware(...middleware_chain),
 			// Provides support for DevTools:
-			dev_tools.instrument(),
+			window.devToolsExtension ? window.devToolsExtension() : DevTools.instrument(),
 			// Lets you write ?debug_session=<name> in address bar to persist debug sessions
 			persistState(window.location.href.match(/[?&]debug_session=([^&]+)\b/))
 		)

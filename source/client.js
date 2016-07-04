@@ -1,25 +1,15 @@
-// client side rendering function
-
 import React from 'react'
 
-import { client as client_render } from './render'
-import { exists }                  from './helpers'
-
-import http_client from './http client'
-
-// sets up client side rendering
-export default function({ development, to, render, create_page_element, create_routes, markup_wrapper, load_localized_messages })
+// Performs client-side rendering
+// along with varios stuff like loading localized messages.
+//
+// This function is intended to be wrapped by another function
+// which (in turn) is gonna be called from the project's code on the client-side.
+//
+export default function localize_and_render({ development, render_parameters = {}, render_on_client, markup_wrapper, load_localized_messages })
 {
-	// creates React page element
-	create_page_element = create_page_element || create_react_page_element
-
-	// returns a Promise for the rendered React page component
-	render = render || client_render
-
-	// international
-
+	// Initialize locale
 	const locale = window._locale
-
 	if (locale)
 	{
 		delete window._locale
@@ -31,15 +21,16 @@ export default function({ development, to, render, create_page_element, create_r
 	{
 		// returns a Promise for React component.
 		//
-		return render
+		return render_on_client
 		({
+			...render_parameters,
 			development,
-			create_page_element : (element, props) =>
+			create_page_element : (element, props = {}) =>
 			{
 				// if no i18n is required, then simply create Page element
 				if (!locale)
 				{
-					return Promise.resolve(create_page_element(element, props, markup_wrapper))
+					return Promise.resolve(React.createElement(markup_wrapper, props, element))
 				}
 
 				// translation loading function must be passed
@@ -58,20 +49,17 @@ export default function({ development, to, render, create_page_element, create_r
 					props.messages = messages
 
 					// create React page element
-					return create_page_element(element, props, markup_wrapper)
+					return React.createElement(markup_wrapper, props, element)
 				})
 			},
-			create_routes,
-			to: to || document.getElementById('react_markup')
+			to: document.getElementById('react')
 		})
 	}
 
-	// render page (on the client side)
+	// Render page (on the client side).
+	//
+	// Client side code can then rerender the page any time
+	// through obtaining the `rerender()` function from the result object.
 	//
 	return render_page().then(component => ({ rerender: render_page }))
-}
-
-export function create_react_page_element(element, props, markup_wrapper)
-{
-	return React.createElement(markup_wrapper, props, element)
 }

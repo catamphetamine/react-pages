@@ -110,7 +110,7 @@ export default function start_web_server({ development, preload, localize, asset
 					this.status = status
 				}
 			}, 
-			fail    : error =>
+			fail : error =>
 			{
 				if (on_error)
 				{

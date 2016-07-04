@@ -1,3 +1,10 @@
+3.0.4 / 04.07.2016
+===================
+
+  * Refactoring
+  * `<div id="react_markup"/>` -> `<div id="react"/>`
+  * Fixed `redux-devtools`
+
 3.0.0 / 29.05.2016
 ===================
 

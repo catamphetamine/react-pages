@@ -7,8 +7,8 @@ import fs from 'fs'
 
 import Html from './html'
 
-import { server as redux_render } from '../redux/render'
-import { server as react_render } from '../render'
+import { render_on_server as redux_render }        from '../redux/render'
+import { render_on_server as react_router_render } from '../redux/render'
 
 // isomorphic (universal) rendering (middleware).
 // will be used in web_application.use(...)
@@ -48,7 +48,7 @@ export default async function({ development, preload, localize, preferred_locale
 
 	// if Redux is being used, then render for Redux.
 	// else render for pure React.
-	const render = store ? redux_render : react_render
+	const render = store ? redux_render : react_router_render
 
 	// render the web page
 	try
@@ -70,7 +70,7 @@ export default async function({ development, preload, localize, preferred_locale
 				return React.createElement(markup_wrapper, props, child_element)
 			},
 
-			render_html: element =>
+			render_webpage_as_react_element: content =>
 			{
 				const markup = 
 				(
@@ -86,7 +86,7 @@ export default async function({ development, preload, localize, preferred_locale
 						style={style} 
 						store={store}>
 
-						{element}
+						{content}
 					</Html>
 				)
 
@@ -95,7 +95,7 @@ export default async function({ development, preload, localize, preferred_locale
 
 			store,
 
-			// create_routes is only used for pure React-router rendering
+			// create_routes is only used for bare React-router rendering
 			create_routes: store ? undefined : create_routes
 		})
 
@@ -108,13 +108,15 @@ export default async function({ development, preload, localize, preferred_locale
 	}
 	catch (error)
 	{
-		// a somewhat hacky way to do a redirect
+		// A somewhat hacky way to do a redirect.
+		// I'm using it in my projects when throwing
+		// "403 Unauthorized" errors while redirecting user to "Access denied" page.
 		if (error.redirect_to)
 		{
 			return redirect(error.redirect_to)
 		}
 
-		// calls user supplied error handler
+		// Calls user supplied error handler
 		fail(error)
 	}
 }

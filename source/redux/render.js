@@ -1,4 +1,4 @@
-import { client as default_client_render, server as default_server_render } from '../render'
+import { render_on_client as react_render_on_client, render_on_server as react_render_on_server } from '../render'
 
 import { match } from 'redux-router/server'
 import { ReduxRouter } from 'redux-router'
@@ -6,11 +6,13 @@ import { ReduxRouter } from 'redux-router'
 import React          from 'react'
 import ReactDOMServer from 'react-dom/server'
 
-// renders directly to the "to" DOM element.
+import DevTools from './dev tools'
+
+// Renders the current page React element inside the `to` DOM element.
 //
-// returns a Promise resolving to the rendered React component
+// returns a Promise resolving to the rendered React component.
 //
-export function client({ development, create_page_element, create_routes, store, to })
+export function render_on_client({ development, development_tools, create_page_element, create_routes, store, to })
 {
 	// In short, Redux-router performs react-router routing asynchronously
 	// which allows preloading pages before showing them.
@@ -43,37 +45,132 @@ export function client({ development, create_page_element, create_routes, store,
 	// triggering a render() method call for the root <ReduxRouter/> React component
 	// (see the beginning of this explanation) and the new page is finally rendered.
 	//
-	const router_element = <ReduxRouter routes={create_routes({store})}/>
+	const router_element = <ReduxRouter routes={create_routes({ store })}/>
 
 	// wraps <ReduxRouter/> with arbitrary React components (e.g. Redux <Provider/>),
 	// loads internationalization messages,
 	// and then renders the wrapped React page element to DOM
-	return create_page_element(router_element, {store}).then(element =>
+	return create_page_element(router_element, { store }).then(element =>
 	{
 		// render the wrapped React page element to DOM
-		return default_client_render
+		const component = react_render_on_client
 		({
 			development, // development mode flag
 			element,     // wrapped React page element
 			to           // DOM element containing React markup
+		})
+
+		// if Redux-devtools aren't enabled, then just return the Page elemnt
+		if (!development_tools)
+		{
+			return component
+		}
+
+		// Dev tools should be rendered after initial client render to prevent warning
+		// "React attempted to reuse markup in a container but the checksum was invalid"
+		// https://github.com/erikras/react-redux-universal-hot-example/pull/210
+		//
+		// Therefore this function returns an array of two React elements
+		// to be rendered sequentially
+
+		// console.log(`You are gonna see a warning about "React.findDOMNode is deprecated" in the console. It's normal: redux_devtools hasn't been updated to React 0.14 yet`)
+
+		// this element will contain React page element and Redux-devtools
+		element = 
+		(
+			<div>
+				{element}
+				{/* Since `DevTools` are inserted outside of the `<Provider/>`, provide the `store` manually */}
+				<DevTools store={store}/>
+			</div>
+		)
+
+		// render the wrapped React page element to DOM
+		return react_render_on_client
+		({
+			development, // development mode flag
+			element,     // wrapped React page element
+			to,          // DOM element containing React markup
+			subsequent_render: true // Prevents "Server-side React render was discarded" warning
 		})
 	})
 }
 
 // returns a Promise resolving to { status, markup, redirect_to }.
 //
-export function server({ disable_server_side_rendering, create_page_element, render_html, url, store })
+export function render_on_server({ disable_server_side_rendering, create_page_element, render_webpage_as_react_element, url, store })
 {
-	// I guess no one actually disabled their server side rendering
-	// so this if condition may be removed (along with the flag) in the future
+	// Maybe no one really needs to `disable_server_side_rendering`
 	if (disable_server_side_rendering)
 	{
-		// render the empty <Html/> component into Html markup string
-		return default_server_render({ render_html })
+		// Render the empty <Html/> component into Html markup string
+		return Promise.resolve({ markup: react_render_on_server({ render_webpage_as_react_element }) })
 	}
 
-	// return a Promise
-	//
+	// perform routing for this `url`
+	return match_url(url, store).then(routing_result =>
+	{
+		// Return in case of an HTTP redirect
+		if (routing_result.redirect_to)
+		{
+			return routing_result
+		}
+
+		// Http response status code
+		const http_status_code = get_http_response_status_code_for_the_route(routing_result.matched_routes)
+		
+		// After everything is preloaded, render the (current) page
+		return wait_for_page_to_preload(store).then(() => 
+		{
+			// Renders the current page React component to a React element
+			// (`<ReduxRouter/>` is gonna get the matched route from the `store`)
+			const page_element = create_page_element(<ReduxRouter/>, { store })
+
+			// Render the current page's React element to HTML markup
+			const markup = react_render_on_server({ render_webpage_as_react_element, page_element })
+		
+			// return HTTP status code and HTML markup
+			return { status: http_status_code, markup }
+		})
+	})
+}
+
+// Waits for all `@preload()` calls to finish.
+function wait_for_page_to_preload(store)
+{
+	// This promise was previously set by "preloading middleware"
+	// if there were any @preload() calls on the current route components
+	const promise = store.getState().router
+
+	// Validate the currently preloading promise
+	if (promise && typeof promise.then === 'function')
+	{
+		// If it's really a Promise then return it
+		return promise
+	}
+
+	// Otherwise, if nothing is being preloaded, just return a dummy Promise
+	return Promise.resolve()
+}
+
+// One can set a `status` prop for a react-router `Route`
+// to be returned as an Http response status code (404, etc)
+function get_http_response_status_code_for_the_route(matched_routes)
+{
+	return matched_routes.reduce((previous, current) => (current && current.status) || (previous && current.status))
+}
+
+// Matches a `url` to a route
+// (to a hierarchy of React-router `<Route/>`s).
+//
+// Returns a Promise resolving to an object:
+//
+//   redirect_to    - in case of an HTTP redirect
+//
+//   matched_routes - the matched hierarchy of React-router `<Route/>`s
+//
+function match_url(url, store)
+{
 	// (not using `promisify()` helper here 
 	//  to avoid introducing dependency on `bluebird` Promise library)
 	//
@@ -105,46 +202,7 @@ export function server({ disable_server_side_rendering, create_page_element, ren
 				return reject(new Error('No router state'))
 			}
 
-			// one can set a `status` prop for a react-router `Route`
-			// to be returned as an Http response status code (404, etc)
-			const get_http_response_status_code_for_the_chosen_route = matched_routes =>
-			{
-				return matched_routes.reduce((previous, current) => (current && current.status) || (previous && current.status))
-			}
-
-			// routing process succeeded.
-			// render the page's React component.
-			
-			// this promise was previously set by "preloading middleware"
-			// if there were any @preload() calls on the current route components
-			let promise = store.getState().router
-
-			// if nothing is being preloaded, create a dummy Promise
-			if (!promise || typeof promise.then !== 'function')
-			{
-				promise = Promise.resolve()
-			}
-
-			// after everything is preloaded, render the page
-			promise.then(() => 
-			{
-				// Http response status code
-				const status = get_http_response_status_code_for_the_chosen_route(router_state.routes)
-
-				// React page content element
-				const page_element = create_page_element(<ReduxRouter/>, {store})
-
-				// render the page's React component
-				default_server_render({ render_html, page_element }).then
-				(
-					result => resolve({ status, markup: result.markup }),
-					reject
-				)
-			})
-			.catch(error =>
-			{
-				reject(error)
-			})
+			return resolve({ matched_routes: router_state.routes })
 		}))
 	})
 }
