@@ -397,48 +397,52 @@ import { goto, redirect } from 'react-isomorphic-render'
   },
 
   // (optional)
-  // handles errors on the server side
-  // (can redirect to special error pages if needed)
+  // Is called when an error happens on the server side
+  // (can redirect to special "500 Error" pages)
   on_error: (error, { url, redirect }) => redirect(`/error?url=${encode(url)}&error=${error.code}`)
 
   // (optional)
-  // returns an array of React elements.
+  // Returns React element an array of React elements
   // which will be inserted into server rendered webpage's <head/>
-  // (use `key`s to prevent React warning)
+  // (in case of an array use `key`s to prevent React warning)
   head: () => React element or an array of React elements
 
   // (optional)
-  // returns a React element.
-  // allows for wrapping React page component with arbitrary markup
+  // Allows for wrapping React page component with arbitrary elements
   // (or doing whatever else can be done with a React element).
-  // returns either a React element or an array of React elements
+  // Returns either a React element or an array of React elements
   // which will be inserted into server rendered webpage's <body/>
   body: react_page_element => react_page_element
 
   // (optional)
-  // returns an array of React elements.
-  // allows adding arbitrary React components to the start of the <body/>
+  // Returns React element or an array of React elements.
+  // Allows adding arbitrary React elements to the start of the <body/>
   // (use `key`s to prevent React warning when returning an array of React elements)
   body_start: () => React element or an array of React elements
 
   // (optional)
-  // returns an array of React elements.
-  // allows adding arbitrary React components to the end of the <body/>
+  // Returns React element or an array of React elements.
+  // Allows adding arbitrary React elements to the end of the <body/>
   // (use `key`s to prevent React warning when returning an array of React elements)
   body_end: () => React element or an array of React elements
 
   // (optional)
   // (is used only in development mode - removes Ctrl + R (F5) flicker)
-  // This CSS text will be inserted into server rendered webpage's <head/> <style/> tag.
+  // This function returns CSS text which will be inserted 
+  // into server rendered webpage's <head/> <style/> tag.
   // If you're using Webpack then the CSS text is the result of a require() call.
   style: () => require('../assets/style.scss').toString()
 
   // (optional)
-  // supports preloading data before performing page rendering
-  preload: async (http_client) => Nothing or initial Flux store data
+  // Preloads data before performing page rendering.
+  // If this function returns an object then this object
+  // will be merged into Redux store.
+  preload: async (http_client) => {}
+  // (or same without `async`: (http_client) => Promise.resolve({})
 
   // (optional)
-  // supports internationalization
+  // Based on the `preferred_locale`,
+  // returns the suitable `locale` and `messages` for it.
   localize: async (store, preferred_locale) => { locale, messages }
   // (or same without `async`: (store, preferred_locale) => Promise.resolve({ locale, messages }))
 }
@@ -451,11 +455,11 @@ import { goto, redirect } from 'react-isomorphic-render'
   ...
 
   // (optional)
-  // enable/disable Redux development tools (true/false)
+  // Enables/disables Redux development tools (true/false)
   development_tools: _development_tools_,
 
   // (optional)
-  // supports internationalization
+  // Loads localized messages (asynchronously)
   load_translation: async locale => messages
   // (or same without `async`: locale => Promise.resolve(messages))
 }
