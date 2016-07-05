@@ -105,6 +105,7 @@ export default class Wrapper extends React.Component
   render()
   {
     const { store, children } = this.props
+
     return <Provider store={store}>{children}</Provider>
   }
 }
@@ -356,6 +357,7 @@ import { goto, redirect } from 'react-isomorphic-render'
   // (can be used for setting up Webpack Hot Module Replacement)
   on_store_created: ({ reload_reducer }) => {}
 }
+```
 
 ## Miscellaneous webpage rendering server options
 
@@ -513,7 +515,3 @@ npm install [module name with version].tar.gz
 ## License
 
 [MIT](LICENSE)
-[npm-image]: https://img.shields.io/npm/v/react-isomorphic-render.svg
-[npm-url]: https://npmjs.org/package/react-isomorphic-render
-[downloads-image]: https://img.shields.io/npm/dm/react-isomorphic-render.svg
-[downloads-url]: https://npmjs.org/package/react-isomorphic-render
