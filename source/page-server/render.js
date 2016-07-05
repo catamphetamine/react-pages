@@ -82,11 +82,17 @@ export default async function({ development, preload, localize, preferred_locale
 
 			render_webpage_as_react_element: content =>
 			{
+				assets = assets(url)
+				if (assets.styles)
+				{
+					assets.style = assets.styles
+				}
+
 				const markup = 
 				(
 					<Html
 						development={development}
-						assets={assets(url)}
+						assets={assets}
 						locale={locale}
 						head={head}
 						body={body}
