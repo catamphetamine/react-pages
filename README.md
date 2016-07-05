@@ -333,7 +333,7 @@ class Component extends React.Component
 ```javascript
 import { goto, redirect } from 'react-isomorphic-render'
 
-// usage example
+// Usage example
 // (`goto` navigates to a URL while adding a new entry in browsing history,
 //  `redirect` does the same without modifying browsing history)
 // this.props.dispatch(goto('/items/1?color=red'))
@@ -344,16 +344,16 @@ import { goto, redirect } from 'react-isomorphic-render'
 ```javascript
 {
   // (optional)
-  // handles errors occurring inside `@preload()` of pages on the client side
+  // Handles errors occurring inside `@preload()` of pages on the client side
   // (can redirect to special error pages if needed)
   on_preload_error: (error, { url, redirect }) => redirect(`/error?url=${encode(url)}&error=${error.code}`)
 
   // (optional)
-  // user can add his own middleware to the `middleware` list
+  // User can add his own middleware to this `middleware` list
   redux_middleware: middleware => middleware
 
   // (optional)
-  // is called when Redux store has been created
+  // Is called when Redux store has been created
   // (can be used for setting up Webpack Hot Module Replacement)
   on_store_created: ({ reload_reducer }) => {}
 }
