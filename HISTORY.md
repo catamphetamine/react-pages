@@ -1,3 +1,11 @@
+4.0.0 / 05.07.2016
+===================
+
+  * Renamed `markup_wrapper` to `wrapper`
+  * Now takes `reducer` parameter instead of `create_store`
+  * Now takes `routes` parameter instead of `create_routes`
+  * Many other API changes (mostly refactoring)
+
 3.0.4 / 04.07.2016
 ===================
 

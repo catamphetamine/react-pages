@@ -26,13 +26,12 @@ export default class Html extends Component
 		body_start  : PropTypes.func,
 		body_end    : PropTypes.func,
 		style       : PropTypes.func,
-		locale      : PropTypes.string,
-		entry_point : PropTypes.string.isRequired
+		locale      : PropTypes.string
 	}
 
 	render()
 	{
-		const { development, assets, store, head, body, body_start, body_end, style, locale, entry_point } = this.props
+		const { development, assets, store, head, body, body_start, body_end, style, locale } = this.props
 
 		// when server-side rendering is disabled, content will be undefined
 		// (but server-side rendering is always enabled so this "if" condition may be removed)
@@ -71,15 +70,22 @@ export default class Html extends Component
 
 					    (currently there is only one entry point: "main";
 					     and also the "common" chunk) */}
-					{Object.keys(assets.styles).map((style, i) =>
+
+					{ assets.entry && assets.style && assets.style.common &&
 						<link 
-							href={assets.styles[style]} 
-							key={i} 
-							media="screen, projection"
+							href={assets.style.common} 
 							rel="stylesheet" 
 							type="text/css"
 							charSet="UTF-8"/>
-					)}
+					}
+
+					{ assets.style &&
+						<link 
+							href={assets.entry ? assets.style[assets.entry] : assets.style} 
+							rel="stylesheet" 
+							type="text/css"
+							charSet="UTF-8"/>
+					}
 
 					{/* (will be done only in development mode)
 
@@ -115,11 +121,11 @@ export default class Html extends Component
 
 					{/* the "common.js" chunk (see webpack extract commons plugin) */}
 					{/* (needs to be included first (by design)) */}
-					{ (assets.javascript && assets.javascript.common) ? <script src={assets.javascript.common} charSet="UTF-8"/> : null }
+					{ (assets.entry && assets.javascript && assets.javascript.common) ? <script src={assets.javascript.common} charSet="UTF-8"/> : null }
 					
 					{/* current application "entry" point javascript
 					    (currently there is only one entry point: "main") */}
-					<script src={assets.javascript[entry_point]} charSet="UTF-8"/>
+					<script src={ assets.entry ? assets.javascript[assets.entry] : assets.javascript } charSet="UTF-8"/>
 
 					{/* support adding arbitrary markup to body end */}
 					{ body_end ? body_end() : null }

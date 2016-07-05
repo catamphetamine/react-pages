@@ -10,9 +10,11 @@ import Html from './html'
 import { render_on_server as redux_render }        from '../redux/render'
 import { render_on_server as react_router_render } from '../redux/render'
 
+import create_store from '../redux/store'
+
 // isomorphic (universal) rendering (middleware).
 // will be used in web_application.use(...)
-export default async function({ development, preload, localize, preferred_locale, assets, url, http_client, respond, fail, redirect, disable_server_side_rendering, log, create_store, create_routes, markup_wrapper, head, body, body_start, body_end, style })
+export default async function({ development, preload, localize, preferred_locale, assets, url, http_client, respond, fail, redirect, disable_server_side_rendering, get_reducer, redux_middleware, on_store_created, on_preload_error, create_routes, wrapper, head, body, body_start, body_end, style })
 {
 	// initial Flux store data (if using Flux)
 	let store_data = {}
@@ -26,9 +28,19 @@ export default async function({ development, preload, localize, preferred_locale
 
 	// create Redux store
 	let store
-	if (create_store)
+	if (get_reducer)
 	{
-		store = create_store({ development, create_routes, server: true, http_client, data: store_data })
+		store = create_store(get_reducer,
+		{
+			development,
+			server: true,
+			create_routes,
+			data: store_data,
+			middleware: redux_middleware,
+			on_store_created,
+			on_preload_error,
+			http_client
+		})
 	}
 
 	// internationalization
@@ -43,8 +55,6 @@ export default async function({ development, preload, localize, preferred_locale
 		locale   = result.locale
 		messages = result.messages
 	}
-
-	const entry_point = 'main' // may examine `url` to determine Webpack entry point
 
 	// if Redux is being used, then render for Redux.
 	// else render for pure React.
@@ -67,23 +77,22 @@ export default async function({ development, preload, localize, preferred_locale
 					props.messages = messages
 				}
 
-				return React.createElement(markup_wrapper, props, child_element)
+				return React.createElement(wrapper, props, child_element)
 			},
 
 			render_webpage_as_react_element: content =>
 			{
 				const markup = 
 				(
-					<Html 
-						development={development} 
-						assets={assets()} 
-						entry_point={entry_point} 
-						locale={locale} 
-						head={head} 
-						body={body} 
+					<Html
+						development={development}
+						assets={assets(url)}
+						locale={locale}
+						head={head}
+						body={body}
 						body_start={body_start}
-						body_end={body_end} 
-						style={style} 
+						body_end={body_end}
+						style={style}
 						store={store}>
 
 						{content}

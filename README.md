@@ -8,11 +8,7 @@
 [![Test Coverage][coveralls-image]][coveralls-url]
 -->
 
-<!---
-[![Gratipay][gratipay-image]][gratipay-url]
--->
-
-Is a module providing support for isomorphic (universal) rendering with React, React-router, Redux, Redux-router. Also allows for Webpack bundler. Allows for locale detection and therefore internationalization of the app. Also it handles Http Cookies mutation correctly (both on client and server). And when paired with Redux it certainly knows how to preload web pages before rendering them on the server – it wouldn't be called "isomorphic" otherwise.
+Is a module providing support for isomorphic (universal) rendering with React, React-router, Redux, Redux-router. Also allows for Webpack "hot reload". Allows for locale detection and therefore internationalization of the app. Provides isomorphic HTTP client for REST API. Also it handles Http Cookies mutation correctly (both on client and server). And when paired with Redux it knows how to preload web pages when rendering them on the server.
 
 ## Installation
 
@@ -24,206 +20,107 @@ $ npm install react-isomorphic-render --save
 
 See [webapp](https://github.com/halt-hammerzeit/webapp) and [webpack-react-redux-isomorphic-render-example](https://github.com/halt-hammerzeit/webpack-react-redux-isomorphic-render-example) as references.
 
-The following usage example is for `React + React-router + Redux` setup (the one I'm using in my projects).
+The following usage example is for `React + React-router + Redux` setup.
 
-Create your webpage rendering server
+Create your `react-isomorphic-render.js` set up file (it will be used both on client and server)
+
+```javascript
+export default
+{
+  // Redux reducer
+  // (either an object or a function returning an object)
+  reducer: require('./src/client/redux/reducer'),
+
+  // React-router routes
+  // (either a `<Route/>` element or a `function({ store })` returning a `<Route/>` element)
+  routes: require('./src/client/routes'),
+  
+  // Wraps React page component with arbitrary elements (e.g. <Provider/>, etc; see an example below)
+  wrapper: require('./src/client/wrapper')
+}
+```
+
+Start webpage rendering server
 
 ```javascript
 import webpage_server from 'react-isomorphic-render/page-server'
+import settings from './react-isomorphic-render'
 
-// starts webpage rendering server
-webpage_server
+// Create webpage rendering server
+const server = webpage_server
 ({
-  // enable/disable development mode (true/false)
-  development: _development_,
+  // enable/disable development mode
+  development: true,
 
-  // on which Http host and port to start the webpage rendering server
-  // host: optional
-  port: 3000,
-
-  // Http host and port for executing all client-side ajax requests on server-side
-  web_server:
+  // Http host and port for executing all client-side ajax requests on server-side.
+  // This is the host and port on which the web application is run.
+  application:
   {
     host: '192.168.0.1',
     port: 80
   },
 
-  // Http Urls to javascripts and (optionally) CSS styles 
+  // URLs of javascript and CSS files
   // which will be insterted into the <head/> element of the resulting Html webpage
-  // (as <script src="..."/> and <link rel="style" href="..."/> respectively)
+  // (as <script src="..."/> and <link rel="style" href="..."/>)
   //
-  // Also a website "favicon", if any.
-  //
-  assets: () =>
+  assets:
   {
-    return {
-      javascript: { main: '/assets/main.js' },
+    javascript: '/assets/application.js',
+    style: '/assets/application.css'
+  }
+},
+settings)
 
-      // (optional)
-      styles: { main: '/assets/main.css' },
+// Start webpage rendering server
+// (`server.listen(port, [host], [callback])`)
+server.listen(3000, function(error)
+{
+  if (error)
+  {
+    throw error
+  }
 
-      // (optional)
-      // URL of your "favicon".
-      // If you're using Webpack then the URL is the result of a require() call.
-      icon: require('../assets/icon.png')
-    }
-  },
-
-  // a function to create Redux store (explained below)
-  create_store,
-
-  // creates React-router routes (explained below)
-  create_routes,
-  
-  // wraps React page component into arbitrary markup (explained below)
-  markup_wrapper,
-
-  // (optional)
-  // handles errors on the server side
-  // (can redirect to special error pages if needed)
-  // on_error: (error, { url, redirect }) => redirect(`/error?url=${encode(url)}&error=${error.code}`)
-
-  // (optional)
-  // returns an array of React elements.
-  // which will be inserted into server rendered webpage's <head/>
-  // (use `key`s to prevent React warning)
-  // head: () => React element or an array of React elements
-
-  // (optional)
-  // returns a React element.
-  // allows for wrapping React page component with arbitrary markup
-  // (or doing whatever else can be done with a React element).
-  // returns either a React element or an array of React elements
-  // which will be inserted into server rendered webpage's <body/>
-  // body: react_page_element => react_page_element
-
-  // (optional)
-  // returns an array of React elements.
-  // allows adding arbitrary React components to the start of the <body/>
-  // (use `key`s to prevent React warning when returning an array of React elements)
-  // body_start: () => React element or an array of React elements
-
-  // (optional)
-  // returns an array of React elements.
-  // allows adding arbitrary React components to the end of the <body/>
-  // (use `key`s to prevent React warning when returning an array of React elements)
-  // body_end: () => React element or an array of React elements
-
-  // (optional)
-  // (is used only in development mode - removes Ctrl + R (F5) flicker)
-  // This CSS text will be inserted into server rendered webpage's <head/> <style/> tag.
-  // If you're using Webpack then the CSS text is the result of a require() call.
-  style: () => require('../assets/style.scss').toString()
-
-  // (optional)
-  // supports preloading data before performing page rendering
-  // preload: async (http_client) => Nothing or initial Flux store data
-
-  // (optional)
-  // supports internationalization
-  // localize: async (store, preferred_locale) => { locale, messages }
-  // (or same without `async`: (store, preferred_locale) => Promise.resolve({ locale, messages }))
+  console.log(`Webpage rendering server is listening at http://localhost:${port}`)
 })
 ```
 
-And also write your client-side rendering code
+Create your client-side main file `application.js`
 
 ```javascript
-import { render }     from 'react-isomorphic-render/redux'
+import { render } from 'react-isomorphic-render/redux'
+import settings from './react-isomorphic-render'
 
-import markup_wrapper from './markup wrapper'
-import create_store   from './redux/store'
-import create_routes  from './routes'
-
-// renders the webpage on the client side
+// Renders the page in web browser
 render
 ({
-  // enable/disable development mode (true/false)
-  development: _development_,
-
-  // enable/disable Redux development tools (true/false)
-  // development_tools: _development_tools_,
-
-  // a function to create Redux store (explained below)
-  create_store,
-
-  // creates React-router routes (explained below)
-  create_routes,
-  
-  // wraps React page component into arbitrary markup (explained below)
-  markup_wrapper,
-
-  // (optional)
-  // supports internationalization
-  // load_localized_messages: async locale => messages
-  // (or same without `async`: locale => Promise.resolve(messages))
-})
+  // enable/disable development mode
+  development: true
+},
+settings)
 ```
 
-In the simplest case the `create_store` function would look like this
+An example of a `wrapper` component:
 
 ```javascript
-import { create_store } from 'react-isomorphic-render/redux'
-
-// your Redux reducers
-import reducers from './path/to/reducers'
-
-export default function(options)
-{
-  // (optional)
-  // handles errors occurring inside `@preload()` of pages on the client side
-  // (can redirect to special error pages if needed)
-  // options.on_preload_error = (error, { url, redirect }) => redirect(`/error?url=${encode(url)}&error=${error.code}`)
-
-  // (optional)
-  // user can add his own middleware to the `middleware` list
-  // options.middleware = middleware => ...
-
-  return create_store(reducers, options)
-  // Webpack Hot Module Replacement can be added (see example projects for reference)
-}
-```
-
-The `create_routes` function would look like this (nothing special about it)
-
-```javascript
-export default function(store)
-{
-  // `store` can be used in `onEnter` hooks of `Route`s.
-  // For example, to implement user authorization.
-  //
-  return (
-    <Route path="/" component={Layout}>
-      <IndexRoute component={Home}/>
-      <Route path="blog"  component={Blog}/>
-      <Route path="about" component={About}/>
-      <Route path="*"     component={Page_not_found} status={404}/>
-    </Route>
-  )
-}
-```
-
-The `markup_wrapper` component would look like this (nothing special about it)
-
-```javascript
-// can be also a "React pure component"
+// Can be also a "React pure component" (i.e. a function)
 export default class Wrapper extends React.Component
 {
-  static propTypes = 
-  {
-    store : React.PropTypes.object.isRequired
-  }
-
-  // wraps React page component into arbitrary markup (e.g. Redux Provider)
-  //
+  // Wraps React page component with arbitrary elements (e.g. Redux Provider)
   render()
   {
-    return <Provider store={this.props.store} key="provider">{this.props.children}</Provider>
+    const { store, children } = this.props
+    return <Provider store={store}>{children}</Provider>
   }
+}
+
+Wrapper.propTypes = 
+{
+  store : React.PropTypes.object.isRequired
 }
 ```
 
-And, finally, React pages would look like this (use `@preload()` helper to load the neccessary data before the page is rendered)
+And, finally, React pages would look like this (optionally use `@preload()` helper to load the neccessary data before the page is rendered)
 
 ```javascript
 import { title }              from 'react-isomorphic-render'
@@ -243,7 +140,7 @@ function fetch_users()
 @preload(dispatch => dispatch(fetch_users))
 @connect
 (
-  store    => ({ users: store.users.users }),
+  state    => ({ users: state.users.users }),
   dispatch => bindActionCreators({ fetch_users }, dispatch)
 )
 export default class Page extends Component
@@ -265,7 +162,7 @@ export default class Page extends Component
     )
   }
 
-  // Observing action result example.
+  // Observing action result example (advanced).
   //
   // Suppose you make a `delete_users()` function 
   // analagous to the `fetch_users()` function.
@@ -291,17 +188,32 @@ export default class Page extends Component
 }
 ```
 
-The final step is to set up the main web server to proxy all Http requests for webpages to the webpage rendering server you've set up.
+The final step is to set up the main web server (`192.168.0.1:80` in this example) to proxy all HTTP requests for webpages to the webpage rendering server you've set up.
 
-An example of how Http request routing on your web server can be set up:
+An example of how HTTP request routing on your main web server can be set up:
 
- * all Http GET requests starting with `/assets` return static files from your `assets` folder
- * all Http requests starting with `/api` call your REST API methods
- * all the other Http GET requests are proxied to `http://localhost:3000` for webpage rendering
+ * all HTTP GET requests starting with `/assets` return static files from your `assets` folder
+ * all HTTP requests starting with `/api` call your REST API methods
+ * all the other HTTP GET requests are proxied to `http://localhost:3000` for webpage rendering
 
 (proxying can be easily set up with [http-proxy](https://github.com/nodejitsu/node-http-proxy))
 
 (see the aforementioned example projects for reference)
+
+## HTTP response status code
+
+To set custom HTTP response status code for a specific route set the `status` property of that `<Route/>`.
+
+```javascript
+export default (
+  <Route path="/" component={Layout}>
+    <IndexRoute component={Home}/>
+    <Route path="blog"  component={Blog}/>
+    <Route path="about" component={About}/>
+    <Route path="*"     component={Page_not_found} status={404}/>
+  </Route>
+)
+```
 
 ## Page preloading
 
@@ -405,8 +317,12 @@ This library performs the following locale detection steps for each webpage rend
  * Checks the `locale` query parameter (if it's an HTTP GET request)
  * Checks the `locale` cookie
  * Checks the `Accept-Language` HTTP header
+
+(for more info see [`koa-locale`](https://www.npmjs.com/package/koa-locale))
  
-For more info see [`koa-locale`](https://www.npmjs.com/package/koa-locale).
+The resulting locale is passed as `preferred_locale` parameter into `localize()` function of the webpage rendering server which then returns `{ locale, messages }`.
+
+Later, on the client side, that `locale` returned from the `localize()` function on the server side is fed into `load_translation(locale)` function, and when translation is loaded the application is rendered with `locale` and `messages` properties passed to the `wrapper`.
 
 ### Determining current location
 
@@ -432,15 +348,132 @@ import { goto, redirect } from 'react-isomorphic-render'
 // this.props.dispatch(goto('/items/1?color=red'))
 ```
 
+## Miscellaneous react-isomorphic-render.js settings
+
+```javascript
+{
+  // (optional)
+  // handles errors occurring inside `@preload()` of pages on the client side
+  // (can redirect to special error pages if needed)
+  on_preload_error: (error, { url, redirect }) => redirect(`/error?url=${encode(url)}&error=${error.code}`)
+
+  // (optional)
+  // user can add his own middleware to the `middleware` list
+  redux_middleware: middleware => middleware
+
+  // (optional)
+  // is called when Redux store has been created
+  // (can be used for setting up Webpack Hot Module Replacement)
+  on_store_created: ({ reload_reducer }) => {}
+}
+
+## Miscellaneous webpage rendering server options
+
+```javascript
+{
+  ...
+
+  // URLs of javascript and CSS files
+  // which will be insterted into the <head/> element of the resulting Html webpage
+  // (as <script src="..."/> and <link rel="style" href="..."/>)
+  //
+  // Also a website "favicon" URL, if any.
+  //
+  // Can be an `object` or a `function(url)`.
+  //
+  // `javascript` and `style` can be strings or objects.
+  // If they are objects then also provide an `entry` parameter.
+  // The objects may also contain `common` entry
+  // which will also be included on the page.
+  //
+  assets: (url) =>
+  {
+    return {
+      javascript: '/assets/main.js',
+
+      // (optional)
+      style: '/assets/main.css',
+
+      // (optional)
+      // URL of your "favicon".
+      // If you're using Webpack then the URL is the result of a require() call.
+      icon: '/assets/icon.png',
+
+      // (only required when `javascript` and `style` are objects)
+      entry: 'webpack entry key' // e.g. 'main'
+    }
+  },
+
+  // (optional)
+  // handles errors on the server side
+  // (can redirect to special error pages if needed)
+  on_error: (error, { url, redirect }) => redirect(`/error?url=${encode(url)}&error=${error.code}`)
+
+  // (optional)
+  // returns an array of React elements.
+  // which will be inserted into server rendered webpage's <head/>
+  // (use `key`s to prevent React warning)
+  head: () => React element or an array of React elements
+
+  // (optional)
+  // returns a React element.
+  // allows for wrapping React page component with arbitrary markup
+  // (or doing whatever else can be done with a React element).
+  // returns either a React element or an array of React elements
+  // which will be inserted into server rendered webpage's <body/>
+  body: react_page_element => react_page_element
+
+  // (optional)
+  // returns an array of React elements.
+  // allows adding arbitrary React components to the start of the <body/>
+  // (use `key`s to prevent React warning when returning an array of React elements)
+  body_start: () => React element or an array of React elements
+
+  // (optional)
+  // returns an array of React elements.
+  // allows adding arbitrary React components to the end of the <body/>
+  // (use `key`s to prevent React warning when returning an array of React elements)
+  body_end: () => React element or an array of React elements
+
+  // (optional)
+  // (is used only in development mode - removes Ctrl + R (F5) flicker)
+  // This CSS text will be inserted into server rendered webpage's <head/> <style/> tag.
+  // If you're using Webpack then the CSS text is the result of a require() call.
+  style: () => require('../assets/style.scss').toString()
+
+  // (optional)
+  // supports preloading data before performing page rendering
+  preload: async (http_client) => Nothing or initial Flux store data
+
+  // (optional)
+  // supports internationalization
+  localize: async (store, preferred_locale) => { locale, messages }
+  // (or same without `async`: (store, preferred_locale) => Promise.resolve({ locale, messages }))
+}
+```
+
+## Miscellaneous client-side rendering options
+
+```javascript
+{
+  ...
+
+  // (optional)
+  // enable/disable Redux development tools (true/false)
+  development_tools: _development_tools_,
+
+  // (optional)
+  // supports internationalization
+  load_translation: async locale => messages
+  // (or same without `async`: locale => Promise.resolve(messages))
+}
+```
+
 ## Gotchas
 
 This library is build system agnostic: you can use your favourite Grunt, Gulp, Browserify, RequireJS, Webpack, etc.
 
 If you're using Webpack then make sure you either build your server-side code with Webpack too (so that asset `require()` calls (images, styles, fonts, etc) inside React components work, see [universal-webpack](https://github.com/halt-hammerzeit/universal-webpack)) or use [webpack-isomorphic-tools](https://github.com/halt-hammerzeit/webpack-isomorphic-tools).
-
-## Suggestions
-
-This library is (semi)open to suggestions on adding new functionality, removing existing functionality, refactoring, etc. This whole thing is evolving fast, things change rapidly.
 
 ## Contributing
 

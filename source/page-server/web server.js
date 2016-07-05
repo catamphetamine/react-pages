@@ -9,9 +9,34 @@ import render      from './render'
 
 import render_stack_trace from './html stack trace'
 
-export default function start_web_server({ development, preload, localize, assets, host, port, web_server, log, disable_server_side_rendering, create_store, create_routes, markup_wrapper, head, body, body_start, body_end, style, on_error })
+import { normalize_common_options } from '../redux/normalize'
+
+export default function start_webpage_rendering_server(options, common)
 {
-	log = log || console
+	common = normalize_common_options(common)
+
+	let
+	{
+		development,
+		preload,
+		localize,
+		assets,
+		application,
+		disable_server_side_rendering,
+		head,
+		body,
+		body_start,
+		body_end,
+		style,
+		on_error
+	}
+	= options
+
+	if (typeof assets !== 'function')
+	{
+		const assets_object = assets
+		assets = () => assets_object
+	}
 
 	const web = koa()
 
@@ -57,7 +82,6 @@ export default function start_web_server({ development, preload, localize, asset
 
 			// log the error
 			console.log('[react-isomorphic-render] Webpage rendering server error')
-			log.error(error)
 
 			this.status = typeof error.code === 'number' ? error.code : 500
 			this.message = error.message || 'Internal error'
@@ -71,7 +95,7 @@ export default function start_web_server({ development, preload, localize, asset
 	function* rendering()
 	{
 		// isomorphic http api calls
-		const _http_client = new http_client({ host: web_server.host, port: web_server.port, clone_request: this.request })
+		const _http_client = new http_client({ host: application.host, port: application.port, clone_request: this.request })
 
 		// Material-UI asks for this,
 		// but this isn't right,
@@ -126,12 +150,13 @@ export default function start_web_server({ development, preload, localize, asset
 			redirect,
 
 			disable_server_side_rendering,
-			log,
 
-			create_store,
-			create_routes,
-
-			markup_wrapper,
+			get_reducer      : common.get_reducer,
+			middleware       : common.redux_middleware,
+			on_store_created : common.on_store_created,
+			on_preload_error : common.on_preload_error,
+			create_routes    : common.create_routes,
+			wrapper          : common.wrapper,
 
 			head,
 			body,
@@ -153,15 +178,5 @@ export default function start_web_server({ development, preload, localize, asset
 
 	web.use(rendering)
 
-	// start http server
-	web.listen(port, host, function(error)
-	{
-		if (error)
-		{
-			console.log('[react-isomorphic-render] Webpage rendering server shutdown due to an error')
-			return log.error(error)
-		}
-
-		log.info(`Webpage server is listening at http://${host ? host : 'localhost'}:${port}`)
-	})
+	return web
 }

@@ -6,6 +6,8 @@ import { exists }           from '../helpers'
 
 import localize_and_render from '../client'
 
+import { normalize_common_options } from './normalize'
+
 // Performs client-side rendering
 // along with varios stuff like loading localized messages.
 //
@@ -14,14 +16,16 @@ import localize_and_render from '../client'
 // The following code hasn't been tested.
 // Should work.
 //
-export default function render({ development, create_routes, markup_wrapper, load_localized_messages })
+export default function render({ development, load_translation }, common)
 {
+  common = normalize_common_options(common)
+
   return localize_and_render
   ({
     development,
-    load_localized_messages,
-    markup_wrapper,
+    load_translation,
+    wrapper: common.wrapper,
     render_on_client,
-    render_parameters: { create_routes }
+    render_parameters: { create_routes: common.create_routes }
   })
 }
