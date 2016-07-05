@@ -1,6 +1,7 @@
 # react-isomorphic-render
 
 [![NPM Version][npm-image]][npm-url]
+
 [![NPM Downloads][downloads-image]][downloads-url]
 
 Is a module providing support for isomorphic (universal) rendering with React, React-router, Redux, Redux-router. Also allows for Webpack "hot reload". Allows for locale detection and therefore internationalization of the app. Provides isomorphic HTTP client for REST API. Also it handles Http Cookies mutation correctly (both on client and server). And when paired with Redux it knows how to preload web pages when rendering them on the server.
