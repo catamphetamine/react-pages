@@ -1,7 +1,7 @@
 # react-isomorphic-render
 
-[![NPM Version][npm-image]][npm-url]
-[![NPM Downloads][downloads-image]][downloads-url]
+[![npm version](https://img.shields.io/npm/v/react-isomorphic-render.svg?style=flat-square)](https://www.npmjs.com/package/react-isomorphic-render)
+[![npm downloads](https://img.shields.io/npm/dm/react-isomorphic-render.svg?style=flat-square)](https://www.npmjs.com/package/react-isomorphic-render)
 
 Is a module providing support for isomorphic (universal) rendering with React, React-router, Redux, Redux-router. Also allows for Webpack "hot reload". Allows for locale detection and therefore internationalization of the app. Provides isomorphic HTTP client for REST API. Also it handles Http Cookies mutation correctly (both on client and server). And when paired with Redux it knows how to preload web pages when rendering them on the server.
 
@@ -107,11 +107,6 @@ export default class Wrapper extends React.Component
     const { store, children } = this.props
     return <Provider store={store}>{children}</Provider>
   }
-}
-
-Wrapper.propTypes = 
-{
-  store : React.PropTypes.object.isRequired
 }
 ```
 
