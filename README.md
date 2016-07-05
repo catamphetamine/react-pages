@@ -327,7 +327,7 @@ class Component extends React.Component
 {
   render()
   {
-    return <span>{this.props.location}</span>
+    return <span>{ this.props.location }</span>
   }
 }
 ```
