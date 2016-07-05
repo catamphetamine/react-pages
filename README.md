@@ -3,11 +3,6 @@
 [![NPM Version][npm-image]][npm-url]
 [![NPM Downloads][downloads-image]][downloads-url]
 
-<!---
-[![Build Status][travis-image]][travis-url]
-[![Test Coverage][coveralls-image]][coveralls-url]
--->
-
 Is a module providing support for isomorphic (universal) rendering with React, React-router, Redux, Redux-router. Also allows for Webpack "hot reload". Allows for locale detection and therefore internationalization of the app. Provides isomorphic HTTP client for REST API. Also it handles Http Cookies mutation correctly (both on client and server). And when paired with Redux it knows how to preload web pages when rendering them on the server.
 
 ## Installation
@@ -527,15 +522,3 @@ npm install [module name with version].tar.gz
 [npm-url]: https://npmjs.org/package/react-isomorphic-render
 [downloads-image]: https://img.shields.io/npm/dm/react-isomorphic-render.svg
 [downloads-url]: https://npmjs.org/package/react-isomorphic-render
-
-<!---
-[travis-image]: https://img.shields.io/travis/halt-hammerzeit/react-isomorphic-render/master.svg
-[travis-url]: https://travis-ci.org/halt-hammerzeit/react-isomorphic-render
-[coveralls-image]: https://img.shields.io/coveralls/halt-hammerzeit/react-isomorphic-render/master.svg
-[coveralls-url]: https://coveralls.io/r/halt-hammerzeit/react-isomorphic-render?branch=master
--->
-
-<!---
-[gratipay-image]: https://img.shields.io/gratipay/dougwilson.svg
-[gratipay-url]: https://gratipay.com/dougwilson/
--->
