@@ -46,7 +46,7 @@ export default function render_stack_trace(error)
 
 	try
 	{
-		return { response_body: html_stack_trace(stack_trace) }
+		return { response_body: html_stack_trace({ stack: stack_trace }) }
 	}
 	catch (error)
 	{
