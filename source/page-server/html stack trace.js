@@ -1,6 +1,6 @@
 import { html as html_stack_trace } from 'print-error'
 
-export default function render_stack_trace(error)
+export default function render_stack_trace(error, options)
 {
 	// supports custom `html` for an error
 	if (error.html)
@@ -46,7 +46,7 @@ export default function render_stack_trace(error)
 
 	try
 	{
-		return { response_body: html_stack_trace({ stack: stack_trace }) }
+		return { response_body: html_stack_trace({ stack: stack_trace }, options) }
 	}
 	catch (error)
 	{

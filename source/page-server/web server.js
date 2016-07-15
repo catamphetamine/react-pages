@@ -62,7 +62,7 @@ export default function start_webpage_rendering_server(options, common)
 			{
 				try
 				{
-					const { response_status, response_body } = render_stack_trace(error)
+					const { response_status, response_body } = render_stack_trace(error, options.print_error)
 
 					if (response_body)
 					{
