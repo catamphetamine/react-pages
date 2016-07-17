@@ -15,19 +15,22 @@ import { reduxReactRouter as reduxReactRouter_server } from 'redux-router/server
 import createHistory_server from 'history/lib/createMemoryHistory'
 import createHistory_client from 'history/lib/createBrowserHistory'
 
-import use_scroll from 'scroll-behavior'
+// import use_scroll from 'scroll-behavior'
 
 export default function(get_reducer, { development, development_tools, server, data, create_routes, http_client, on_preload_error, middleware, on_store_created })
 {
 	// server-side and client-side specifics
 	const reduxReactRouter = server ? reduxReactRouter_server : reduxReactRouter_client
-	// const createHistory    = server ? createHistory_server    : createHistory_client
+	const createHistory    = server ? createHistory_server    : createHistory_client
 
-	// `scroll-behavior@0.7.0`
-	// because it jumps to top when navigating the app
+	// Simply using `useScroll` from `scroll-behavior@0.7.0`
+	// introduces scroll jumps to top when navigating the app
 	// while navigation is asynchronous and takes some time to finish,
 	// therefore it creates a scrollbar "jumping" effect.
-	const createHistory    = server ? createHistory_server    : () => use_scroll(createHistory_client())
+	//
+	// const createHistory = server ? createHistory_server    : () => use_scroll(createHistory_client())
+	//
+	// Therefore using a middleware to wait for page loading to finish.
 
 	// generates the three promise event names automatically based on a base event name
 	const promise_event_naming = event_name => [`${event_name} pending`, `${event_name} done`, `${event_name} failed`]
