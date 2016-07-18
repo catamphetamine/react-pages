@@ -181,15 +181,43 @@ export default class Page extends Component
 
 The final step is to set up the main web server (`192.168.0.1:80` in this example) to proxy all HTTP requests for webpages to the webpage rendering server you've set up.
 
-An example of how HTTP request routing on your main web server can be set up:
+An example of how HTTP request routing on your main web server can be set up (with `page-server` running on port `3000`):
 
  * all HTTP GET requests starting with `/assets` return static files from your `assets` folder
  * all HTTP requests starting with `/api` call your REST API methods
  * all the other HTTP GET requests are proxied to `http://localhost:3000` for webpage rendering
 
-(proxying can be easily set up with [http-proxy](https://github.com/nodejitsu/node-http-proxy))
+Proxying can be easily set up, for example, with [http-proxy](https://github.com/nodejitsu/node-http-proxy)
 
-(see the aforementioned example projects for reference)
+```js
+const express = require('express')
+const httpProxy = require('http-proxy')
+
+// Use Express or Koa, for example
+const app = express()
+const proxy = httpProxy.createProxyServer(options)
+
+// Serve static files
+app.use('/assets', express.static(assets_folder))
+
+// Define the REST API
+app.get('/api', function(request, response)
+{
+  response.send({ result: true })
+})
+
+// Or just extract the REST API into its own microservice
+// app.get('/api', function(request, response)
+// {
+//   proxy.web(request, response, { target: 'http://localhost:3001' })
+// })
+
+// Proxy all unmatched HTTP requests to webpage rendering service
+app.use(function(request, response)
+{
+  proxy.web(request, response, { target: 'http://localhost:3000' })
+})
+```
 
 ## HTTP response status code
 
