@@ -1,3 +1,8 @@
+4.0.5 / 18.07.2016
+===================
+
+  * Added support for supplying custom HTTP headers to `http` utility
+
 4.0.4 / 18.07.2016
 ===================
 

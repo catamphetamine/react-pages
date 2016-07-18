@@ -75,6 +75,14 @@ export default class http_client
 						request.set('cookie', this.cookies)
 					}
 
+					if (options && options.headers)
+					{
+						for (let key of Object.keys(options.headers))
+						{
+							request.set(key, options.headers[key])
+						}
+					}
+
 					if (options && options.locale)
 					{
 						request.set('accept-language', locale)
