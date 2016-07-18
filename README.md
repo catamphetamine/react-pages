@@ -190,6 +190,7 @@ An example of how HTTP request routing on your main web server can be set up (wi
 Proxying can be easily set up, for example, with [http-proxy](https://github.com/nodejitsu/node-http-proxy)
 
 ```js
+const path = require('path')
 const express = require('express')
 const httpProxy = require('http-proxy')
 
@@ -198,7 +199,7 @@ const app = express()
 const proxy = httpProxy.createProxyServer(options)
 
 // Serve static files
-app.use('/assets', express.static(assets_folder))
+app.use('/assets', express.static(path.join(__dirname, '../assets')))
 
 // Define the REST API
 app.get('/api', function(request, response)
