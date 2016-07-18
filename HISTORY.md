@@ -1,3 +1,8 @@
+4.0.4 / 18.07.2016
+===================
+
+  * @adailey14 Fixed a bug of `redux_middleware` not working on server-side
+
 4.0.0 / 05.07.2016
 ===================
 

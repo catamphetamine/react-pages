@@ -152,7 +152,7 @@ export default function start_webpage_rendering_server(options, common)
 			disable_server_side_rendering,
 
 			get_reducer      : common.get_reducer,
-			middleware       : common.redux_middleware,
+			redux_middleware : common.redux_middleware,
 			on_store_created : common.on_store_created,
 			on_preload_error : common.on_preload_error,
 			create_routes    : common.create_routes,
