@@ -10,7 +10,7 @@ export default class http_client
 	// (this way server side Http Api calls mimic client side Http Api calls).
 	constructor(options = {})
 	{
-		const { host, port, headers, prefix, http_request_adjustments, clone_request } = options
+		const { host, port, headers, prefix, clone_request } = options
 
 		if (clone_request)
 		{
@@ -21,6 +21,8 @@ export default class http_client
 		this.host = host
 		this.port = port || 80
 		this.prefix = prefix || ''
+
+		this.on_before_send_listeners = []
 
 		const http = {}
 
@@ -94,9 +96,9 @@ export default class http_client
 					}
 
 					// Apply custom adjustments to HTTP request
-					if (http_request_adjustments)
+					for (let listener of this.on_before_send_listeners)
 					{
-						http_request_adjustments(request)
+						listener(request)
 					}
 
 					request.end((error, response) => 
@@ -168,6 +170,11 @@ export default class http_client
 
 		// Prepend prefix to relative URL, to proxy to API server.
 		return this.prefix + normalized_path
+	}
+
+	on_before_send(listener)
+	{
+		this.on_before_send_listeners.push(listener)
 	}
 }
 

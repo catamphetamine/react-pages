@@ -1,3 +1,8 @@
+4.0.7 / 19.07.2016
+===================
+
+  * Added second parameter for `http` utility customization function, which holds the `store`
+
 4.0.6 / 18.07.2016
 ===================
 

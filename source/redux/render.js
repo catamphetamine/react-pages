@@ -3,9 +3,8 @@ import ReactDOMServer from 'react-dom/server'
 
 import { match }       from 'redux-router/server'
 import { ReduxRouter } from 'redux-router'
-import { RouterContext } from 'react-router'
+import { RouterContext, applyRouterMiddleware } from 'react-router'
 import use_scroll      from 'react-router-scroll'
-import { applyRouterMiddleware } from 'react-router'
 
 import { render_on_client as react_render_on_client, render_on_server as react_render_on_server } from '../render'
 

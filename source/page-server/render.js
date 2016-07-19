@@ -11,10 +11,11 @@ import { render_on_server as redux_render }        from '../redux/render'
 import { render_on_server as react_router_render } from '../redux/render'
 
 import create_store from '../redux/store'
+import set_up_http_client from '../redux/http client'
 
 // isomorphic (universal) rendering (middleware).
 // will be used in web_application.use(...)
-export default async function({ development, preload, localize, preferred_locale, assets, url, http_client, respond, fail, redirect, disable_server_side_rendering, get_reducer, redux_middleware, on_store_created, on_preload_error, create_routes, wrapper, head, body, body_start, body_end, style })
+export default async function({ development, preload, localize, preferred_locale, assets, url, http_client, http_client_on_before_send, respond, fail, redirect, disable_server_side_rendering, get_reducer, redux_middleware, on_store_created, on_preload_error, create_routes, wrapper, head, body, body_start, body_end, style })
 {
 	// initial Flux store data (if using Flux)
 	let store_data = {}
@@ -42,6 +43,10 @@ export default async function({ development, preload, localize, preferred_locale
 			http_client
 		})
 	}
+
+	// Customization of `http` utility
+	// which can be used inside Redux action creators
+	set_up_http_client(http_client, { store, on_before_send: http_client_on_before_send })
 
 	// internationalization
 

@@ -4,7 +4,7 @@ import path from 'path'
 import koa        from 'koa'
 import koa_locale from 'koa-locale'
 
-import http_client from '../http client'
+import Http_client from '../http client'
 import render      from './render'
 
 import render_stack_trace from './html stack trace'
@@ -95,7 +95,7 @@ export default function start_webpage_rendering_server(options, common)
 	function* rendering()
 	{
 		// isomorphic http api calls
-		const _http_client = new http_client({ host: application.host, port: application.port, http_request_adjustments: common.http_request, clone_request: this.request })
+		const http_client = new Http_client({ host: application.host, port: application.port, clone_request: this.request })
 
 		// Material-UI asks for this,
 		// but this isn't right,
@@ -123,7 +123,8 @@ export default function start_webpage_rendering_server(options, common)
 
 			url,
 
-			http_client : _http_client, 
+			http_client,
+			http_client_on_before_send: common.http_request,
 
 			respond : ({ markup, status }) =>
 			{

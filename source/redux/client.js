@@ -1,12 +1,13 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
 
-import http_client from '../http client'
+import Http_client from '../http client'
 import localize_and_render from '../client'
 
 import { render_on_client } from './render'
 import create_store from './store'
 import { normalize_common_options } from './normalize'
+import set_up_http_client from './http client'
 
 // Performs client-side rendering
 // along with varios stuff like loading localized messages.
@@ -16,6 +17,9 @@ import { normalize_common_options } from './normalize'
 export default function render({ development, development_tools, load_translation }, common)
 {
 	common = normalize_common_options(common)
+
+	// `http` utility can be used inside Redux action creators
+	const http_client = new Http_client()
 
 	// create ("rehydrate") Redux store
 	const store = create_store(common.get_reducer,
@@ -27,10 +31,14 @@ export default function render({ development, development_tools, load_translatio
 		on_preload_error : common.on_preload_error,
 		create_routes    : common.create_routes,
 		data             : window._flux_store_data,
-		http_client      : new http_client({ http_request_adjustments: common.http_request })
+		http_client
 	})
-	
+
 	delete window._flux_store_data
+
+	// Customization of `http` utility
+	// which can be used inside Redux action creators
+	set_up_http_client(http_client, { store, on_before_send: common.http_request })
 
 	return localize_and_render
 	({

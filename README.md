@@ -387,9 +387,18 @@ import { goto, redirect } from 'react-isomorphic-render'
   on_store_created: ({ reload_reducer }) => {}
 
   // (optional)
-  // Extra HTTP request settings for `http` utility in Redux action creators
+  // Extra HTTP request settings for `http` utility in Redux action creators.
   // (`request` is a `superagent` request)
-  http_request: request => request.set({ Authentication: `Bearer ${token}` })
+  // Will be called for each HTTP request sent using `http` utility.
+  http_request: (request, { store }) =>
+  {
+    const token = store.getState().authentication.token
+
+    if (token)
+    {
+      request.set('Authorization', `Bearer ${token}`)
+    }
+  }
 }
 ```
 
