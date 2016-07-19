@@ -109,7 +109,7 @@ export default class Html extends Component
 					{content_element}
 
 					{/* locale for international messages */}
-					<script dangerouslySetInnerHTML={{__html: `window._locale=${JSON.stringify(locale)}`}} charSet="UTF-8"/>
+					{ locale && <script dangerouslySetInnerHTML={{__html: `window._locale=${JSON.stringify(locale)}`}} charSet="UTF-8"/> }
 
 					{/* JSON Date deserializer */}
 					<script dangerouslySetInnerHTML={{__html: define_json_parser}} charSet="UTF-8"/>
