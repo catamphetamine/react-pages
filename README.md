@@ -489,7 +489,7 @@ import { goto, redirect } from 'react-isomorphic-render'
   //  to later be set as an `Authorization` header for `http` utility requests)
   //
   preload: async (http_client, { request }) => {}
-  // (or same without `async`: (http_client) => Promise.resolve({})
+  // (or same without `async`: (http_client, { request }) => Promise.resolve({})
 
   // (optional)
   // Based on the `preferred_locale`,
