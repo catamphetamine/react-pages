@@ -15,7 +15,7 @@ import set_up_http_client from '../redux/http client'
 
 // isomorphic (universal) rendering (middleware).
 // will be used in web_application.use(...)
-export default async function({ development, preload, localize, preferred_locale, assets, url, http_client, http_client_on_before_send, respond, fail, redirect, disable_server_side_rendering, get_reducer, redux_middleware, on_store_created, on_preload_error, create_routes, wrapper, head, body, body_start, body_end, style })
+export default async function({ development, preload, localize, preferred_locale, assets, url, request, http_client, http_client_on_before_send, respond, fail, redirect, disable_server_side_rendering, get_reducer, redux_middleware, on_store_created, on_preload_error, create_routes, wrapper, head, body, body_start, body_end, style })
 {
 	// initial Flux store data (if using Flux)
 	let store_data = {}
@@ -24,7 +24,7 @@ export default async function({ development, preload, localize, preferred_locale
 	// (for example to authenticate the user and retrieve user selected language)
 	if (preload)
 	{
-		store_data = (await preload(http_client)) || store_data
+		store_data = (await preload(http_client, { request })) || store_data
 	}
 
 	// create Redux store

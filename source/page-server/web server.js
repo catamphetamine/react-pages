@@ -123,6 +123,10 @@ export default function start_webpage_rendering_server(options, common)
 
 			url,
 
+			// The original HTTP request can be required
+			// for inspecting cookies in `preload` function
+			request: this.request,
+
 			http_client,
 			http_client_on_before_send: common.http_request,
 

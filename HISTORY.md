@@ -1,3 +1,8 @@
+4.0.8 / 19.07.2016
+===================
+
+  * Added second parameter to `preload` server-side function. The added parameter is an object having a `request` property which can be used, for example, to read a cookie into Redux store.
+
 4.0.7 / 19.07.2016
 ===================
 

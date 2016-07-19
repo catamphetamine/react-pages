@@ -53,6 +53,9 @@ export default class Html extends Component
 			html_attributes.lang = get_language_from_locale(locale)
 		}
 
+		const style_url      = assets.entry ? assets.style[assets.entry]      : assets.style
+		const javascript_url = assets.entry ? assets.javascript[assets.entry] : assets.javascript
+
 		const html = 
 		(
 			<html {...html_attributes}>
@@ -79,9 +82,9 @@ export default class Html extends Component
 							charSet="UTF-8"/>
 					}
 
-					{ assets.style &&
+					{ style_url &&
 						<link 
-							href={assets.entry ? assets.style[assets.entry] : assets.style} 
+							href={style_url} 
 							rel="stylesheet" 
 							type="text/css"
 							charSet="UTF-8"/>
@@ -125,7 +128,7 @@ export default class Html extends Component
 					
 					{/* current application "entry" point javascript
 					    (currently there is only one entry point: "main") */}
-					<script src={ assets.entry ? assets.javascript[assets.entry] : assets.javascript } charSet="UTF-8"/>
+					<script src={ javascript_url } charSet="UTF-8"/>
 
 					{/* support adding arbitrary markup to body end */}
 					{ body_end ? body_end() : null }
