@@ -478,9 +478,17 @@ import { goto, redirect } from 'react-isomorphic-render'
 
   // (optional)
   // Preloads data before performing page rendering.
+  //
   // If this function returns an object then this object
   // will be merged into Redux store.
-  preload: async (http_client) => {}
+  // 
+  // `request` is the original HTTP request for the webpage.
+  // It can be used, for example, to get a cookie value 
+  // and put it to Redux store.
+  // (for example, a Json Web Token cookie value can be put to the store
+  //  to later be set as an `Authorization` header for `http` utility requests)
+  //
+  preload: async (http_client, { request }) => {}
   // (or same without `async`: (http_client) => Promise.resolve({})
 
   // (optional)
