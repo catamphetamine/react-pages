@@ -1,3 +1,8 @@
+4.0.9 / 19.07.2016
+===================
+
+  * Fixed `PUT` and `PATCH` `http` requests not sending data via POST
+
 4.0.8 / 19.07.2016
 ===================
 
