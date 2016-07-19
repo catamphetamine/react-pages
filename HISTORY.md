@@ -1,3 +1,8 @@
+4.0.6 / 18.07.2016
+===================
+
+  * Added `http_request` parameter for `http` utility adjustment
+
 4.0.5 / 18.07.2016
 ===================
 

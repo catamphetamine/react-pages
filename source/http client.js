@@ -10,7 +10,7 @@ export default class http_client
 	// (this way server side Http Api calls mimic client side Http Api calls).
 	constructor(options = {})
 	{
-		const { host, port, prefix, clone_request } = options
+		const { host, port, headers, prefix, http_request_adjustments, clone_request } = options
 
 		if (clone_request)
 		{
@@ -49,6 +49,7 @@ export default class http_client
 					throw new Error(`Api method not found: ${method}`)
 				}
 
+				// `url` will be absolute for server-side
 				const url = this.format_url(path)
 
 				return new Promise((resolve, reject) =>
@@ -68,24 +69,34 @@ export default class http_client
 						}
 					}
 
-					// server side only
+					// Server side only
 					// (copies user authentication cookies to retain session specific data)
 					if (this.cookies)
 					{
 						request.set('cookie', this.cookies)
 					}
 
+					// Apply default HTTP headers
+					if (headers)
+					{
+						request.set(headers)
+					}
+
+					// Apply this HTTP request specific HTTP headers
 					if (options && options.headers)
 					{
-						for (let key of Object.keys(options.headers))
-						{
-							request.set(key, options.headers[key])
-						}
+						request.set(options.headers)
 					}
 
 					if (options && options.locale)
 					{
 						request.set('accept-language', locale)
+					}
+
+					// Apply custom adjustments to HTTP request
+					if (http_request_adjustments)
+					{
+						http_request_adjustments(request)
 					}
 
 					request.end((error, response) => 

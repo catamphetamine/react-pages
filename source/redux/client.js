@@ -27,7 +27,7 @@ export default function render({ development, development_tools, load_translatio
 		on_preload_error : common.on_preload_error,
 		create_routes    : common.create_routes,
 		data             : window._flux_store_data,
-		http_client      : new http_client()
+		http_client      : new http_client({ http_request_adjustments: common.http_request })
 	})
 	
 	delete window._flux_store_data

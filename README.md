@@ -385,6 +385,11 @@ import { goto, redirect } from 'react-isomorphic-render'
   // Is called when Redux store has been created
   // (can be used for setting up Webpack Hot Module Replacement)
   on_store_created: ({ reload_reducer }) => {}
+
+  // (optional)
+  // Extra HTTP request settings for `http` utility in Redux action creators
+  // (`request` is a `superagent` request)
+  http_request: request => request.set({ Authentication: `Bearer ${token}` })
 }
 ```
 
