@@ -21,10 +21,10 @@ export default class Html extends Component
 		assets      : PropTypes.object.isRequired,
 		content     : PropTypes.node,
 		store       : PropTypes.object.isRequired,
-		head        : PropTypes.func,
+		head        : PropTypes.node,
 		body        : PropTypes.func,
-		body_start  : PropTypes.func,
-		body_end    : PropTypes.func,
+		body_start  : PropTypes.node,
+		body_end    : PropTypes.node,
 		style       : PropTypes.func,
 		locale      : PropTypes.string
 	}
@@ -97,19 +97,19 @@ export default class Html extends Component
 					    (caused by Webpack style-loader mounting CSS styles 
 					     through javascript after page load)
 					    by mounting the entire CSS stylesheet in a <style/> tag */}
-					{ development && style ? <style dangerouslySetInnerHTML={{__html: style()}} charSet="UTF-8"/> : null }
+					{ development && style && <style dangerouslySetInnerHTML={{__html: style()}} charSet="UTF-8"/> }
 
-					{ head ? head() : null }
+					{ head }
 
-					{ assets.icon ? <link rel="shortcut icon" href={assets.icon}/> : null }
+					{ assets.icon && <link rel="shortcut icon" href={assets.icon}/> }
 				</head>
 
 				<body>
 					{/* support adding arbitrary markup to body start */}
-					{ body_start ? body_start() : null }
+					{ body_start }
 
 					{/* React page content */}
-					{content_element}
+					{ content_element }
 
 					{/* locale for international messages */}
 					{ locale && <script dangerouslySetInnerHTML={{__html: `window._locale=${JSON.stringify(locale)}`}} charSet="UTF-8"/> }
@@ -124,14 +124,14 @@ export default class Html extends Component
 
 					{/* the "common.js" chunk (see webpack extract commons plugin) */}
 					{/* (needs to be included first (by design)) */}
-					{ (assets.entry && assets.javascript && assets.javascript.common) ? <script src={assets.javascript.common} charSet="UTF-8"/> : null }
+					{ (assets.entry && assets.javascript && assets.javascript.common) && <script src={assets.javascript.common} charSet="UTF-8"/> }
 					
 					{/* current application "entry" point javascript
 					    (currently there is only one entry point: "main") */}
 					<script src={ javascript_url } charSet="UTF-8"/>
 
 					{/* support adding arbitrary markup to body end */}
-					{ body_end ? body_end() : null }
+					{ body_end }
 				</body>
 			</html>
 		)

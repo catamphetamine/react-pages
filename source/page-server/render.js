@@ -93,6 +93,21 @@ export default async function({ development, preload, localize, preferred_locale
 					assets.style = assets.styles
 				}
 
+				if (head)
+				{
+					head = head(url)
+				}
+
+				if (body_start)
+				{
+					body_start = body_start(url)
+				}
+
+				if (body_end)
+				{
+					body_end = body_end(url)
+				}
+
 				const markup = 
 				(
 					<Html

@@ -451,7 +451,7 @@ import { goto, redirect } from 'react-isomorphic-render'
   // Returns React element an array of React elements
   // which will be inserted into server rendered webpage's <head/>
   // (in case of an array use `key`s to prevent React warning)
-  head: () => React element or an array of React elements
+  head: (url) => React element or an array of React elements
 
   // (optional)
   // Allows for wrapping React page component with arbitrary elements
@@ -464,13 +464,13 @@ import { goto, redirect } from 'react-isomorphic-render'
   // Returns React element or an array of React elements.
   // Allows adding arbitrary React elements to the start of the <body/>
   // (use `key`s to prevent React warning when returning an array of React elements)
-  body_start: () => React element or an array of React elements
+  body_start: (url) => React element or an array of React elements
 
   // (optional)
   // Returns React element or an array of React elements.
   // Allows adding arbitrary React elements to the end of the <body/>
   // (use `key`s to prevent React warning when returning an array of React elements)
-  body_end: () => React element or an array of React elements
+  body_end: (url) => React element or an array of React elements
 
   // (optional)
   // (is used only in development mode, for "flash of unstyled content")
