@@ -44,9 +44,6 @@ import settings from './react-isomorphic-render'
 // Create webpage rendering server
 const server = webpage_server
 ({
-  // enable/disable development mode
-  development: true,
-
   // Http host and port for executing all client-side ajax requests on server-side.
   // This is the host and port on which the web application is run.
   application:
@@ -476,11 +473,11 @@ import { goto, redirect } from 'react-isomorphic-render'
   body_end: () => React element or an array of React elements
 
   // (optional)
-  // (is used only in development mode - removes Ctrl + R (F5) flicker)
+  // (is used only in development mode, for "flash of unstyled content")
   // This function returns CSS text which will be inserted 
   // into server rendered webpage's <head/> <style/> tag.
   // If you're using Webpack then the CSS text is the result of a require() call.
-  style: () => require('../assets/style.scss').toString()
+  style: () => 'body { background: white }'
 
   // (optional)
   // Preloads data before performing page rendering.

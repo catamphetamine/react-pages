@@ -1,3 +1,7 @@
+4.0.11 / 20.07.2016
+
+  * Removed server-side `development` option. Using `process.env.NODE_ENV` now.
+
 4.0.10 / 20.07.2016
 ===================
 

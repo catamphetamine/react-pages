@@ -13,11 +13,13 @@ import { normalize_common_options } from '../redux/normalize'
 
 export default function start_webpage_rendering_server(options, common)
 {
+	// In development mode errors are printed as HTML, for example
+	const development = process.env.NODE_ENV !== 'production'
+
 	common = normalize_common_options(common)
 
 	let
 	{
-		development,
 		preload,
 		localize,
 		assets,
