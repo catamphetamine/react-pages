@@ -445,6 +445,12 @@ import { goto, redirect } from 'react-isomorphic-render'
   on_error: (error, { url, redirect }) => redirect(`/error?url=${encode(url)}&error=${error.code}`)
 
   // (optional)
+  // Custom Koa middleware (an array of middlewares).
+  // Inserted before page rendering middleware.
+  // (if anyone needs that for whatever reason)
+  middleware: [...]
+
+  // (optional)
   // Returns React element an array of React elements
   // which will be inserted into server rendered webpage's <head/>
   // (in case of an array use `key`s to prevent React warning)

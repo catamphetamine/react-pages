@@ -32,25 +32,26 @@ export default function start_webpage_rendering_server(options, common)
 	}
 	= options
 
+	// Normalize `assets` parameter
+	// (to be a function)
 	if (typeof assets !== 'function')
 	{
 		const assets_object = assets
 		assets = () => assets_object
 	}
 
-	const web = koa()
+	const web = new koa()
 
-	// get locale from Http request
+	// Adds helper methods for getting locale from Http request
 	// (the second parameter is the Http Get parameter name)
 	koa_locale(web, 'locale')
 
-	// handle errors
-
-	function* errors(next)
+	// Handles errors
+	web.use(async (ctx, next) =>
 	{
 		try
 		{
-			yield next
+			await next()
 		}
 		catch (error)
 		{
@@ -66,9 +67,9 @@ export default function start_webpage_rendering_server(options, common)
 
 					if (response_body)
 					{
-						this.status = response_status || 500
-						this.body = response_body
-						this.type = 'html'
+						ctx.status = response_status || 500
+						ctx.body = response_body
+						ctx.type = 'html'
 
 						return
 					}
@@ -83,19 +84,26 @@ export default function start_webpage_rendering_server(options, common)
 			// log the error
 			console.log('[react-isomorphic-render] Webpage rendering server error')
 
-			this.status = typeof error.code === 'number' ? error.code : 500
-			this.message = error.message || 'Internal error'
+			ctx.status = typeof error.code === 'number' ? error.code : 500
+			ctx.message = error.message || 'Internal error'
+		}
+	})
+
+	// Custom Koa middleware extension point
+	// (if someone ever needs this)
+	if (options.middleware)
+	{
+		for (let middleware of options.middleware)
+		{
+			web.use(middleware)
 		}
 	}
 
-	web.use(errors)
-
-	// isomorphic rendering
-
-	function* rendering()
+	// Isomorphic rendering
+	web.use(async (ctx) =>
 	{
 		// isomorphic http api calls
-		const http_client = new Http_client({ host: application.host, port: application.port, clone_request: this.request })
+		const http_client = new Http_client({ host: application.host, port: application.port, clone_request: ctx.req })
 
 		// Material-UI asks for this,
 		// but this isn't right,
@@ -105,19 +113,19 @@ export default function start_webpage_rendering_server(options, common)
 		//
 		// global.navigator = { userAgent: request.headers['user-agent'] }
 
-		const url = this.request.originalUrl.replace(/\?$/, '')
+		const url = ctx.request.originalUrl.replace(/\?$/, '')
 
-		const redirect = to => this.redirect(to)
+		const redirect = to => ctx.redirect(to)
 
 		// these parameters are for Koa app.
 		// they can be modified to work with Express app if needed.
-		yield render
+		await render
 		({
 			development,
 
 			preload,
 			localize,
-			preferred_locale: this.getLocaleFromQuery() || this.getLocaleFromCookie() || this.getLocaleFromHeader(),
+			preferred_locale: ctx.getLocaleFromQuery() || ctx.getLocaleFromCookie() || ctx.getLocaleFromHeader(),
 
 			assets,
 
@@ -125,18 +133,18 @@ export default function start_webpage_rendering_server(options, common)
 
 			// The original HTTP request can be required
 			// for inspecting cookies in `preload` function
-			request: this.request,
+			request: ctx.req,
 
 			http_client,
 			http_client_on_before_send: common.http_request,
 
 			respond : ({ markup, status }) =>
 			{
-				this.body = markup
+				ctx.body = markup
 
 				if (status)
 				{
-					this.status = status
+					ctx.status = status
 				}
 			}, 
 			fail : error =>
@@ -178,10 +186,8 @@ export default function start_webpage_rendering_server(options, common)
 		//
 		// now superagent.agent() handles cookies correctly.
 		//
-		// this.set('set-cookie', _http_client.cookies)
-	}
-
-	web.use(rendering)
+		// ctx.set('set-cookie', _http_client.cookies)
+	})
 
 	return web
 }

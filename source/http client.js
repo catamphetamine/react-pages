@@ -15,7 +15,7 @@ export default class http_client
 		if (clone_request)
 		{
 			this.server = true
-			this.cookies = clone_request.get('cookie')
+			this.cookies = clone_request.headers.cookie
 		}
 		
 		this.host = host

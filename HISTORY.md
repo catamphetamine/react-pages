@@ -1,3 +1,12 @@
+4.0.10 / 20.07.2016
+===================
+
+  * Migrated from Koa v1 to Koa v2
+  * Added `middleware` option for possible Koa application extension
+  * Bumped `superagent` version (1.x -> 2.x)
+  * Fixed `preload` function `request` parameter: it was a Koa request, now it's Node.js request
+  * Fixed `clone_request` parameter of `http_client`: it was a Koa request, now it's Node.js request
+
 4.0.9 / 19.07.2016
 ===================
 
