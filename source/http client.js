@@ -2,16 +2,20 @@ import superagent from 'superagent'
 
 import { is_object, starts_with } from './helpers'
 
+// This is an isomorphic (universal) HTTP client
+// which works both on Node.js and in the web browser,
+// and therefore can be used in Flux actions (for HTTP requests)
 export default class http_client
 {
-	// Constructs a new instance of Api Client.
-	// Optionally takes an Http Request as a reference to mimic (for example, cookies).
-	// This feature is used for Api calls during server side rendering 
-	// (this way server side Http Api calls mimic client side Http Api calls).
+	// Constructs a new instance of Http client.
+	// Optionally takes an Http Request as a reference to mimic
+	// (in this case, cookies, to make authentication work on the server-side).
 	constructor(options = {})
 	{
-		const { host, port, headers, prefix, clone_request } = options
+		const { secure, host, port, headers, clone_request } = options
 
+		// Clone HTTP request cookies on the server-side
+		// (to make authentication work)
 		if (clone_request)
 		{
 			this.server = true
@@ -20,48 +24,40 @@ export default class http_client
 		
 		this.host = host
 		this.port = port || 80
-		this.prefix = prefix || ''
+		this.secure = secure
 
 		this.on_before_send_listeners = []
 
-		const http = {}
-
+		// A mapping of HTTP method names
 		const http_methods =
-		{
-			get    : 'get',
-			post   : 'post',
-			call   : 'post',
-			create : 'post',
-			put    : 'put',
-			update : 'put',
-			patch  : 'patch',
-			delete : 'del'
-		}
+		[
+			'get',
+			'post',
+			'put',
+			'patch',
+			'delete',
+			'head',
+			'options'
+		]
 
-		for (let method of Object.keys(http_methods))
+		// Define HTTP methods on this instance
+		for (let method of http_methods)
 		{
-			this[method] = (path, data, options) =>
+			this[method] = (path, data, options = {}) =>
 			{
-				// options = options || {}
-
-				const http_method = http_methods[method]
-
-				if (!http_method)
-				{
-					throw new Error(`Api method not found: ${method}`)
-				}
-
 				// `url` will be absolute for server-side
 				const url = this.format_url(path)
 
 				return new Promise((resolve, reject) =>
 				{
+					// Create Http request
 					const agent = this.server ? superagent.agent() : superagent
-					const request = agent[http_method](url)
+					const request = agent[method](url)
 
+					// Attach data to the outgoing HTTP request
 					if (data)
 					{
-						switch (http_method)
+						switch (method)
 						{
 							case 'get':
 								request.query(data)
@@ -79,7 +75,7 @@ export default class http_client
 								throw new Error(`"data" supplied for HTTP DELETE request: ${JSON.stringify(data)}`)
 
 							default:
-								throw new Error(`Unknown HTTP method: ${http_method}`)
+								throw new Error(`Unknown HTTP method: ${method}`)
 						}
 					}
 
@@ -97,15 +93,16 @@ export default class http_client
 					}
 
 					// Apply this HTTP request specific HTTP headers
-					if (options && options.headers)
+					if (options.headers)
 					{
 						request.set(options.headers)
 					}
 
-					if (options && options.locale)
-					{
-						request.set('accept-language', locale)
-					}
+					// // Set HTTP locale header
+					// if (options.locale)
+					// {
+					// 	request.set('accept-language', locale)
+					// }
 
 					// Apply custom adjustments to HTTP request
 					for (let listener of this.on_before_send_listeners)
@@ -113,6 +110,7 @@ export default class http_client
 						listener(request)
 					}
 
+					// Send HTTP request
 					request.end((error, response) => 
 					{
 						// this turned out to be a lame way of handling cookies,
@@ -131,11 +129,15 @@ export default class http_client
 						// 	}
 						// }
 
+						// If HTTP response was received,
+						// and if that HTTP response is a JSON object,
+						// then the error is the `error` property of that object.
 						if (!error && response)
 						{
 							error = response.error
 						}
 
+						// If the HTTP request failed
 						if (error)
 						{
 							// superagent would have already output the error to console
@@ -143,9 +145,16 @@ export default class http_client
 
 							console.log('[react-isomorphic-render] (http request error)')
 
+							// If the `error` was returned as part of HTTP response
 							if (response)
 							{
+								// Set `error` `code` to HTTP response status code
 								error.code = response.status
+
+								// If the HTTP response was not a JSON,
+								// but rather a text or an HTML page,
+								// then include that information in the `error`
+								// for future reference (e.g. easier debugging).
 
 								const content_type = response.get('content-type').split(';')[0].trim()
 
@@ -159,9 +168,12 @@ export default class http_client
 								}
 							}
 
+							// HTTP request failed with an `error`
 							return reject(error)
 						}
 
+						// HTTP request completed without errors,
+						// so return the HTTP response data.
 						resolve(parse_dates(response.body))
 					})
 				})
@@ -169,36 +181,56 @@ export default class http_client
 		}
 	}
 
+	// Validates the requested URL,
+	// and also prepends host and port to it on the server side.
 	format_url(path)
 	{
-		// add slash in the beginning
-		let normalized_path = path[0] !== '/' ? '/' + path : path
-
-		if (this.server)
+		// Rejects URLs of form "//www.google.ru/search",
+		// and verifies that the `path` is an internal URL.
+		// This check is performed to avoid leaking cookies to a third party.
+		if (starts_with(path, '//') || !starts_with(path, '/'))
 		{
-			// Prepend host and port of the API server to the path.
-			return `http://${this.host}:${this.port}${this.prefix}${normalized_path}`
+			throw new Error(`Only internal URLs (e.g. "/api/item?id=1") are allowed for the "http" utility. Got an external url "${path}"`)
 		}
 
-		// Prepend prefix to relative URL, to proxy to API server.
-		return this.prefix + normalized_path
+		// Prepend host and port on the server side
+		if (this.server)
+		{
+			const protocol = this.secure ? 'https' : 'http'
+			return `${protocol}://${this.host}:${this.port}${path}`
+		}
+
+		return path
 	}
 
+	// Allows hooking into HTTP request sending routine
+	// (for example, to set some HTTP headers)
 	on_before_send(listener)
 	{
 		this.on_before_send_listeners.push(listener)
 	}
 }
 
-// JSON date deserializer
-// use as the second, 'reviver' argument to JSON.parse(json, JSON.date_parser);
+// JSON date deserializer.
+//
+// Automatically converts ISO serialized `Date`s
+// in JSON responses for Ajax HTTP requests.
+//
+// Without it the developer would have to convert
+// `Date` strings to `Date`s in Ajax HTTP responses manually.
+//
+// Use as the second, 'reviver' argument to `JSON.parse`: `JSON.parse(json, JSON.date_parser)`
 //
 // http://stackoverflow.com/questions/14488745/javascript-json-date-deserialization/23691273#23691273
 
+// ISO 8601 date regular expression
 const ISO = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2}(?:\.\d*))(?:Z|(\+|-)([\d|:]*))?$/
 
+// Walks JSON object tree
 function parse_dates(object)
 {
+	// If an array is encountered, 
+	// proceed recursively with each element of this array.
 	if (object instanceof Array)
 	{
 		let i = 0
@@ -208,6 +240,9 @@ function parse_dates(object)
 			i++
 		}
 	}
+	// If a child JSON object is encountered,
+	// convert all of its `Date` string values to `Date`s,
+	// and proceed recursively for all of its properties.
 	else if (is_object(object))
 	{
 		for (let key of Object.keys(object))
@@ -225,5 +260,6 @@ function parse_dates(object)
 		}
 	}
 
+	// Dates have been converted for this JSON object
 	return object
 }

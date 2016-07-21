@@ -1,3 +1,8 @@
+4.0.13 / 21.07.2016
+===================
+
+  * Constrained `http` utility URLs to internal ones only to prevent sensitive data leakage (e.g. HTTP cookies)
+
 4.0.11 / 20.07.2016
 ===================
 
