@@ -28,7 +28,6 @@ export default class http_client
 
 		this.on_before_send_listeners = []
 
-		// A mapping of HTTP method names
 		const http_methods =
 		[
 			'get',
