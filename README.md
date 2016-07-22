@@ -374,7 +374,7 @@ this.props.dispatch(goto('/items/1?color=red'))
   // (optional)
   // Handles errors occurring inside `@preload()`.
   // For example, if `@preload()` throws a `new Error("Unauthorized")`,
-  // then a redirect to "/unauthorized" page can be made.
+  // then a redirect to "/unauthorized" page can be made here.
   on_preload_error: (error, { url, redirect }) => redirect(`/error?url=${encode(url)}&error=${error.code}`)
 
   // (optional)
