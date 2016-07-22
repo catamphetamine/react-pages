@@ -386,9 +386,9 @@ this.props.dispatch(goto('/items/1?color=red'))
   on_store_created: ({ reload_reducer }) => {}
 
   // (optional)
-  // Extra HTTP request settings for `http` utility in Redux action creators.
+  // Will be called for each HTTP request
+  // sent using `http` utility inside Redux action creators..
   // (`request` is a `superagent` request)
-  // Will be called for each HTTP request sent using `http` utility.
   http_request: (request, { store }) =>
   {
     const token = store.getState().authentication.token
