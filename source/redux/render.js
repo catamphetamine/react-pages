@@ -100,7 +100,7 @@ export function render_on_client({ development, development_tools, create_page_e
 	})
 }
 
-// returns a Promise resolving to { status, markup, redirect_to }.
+// returns a Promise resolving to { status, content, redirect }.
 //
 export function render_on_server({ disable_server_side_rendering, create_page_element, render_webpage_as_react_element, url, store })
 {
@@ -108,14 +108,14 @@ export function render_on_server({ disable_server_side_rendering, create_page_el
 	if (disable_server_side_rendering)
 	{
 		// Render the empty <Html/> component into Html markup string
-		return Promise.resolve({ markup: react_render_on_server({ render_webpage_as_react_element }) })
+		return Promise.resolve({ content: react_render_on_server({ render_webpage_as_react_element }) })
 	}
 
 	// Perform routing for this `url`
 	return match_url(url, store).then(routing_result =>
 	{
 		// Return in case of an HTTP redirect
-		if (routing_result.redirect_to)
+		if (routing_result.redirect)
 		{
 			return routing_result
 		}
@@ -136,10 +136,32 @@ export function render_on_server({ disable_server_side_rendering, create_page_el
 			const page_element = create_page_element(<ReduxRouter/>, { store })
 
 			// Render the current page's React element to HTML markup
-			const markup = react_render_on_server({ render_webpage_as_react_element, page_element })
+			const content = react_render_on_server({ render_webpage_as_react_element, page_element })
 
 			// return HTTP status code and HTML markup
-			return { status: http_status_code, markup }
+			return { status: http_status_code, content }
+		},
+		(error) =>
+		{
+			// If it's a `@preload` error and `on_preload_error()` had been set,
+			// then this error was already handled
+			// in `preloading_middleware`'s `error_handler`.
+			// Therefore, just ignore it.
+			//
+			if (error._was_handled)
+			{
+				return {}
+			}
+
+			// If an HTTP redirect is required, then abort all further actions.
+			// That's a hacky way to do it but it should work.
+			if (error._redirect)
+			{
+				return { redirect: error._redirect }
+			}
+
+			// Otherwise, throw this error up the call stack.
+			throw error
 		})
 	})
 }
@@ -174,7 +196,7 @@ function get_http_response_status_code_for_the_route(matched_routes)
 //
 // Returns a Promise resolving to an object:
 //
-//   redirect_to    - in case of an HTTP redirect
+//   redirect    - in case of an HTTP redirect
 //
 //   matched_routes - the matched hierarchy of React-router `<Route/>`s
 //
@@ -195,7 +217,7 @@ function match_url(url, store)
 			{
 				return resolve
 				({
-					redirect_to: redirect_location.pathname + redirect_location.search
+					redirect: redirect_location.pathname + redirect_location.search
 				})
 			}
 

@@ -50,5 +50,14 @@ describe(`exports`, function()
 
 		redux.Preload_method_name.should.be.a('string')
 		redux.Preload_blocking_method_name.should.be.a('string')
+
+		const server = require('../server')
+
+		// (for backwards compatibility; use `react-isomorphic-render/server` instead)
+		const page_server = require('../page-server')
+		page_server.should.equal(server)
+
+		server.should.be.a('function')
+		server.render.should.be.a('function')
 	})
 })

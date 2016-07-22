@@ -1,3 +1,8 @@
+4.0.16 / 22.07.2016
+===================
+
+  * Extracted `page-server` rendering into a separate `async` (returns Promise) function `render` (see readme for arguments and return values)
+
 4.0.15 / 22.07.2016
 ===================
 

@@ -37,7 +37,7 @@ export default class Html extends Component
 		// (but server-side rendering is always enabled so this "if" condition may be removed)
 		let content_markup = this.props.children ? ReactDOMServer.renderToString(this.props.children) : ''
 
-		let content_element = <div id="react" dangerouslySetInnerHTML={{__html: content_markup}}/>
+		let content_element = <div id="react" dangerouslySetInnerHTML={{ __html: content_markup }}/>
 
 		if (body)
 		{

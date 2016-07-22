@@ -38,7 +38,7 @@ export default
 Start webpage rendering server
 
 ```javascript
-import webpage_server from 'react-isomorphic-render/page-server'
+import webpage_server from 'react-isomorphic-render/server'
 import settings from './react-isomorphic-render'
 
 // Create webpage rendering server
@@ -55,8 +55,8 @@ const server = webpage_server
 
   // URLs of javascript and CSS files
   // which will be insterted into the <head/> element of the resulting Html webpage
-  // (as <script src="..."/> and <link rel="style" href="..."/>)
-  //
+  // as <script src="..."/> and <link rel="style" href="..."/> respectively.
+  // (can be a function)
   assets:
   {
     javascript: '/assets/application.js',
@@ -218,6 +218,72 @@ app.use(function(request, response)
 })
 ```
 
+## Without proxying
+
+To use `react-isomorphic-render` without proxying there are two options
+
+  * Supply custom Koa `middleware` array option to webpage server
+  * Use `render` function manually:
+
+```js
+import { render } from 'react-isomorphic-render/server'
+
+try
+{
+  // Returns a Promise.
+  //
+  // status  - HTTP response status
+  // content - rendered HTML document (markup)
+  // redirect - redirection URL (in case of HTTP redirect)
+  //
+  const { status, content, redirect } = await render
+  ({
+    // Takes the same parameters as webpage server
+    application: { host, port },
+    assets,
+
+    // Plus two extra parameters:
+
+    // Original HTTP request, which is used for
+    // getting URL, cloning cookies, and inside `preload`.
+    request,
+
+    // Preferred locale (e.g. 'ru-RU').
+    // Can be obtained from 'Accept-Language' HTTP header.
+    preferred_locale,
+
+    // The rest options are the same as for webpage server
+    // and are all optional.
+    preload(),
+    localize(),
+    disable_server_side_rendering, // true/false
+    head,
+    body,
+    body_start,
+    body_end,
+    style
+  },
+  // The second `settings` parameter is the same as for webpage server
+  settings)
+
+  if (redirect)
+  {
+    return request.redirect(redirect)
+  }
+
+  if (content)
+  {
+    response.status(status || 200)
+    response.send(content)
+  }
+}
+catch (error)
+{
+  response.status(500)
+  response.send('Internal server error')
+}
+```
+
 ## HTTP response status code
 
 To set custom HTTP response status code for a specific route set the `status` property of that `<Route/>`.
@@ -376,6 +442,8 @@ this.props.dispatch(goto('/items/1?color=red'))
   // Handles errors occurring inside `@preload()`.
   // For example, if `@preload()` throws a `new Error("Unauthorized")`,
   // then a redirect to "/unauthorized" page can be made here.
+  // If this error handler is defined then it must handle
+  // all errors it gets (or just re`throw` them).
   on_preload_error: (error, { url, redirect }) => redirect(`/error?url=${encode(url)}&error=${error.code}`)
 
   // (optional)
@@ -442,7 +510,9 @@ this.props.dispatch(goto('/items/1?color=red'))
 
   // (optional)
   // Is called when an error happens on the server side
-  // (can redirect to special "500 Error" pages)
+  // (can redirect to special "500 Error" pages).
+  // If this error handler is defined then it must handle
+  // all errors it gets (or just re`throw` them).
   on_error: (error, { url, redirect }) => redirect(`/error?url=${encode(url)}&error=${error.code}`)
 
   // (optional)
@@ -452,36 +522,41 @@ this.props.dispatch(goto('/items/1?color=red'))
   middleware: [...]
 
   // (optional)
-  // Returns React element an array of React elements
-  // which will be inserted into server rendered webpage's <head/>
-  // (in case of an array use `key`s to prevent React warning)
-  head: (url) => React element or an array of React elements
+  // HTML code injection
+  html:
+  {
+    // (optional)
+    // Returns React element an array of React elements
+    // which will be inserted into server rendered webpage's <head/>
+    // (in case of an array use `key`s to prevent React warning)
+    head: (url) => React element or an array of React elements
 
-  // (optional)
-  // Allows for wrapping React page component with arbitrary elements
-  // (or doing whatever else can be done with a React element).
-  // Returns either a React element or an array of React elements
-  // which will be inserted into server rendered webpage's <body/>
-  body: react_page_element => react_page_element
+    // (optional)
+    // Allows for wrapping React page component with arbitrary elements
+    // (or doing whatever else can be done with a React element).
+    // Returns either a React element or an array of React elements
+    // which will be inserted into server rendered webpage's <body/>
+    body: react_page_element => react_page_element
 
-  // (optional)
-  // Returns React element or an array of React elements.
-  // Allows adding arbitrary React elements to the start of the <body/>
-  // (use `key`s to prevent React warning when returning an array of React elements)
-  body_start: (url) => React element or an array of React elements
+    // (optional)
+    // Returns React element or an array of React elements.
+    // Allows adding arbitrary React elements to the start of the <body/>
+    // (use `key`s to prevent React warning when returning an array of React elements)
+    body_start: (url) => React element or an array of React elements
 
-  // (optional)
-  // Returns React element or an array of React elements.
-  // Allows adding arbitrary React elements to the end of the <body/>
-  // (use `key`s to prevent React warning when returning an array of React elements)
-  body_end: (url) => React element or an array of React elements
+    // (optional)
+    // Returns React element or an array of React elements.
+    // Allows adding arbitrary React elements to the end of the <body/>
+    // (use `key`s to prevent React warning when returning an array of React elements)
+    body_end: (url) => React element or an array of React elements
 
-  // (optional)
-  // (is used only in development mode, for "flash of unstyled content")
-  // This function returns CSS text which will be inserted 
-  // into server rendered webpage's <head/> <style/> tag.
-  // If you're using Webpack then the CSS text is the result of a require() call.
-  style: () => 'body { background: white }'
+    // (optional)
+    // (is used only in development mode, for "flash of unstyled content")
+    // This function returns CSS text which will be inserted 
+    // into server rendered webpage's <head/> <style/> tag.
+    // If you're using Webpack then the CSS text is the result of a require() call.
+    style: () => 'body { background: white }'
+  }
 
   // (optional)
   // Preloads data before performing page rendering.

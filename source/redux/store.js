@@ -115,8 +115,30 @@ export default function(get_reducer, { development, development_tools, server, d
 	// instrument it with redirection handlers (isomorphic redirection)
 	if (server)
 	{
-		store.history.replace = server.redirect
-		store.history.push    = server.redirect
+		// A hacky way but it should work
+		// for calling `redirect` from anywhere
+		// inside `@preload` Promise.
+		//
+		// this.props.dispatch(redirect(url)) is synchronous,
+		// and so is `redux-router`'s `historyMiddleware`,
+		// so throwing an error should abort further actions
+		// and bring it to the top of the call stack
+		// (`render` function) where it's processed properly.
+		//
+		const redirect = (url) =>
+		{
+			if (!url)
+			{
+				throw new Error(`"url" parameter is required for redirect`)
+			}
+			
+			const error = new Error('redirect')
+			error._redirect = url || '/'
+			throw error
+		}
+
+		store.history.replace = redirect
+		store.history.push    = redirect
 	}
 	
 	// // client side hot module reload for Redux reducers attempt

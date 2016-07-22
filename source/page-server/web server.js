@@ -4,7 +4,6 @@ import path from 'path'
 import koa        from 'koa'
 import koa_locale from 'koa-locale'
 
-import Http_client from '../http client'
 import render      from './render'
 
 import render_stack_trace from './html stack trace'
@@ -25,14 +24,26 @@ export default function start_webpage_rendering_server(options, common)
 		assets,
 		application,
 		disable_server_side_rendering,
+		on_error,
+
+		// Legacy 4.x API support
 		head,
 		body,
 		body_start,
 		body_end,
-		style,
-		on_error
+		style
 	}
 	= options
+
+	// Legacy 4.x API support
+	const html = options.html ||
+	{
+		head,
+		body,
+		body_start,
+		body_end,
+		style
+	}
 
 	// Normalize `assets` parameter
 	// (to be a function)
@@ -104,15 +115,6 @@ export default function start_webpage_rendering_server(options, common)
 	// Isomorphic rendering
 	web.use(async (ctx) =>
 	{
-		// isomorphic http api calls
-		const http_client = new Http_client
-		({
-			host          : application.host,
-			port          : application.port,
-			secure        : application.secure,
-			clone_request : ctx.req
-		})
-
 		// Material-UI asks for this,
 		// but this isn't right,
 		// because Node.js serves requests asynchronously
@@ -121,78 +123,65 @@ export default function start_webpage_rendering_server(options, common)
 		//
 		// global.navigator = { userAgent: request.headers['user-agent'] }
 
+		// Trims a question mark in the end (just in case)
 		const url = ctx.request.originalUrl.replace(/\?$/, '')
 
-		const redirect = to => ctx.redirect(to)
+		const redirect_to = to => ctx.redirect(to)
 
-		// these parameters are for Koa app.
-		// they can be modified to work with Express app if needed.
-		await render
-		({
-			development,
+		try
+		{
+			const { status, content, redirect } = await render
+			({
+				application,
+				assets,
+				preload,
+				localize,
+				disable_server_side_rendering,
+				html,
 
-			preload,
-			localize,
-			preferred_locale: ctx.getLocaleFromQuery() || ctx.getLocaleFromCookie() || ctx.getLocaleFromHeader(),
+				// The original HTTP request can be required
+				// for inspecting cookies in `preload` function
+				request: ctx.req,
+				preferred_locale: ctx.getLocaleFromQuery() || ctx.getLocaleFromCookie() || ctx.getLocaleFromHeader(),
+			},
+			common)
 
-			assets,
-
-			url,
-
-			// The original HTTP request can be required
-			// for inspecting cookies in `preload` function
-			request: ctx.req,
-
-			http_client,
-			http_client_on_before_send: common.http_request,
-
-			respond : ({ markup, status }) =>
+			if (redirect)
 			{
-				ctx.body = markup
+				return redirect_to(redirect)
+			}
 
+			if (content)
+			{
 				if (status)
 				{
 					ctx.status = status
 				}
-			}, 
-			fail : error =>
+
+				ctx.body = content
+			}
+		}
+		catch (error)
+		{
+			if (on_error)
 			{
-				if (on_error)
+				return on_error(error,
 				{
-					return on_error(error,
-					{
-						redirect,
-						url
-					})
-				}
+					redirect: redirect_to,
+					url
+				})
+			}
 
-				throw error
-			}, 
-			redirect,
+			throw error
+		}
 
-			disable_server_side_rendering,
-
-			get_reducer      : common.get_reducer,
-			redux_middleware : common.redux_middleware,
-			on_store_created : common.on_store_created,
-			on_preload_error : common.on_preload_error,
-			create_routes    : common.create_routes,
-			wrapper          : common.wrapper,
-
-			head,
-			body,
-			body_start,
-			body_end,
-			style
-		})
-
-		// this turned out to be a lame way to do it,
+		// This turned out to be a lame way to do it,
 		// because cookies are sent in request 
 		// with no additional parameters
 		// such as `path`, `httpOnly` and `expires`,
 		// so there were cookie duplication issues.
 		//
-		// now superagent.agent() handles cookies correctly.
+		// Now superagent.agent() handles cookies correctly.
 		//
 		// ctx.set('set-cookie', _http_client.cookies)
 	})

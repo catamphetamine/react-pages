@@ -178,17 +178,27 @@ export default function(server, on_error, dispatch_event)
 			return next(action)
 		}
 
-		// outputs error to the console by default
-		on_error = on_error || (error => console.error(error.stack || error))
-
 		// Promise error handler
 		const error_handler = error => 
 		{
-			// handle the error (for example, redirect to an error page)
+			// If no `on_preload_error` handler was set,
+			// then use default behaviour.
+			if (!on_error)
+			{
+				// This error will be handled in `web server` `catch` clause
+				// if this code is being run on the server side.
+				if (server)
+				{
+					throw error
+				}
+
+				// On the client-side outputs errors to console by default
+				return console.error(error.stack || error)
+			}
+
+			// Handle the error (for example, redirect to an error page)
 			on_error(error,
 			{
-				error, 
-
 				url : action.payload.location.pathname + action.payload.location.search,
 
 				redirect(to)
@@ -201,6 +211,15 @@ export default function(server, on_error, dispatch_event)
 					dispatch_event(replace(to))
 				}
 			})
+
+			// On the server-side the page rendering process
+			// still needs to be aborted, therefore rethrow the error,
+			// while also marking it as handled.
+			if (server)
+			{
+				error._was_handled = true
+				throw error
+			}
 		}
 
 		// all these three properties are the next React-router state
@@ -229,51 +248,42 @@ export default function(server, on_error, dispatch_event)
 
 		// const preloading = { pending: true }
 
-		// will return this Promise
+		// This Promise is only used in server-side rendering.
+		// Client-side rendering never uses this Promise.
 		const promise = 
 			// preload this route
 			preload()
 			// proceed with routing
-			.then
-			(
-				() =>
+			.then(() =>
+			{
+				// if (!preloading.pending)
+				// {
+				// 	return
+				// }
+
+				dispatch({ type: Preload_finished })
+
+				next(action)
+			})
+			.catch(error =>
+			{
+				// if (!preloading.pending)
+				// {
+				// 	return
+				// }
+
+				// Reset the Promise temporarily placed into the router state 
+				// by the code below
+				// (fixes "Invariant Violation: `mapStateToProps` must return an object. Instead received [object Promise]")
+				if (server)
 				{
-					// if (!preloading.pending)
-					// {
-					// 	return
-					// }
-
-					dispatch({ type: Preload_finished })
-
-					next(action)
-				})
-				.catch(error =>
-				{
-					// if (!preloading.pending)
-					// {
-					// 	return
-					// }
-
-					// Reset the Promise temporarily placed into the router state 
-					// by the code below
-					// (fixes "Invariant Violation: `mapStateToProps` must return an object. Instead received [object Promise]")
-					if (server)
-					{
-						getState().router = null
-					}
-					
-					dispatch({ type: Preload_failed, error })
-
-					// `error_handler` will be called in `web server` `catch` clause
-					// if this code is being run on the server side
-					if (server)
-					{
-						throw error
-					}
-
-					error_handler(error)
+					getState().router = null
 				}
-			)
+
+				dispatch({ type: Preload_failed, error })
+
+				error_handler(error)
+			})
 			// .finally(() => preloading.pending = false)
 
 		// if (!server)

@@ -26,7 +26,7 @@ export function render_on_client({ development, element, create_page_element, to
   })
 }
 
-// returns a Promise resolving to { status, markup, redirect_to }
+// returns a Promise resolving to { status, content, redirect }
 //
 export function render_on_server({ disable_server_side_rendering, create_page_element, render_webpage_as_react_element, create_routes, url })
 {
@@ -34,7 +34,7 @@ export function render_on_server({ disable_server_side_rendering, create_page_el
   if (disable_server_side_rendering)
   {
     // Render the empty <Html/> component into Html markup string
-    return Promise.resolve({ markup: react_render_on_server({ render_webpage_as_react_element }) })
+    return Promise.resolve({ content: react_render_on_server({ render_webpage_as_react_element }) })
   }
 
   // The following code hasn't been tested.
@@ -57,7 +57,7 @@ export function render_on_server({ disable_server_side_rendering, create_page_el
       {
         return resolve
         ({
-          redirect_to: redirect_location.pathname + redirect_location.search
+          redirect: redirect_location.pathname + redirect_location.search
         })
       }
 
@@ -74,10 +74,10 @@ export function render_on_server({ disable_server_side_rendering, create_page_el
       const page_element = create_page_element(<RouterContext {...render_props}/>)
 
       // Render the current page's React element to HTML markup
-      const markup = react_render_on_server({ render_webpage_as_react_element, page_element })
+      const content = react_render_on_server({ render_webpage_as_react_element, page_element })
       
       // return HTTP status code and HTML markup
-      return { markup }
+      return { content }
     })
   })
 }

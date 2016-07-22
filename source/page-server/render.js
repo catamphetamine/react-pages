@@ -6,17 +6,54 @@ import React from 'react'
 import fs from 'fs'
 
 import Html from './html'
+import Http_client from '../http client'
 
 import { render_on_server as redux_render }        from '../redux/render'
-import { render_on_server as react_router_render } from '../redux/render'
+import { render_on_server as react_router_render } from '../react-router/render'
 
 import create_store from '../redux/store'
 import set_up_http_client from '../redux/http client'
 
 // isomorphic (universal) rendering (middleware).
 // will be used in web_application.use(...)
-export default async function({ development, preload, localize, preferred_locale, assets, url, request, http_client, http_client_on_before_send, respond, fail, redirect, disable_server_side_rendering, get_reducer, redux_middleware, on_store_created, on_preload_error, create_routes, wrapper, head, body, body_start, body_end, style })
+export default async function({ preload, localize, preferred_locale, assets, application, request, disable_server_side_rendering, html }, common)
 {
+	const
+	{
+		get_reducer,
+		redux_middleware,
+		on_store_created,
+		on_preload_error,
+		create_routes,
+		wrapper
+	}
+	= common
+
+	let
+	{
+		head,
+		body,
+		body_start,
+		body_end,
+		style
+	}
+	= html
+
+	// In development mode Redux DevTools are activated, for example
+	const development = process.env.NODE_ENV !== 'production'
+
+	// Trims a question mark in the end (just in case)
+	const url = request.url.replace(/\?$/, '')
+
+	// Isomorphic http client (with cookie support)
+	const http_client = new Http_client
+	({
+		host          : application.host,
+		port          : application.port,
+		secure        : application.secure,
+		clone_request : request
+	})
+
 	// initial Flux store data (if using Flux)
 	let store_data = {}
 
@@ -34,7 +71,7 @@ export default async function({ development, preload, localize, preferred_locale
 		store = create_store(get_reducer,
 		{
 			development,
-			server: { redirect },
+			server: true,
 			create_routes,
 			data: store_data,
 			middleware: redux_middleware,
@@ -46,9 +83,9 @@ export default async function({ development, preload, localize, preferred_locale
 
 	// Customization of `http` utility
 	// which can be used inside Redux action creators
-	set_up_http_client(http_client, { store, on_before_send: http_client_on_before_send })
+	set_up_http_client(http_client, { store, on_before_send: common.http_request })
 
-	// internationalization
+	// Internationalization
 
 	let locale
 	let messages
@@ -61,89 +98,74 @@ export default async function({ development, preload, localize, preferred_locale
 		messages = result.messages
 	}
 
-	// if Redux is being used, then render for Redux.
-	// else render for pure React.
+	// If Redux is being used, then render for Redux.
+	// Else render for pure React.
 	const render = store ? redux_render : react_router_render
 
-	// render the web page
-	try
-	{
-		const { status, markup, redirect_to } = await render
-		({
-			disable_server_side_rendering,
-			
-			url,
+	// Render the web page
+	return await render
+	({
+		disable_server_side_rendering,
+		
+		url,
 
-			create_page_element: (child_element, props) => 
-			{
-				if (localize)
-				{
-					props.locale   = locale
-					props.messages = messages
-				}
-
-				return React.createElement(wrapper, props, child_element)
-			},
-
-			render_webpage_as_react_element: content =>
-			{
-				assets = assets(url)
-				if (assets.styles)
-				{
-					assets.style = assets.styles
-				}
-
-				if (head)
-				{
-					head = head(url)
-				}
-
-				if (body_start)
-				{
-					body_start = body_start(url)
-				}
-
-				if (body_end)
-				{
-					body_end = body_end(url)
-				}
-
-				const markup = 
-				(
-					<Html
-						development={development}
-						assets={assets}
-						locale={locale}
-						head={head}
-						body={body}
-						body_start={body_start}
-						body_end={body_end}
-						style={style}
-						store={store}>
-
-						{content}
-					</Html>
-				)
-
-				return markup
-			},
-
-			store,
-
-			// create_routes is only used for bare React-router rendering
-			create_routes: store ? undefined : create_routes
-		})
-
-		if (redirect_to)
+		create_page_element: (child_element, props) => 
 		{
-			return redirect(redirect_to)
-		}
+			if (localize)
+			{
+				props.locale   = locale
+				props.messages = messages
+			}
 
-		respond({ status, markup })
-	}
-	catch (error)
-	{
-		// Calls user supplied error handler
-		fail(error)
-	}
+			return React.createElement(wrapper, props, child_element)
+		},
+
+		render_webpage_as_react_element: content =>
+		{
+			assets = assets(url)
+			if (assets.styles)
+			{
+				assets.style = assets.styles
+			}
+
+			if (head)
+			{
+				head = head(url)
+			}
+
+			if (body_start)
+			{
+				body_start = body_start(url)
+			}
+
+			if (body_end)
+			{
+				body_end = body_end(url)
+			}
+
+			const markup = 
+			(
+				<Html
+					development={development}
+					assets={assets}
+					locale={locale}
+					head={head}
+					body={body}
+					body_start={body_start}
+					body_end={body_end}
+					style={style}
+					store={store}>
+
+					{content}
+				</Html>
+			)
+
+			return markup
+		},
+
+		store,
+
+		// create_routes is only used for bare React-router rendering
+		create_routes: store ? undefined : create_routes
+	})
 }

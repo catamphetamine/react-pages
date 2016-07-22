@@ -1,2 +1,3 @@
 // just an npm package helper
-module.exports = require('./build/page-server/web server')
+// (for backwards compatibility; use `react-isomorphic-render/server` instead)
+module.exports = require('./server')
