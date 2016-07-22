@@ -364,7 +364,7 @@ import { goto, redirect } from 'react-isomorphic-render/redux'
 // Usage example
 // (`goto` navigates to a URL while adding a new entry in browsing history,
 //  `redirect` does the same without modifying browsing history)
-// this.props.dispatch(goto('/items/1?color=red'))
+this.props.dispatch(goto('/items/1?color=red'))
 ```
 
 ## Miscellaneous react-isomorphic-render.js settings
