@@ -387,7 +387,7 @@ this.props.dispatch(goto('/items/1?color=red'))
 
   // (optional)
   // Will be called for each HTTP request
-  // sent using `http` utility inside Redux action creators..
+  // sent using `http` utility inside Redux action creators.
   // (`request` is a `superagent` request)
   http_request: (request, { store }) =>
   {
@@ -395,7 +395,6 @@ this.props.dispatch(goto('/items/1?color=red'))
 
     if (token)
     {
-      // if 
       request.set('Authorization', `Bearer ${token}`)
     }
   }
