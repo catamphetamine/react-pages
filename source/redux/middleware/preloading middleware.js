@@ -7,7 +7,7 @@
 // in all the other cases it will do nothing
 
 import { ROUTER_DID_CHANGE } from 'redux-router/lib/constants'
-import { replaceState }      from 'redux-router'
+import { replace }           from 'redux-router'
 
 export const Preload_method_name          = '__react_preload___'
 export const Preload_blocking_method_name = '__react_preload_blocking__'
@@ -80,13 +80,14 @@ const preloader = (server, components, getState, dispatch, location, params, opt
 	// (in parallel) and returns a Promise
 	const preload_all = () => 
 	{
-		return Promise.all((preloads || []).map(preload =>
+		return Promise.all(preloads.map(preload =>
 		{
 			try
 			{
+				// `preload()` returns a Promise
 				const promise = preload()
 
-				// sanity check
+				// Sanity check
 				if (!promise.then)
 				{
 					return Promise.reject(`Preload function didn't return a Promise:`, preload)
@@ -147,8 +148,15 @@ const preloader = (server, components, getState, dispatch, location, params, opt
 	}
 }
 
+// Checks if two `location`s are the same
 const locations_are_equal = (a, b) => (a.pathname === b.pathname) && (a.search === b.search)
 
+// Because `preloading_middleware` is `applied` to the store
+// before `reduxReactRouter` store enhancer adds its own middleware,
+// then it means that standard `dispatch` of `preloading_middleware`
+// won't send actions to that `reduxReactRouter` middleware,
+// therefore there's the third `dispatch_event` argument
+// which is a function to hack around that limitation.
 export default function(server, on_error, dispatch_event)
 {
 	return ({ getState, dispatch }) => next => action =>
@@ -176,23 +184,22 @@ export default function(server, on_error, dispatch_event)
 		// Promise error handler
 		const error_handler = error => 
 		{
-			// finish the current Redux middleware chain
-			next(action)
-			
 			// handle the error (for example, redirect to an error page)
 			on_error(error,
 			{
 				error, 
-				url      : action.payload.location.pathname + action.payload.location.search,
 
-				// for some strange reason the `dispatch` function 
-				// from the middleware parameters doesn't work here 
-				// when `redirect()`ing from this `on_error` handler
-				redirect : to => dispatch_event(replaceState(null, to)),
+				url : action.payload.location.pathname + action.payload.location.search,
 
-				// // finish the current Redux middleware chain
-				// // (not used really)
-				// proceed  : () => next(action)
+				redirect(to)
+				{
+					// Because `preloading_middleware` is `applied` to the store
+					// before `reduxReactRouter` store enhancer adds its own middleware,
+					// then it means that standard `dispatch` of `preloading_middleware`
+					// won't send actions to that `reduxReactRouter` middleware,
+					// therefore using this `dispatch_event` function to hack around that.
+					dispatch_event(replace(to))
+				}
 			})
 		}
 
@@ -239,15 +246,15 @@ export default function(server, on_error, dispatch_event)
 					dispatch({ type: Preload_finished })
 
 					next(action)
-				}, 
-				error =>
+				})
+				.catch(error =>
 				{
 					// if (!preloading.pending)
 					// {
 					// 	return
 					// }
 
-					// reset the Promise temporarily placed into the router state 
+					// Reset the Promise temporarily placed into the router state 
 					// by the code below
 					// (fixes "Invariant Violation: `mapStateToProps` must return an object. Instead received [object Promise]")
 					if (server)
@@ -256,6 +263,13 @@ export default function(server, on_error, dispatch_event)
 					}
 					
 					dispatch({ type: Preload_failed, error })
+
+					// `error_handler` will be called in `web server` `catch` clause
+					// if this code is being run on the server side
+					if (server)
+					{
+						throw error
+					}
 
 					error_handler(error)
 				}
@@ -268,22 +282,29 @@ export default function(server, on_error, dispatch_event)
 		// 	window.__preloading_page = preloading
 		// }
 
-		// on the server side
+		// On the server side
 		if (server)
 		{
-			// router state is null until ReduxRouter is created 
-			// in the next middleware call, so until that next middleware is called
+			// `state.router` is null until `replaceRoutesMiddleware` is called 
+			// with the currently paused ROUTER_DID_CHANGE action as a parameter
+			// in a subsequent middleware call, so until that next middleware is called
 			// we can use this router state variable to store the promise 
 			// to let the server know when it can render the page.
 			//
-			// this variable will be instantly available
+			// This variable will be instantly available
 			// (and therefore .then()-nable)
 			// in ./source/redux/render.js,
-			// and when everything is preloaded (asynchronously), 
+			// and when everything has finished preloading (asynchronously), 
 			// then the next middleware is called,
-			// which replaces this variable with the proper Redux-router router state. 
+			// `replaceRoutesMiddleware` gets control,
+			// and replaces `state.router` with the proper Redux-router router state. 
 			//
-			getState().router = promise
+			// (the `promise` above could still resolve instantly, hence the `if` check)
+			//
+			if (!getState().router)
+			{
+				getState().router = promise
+			}
 		}
 	}
 }

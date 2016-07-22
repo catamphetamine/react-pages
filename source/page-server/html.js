@@ -48,6 +48,24 @@ export default class Html extends Component
 
 		const html_attributes = webpage_head.htmlAttributes.toComponent()
 
+		// Fixing `react-helmet` bug here
+		// until they release the fix
+		// https://github.com/nfl/react-helmet/issues/158
+		if (Array.isArray(html_attributes))
+		{
+			// const array = html_attributes
+			// html_attributes = {}
+			// for (var key in array)
+			// {
+			//		html_attributes[key] = array[key]
+			// }
+
+			console.log(`You're gonna see a React warning in the console:` + `\n` +
+				`"Warning: React.createElement(...): Expected props argument of html to be a plain object".` + `\n` +
+				`This is not an error and this warning will be fixed in "react-helmet" package` + `\n` +
+				`https://github.com/nfl/react-helmet/issues/158`)
+		}
+
 		if (locale)
 		{
 			html_attributes.lang = get_language_from_locale(locale)

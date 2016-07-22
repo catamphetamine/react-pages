@@ -1,7 +1,7 @@
 import React          from 'react'
 import ReactDOMServer from 'react-dom/server'
 
-import { match }       from 'redux-router/server'
+import { match }       from 'redux-router/lib/server'
 import { ReduxRouter } from 'redux-router'
 import { RouterContext, applyRouterMiddleware } from 'react-router'
 import use_scroll      from 'react-router-scroll'
@@ -111,7 +111,7 @@ export function render_on_server({ disable_server_side_rendering, create_page_el
 		return Promise.resolve({ markup: react_render_on_server({ render_webpage_as_react_element }) })
 	}
 
-	// perform routing for this `url`
+	// Perform routing for this `url`
 	return match_url(url, store).then(routing_result =>
 	{
 		// Return in case of an HTTP redirect
@@ -122,8 +122,13 @@ export function render_on_server({ disable_server_side_rendering, create_page_el
 
 		// Http response status code
 		const http_status_code = get_http_response_status_code_for_the_route(routing_result.matched_routes)
-		
-		// After everything is preloaded, render the (current) page
+
+		// When `url` matching process finished,
+		// it immediately launched preloading process,
+		// so it's preloading the page now.
+		//
+		// After the page has finished preloading, render it
+		//
 		return wait_for_page_to_preload(store).then(() => 
 		{
 			// Renders the current page React component to a React element
@@ -132,7 +137,7 @@ export function render_on_server({ disable_server_side_rendering, create_page_el
 
 			// Render the current page's React element to HTML markup
 			const markup = react_render_on_server({ render_webpage_as_react_element, page_element })
-		
+
 			// return HTTP status code and HTML markup
 			return { status: http_status_code, markup }
 		})

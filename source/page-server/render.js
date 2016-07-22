@@ -34,7 +34,7 @@ export default async function({ development, preload, localize, preferred_locale
 		store = create_store(get_reducer,
 		{
 			development,
-			server: true,
+			server: { redirect },
 			create_routes,
 			data: store_data,
 			middleware: redux_middleware,
@@ -143,14 +143,6 @@ export default async function({ development, preload, localize, preferred_locale
 	}
 	catch (error)
 	{
-		// A somewhat hacky way to do a redirect.
-		// I'm using it in my projects when throwing
-		// "403 Unauthorized" errors while redirecting user to "Access denied" page.
-		if (error.redirect_to)
-		{
-			return redirect(error.redirect_to)
-		}
-
 		// Calls user supplied error handler
 		fail(error)
 	}

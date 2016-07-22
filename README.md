@@ -356,8 +356,10 @@ class Component extends React.Component
 
 ### Changing current location
 
+When using Redux, these two helpers change current location isomorphically: they work both on client and server.
+
 ```javascript
-import { goto, redirect } from 'react-isomorphic-render'
+import { goto, redirect } from 'react-isomorphic-render/redux'
 
 // Usage example
 // (`goto` navigates to a URL while adding a new entry in browsing history,
@@ -393,6 +395,7 @@ import { goto, redirect } from 'react-isomorphic-render'
 
     if (token)
     {
+      // if 
       request.set('Authorization', `Bearer ${token}`)
     }
   }

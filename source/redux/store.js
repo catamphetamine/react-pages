@@ -10,7 +10,7 @@ import { routerStateReducer } from 'redux-router'
 import { createRoutes } from 'react-router/lib/RouteUtils'
 
 import { reduxReactRouter as reduxReactRouter_client } from 'redux-router'
-import { reduxReactRouter as reduxReactRouter_server } from 'redux-router/server'
+import { reduxReactRouter as reduxReactRouter_server } from 'redux-router/lib/server'
 
 import createHistory_server from 'history/lib/createMemoryHistory'
 import createHistory_client from 'history/lib/createBrowserHistory'
@@ -47,15 +47,19 @@ export default function(get_reducer, { development, development_tools, server, d
 		//
 		asynchronous_middleware(http_client, { promise_event_naming }),
 
-		// enables support for @preload() annotation
+		// Enables support for @preload() annotation
 		// (which preloads data required for displaying certain pages)
 		//
-		// takes effect if the `dispatch`ed message has 
+		// Yakes effect if the `dispatch`ed message has 
 		// { type: ROUTER_DID_CHANGE }
 		//
-		// in all the other cases it will do nothing
+		// In all the other cases it will do nothing
 		//
-		// (passing the additional `dispatch`ing function as the 3rd parameter)
+		// Because `preloading_middleware` is `applied` to the store
+		// before `reduxReactRouter` store enhancer adds its own middleware,
+		// then it means that standard `dispatch` of `preloading_middleware`
+		// won't send actions to that `reduxReactRouter` middleware,
+		// therefore using the third argument to hack around this thing.
 		//
 		preloading_middleware(server, on_preload_error, event => store.dispatch(event))
 	]
@@ -106,6 +110,14 @@ export default function(get_reducer, { development, development_tools, server, d
 	// with the overall Redux reducer 
 	// and the initial Redux store data (aka "the state")
 	const store = create_store(overall_reducer(), data)
+
+	// Because History API won't work on the server side,
+	// instrument it with redirection handlers (isomorphic redirection)
+	if (server)
+	{
+		store.history.replace = server.redirect
+		store.history.push    = server.redirect
+	}
 	
 	// // client side hot module reload for Redux reducers attempt
 	// // (won't work because it's not an immediate parent module for the reducers)

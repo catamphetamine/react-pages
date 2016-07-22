@@ -98,9 +98,10 @@ export default class http_client
 					}
 
 					// // Set HTTP locale header
+					// // (for example, for getting localized response)
 					// if (options.locale)
 					// {
-					// 	request.set('accept-language', locale)
+					// 	request.set('accept-language', options.locale)
 					// }
 
 					// Apply custom adjustments to HTTP request
@@ -136,7 +137,7 @@ export default class http_client
 							error = response.error
 						}
 
-						// If the HTTP request failed
+						// If the HTTP request failed, or returned an `error` property
 						if (error)
 						{
 							// superagent would have already output the error to console
