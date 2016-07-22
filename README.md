@@ -223,7 +223,7 @@ app.use(function(request, response)
 To use `react-isomorphic-render` without proxying there are two options
 
   * Supply custom Koa `middleware` array option to webpage server
-  * Use `render` function manually:
+  * Call `render` function manually:
 
 ```js
 import { render } from 'react-isomorphic-render/server'
