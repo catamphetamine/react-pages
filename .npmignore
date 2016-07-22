@@ -7,6 +7,9 @@
 # Travis CI
 .travis.yml
 
+# tests
+/test/
+
 # test coverage folder
 /coverage/
 

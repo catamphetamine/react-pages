@@ -105,7 +105,13 @@ export default function start_webpage_rendering_server(options, common)
 	web.use(async (ctx) =>
 	{
 		// isomorphic http api calls
-		const http_client = new Http_client({ host: application.host, port: application.port, clone_request: ctx.req })
+		const http_client = new Http_client
+		({
+			host          : application.host,
+			port          : application.port,
+			secure        : application.secure,
+			clone_request : ctx.req
+		})
 
 		// Material-UI asks for this,
 		// but this isn't right,

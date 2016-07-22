@@ -49,7 +49,8 @@ const server = webpage_server
   application:
   {
     host: '192.168.0.1',
-    port: 80
+    port: 80,
+    // secure: true // for HTTPS
   },
 
   // URLs of javascript and CSS files
