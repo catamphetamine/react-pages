@@ -367,7 +367,7 @@ import { goto, redirect } from 'react-isomorphic-render/redux'
 this.props.dispatch(goto('/items/1?color=red'))
 ```
 
-## Miscellaneous react-isomorphic-render.js settings
+## Additional react-isomorphic-render.js settings
 
 ```javascript
 {
