@@ -373,7 +373,6 @@ this.props.dispatch(goto('/items/1?color=red'))
 {
   // (optional)
   // Handles errors occurring inside `@preload()`
-  // both on the client side and on the server side
   // (can redirect to special error pages if needed)
   on_preload_error: (error, { url, redirect }) => redirect(`/error?url=${encode(url)}&error=${error.code}`)
 
