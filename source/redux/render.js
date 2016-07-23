@@ -1,7 +1,7 @@
 import React          from 'react'
 import ReactDOMServer from 'react-dom/server'
 
-import { match }       from 'redux-router/lib/server'
+import { match }       from 'redux-router/server'
 import { ReduxRouter } from 'redux-router'
 import { RouterContext, applyRouterMiddleware } from 'react-router'
 import use_scroll      from 'react-router-scroll'

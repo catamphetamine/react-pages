@@ -10,7 +10,7 @@ import { routerStateReducer } from 'redux-router'
 import { createRoutes } from 'react-router/lib/RouteUtils'
 
 import { reduxReactRouter as reduxReactRouter_client } from 'redux-router'
-import { reduxReactRouter as reduxReactRouter_server } from 'redux-router/lib/server'
+import { reduxReactRouter as reduxReactRouter_server } from 'redux-router/server'
 
 import createHistory_server from 'history/lib/createMemoryHistory'
 import createHistory_client from 'history/lib/createBrowserHistory'
@@ -131,7 +131,7 @@ export default function(get_reducer, { development, development_tools, server, d
 			{
 				throw new Error(`"url" parameter is required for redirect`)
 			}
-			
+
 			const error = new Error('redirect')
 			error._redirect = url || '/'
 			throw error
