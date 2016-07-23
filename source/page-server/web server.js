@@ -126,7 +126,14 @@ export default function start_webpage_rendering_server(options, common)
 		// Trims a question mark in the end (just in case)
 		const url = ctx.request.originalUrl.replace(/\?$/, '')
 
+		// Performs HTTP redirect
 		const redirect_to = to => ctx.redirect(to)
+
+	    // Preferred locale (e.g. 'ru-RU').
+	    // Can be obtained from `language` cookie
+	    // or from 'Accept-Language' HTTP header.
+	    const preferred_locale = ctx.getLocaleFromQuery() || ctx.getLocaleFromCookie() || ctx.getLocaleFromHeader()
+	    const _localize = (store) => localize(store, preferred_locale)
 
 		try
 		{
@@ -135,14 +142,13 @@ export default function start_webpage_rendering_server(options, common)
 				application,
 				assets,
 				preload,
-				localize,
+				localize: _localize,
 				disable_server_side_rendering,
 				html,
 
 				// The original HTTP request can be required
 				// for inspecting cookies in `preload` function
-				request: ctx.req,
-				preferred_locale: ctx.getLocaleFromQuery() || ctx.getLocaleFromCookie() || ctx.getLocaleFromHeader(),
+				request: ctx.req
 			},
 			common)
 

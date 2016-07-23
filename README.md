@@ -242,26 +242,23 @@ try
     application: { host, port },
     assets,
 
-    // Plus two extra parameters:
-
     // Original HTTP request, which is used for
     // getting URL, cloning cookies, and inside `preload`.
     request,
 
-    // Preferred locale (e.g. 'ru-RU').
-    // Can be obtained from 'Accept-Language' HTTP header.
-    preferred_locale,
-
     // The rest options are the same as for webpage server
     // and are all optional.
-    preload(),
-    localize(),
-    disable_server_side_rendering, // true/false
-    head,
-    body,
-    body_start,
-    body_end,
-    style
+    preload(...),
+    localize(store), // doesn't take `preferred_locale` parameter
+    disable_server_side_rendering, // `true`/`false`
+    html:
+    {
+      head,
+      body,
+      body_start,
+      body_end,
+      style
+    }
   },
   // The second `settings` parameter is the same as for webpage server
   settings)
@@ -396,7 +393,7 @@ meta({ ... same `meta` as above ... })
 
 ### Locale detection
 
-This library performs the following locale detection steps for each webpage rendering HTTP request:
+When launched as a webpage server, this library performs the following locale detection steps for each webpage rendering HTTP request:
 
  * Checks the `locale` query parameter (if it's an HTTP GET request)
  * Checks the `locale` cookie

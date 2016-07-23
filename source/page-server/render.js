@@ -16,7 +16,7 @@ import set_up_http_client from '../redux/http client'
 
 // isomorphic (universal) rendering (middleware).
 // will be used in web_application.use(...)
-export default async function({ preload, localize, preferred_locale, assets, application, request, disable_server_side_rendering, html }, common)
+export default async function({ preload, localize, assets, application, request, disable_server_side_rendering, html }, common)
 {
 	const
 	{
@@ -92,7 +92,7 @@ export default async function({ preload, localize, preferred_locale, assets, app
 
 	if (localize)
 	{
-		const result = await localize(store, preferred_locale)
+		const result = await localize(store)
 
 		locale   = result.locale
 		messages = result.messages
