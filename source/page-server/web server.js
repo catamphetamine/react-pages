@@ -157,15 +157,12 @@ export default function start_webpage_rendering_server(options, common)
 				return redirect_to(redirect)
 			}
 
-			if (content)
+			if (status)
 			{
-				if (status)
-				{
-					ctx.status = status
-				}
-
-				ctx.body = content
+				ctx.status = status
 			}
+
+			ctx.body = content
 		}
 		catch (error)
 		{
@@ -173,8 +170,8 @@ export default function start_webpage_rendering_server(options, common)
 			{
 				return on_error(error,
 				{
-					redirect: redirect_to,
-					url
+					url,
+					redirect: redirect_to
 				})
 			}
 

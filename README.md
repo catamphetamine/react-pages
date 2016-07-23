@@ -268,11 +268,8 @@ try
     return request.redirect(redirect)
   }
 
-  if (content)
-  {
-    response.status(status || 200)
-    response.send(content)
-  }
+  response.status(status || 200)
+  response.send(content)
 }
 catch (error)
 {

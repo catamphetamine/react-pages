@@ -213,12 +213,14 @@ export default function(server, on_error, dispatch_event)
 			})
 
 			// On the server-side the page rendering process
-			// still needs to be aborted, therefore rethrow the error,
-			// while also marking it as handled.
+			// still needs to be aborted, therefore rethrow the error.
+			// `on_preload_error` must handle all errors,
+			// which means it either `redirect`s or re`throw`s,
+			// which are both `throw`s, so with a proper
+			// `on_preload_error` handler this code wouldn't be reached.
 			if (server)
 			{
-				error._was_handled = true
-				throw error
+				throw new Error(`"on_preload_error" must either redirect or rethrow the error`)
 			}
 		}
 

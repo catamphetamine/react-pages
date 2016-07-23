@@ -143,18 +143,8 @@ export function render_on_server({ disable_server_side_rendering, create_page_el
 		},
 		(error) =>
 		{
-			// If it's a `@preload` error and `on_preload_error()` had been set,
-			// then this error was already handled
-			// in `preloading_middleware`'s `error_handler`.
-			// Therefore, just ignore it.
-			//
-			if (error._was_handled)
-			{
-				return {}
-			}
-
 			// If an HTTP redirect is required, then abort all further actions.
-			// That's a hacky way to do it but it should work.
+			// That's a hacky way to implement redirects but it seems to work.
 			if (error._redirect)
 			{
 				return { redirect: error._redirect }
