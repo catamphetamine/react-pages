@@ -246,8 +246,8 @@ try
     // getting URL, cloning cookies, and inside `preload`.
     request,
 
-    // The rest options are the same as for webpage server
-    // and are all optional
+    // The rest optional parameters are the same
+    // as for webpage server and are all optional
   },
   // The second `settings` parameter is the same as for webpage server
   settings)
