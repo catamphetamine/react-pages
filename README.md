@@ -247,18 +247,7 @@ try
     request,
 
     // The rest options are the same as for webpage server
-    // and are all optional.
-    preload(...),
-    localize(store), // doesn't take `preferred_locale` parameter
-    disable_server_side_rendering, // `true`/`false`
-    html:
-    {
-      head,
-      body,
-      body_start,
-      body_end,
-      style
-    }
+    // and are all optional
   },
   // The second `settings` parameter is the same as for webpage server
   settings)
@@ -568,10 +557,14 @@ this.props.dispatch(goto('/items/1?color=red'))
   // (or same without `async`: (http_client, { request }) => Promise.resolve({})
 
   // (optional)
-  // Based on the `preferred_locale`,
-  // returns the suitable `locale` and `messages` for it.
+  // Returns the suitable `locale` and `messages` for this HTTP request.
+  // When running as a webpage server, `preferred_locale` will be set.
+  // When rendering manually via `render` function, `preferred_locale` will not be set.
   localize: async (store, preferred_locale) => { locale, messages }
   // (or same without `async`: (store, preferred_locale) => Promise.resolve({ locale, messages }))
+
+  // Disables server-side rendering (for whatever reason)
+  disable_server_side_rendering: `true`/`false`
 }
 ```
 
