@@ -39,6 +39,11 @@ export default async function({ preload, localize, assets, application, request,
 	}
 	= html
 
+	if (style)
+	{
+		console.warn(`"html.style" parameter is deprecated and will be removed in the next major release. Use "html.head" instead: if (development) return [<style dangerouslySetInnerHTML={{ __html: style }} charSet="UTF-8"/>, ...]`)
+	}
+
 	// In development mode Redux DevTools are activated, for example
 	const development = process.env.NODE_ENV !== 'production'
 
