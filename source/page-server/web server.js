@@ -129,11 +129,16 @@ export default function start_webpage_rendering_server(options, common)
 		// Performs HTTP redirect
 		const redirect_to = to => ctx.redirect(to)
 
-	    // Preferred locale (e.g. 'ru-RU').
-	    // Can be obtained from `language` cookie
-	    // or from 'Accept-Language' HTTP header.
-	    const preferred_locale = ctx.getLocaleFromQuery() || ctx.getLocaleFromCookie() || ctx.getLocaleFromHeader()
-	    const _localize = (store) => localize(store, preferred_locale)
+		// Give `localize` a hint on which locale to choose
+		if (localize)
+		{
+		    // Preferred locale (e.g. 'ru-RU').
+		    // Can be obtained from `language` cookie
+		    // or from 'Accept-Language' HTTP header.
+		    const preferred_locale = ctx.getLocaleFromQuery() || ctx.getLocaleFromCookie() || ctx.getLocaleFromHeader()
+		    const _localize = localize
+		    localize = (store) => _localize(store, preferred_locale)
+		}
 
 		try
 		{
@@ -142,7 +147,7 @@ export default function start_webpage_rendering_server(options, common)
 				application,
 				assets,
 				preload,
-				localize: _localize,
+				localize,
 				disable_server_side_rendering,
 				html,
 
