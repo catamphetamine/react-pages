@@ -77,6 +77,7 @@ export function render_on_client({ development, development_tools, create_page_e
 					element,     // wrapped React page element
 					to           // DOM element containing React markup
 				})
+				.component
 
 				const result =
 				{
