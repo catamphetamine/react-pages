@@ -3,6 +3,7 @@ import ReactDOMServer from 'react-dom/server'
 
 import { match as redux_router_server_match } from 'redux-router/server'
 import { ReduxRouter, replace } from 'redux-router'
+import { createRouterObject, createRoutingHistory } from 'react-router/lib/RouterUtils'
 import { RouterContext, applyRouterMiddleware, match } from 'react-router'
 import use_scroll      from 'react-router-scroll'
 
@@ -47,7 +48,7 @@ export function render_on_client({ development, development_tools, create_page_e
 	// triggering a render() method call for the root <ReduxRouter/> React component
 	// (see the beginning of this explanation) and the new page is finally rendered.
 	
-	return match_react_router({ history: store.history, routes: create_routes({ store }) })
+	return match_react_router({ history: store.history, routes: create_routes({ store }), transitionManager: store.transitionManager })
 		.then(({ redirect, router_props }) =>
 		{
 			// if a decision to perform a redirect was made 
@@ -243,12 +244,37 @@ function match_url(url, store)
 }
 
 // Performs `react-router` asynchronous match for current location
-// (is required for asynchonous routes to work)
-function match_react_router({ history, routes })
+// (is required for asynchonous routes to work).
+//
+// Rewriting the default `react-router` `match` function
+// to use the supplied `transitionManager` instead of creating a new one.
+// https://github.com/reactjs/react-router/blob/master/modules/match.js
+//
+// Seems that creating a `router` here doesn't introduce any bugs,
+// and this `router` is passed as a prop to `<ReduxRouter/>
+// overwriting the default one created there (`this.router = ...`):
+//
+// <ReduxRouterContext
+//    history={history}
+//    routerStateSelector={memoizeRouterStateSelector(routerStateSelector)}
+//    router={this.router}
+//    {...this.props}/> <------- `this.props.router` replaces `this.router`
+//
+function match_react_router({ history, routes, transitionManager })
 {
 	return new Promise((resolve, reject) =>
 	{
-		match({ history, routes }, (error, redirect_location, router_props) =>
+		let location
+
+		const unlisten = history.listen(historyLocation =>
+		{
+			location = historyLocation
+		})
+
+		const router = createRouterObject(history, transitionManager)
+		history = createRoutingHistory(history, transitionManager)
+
+		transitionManager.match(location, function(error, redirect_location, next_router_state)
 		{
 			if (error)
 			{
@@ -260,7 +286,39 @@ function match_react_router({ history, routes })
 				return resolve({ redirect: redirect_location })
 			}
 
-			return resolve({ router_props })
+			resolve
+			({
+				router_props: next_router_state &&
+				{
+					...next_router_state,
+					history,
+					router,
+					matchContext: { history, transitionManager, router }
+				}
+			})
+
+			// Defer removing the listener to here to prevent DOM histories from having
+			// to unwind DOM event listeners unnecessarily, in case callback renders a
+			// <Router> and attaches another history listener.
+			if (unlisten)
+			{
+				unlisten()
+			}
 		})
+
+		// match({ history, routes }, (error, redirect_location, router_props) =>
+		// {
+		// 	if (error)
+		// 	{
+		// 		return reject(error)
+		// 	}
+		//
+		// 	if (redirect_location)
+		// 	{
+		// 		return resolve({ redirect: redirect_location })
+		// 	}
+		//
+		// 	return resolve({ router_props })
+		// })
 	})
 }
