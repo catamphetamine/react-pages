@@ -1,3 +1,8 @@
+4.0.30 / 27.07.2016
+===================
+
+  * Fixed user supplied middleware not being able to `goto` or `redirect`
+
 4.0.27 / 27.07.2016
 ===================
 

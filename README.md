@@ -431,7 +431,7 @@ this.props.dispatch(goto('/items/1?color=red'))
 
   // (optional)
   // User can add his own middleware to this `middleware` list
-  redux_middleware: middleware => middleware
+  redux_middleware: () => [...]
 
   // (optional)
   // Is called when Redux store has been created

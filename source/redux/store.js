@@ -63,37 +63,41 @@ export default function(get_reducer, { development, development_tools, server, d
 		//
 		preloading_middleware(server, on_preload_error, event => store.dispatch(event))
 	]
+	
+	// Redux store enhancers
+	const store_enhancers = []
 
 	// user may supply his own middleware
 	if (middleware)
 	{
-		middleware_chain = middleware(middleware_chain)
+		const middleware_list = middleware([])
+		if (middleware_list.length > 0)
+		{
+			store_enhancers.unshift(applyMiddleware(...middleware_list))
+		}
 	}
-	
-	// Store creation function
-	let create_store
+
+	store_enhancers.push
+	(
+		// `redux-router` middleware
+		// (redux-router keeps react-router state in Redux)
+		reduxReactRouter({ getRoutes: create_routes, createHistory }),
+
+		// Ajax and @preload middleware
+		applyMiddleware(...middleware_chain)
+	)
 
 	// Generate store creation function
 	if (development && !server && development_tools)
 	{
-		create_store = compose
+		store_enhancers.push
 		(
-			applyMiddleware(...middleware_chain),
 			// Provides support for DevTools:
 			window.devToolsExtension ? window.devToolsExtension() : DevTools.instrument(),
 			// Lets you write ?debug_session=<name> in address bar to persist debug sessions
 			persistState(window.location.href.match(/[?&]debug_session=([^&]+)\b/))
 		)
-		(createStore)
-	} 
-	else
-	{
-		create_store = applyMiddleware(...middleware_chain)(createStore)
 	}
-
-	// enable redux-router (adds its own middleware)
-	// (redux-router keeps react-router state in Redux)
-	create_store = reduxReactRouter({ getRoutes: create_routes, createHistory })(create_store)
 
 	// adds redux-router reducers to the list of all reducers.
 	// overall Redux reducer = web application reducers + redux-router reducer
@@ -107,7 +111,7 @@ export default function(get_reducer, { development, development_tools, server, d
 	// create Redux store 
 	// with the overall Redux reducer 
 	// and the initial Redux store data (aka "the state")
-	const store = create_store(overall_reducer(), data)
+	const store = compose(...store_enhancers)(createStore)(overall_reducer(), data)
 
 	// Because History API won't work on the server side,
 	// instrument it with redirection handlers (isomorphic redirection)
