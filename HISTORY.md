@@ -1,3 +1,8 @@
+4.0.23 / 27.07.2016
+===================
+
+  * Added support for asynchronous `react-router` routes for Redux renderer
+
 4.0.22 / 23.07.2016
 ===================
 

@@ -1,9 +1,9 @@
 import React          from 'react'
 import ReactDOMServer from 'react-dom/server'
 
-import { match }       from 'redux-router/server'
-import { ReduxRouter } from 'redux-router'
-import { RouterContext, applyRouterMiddleware } from 'react-router'
+import { match as redux_router_server_match } from 'redux-router/server'
+import { ReduxRouter, replace } from 'redux-router'
+import { RouterContext, applyRouterMiddleware, match } from 'react-router'
 import use_scroll      from 'react-router-scroll'
 
 import { render_on_client as react_render_on_client, render_on_server as react_render_on_server } from '../render'
@@ -47,57 +47,71 @@ export function render_on_client({ development, development_tools, create_page_e
 	// triggering a render() method call for the root <ReduxRouter/> React component
 	// (see the beginning of this explanation) and the new page is finally rendered.
 	
-	console.log('You are gonna see a React warning in the console: "Failed prop type: Invalid prop `RoutingContext` supplied to `ReduxRouterContext`, expected a single ReactElement".\nThis warning is not an error and will be fixed in `redux-router`:\nhttps://github.com/acdlite/redux-router/issues/266')
-	
-	const router_element = <ReduxRouter routes={create_routes({ store })} RoutingContext={applyRouterMiddleware(use_scroll())}/>
-
-	// wraps <ReduxRouter/> with arbitrary React components (e.g. Redux <Provider/>),
-	// loads internationalization messages,
-	// and then renders the wrapped React page element to DOM
-	return create_page_element(router_element, { store }).then(element =>
-	{
-		// render the wrapped React page element to DOM
-		const component = react_render_on_client
-		({
-			development, // development mode flag
-			element,     // wrapped React page element
-			to           // DOM element containing React markup
-		})
-
-		// if Redux-devtools aren't enabled, then just return the Page elemnt
-		if (!development || !development_tools)
+	return match_react_router({ history: store.history, routes: create_routes({ store }) })
+		.then(({ redirect, router_props }) =>
 		{
-			return component
-		}
+			// if a decision to perform a redirect was made 
+			// during the routing process,
+			// then redirect to another url
+			if (redirect)
+			{
+				store.dispatch(replace(redirect.pathname + redirect.search))
+				return
+			}
 
-		// Dev tools should be rendered after initial client render to prevent warning
-		// "React attempted to reuse markup in a container but the checksum was invalid"
-		// https://github.com/erikras/react-redux-universal-hot-example/pull/210
-		//
-		// Therefore this function returns an array of two React elements
-		// to be rendered sequentially
+			console.log('You are gonna see a React warning in the console: "Failed prop type: Invalid prop `RoutingContext` supplied to `ReduxRouterContext`, expected a single ReactElement".\nThis warning is not an error and will be fixed in `redux-router`:\nhttps://github.com/acdlite/redux-router/issues/266')
+	
+			const router_element = <ReduxRouter {...router_props}/>
+			// const router_element = <ReduxRouter routes={create_routes({ store })} RoutingContext={applyRouterMiddleware(use_scroll())}/>
 
-		// console.log(`You are gonna see a warning about "React.findDOMNode is deprecated" in the console. It's normal: redux_devtools hasn't been updated to React 0.14 yet`)
+			// wraps <ReduxRouter/> with arbitrary React components (e.g. Redux <Provider/>),
+			// loads internationalization messages,
+			// and then renders the wrapped React page element to DOM
+			return create_page_element(router_element, { store }).then(element =>
+			{
+				// render the wrapped React page element to DOM
+				const component = react_render_on_client
+				({
+					development, // development mode flag
+					element,     // wrapped React page element
+					to           // DOM element containing React markup
+				})
 
-		// this element will contain React page element and Redux-devtools
-		element = 
-		(
-			<div>
-				{element}
-				{/* Since `DevTools` are inserted outside of the `<Provider/>`, provide the `store` manually */}
-				<DevTools store={store}/>
-			</div>
-		)
+				// if Redux-devtools aren't enabled, then just return the Page elemnt
+				if (!development || !development_tools)
+				{
+					return component
+				}
 
-		// render the wrapped React page element to DOM
-		return react_render_on_client
-		({
-			development, // development mode flag
-			element,     // wrapped React page element
-			to,          // DOM element containing React markup
-			subsequent_render: true // Prevents "Server-side React render was discarded" warning
+				// Dev tools should be rendered after initial client render to prevent warning
+				// "React attempted to reuse markup in a container but the checksum was invalid"
+				// https://github.com/erikras/react-redux-universal-hot-example/pull/210
+				//
+				// Therefore this function returns an array of two React elements
+				// to be rendered sequentially
+
+				// console.log(`You are gonna see a warning about "React.findDOMNode is deprecated" in the console. It's normal: redux_devtools hasn't been updated to React 0.14 yet`)
+
+				// this element will contain React page element and Redux-devtools
+				element = 
+				(
+					<div>
+						{element}
+						{/* Since `DevTools` are inserted outside of the `<Provider/>`, provide the `store` manually */}
+						<DevTools store={store}/>
+					</div>
+				)
+
+				// render the wrapped React page element to DOM
+				return react_render_on_client
+				({
+					development, // development mode flag
+					element,     // wrapped React page element
+					to,          // DOM element containing React markup
+					subsequent_render: true // Prevents "Server-side React render was discarded" warning
+				})
+			})
 		})
-	})
 }
 
 // returns a Promise resolving to { status, content, redirect }.
@@ -198,7 +212,7 @@ function match_url(url, store)
 	return new Promise((resolve, reject) =>
 	{
 		// perform routing for this `url`
-		store.dispatch(match(url, (error, redirect_location, router_state) =>
+		store.dispatch(redux_router_server_match(url, (error, redirect_location, router_state) =>
 		{
 			// if a decision to perform a redirect was made 
 			// during the routing process,
@@ -225,5 +239,28 @@ function match_url(url, store)
 
 			return resolve({ matched_routes: router_state.routes })
 		}))
+	})
+}
+
+// Performs `react-router` asynchronous match for current location
+// (is required for asynchonous routes to work)
+function match_react_router({ history, routes })
+{
+	return new Promise((resolve, reject) =>
+	{
+		match({ history, routes }, (error, redirect_location, router_props) =>
+		{
+			if (error)
+			{
+				return reject(error)
+			}
+
+			if (redirect_location)
+			{
+				return resolve({ redirect: redirect_location })
+			}
+
+			return resolve({ router_props })
+		})
 	})
 }
