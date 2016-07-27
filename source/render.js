@@ -22,7 +22,7 @@ export function render_on_client({ development, element, to, subsequent_render }
 		}
 	}
 
-	return component
+	return { component }
 }
 
 // Renders React page content element

@@ -1,3 +1,8 @@
+4.0.27 / 27.07.2016
+===================
+
+  * `render` on client now also returns `component` and `store` along with `rerender`
+
 4.0.23 / 27.07.2016
 ===================
 

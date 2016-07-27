@@ -78,10 +78,16 @@ export function render_on_client({ development, development_tools, create_page_e
 					to           // DOM element containing React markup
 				})
 
+				const result =
+				{
+					component,
+					store
+				}
+
 				// if Redux-devtools aren't enabled, then just return the Page elemnt
 				if (!development || !development_tools)
 				{
-					return component
+					return result
 				}
 
 				// Dev tools should be rendered after initial client render to prevent warning
@@ -104,13 +110,15 @@ export function render_on_client({ development, development_tools, create_page_e
 				)
 
 				// render the wrapped React page element to DOM
-				return react_render_on_client
+				result.component = react_render_on_client
 				({
 					development, // development mode flag
 					element,     // wrapped React page element
 					to,          // DOM element containing React markup
 					subsequent_render: true // Prevents "Server-side React render was discarded" warning
 				})
+
+				return result
 			})
 		})
 }
@@ -254,10 +262,12 @@ function match_react_router({ history, routes, transition_manager })
 {
 	return new Promise((resolve, reject) =>
 	{
+		// Get `location` from `history`
 		let location
 		const unlisten = history.listen(historyLocation => location = historyLocation)
 
-		transition_manager.match(location, function(error, redirect_location, next_router_state)
+		// Match `location` to a route (`<Route/>`s)
+		transition_manager.match(location, (error, redirect_location, next_router_state) =>
 		{
 			if (error)
 			{

@@ -61,5 +61,9 @@ export default function localize_and_render({ development, render_parameters = {
 	// Client side code can then rerender the page any time
 	// through obtaining the `rerender()` function from the result object.
 	//
-	return render_page().then(component => ({ rerender: render_page }))
+	return render_page().then(result =>
+	{
+		result.rerender = render_page
+		return result
+	})
 }

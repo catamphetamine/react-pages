@@ -585,6 +585,16 @@ this.props.dispatch(goto('/items/1?color=red'))
 }
 ```
 
+Client-side `render` function returns a `Promise` resolving to
+
+```js
+{
+  component, // root React component
+  store,     // (Redux) store
+  rerender   // (Redux) rerender React application
+}
+```
+
 ## Gotchas
 
 This library is build system agnostic: you can use your favourite Grunt, Gulp, Browserify, RequireJS, Webpack, etc.
