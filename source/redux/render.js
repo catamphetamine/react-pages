@@ -117,6 +117,7 @@ export function render_on_client({ development, development_tools, create_page_e
 					to,          // DOM element containing React markup
 					subsequent_render: true // Prevents "Server-side React render was discarded" warning
 				})
+				.component
 
 				return result
 			})
