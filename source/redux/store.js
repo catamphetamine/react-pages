@@ -1,19 +1,19 @@
 import { createStore, combineReducers, applyMiddleware, compose } from 'redux'
+import { persistState } from 'redux-devtools'
+
+import { routerStateReducer } from 'redux-router'
+import { reduxReactRouter as reduxReactRouter_client } from 'redux-router'
+import { reduxReactRouter as reduxReactRouter_server } from 'redux-router/server'
+
+import { createRoutes } from 'react-router/lib/RouteUtils'
+
+import createHistory_server from 'history/lib/createMemoryHistory'
+import createHistory_client from 'history/lib/createBrowserHistory'
 
 import asynchronous_middleware from './middleware/asynchronous middleware'
 import preloading_middleware from './middleware/preloading middleware'
 
 import DevTools from './dev tools'
-
-import { routerStateReducer } from 'redux-router'
-
-import { createRoutes } from 'react-router/lib/RouteUtils'
-
-import { reduxReactRouter as reduxReactRouter_client } from 'redux-router'
-import { reduxReactRouter as reduxReactRouter_server } from 'redux-router/server'
-
-import createHistory_server from 'history/lib/createMemoryHistory'
-import createHistory_client from 'history/lib/createBrowserHistory'
 
 // import use_scroll from 'scroll-behavior'
 
@@ -76,8 +76,6 @@ export default function(get_reducer, { development, development_tools, server, d
 	// Generate store creation function
 	if (development && !server && development_tools)
 	{
-		const { persistState } = require('redux-devtools')
-
 		create_store = compose
 		(
 			applyMiddleware(...middleware_chain),
