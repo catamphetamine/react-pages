@@ -589,7 +589,7 @@ Client-side `render` function returns a `Promise` resolving to
 
 ```js
 {
-  component, // root React component
+  component, // root React component (i.e. the `wrapper`; will be `null` if `wrapper` is a stateless React component)
   store,     // (Redux) store
   rerender   // (Redux) rerender React application
 }
