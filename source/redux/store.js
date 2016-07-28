@@ -32,48 +32,21 @@ export default function(get_reducer, { development, development_tools, server, d
 	//
 	// Therefore using a middleware to wait for page loading to finish.
 
-	// generates the three promise event names automatically based on a base event name
+	// Generates the three promise event names automatically based on a base event name
 	const promise_event_naming = event_name => [`${event_name} pending`, `${event_name} done`, `${event_name} failed`]
 
-	// Redux middleware chain
-	let middleware_chain = 
-	[
-		// enables support for Ajax Http requests
-		//
-		// takes effect if the `dispatch`ed message has 
-		// { promise: ... }
-		//
-		// in all the other cases it will do nothing
-		//
-		asynchronous_middleware(http_client, { promise_event_naming }),
-
-		// Enables support for @preload() annotation
-		// (which preloads data required for displaying certain pages)
-		//
-		// Yakes effect if the `dispatch`ed message has 
-		// { type: ROUTER_DID_CHANGE }
-		//
-		// In all the other cases it will do nothing
-		//
-		// Because `preloading_middleware` is `applied` to the store
-		// before `reduxReactRouter` store enhancer adds its own middleware,
-		// then it means that standard `dispatch` of `preloading_middleware`
-		// won't send actions to that `reduxReactRouter` middleware,
-		// therefore using the third argument to hack around this thing.
-		//
-		preloading_middleware(server, on_preload_error, event => store.dispatch(event))
-	]
-	
 	// Redux store enhancers
 	const store_enhancers = []
 
-	// user may supply his own middleware
+	// User may supply his own middleware
 	if (middleware)
 	{
+		// Passing in an empty array for compatibility with old API
+		// (the empty array argument will be removed in the next major release)
 		const middleware_list = middleware([])
 		if (middleware_list.length > 0)
 		{
-			store_enhancers.unshift(applyMiddleware(...middleware_list))
+			store_enhancers.push(applyMiddleware(...middleware_list))
 		}
 	}
 
@@ -113,15 +86,41 @@ export default function(get_reducer, { development, development_tools, server, d
 		}),
 
 		// Ajax and @preload middleware
-		applyMiddleware(...middleware_chain)
+		applyMiddleware
+		(
+			// Enables support for Ajax Http requests.
+			//
+			// Takes effect if the `dispatch`ed message has 
+			// { promise: ... }
+			//
+			// In all the other cases it will do nothing.
+			//
+			asynchronous_middleware(http_client, { promise_event_naming }),
+
+			// Enables support for @preload() annotation
+			// (which preloads data required for displaying certain pages).
+			//
+			// Takes effect if the `dispatch`ed message has 
+			// { type: ROUTER_DID_CHANGE }
+			//
+			// In all the other cases it will do nothing.
+			//
+			// Because `preloading_middleware` is `applied` to the store
+			// before `reduxReactRouter` store enhancer adds its own middleware,
+			// then it means that standard `dispatch` of `preloading_middleware`
+			// won't send actions to that `reduxReactRouter` middleware,
+			// therefore using the third argument to hack around this thing.
+			//
+			preloading_middleware(server, on_preload_error, event => store.dispatch(event))
+		)
 	)
 
-	// Generate store creation function
+	// Add Redux DevTools (if they're enabled)
 	if (development && !server && development_tools)
 	{
 		store_enhancers.push
 		(
-			// Provides support for DevTools:
+			// Provides support for DevTools
 			window.devToolsExtension ? window.devToolsExtension() : DevTools.instrument(),
 			// Lets you write ?debug_session=<name> in address bar to persist debug sessions
 			persistState(window.location.href.match(/[?&]debug_session=([^&]+)\b/))
