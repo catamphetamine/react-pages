@@ -237,18 +237,18 @@ export default function(server, on_error, dispatch_event)
 			return next(action)
 		}
 
-		// // `window.__preloading_page` holds client side page preloading status.
-		// // can be used to cancel navigation.
+		// `window.__preloading_page` holds client side page preloading status.
+		// can be used to cancel navigation.
 
-		// if (!server && window.__preloading_page && window.__preloading_page.pending)
-		// {
-		// 	// window.__preloading_page.promise.cancel()
-		// 	window.__preloading_page.pending = false
-		// }
+		if (!server && window.__preloading_page && !window.__preloading_page.cancelled)
+		{
+			// window.__preloading_page.promise.cancel()
+			window.__preloading_page.cancelled = true
+		}
 		
 		dispatch({ type: Preload_started })
 
-		// const preloading = { pending: true }
+		const preloading = { cancelled: false }
 
 		// This Promise is only used in server-side rendering.
 		// Client-side rendering never uses this Promise.
@@ -258,10 +258,10 @@ export default function(server, on_error, dispatch_event)
 			// proceed with routing
 			.then(() =>
 			{
-				// if (!preloading.pending)
-				// {
-				// 	return
-				// }
+				if (preloading.cancelled)
+				{
+					return
+				}
 
 				dispatch({ type: Preload_finished })
 
@@ -269,10 +269,10 @@ export default function(server, on_error, dispatch_event)
 			})
 			.catch(error =>
 			{
-				// if (!preloading.pending)
-				// {
-				// 	return
-				// }
+				if (preloading.cancelled)
+				{
+					return
+				}
 
 				// Reset the Promise temporarily placed into the router state 
 				// by the code below
@@ -286,13 +286,12 @@ export default function(server, on_error, dispatch_event)
 
 				error_handler(error)
 			})
-			// .finally(() => preloading.pending = false)
 
-		// if (!server)
-		// {
-		// 	preloading.promise = promise
-		// 	window.__preloading_page = preloading
-		// }
+		if (!server)
+		{
+			// preloading.promise = promise
+			window.__preloading_page = preloading
+		}
 
 		// On the server side
 		if (server)

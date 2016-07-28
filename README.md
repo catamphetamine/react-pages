@@ -413,9 +413,11 @@ import { goto, redirect } from 'react-isomorphic-render/redux'
 
 // Usage example
 // (`goto` navigates to a URL while adding a new entry in browsing history,
-//  `redirect` does the same without modifying browsing history)
+//  `redirect` does the same replacing the current entry in browsing history)
 this.props.dispatch(goto('/items/1?color=red'))
 ```
+
+A sidenote: these two functions aren't supposed to be used inside `onEnter` and `onChange` `react-router` hooks. Instead use the `replace` argument supplied to these functions by `react-router` when they are called (`replace` works the same way as `redirect`).
 
 ## Additional `react-isomorphic-render.js` settings
 

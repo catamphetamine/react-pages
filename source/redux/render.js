@@ -46,7 +46,7 @@ export function render_on_client({ development, development_tools, create_page_e
 	// and upon detecting it this last middleware writes the new Url to Redux store
 	// triggering a render() method call for the root <ReduxRouter/> React component
 	// (see the beginning of this explanation) and the new page is finally rendered.
-	
+
 	return match_react_router({ history: store.history, routes: create_routes(store), transition_manager: store.transitionManager })
 		.then(({ redirect, router_props }) =>
 		{
@@ -156,19 +156,18 @@ export function render_on_server({ disable_server_side_rendering, create_page_el
 		//
 		// After the page has finished preloading, render it
 		//
-		return wait_for_page_to_preload(store)
-	})
-	.then(() => 
-	{
-		// Renders the current page React component to a React element
-		// (`<ReduxRouter/>` is gonna get the matched route from the `store`)
-		const page_element = create_page_element(<ReduxRouter/>, { store })
+		return wait_for_page_to_preload(store).then(() => 
+		{
+			// Renders the current page React component to a React element
+			// (`<ReduxRouter/>` is gonna get the matched route from the `store`)
+			const page_element = create_page_element(<ReduxRouter/>, { store })
 
-		// Render the current page's React element to HTML markup
-		const content = react_render_on_server({ render_webpage_as_react_element, page_element })
+			// Render the current page's React element to HTML markup
+			const content = react_render_on_server({ render_webpage_as_react_element, page_element })
 
-		// return HTTP status code and HTML markup
-		return { status: http_status_code, content }
+			// return HTTP status code and HTML markup
+			return { status: http_status_code, content }
+		})
 	})
 	.catch((error) =>
 	{

@@ -85,10 +85,28 @@ export default function(get_reducer, { development, development_tools, server, d
 		({
 			getRoutes()
 			{
+				const error_message = (method_name) => `You shouldn't be calling "${method_name}" immediately in your "routes({ dispatch, getState })" function because it's pointless. It is supposed to be called in route lifecycle hooks, e.g. "onEnter". If you still think you need calling it immediately, then create an issue in the github repo: https://github.com/halt-hammerzeit/react-isomorphic-render`
+
 				return create_routes
 				({
-					dispatch : (action) => store.dispatch(action),
-					getState : () => store.getState(),
+					dispatch(action)
+					{
+						if (store === undefined)
+						{
+							throw new Error(error_message('dispatch'))
+						}
+
+						store.dispatch(action)
+					},
+					getState()
+					{
+						if (store === undefined)
+						{
+							throw new Error(error_message('getState'))
+						}
+
+						store.getState(action)
+					}
 				})
 			},
 			createHistory
