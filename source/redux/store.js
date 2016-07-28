@@ -81,7 +81,18 @@ export default function(get_reducer, { development, development_tools, server, d
 	(
 		// `redux-router` middleware
 		// (redux-router keeps react-router state in Redux)
-		reduxReactRouter({ getRoutes: create_routes, createHistory }),
+		reduxReactRouter
+		({
+			getRoutes()
+			{
+				return create_routes
+				({
+					dispatch : (action) => store.dispatch(action),
+					getState : () => store.getState(),
+				})
+			},
+			createHistory
+		}),
 
 		// Ajax and @preload middleware
 		applyMiddleware(...middleware_chain)
