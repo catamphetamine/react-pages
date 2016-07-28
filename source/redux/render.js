@@ -12,7 +12,7 @@ import DevTools from './dev tools'
 
 // Renders the current page React element inside the `to` DOM element.
 //
-// returns a Promise resolving to the rendered React component.
+// Returns a Promise resolving to the rendered React component.
 //
 export function render_on_client({ development, development_tools, create_page_element, create_routes, store, to })
 {
@@ -50,7 +50,7 @@ export function render_on_client({ development, development_tools, create_page_e
 	return match_react_router({ history: store.history, routes: create_routes(store), transition_manager: store.transitionManager })
 		.then(({ redirect, router_props }) =>
 		{
-			// if a decision to perform a redirect was made 
+			// If a decision to perform a redirect was made 
 			// during the routing process,
 			// then redirect to another url
 			if (redirect)
@@ -59,17 +59,14 @@ export function render_on_client({ development, development_tools, create_page_e
 				return
 			}
 
-			console.log('You are gonna see a React warning in the console: "Failed prop type: Invalid prop `RoutingContext` supplied to `ReduxRouterContext`, expected a single ReactElement".\nThis warning is not an error and will be fixed in `redux-router`:\nhttps://github.com/acdlite/redux-router/issues/266')
-	
 			const router_element = <ReduxRouter {...router_props} RoutingContext={applyRouterMiddleware(use_scroll())}/>
-			// const router_element = <ReduxRouter routes={create_routes(store)} RoutingContext={applyRouterMiddleware(use_scroll())}/>
 
-			// wraps <ReduxRouter/> with arbitrary React components (e.g. Redux <Provider/>),
+			// Wraps <ReduxRouter/> with arbitrary React components (e.g. Redux <Provider/>),
 			// loads internationalization messages,
 			// and then renders the wrapped React page element to DOM
 			return create_page_element(router_element, { store }).then(element =>
 			{
-				// render the wrapped React page element to DOM
+				// Render the wrapped React page element to DOM
 				const component = react_render_on_client
 				({
 					development, // development mode flag
@@ -84,7 +81,7 @@ export function render_on_client({ development, development_tools, create_page_e
 					store
 				}
 
-				// if Redux-devtools aren't enabled, then just return the Page elemnt
+				// If Redux-devtools aren't enabled, then just return the Page elemnt
 				if (!development || !development_tools)
 				{
 					return result
@@ -99,7 +96,7 @@ export function render_on_client({ development, development_tools, create_page_e
 
 				// console.log(`You are gonna see a warning about "React.findDOMNode is deprecated" in the console. It's normal: redux_devtools hasn't been updated to React 0.14 yet`)
 
-				// this element will contain React page element and Redux-devtools
+				// This element will contain React page element and Redux-devtools
 				element = 
 				(
 					<div>
@@ -109,7 +106,7 @@ export function render_on_client({ development, development_tools, create_page_e
 					</div>
 				)
 
-				// render the wrapped React page element to DOM
+				// Render the wrapped React page element to DOM
 				result.component = react_render_on_client
 				({
 					development, // development mode flag
@@ -124,7 +121,7 @@ export function render_on_client({ development, development_tools, create_page_e
 		})
 }
 
-// returns a Promise resolving to { status, content, redirect }.
+// Returns a Promise resolving to { status, content, redirect }.
 //
 export function render_on_server({ disable_server_side_rendering, create_page_element, render_webpage_as_react_element, url, store })
 {
