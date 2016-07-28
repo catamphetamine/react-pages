@@ -48,7 +48,7 @@ export function render_on_client({ development, development_tools, create_page_e
 	// triggering a render() method call for the root <ReduxRouter/> React component
 	// (see the beginning of this explanation) and the new page is finally rendered.
 	
-	return match_react_router({ history: store.history, routes: create_routes({ store }), transition_manager: store.transitionManager })
+	return match_react_router({ history: store.history, routes: create_routes(store), transition_manager: store.transitionManager })
 		.then(({ redirect, router_props }) =>
 		{
 			// if a decision to perform a redirect was made 
@@ -63,7 +63,7 @@ export function render_on_client({ development, development_tools, create_page_e
 			console.log('You are gonna see a React warning in the console: "Failed prop type: Invalid prop `RoutingContext` supplied to `ReduxRouterContext`, expected a single ReactElement".\nThis warning is not an error and will be fixed in `redux-router`:\nhttps://github.com/acdlite/redux-router/issues/266')
 	
 			const router_element = <ReduxRouter {...router_props} RoutingContext={applyRouterMiddleware(use_scroll())}/>
-			// const router_element = <ReduxRouter routes={create_routes({ store })} RoutingContext={applyRouterMiddleware(use_scroll())}/>
+			// const router_element = <ReduxRouter routes={create_routes(store)} RoutingContext={applyRouterMiddleware(use_scroll())}/>
 
 			// wraps <ReduxRouter/> with arbitrary React components (e.g. Redux <Provider/>),
 			// loads internationalization messages,

@@ -1,3 +1,8 @@
+4.0.31 / 27.07.2016
+===================
+
+  * Fixed `create_routes`: it now takes `store` as a parameter
+
 4.0.30 / 27.07.2016
 ===================
 
