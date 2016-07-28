@@ -27,7 +27,7 @@ export default
   reducer: require('./src/client/redux/reducer'),
 
   // React-router routes
-  // (either a `<Route/>` element or a `function({ store })` returning a `<Route/>` element)
+  // (either a `<Route/>` element or a `function({ dispatch, getState })` returning a `<Route/>` element)
   routes: require('./src/client/routes'),
   
   // Wraps React page component with arbitrary elements (e.g. <Provider/>, etc; see an example below)
