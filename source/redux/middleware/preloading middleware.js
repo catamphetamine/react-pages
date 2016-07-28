@@ -229,7 +229,7 @@ export default function(server, on_error, dispatch_event)
 		const { components, location, params } = action.payload
 
 		// preload all the required data for this route
-		const preload = preloader(server, components, getState, dispatch, location, params)
+		const preload = preloader(server, components, getState, dispatch_event, location, params)
 
 		// if nothing to preload, just move to the next middleware
 		if (!preload)
