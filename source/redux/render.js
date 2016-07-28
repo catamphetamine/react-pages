@@ -1,11 +1,10 @@
 import React          from 'react'
 import ReactDOMServer from 'react-dom/server'
 
-import { match as redux_router_server_match } from 'redux-router/server'
-import { ReduxRouter, replace } from 'redux-router'
-import { createRouterObject, createRoutingHistory } from 'react-router/lib/RouterUtils'
+import { match as redux_router_server_match }          from 'redux-router/server'
+import { ReduxRouter, replace }                        from 'redux-router'
 import { RouterContext, applyRouterMiddleware, match } from 'react-router'
-import use_scroll      from 'react-router-scroll'
+import use_scroll                                      from 'react-router-scroll'
 
 import { render_on_client as react_render_on_client, render_on_server as react_render_on_server } from '../render'
 
