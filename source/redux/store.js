@@ -95,7 +95,13 @@ export default function(get_reducer, { development, development_tools, server, d
 			//
 			// In all the other cases it will do nothing.
 			//
-			asynchronous_middleware(http_client, { promise_event_naming }),
+			// Because `asynchronous_middleware` is `applied` to the store
+			// before user-supplied middleware, it means that standard `dispatch`
+			// of `asynchronous_middleware` won't send actions to user-supplied middleware,
+			// therefore there's an additional `dispatch_event` argument
+			// which is a function to hack around that limitation.
+			//
+			asynchronous_middleware(http_client, event => store.dispatch(event), { promise_event_naming }),
 
 			// Enables support for @preload() annotation
 			// (which preloads data required for displaying certain pages).

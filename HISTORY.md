@@ -1,3 +1,8 @@
+4.0.35 / 28.07.2016
+===================
+
+  * Fixed `asynchronous_middleware` events not being dispatched through user-defined middleware
+
 4.0.31 / 27.07.2016
 ===================
 

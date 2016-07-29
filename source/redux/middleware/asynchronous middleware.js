@@ -5,7 +5,12 @@
 //
 // in all the other cases it will do nothing
 
-export default function middleware(http_client, { promise_event_naming })
+// Because `asynchronous_middleware` is `applied` to the store
+// before user-supplied middleware, it means that standard `dispatch`
+// of `asynchronous_middleware` won't send actions to user-supplied middleware,
+// therefore there's an additional `dispatch_event` argument
+// which is a function to hack around that limitation.
+export default function asynchronous_middleware(http_client, dispatch_event, { promise_event_naming })
 {
 	return ({ dispatch, getState }) =>
 	{
@@ -49,7 +54,7 @@ export default function middleware(http_client, { promise_event_naming })
 			const [Request, Success, Failure] = events
 
 			// dispatch the `pending` event to the Redux store
-			next({ ...rest, type: Request })
+			dispatch_event({ ...rest, type: Request })
 
 			// returning promise from a middleware is not required.
 			//
@@ -93,7 +98,7 @@ export default function middleware(http_client, { promise_event_naming })
 					result =>
 					{
 						// dispatch the `success` event to the Redux store
-						next({ ...rest, result, type: Success })
+						dispatch_event({ ...rest, result, type: Success })
 
 						// the Promise returned from `dispatch()` is resolved
 						resolve(result)
@@ -105,7 +110,7 @@ export default function middleware(http_client, { promise_event_naming })
 					error =>
 					{
 						// dispatch the `failure` event to the Redux store
-						next({ ...rest, error,  type: Failure })
+						dispatch_event({ ...rest, error,  type: Failure })
 
 						// the Promise returned from `dispatch()` is rejected
 						reject(error)

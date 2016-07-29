@@ -157,7 +157,7 @@ const locations_are_equal = (a, b) => (a.pathname === b.pathname) && (a.search =
 // won't send actions to that `reduxReactRouter` middleware,
 // therefore there's the third `dispatch_event` argument
 // which is a function to hack around that limitation.
-export default function(server, on_error, dispatch_event)
+export default function preloading_middleware(server, on_error, dispatch_event)
 {
 	return ({ getState, dispatch }) => next => action =>
 	{
