@@ -174,6 +174,13 @@ export default class http_client
 
 						// HTTP request completed without errors,
 						// so return the HTTP response data.
+
+						// 204 - No content (e.g. PUT, DELETE)
+						if (response.statusCode === 204)
+						{
+							return resolve()
+						}
+
 						resolve(parse_dates(response.body))
 					})
 				})

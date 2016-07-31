@@ -1,3 +1,8 @@
+4.0.36 / 31.07.2016
+===================
+
+  * Added a dedicated HTTP status code `204` handler to `http` utility
+
 4.0.35 / 28.07.2016
 ===================
 
