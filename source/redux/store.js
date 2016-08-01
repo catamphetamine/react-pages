@@ -168,8 +168,8 @@ export default function(get_reducer, { development, development_tools, server, d
 				throw new Error(`"url" parameter is required for redirect`)
 			}
 
-			const error = new Error('redirect')
-			error._redirect = url || '/'
+			const error = new Error(`Redirecting to ${url} (this is not an error)`)
+			error._redirect = url
 			throw error
 		}
 

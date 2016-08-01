@@ -1,3 +1,8 @@
+4.0.37 / 01.08.2016
+===================
+
+  * Fixed `redirect` and `goto` not working from `asynchronous_middleware` failure event dispatch handler
+
 4.0.36 / 31.07.2016
 ===================
 

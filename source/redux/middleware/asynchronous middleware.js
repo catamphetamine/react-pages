@@ -78,45 +78,44 @@ export default function asynchronous_middleware(http_client, dispatch_event, { p
 			// 	}
 			// }
 			//
-			return new Promise((resolve, reject) =>
+		
+			// perform Http request
+			const promised = promise(http_client)
+
+			// sanity check
+			if (!promised || typeof promised.then !== 'function')
 			{
-				// perform Http request
-				const promised = promise(http_client)
+				throw new Error(`"promise" function must return a Promise. Got:`, promised)
+			}
 
-				// sanity check
-				if (!promised.then)
+			return promised
+			.then
+			(
+				// if the Http request succeeded
+				//
+				// (Http status === 20x
+				//  and the Http response JSON object doesn't have an `error` field)
+				result =>
 				{
-					throw new Error(`"promise" function must return a Promise. Got:`, promised)
+					// dispatch the `success` event to the Redux store
+					dispatch_event({ ...rest, result, type: Success })
+
+					// the Promise returned from `dispatch()` is resolved
+					return result
+				},
+				// if the Http request failed
+				//
+				// (Http status !== 20x
+				//  or the Http response JSON object has an `error` field)
+				error =>
+				{
+					// dispatch the `failure` event to the Redux store
+					dispatch_event({ ...rest, error, type: Failure })
+
+					// the Promise returned from `dispatch()` is rejected
+					throw error
 				}
-
-				promised.then
-				(
-					// if the Http request succeeded
-					//
-					// (Http status === 20x
-					//  and the Http response JSON object doesn't have an `error` field)
-					result =>
-					{
-						// dispatch the `success` event to the Redux store
-						dispatch_event({ ...rest, result, type: Success })
-
-						// the Promise returned from `dispatch()` is resolved
-						resolve(result)
-					},
-					// if the Http request failed
-					//
-					// (Http status !== 20x
-					//  or the Http response JSON object has an `error` field)
-					error =>
-					{
-						// dispatch the `failure` event to the Redux store
-						dispatch_event({ ...rest, error,  type: Failure })
-
-						// the Promise returned from `dispatch()` is rejected
-						reject(error)
-					}
-				)
-			})
+			)
 		}
 	}
 }

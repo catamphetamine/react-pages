@@ -161,20 +161,20 @@ export default function preloading_middleware(server, on_error, dispatch_event)
 {
 	return ({ getState, dispatch }) => next => action =>
 	{
-		// if it isn't a React-router navigation event then do nothing
+		// If it isn't a `redux-router` navigation event then do nothing
 		if (action.type !== ROUTER_DID_CHANGE)
 		{
-			// do nothing
+			// Do nothing
 			return next(action)
 		}
 
-		// when routing is initialized on the client side
+		// When routing is initialized on the client side
 		// then ROUTER_DID_CHANGE event will be fired,
-		// so ignore this event.
+		// so ignore this initialization event.
 		// ("getState().router" means "is on the client side now")
 		if (getState().router && locations_are_equal(action.payload.location, getState().router.location))
 		{
-			// ignore the event
+			// Ignore the event
 			return next(action)
 		}
 
@@ -224,30 +224,31 @@ export default function preloading_middleware(server, on_error, dispatch_event)
 			}
 		}
 
-		// all these three properties are the next React-router state
+		// All these three properties are the next `react-router` state
 		// (taken from `history.listen(function(error, nextRouterState))`)
 		const { components, location, params } = action.payload
 
-		// preload all the required data for this route
+		// Preload all the required data for this route (page)
 		const preload = preloader(server, components, getState, dispatch_event, location, params)
 
-		// if nothing to preload, just move to the next middleware
+		// If nothing to preload, just move to the next middleware
 		if (!preload)
 		{
 			return next(action)
 		}
 
 		// `window.__preloading_page` holds client side page preloading status.
-		// can be used to cancel navigation.
-
+		// If there's preceeding navigation pending, then cancel that previous navigation.
 		if (!server && window.__preloading_page && !window.__preloading_page.cancelled)
 		{
 			// window.__preloading_page.promise.cancel()
 			window.__preloading_page.cancelled = true
 		}
 		
-		dispatch({ type: Preload_started })
+		// Page loading indicator could listen for this event
+		dispatch_event({ type: Preload_started })
 
+		// Holds the cancellation flag for this navigation process
 		const preloading = { cancelled: false }
 
 		// This Promise is only used in server-side rendering.
@@ -258,17 +259,26 @@ export default function preloading_middleware(server, on_error, dispatch_event)
 			// proceed with routing
 			.then(() =>
 			{
+				// If this navigation process was cancelled
+				// before @preload() finished its work,
+				// then don't take any further steps on this cancelled navigation.
 				if (preloading.cancelled)
 				{
 					return
 				}
 
-				dispatch({ type: Preload_finished })
+				// Page loading indicator could listen for this event
+				dispatch_event({ type: Preload_finished })
 
+				// Pass ROUTER_DID_CHANGE to redux-router middleware
+				// so that react-router renders the new route.
 				next(action)
 			})
 			.catch(error =>
 			{
+				// If this navigation process was cancelled
+				// before @preload() finished its work,
+				// then don't take any further steps on this cancelled navigation.
 				if (preloading.cancelled)
 				{
 					return
@@ -276,17 +286,25 @@ export default function preloading_middleware(server, on_error, dispatch_event)
 
 				// Reset the Promise temporarily placed into the router state 
 				// by the code below
-				// (fixes "Invariant Violation: `mapStateToProps` must return an object. Instead received [object Promise]")
+				// (fixes "Invariant Violation: `mapStateToProps` must return an object.
+				//  Instead received [object Promise]")
 				if (server)
 				{
 					getState().router = null
 				}
 
-				dispatch({ type: Preload_failed, error })
+				// Page loading indicator could listen for this event
+				dispatch_event({ type: Preload_failed, error })
 
+				// Handle preloading error
+				// (either `redirect` to an "error" page
+				//  or rethrow the error up the Promise chain)
 				error_handler(error)
 			})
 
+		// If on the client side, then store the current pending navigation,
+		// so that it can be cancelled when a new navigation process takes place
+		// before the current navigation process finishes.
 		if (!server)
 		{
 			// preloading.promise = promise
