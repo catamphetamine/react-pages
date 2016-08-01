@@ -78,7 +78,7 @@ export default function asynchronous_middleware(http_client, dispatch_event, { p
 			// 	}
 			// }
 			//
-		
+
 			// perform Http request
 			const promised = promise(http_client)
 
@@ -88,8 +88,7 @@ export default function asynchronous_middleware(http_client, dispatch_event, { p
 				throw new Error(`"promise" function must return a Promise. Got:`, promised)
 			}
 
-			return promised
-			.then
+			return promised.then
 			(
 				// if the Http request succeeded
 				//
