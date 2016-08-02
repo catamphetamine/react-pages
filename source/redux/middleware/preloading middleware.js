@@ -244,7 +244,7 @@ export default function preloading_middleware(server, on_error, dispatch_event)
 			// window.__preloading_page.promise.cancel()
 			window.__preloading_page.cancelled = true
 		}
-		
+
 		// Page loading indicator could listen for this event
 		dispatch_event({ type: Preload_started })
 
@@ -282,6 +282,15 @@ export default function preloading_middleware(server, on_error, dispatch_event)
 				if (preloading.cancelled)
 				{
 					return
+				}
+
+				// If the error was a redirection exception (not a error),
+				// then just exit and do nothing.
+				// (happens on server side only)
+				if (server && getState()._redirect)
+				{
+					delete getState()._redirect
+					throw error
 				}
 
 				// Reset the Promise temporarily placed into the router state 
