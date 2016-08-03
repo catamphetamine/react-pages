@@ -287,9 +287,8 @@ export default function preloading_middleware(server, on_error, dispatch_event)
 				// If the error was a redirection exception (not a error),
 				// then just exit and do nothing.
 				// (happens on server side only)
-				if (server && getState()._redirect)
+				if (error._redirect)
 				{
-					delete getState()._redirect
 					throw error
 				}
 

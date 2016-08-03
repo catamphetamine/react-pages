@@ -108,6 +108,14 @@ export default function asynchronous_middleware(http_client, dispatch_event, { p
 				//  or the Http response JSON object has an `error` field)
 				error =>
 				{
+					// If the error was a redirection exception (not a error),
+					// then just exit and do nothing.
+					// (happens on server side only)
+					if (error._redirect)
+					{
+						throw error
+					}
+					
 					// dispatch the `failure` event to the Redux store
 					dispatch_event({ ...rest, error, type: Failure })
 

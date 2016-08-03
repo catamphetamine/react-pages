@@ -168,10 +168,6 @@ export default function(get_reducer, { development, development_tools, server, d
 				throw new Error(`"url" parameter is required for redirect`)
 			}
 
-			// Another little hack to abort page preloading `.catch` clause
-			// (will be checked in `preloading_middleware` `.catch` clause)
-			store.getState()._redirect = true
-
 			const error = new Error(`Redirecting to ${url} (this is not an error)`)
 			error._redirect = url
 			throw error
