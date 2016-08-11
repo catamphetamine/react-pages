@@ -94,7 +94,7 @@ export function render_on_client({ development, development_tools, create_page_e
 				// Therefore this function returns an array of two React elements
 				// to be rendered sequentially
 
-				// console.log(`You are gonna see a warning about "React.findDOMNode is deprecated" in the console. It's normal: redux_devtools hasn't been updated to React 0.14 yet`)
+				// console.log(`You're gonna see two "@@reduxReactRouter/initRoutes" events in Redux DevTools because the page has been rendered twice: first time without DevTools and second time with it`)
 
 				// This element will contain React page element and Redux-devtools
 				element = 
