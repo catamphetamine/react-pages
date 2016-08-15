@@ -102,7 +102,7 @@ export function render_on_client({ development, development_tools, create_page_e
 					<div>
 						{element}
 						{/* Since `DevTools` are inserted outside of the `<Provider/>`, provide the `store` manually */}
-						<DevTools store={store}/>
+						{!window.devToolsExtension ? <DevTools store={store} /> : null}
 					</div>
 				)
 
