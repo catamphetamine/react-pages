@@ -81,8 +81,10 @@ export function render_on_client({ development, development_tools, create_page_e
 					store
 				}
 
-				// If Redux-devtools aren't enabled, then just return the Page elemnt
-				if (!development || !development_tools)
+				// If Redux-devtools aren't enabled, then just return the Page element
+				// (if Redux-devtools are installed as a web browser extension
+				//  then no need to do the second render too)
+				if (!development || !development_tools || window.devToolsExtension)
 				{
 					return result
 				}
@@ -102,7 +104,7 @@ export function render_on_client({ development, development_tools, create_page_e
 					<div>
 						{element}
 						{/* Since `DevTools` are inserted outside of the `<Provider/>`, provide the `store` manually */}
-						{!window.devToolsExtension && <DevTools store={store}/>}
+						<DevTools store={store}/>
 					</div>
 				)
 
