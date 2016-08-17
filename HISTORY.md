@@ -1,3 +1,8 @@
+4.1.0 / 17.08.2016
+===================
+
+  * [slight possibility of a breaking change] `http` utility now emits `Failure` Redux event with the `error` different from what it was in `4.0.x`: it used to be the raw `Error` javascript object, and now it is `error.data` containing `{ status: 403, message: 'Unauthorized' }` (`error.data` is inferred from the `error` instance object inside `http client.js`; if `error.data` is not set inside `http client.js` then it falls back to the original `error` istance). The reasoning behind this change is that the `error` from the `Failure` Redux event payload is immediately stored in Redux state tree in the corresponding reducer, and since Redux state tree should only contain plain (pure) javascript objects, then it makes sence to store only the useful properties there (`error.data`) instead of an instance of an `Error` class which is not a plain (pure) javascript object (and, therefore, is not serializable, which is not a functional programming approach).
+
 4.0.40 / 15.08.2016
 ===================
 

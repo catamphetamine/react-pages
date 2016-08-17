@@ -132,40 +132,79 @@ export default class http_client
 						// If HTTP response was received,
 						// and if that HTTP response is a JSON object,
 						// then the error is the `error` property of that object.
-						if (!error && response)
+						// (if it exists)
+						if (!error)
 						{
-							error = response.error
+							if (response && response.body && response.body.error)
+							{
+								error = new Error('Server Error')
+								error.data = response.body.error
+							}
 						}
 
-						// If the HTTP request failed, or returned an `error` property
+						// If there was an error, then reject the Promise
 						if (error)
 						{
-							// superagent would have already output the error to console
+							// `superagent` would have already output the error to console
 							// console.error(error.stack)
 
 							console.log('[react-isomorphic-render] (http request error)')
 
-							// If the `error` was returned as part of HTTP response
+							// Initialize `error.data`
+							if (!error.data)
+							{
+								// Set error `data` from response body,
+								// if it's a JSON object
+								if (response && response.body)
+								{
+									error.data = response.body
+								}
+								// Otherwise just default to an empty object
+								else
+								{
+									error.data = {}
+								}
+							}
+							
+							// Set error `data` from response
 							if (response)
 							{
-								// Set `error` `code` to HTTP response status code
-								error.code = response.status
+								// Set `error.data.status` to HTTP response status code
+								error.data.status = response.statusCode
 
-								// If the HTTP response was not a JSON,
+								// Shortcut for `status` on the `error` instance object itself
+								if (error.status === undefined)
+								{
+									error.status = error.data.status
+								}
+
+								// If the HTTP response was not a JSON object,
 								// but rather a text or an HTML page,
 								// then include that information in the `error`
 								// for future reference (e.g. easier debugging).
 
-								const content_type = response.get('content-type').split(';')[0].trim()
+								if (response.text)
+								{
+									const content_type = response.get('content-type').split(';')[0].trim()
 
-								if (content_type === 'text/plain')
-								{
-									error.message = response.text
+									switch (content_type)
+									{
+										case 'text/plain':
+											error.message = error.data.message = response.text
+											break
+
+										case 'text/html':
+											error.data.html = response.text
+											break
+									}
 								}
-								else if (content_type === 'text/html')
-								{
-									error.html = response.text
-								}
+							}
+
+							// Set `data` message if not set already
+							// (it is unlikely that an `error` will have no `message`)
+							if (!error.data.message)
+							{
+								error.data.message = error.message
 							}
 
 							// HTTP request failed with an `error`
@@ -175,12 +214,15 @@ export default class http_client
 						// HTTP request completed without errors,
 						// so return the HTTP response data.
 
-						// 204 - No content (e.g. PUT, DELETE)
+						// If HTTP response status is "204 - No content"
+						// (e.g. PUT, DELETE)
+						// then resolve with an empty result
 						if (response.statusCode === 204)
 						{
 							return resolve()
 						}
 
+						// Else, the result is HTTP response body
 						resolve(parse_dates(response.body))
 					})
 				})

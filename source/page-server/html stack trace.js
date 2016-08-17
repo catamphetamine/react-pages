@@ -2,17 +2,17 @@ import { html as html_stack_trace } from 'print-error'
 
 export default function render_stack_trace(error, options)
 {
-	// supports custom `html` for an error
-	if (error.html)
+	// Supports custom `html` for an error
+	if (error.data && error.data.html)
 	{
-		return { response_status: error.code, response_body: error.html }
+		return { response_status: error.status, response_body: error.data.html }
 	}
 
-	// handle `superagent` errors: if an error response was an html, then just render it
+	// Handle `superagent` errors: if an error response was an html, then just render it
 	// https://github.com/visionmedia/superagent/blob/29ca1fc938b974c6623d9040a044e39dfb272fed/lib/node/response.js#L106
 	if (typeof error.status === 'number')
 	{
-		// if the `superagent` http request returned an html response 
+		// If the `superagent` http request returned an html response 
 		// (possibly an error stack trace),
 		// then just output that stack trace
 		if (error.response 
@@ -23,7 +23,7 @@ export default function render_stack_trace(error, options)
 		}
 	}
 
-	// if this error has a stack trace then it can be shown
+	// If this error has a stack trace then it can be shown
 
 	let stack_trace
 
@@ -38,7 +38,7 @@ export default function render_stack_trace(error, options)
 		stack_trace = error.original.stack
 	}
 
-	// if this error doesn't have a stack trace - do nothing
+	// If this error doesn't have a stack trace - do nothing
 	if (!stack_trace)
 	{
 		return {}

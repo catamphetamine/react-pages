@@ -97,7 +97,7 @@ export default function start_webpage_rendering_server(options, common)
 			// log the error
 			console.log('[react-isomorphic-render] Webpage rendering server error')
 
-			ctx.status = typeof error.code === 'number' ? error.code : 500
+			ctx.status = typeof error.status === 'number' ? error.status : 500
 			ctx.message = error.message || 'Internal error'
 		}
 	})

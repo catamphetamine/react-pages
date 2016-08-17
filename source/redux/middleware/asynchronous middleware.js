@@ -115,9 +115,9 @@ export default function asynchronous_middleware(http_client, dispatch_event, { p
 					{
 						throw error
 					}
-					
+
 					// dispatch the `failure` event to the Redux store
-					dispatch_event({ ...rest, error, type: Failure })
+					dispatch_event({ ...rest, error: error.data || error, type: Failure })
 
 					// the Promise returned from `dispatch()` is rejected
 					throw error

@@ -429,7 +429,7 @@ A sidenote: these two functions aren't supposed to be used inside `onEnter` and 
   // then a redirect to "/unauthorized" page can be made here.
   // If this error handler is defined then it must handle
   // all errors it gets (or just re`throw` them).
-  on_preload_error: (error, { url, redirect }) => redirect(`/error?url=${encode(url)}&error=${error.code}`)
+  on_preload_error: (error, { url, redirect }) => redirect(`/error?url=${encode(url)}&error=${error.status}`)
 
   // (optional)
   // User can add his own middleware to this `middleware` list
@@ -498,7 +498,7 @@ A sidenote: these two functions aren't supposed to be used inside `onEnter` and 
   // (can redirect to special "500 Error" pages).
   // If this error handler is defined then it must handle
   // all errors it gets (or just re`throw` them).
-  on_error: (error, { url, redirect }) => redirect(`/error?url=${encode(url)}&error=${error.code}`)
+  on_error: (error, { url, redirect }) => redirect(`/error?url=${encode(url)}&error=${error.status}`)
 
   // (optional)
   // Custom Koa middleware (an array of middlewares).
