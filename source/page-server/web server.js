@@ -115,30 +115,11 @@ export default function start_webpage_rendering_server(options, common)
 	// Isomorphic rendering
 	web.use(async (ctx) =>
 	{
-		// Material-UI asks for this,
-		// but this isn't right,
-		// because Node.js serves requests asynchronously
-		// and therefore two different web browsers 
-		// may be asking for a rendered page simultaneously.
-		//
-		// global.navigator = { userAgent: request.headers['user-agent'] }
-
 		// Trims a question mark in the end (just in case)
 		const url = ctx.request.originalUrl.replace(/\?$/, '')
 
 		// Performs HTTP redirect
 		const redirect_to = to => ctx.redirect(to)
-
-		// Give `localize` a hint on which locale to choose
-		if (localize)
-		{
-		    // Preferred locale (e.g. 'ru-RU').
-		    // Can be obtained from `language` cookie
-		    // or from 'Accept-Language' HTTP header.
-		    const preferred_locale = ctx.getLocaleFromQuery() || ctx.getLocaleFromCookie() || ctx.getLocaleFromHeader()
-		    const _localize = localize
-		    localize = (store) => _localize(store, preferred_locale)
-		}
 
 		try
 		{
@@ -147,7 +128,7 @@ export default function start_webpage_rendering_server(options, common)
 				application,
 				assets,
 				preload,
-				localize,
+				localize: localize_with_preferred_locale(localize, ctx),
 				disable_server_side_rendering,
 				html,
 
@@ -195,4 +176,21 @@ export default function start_webpage_rendering_server(options, common)
 	})
 
 	return web
+}
+
+// Give `localize` a hint on which locale to choose
+function localize_with_preferred_locale(localize, ctx)
+{
+	if (!localize)
+	{
+		return
+	}
+
+    // Preferred locale (e.g. 'ru-RU').
+    // Can be obtained from `language` HTTP GET parameter,
+    // or from `language` cookie,
+    // or from 'Accept-Language' HTTP header.
+    const preferred_locale = ctx.getLocaleFromQuery() || ctx.getLocaleFromCookie() || ctx.getLocaleFromHeader()
+
+    return (store) => localize(store, preferred_locale)
 }
