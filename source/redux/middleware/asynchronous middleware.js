@@ -1,3 +1,5 @@
+import { exists, is_object } from '../../helpers'
+
 // enables support for Ajax Http requests
 //
 // takes effect if the `dispatch`ed message has 
@@ -97,7 +99,12 @@ export default function asynchronous_middleware(http_client, dispatch_event, { p
 				result =>
 				{
 					// dispatch the `success` event to the Redux store
-					dispatch_event({ ...rest, result, type: Success })
+					dispatch_event
+					({
+						...rest,
+						result,
+						type : Success
+					})
 
 					// the Promise returned from `dispatch()` is resolved
 					return result
@@ -116,8 +123,31 @@ export default function asynchronous_middleware(http_client, dispatch_event, { p
 						throw error
 					}
 
+					// Transform Javascript `Error` instance into a plain JSON object
+					// because the meaning of the `error` is different
+					// from what `Error` class is: it should only carry info like
+					// `status`, `message` and possible other values (e.g. `code`),
+					// without any stack traces, line numbers, etc.
+
+					const error_data = is_object(error.data) ? error.data : {}
+
+					if (!exists(error_data.message))
+					{
+						error_data.message = error.message
+					}
+
+					if (!exists(error_data.status))
+					{
+						error_data.status = error.status
+					}
+
 					// dispatch the `failure` event to the Redux store
-					dispatch_event({ ...rest, error: error.data || error, type: Failure })
+					dispatch_event
+					({
+						...rest,
+						error : error_data,
+						type  : Failure
+					})
 
 					// the Promise returned from `dispatch()` is rejected
 					throw error

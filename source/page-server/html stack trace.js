@@ -3,9 +3,9 @@ import { html as html_stack_trace } from 'print-error'
 export default function render_stack_trace(error, options)
 {
 	// Supports custom `html` for an error
-	if (error.data && error.data.html)
+	if (error.html)
 	{
-		return { response_status: error.status, response_body: error.data.html }
+		return { response_status: error.status, response_body: error.html }
 	}
 
 	// Handle `superagent` errors: if an error response was an html, then just render it

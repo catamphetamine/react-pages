@@ -17,11 +17,10 @@ export default function start_webpage_rendering_server(options, common)
 
 	common = normalize_common_options(common)
 
-	let
+	const
 	{
 		preload,
 		localize,
-		assets,
 		application,
 		disable_server_side_rendering,
 		on_error,
@@ -45,13 +44,7 @@ export default function start_webpage_rendering_server(options, common)
 		style
 	}
 
-	// Normalize `assets` parameter
-	// (to be a function)
-	if (typeof assets !== 'function')
-	{
-		const assets_object = assets
-		assets = () => assets_object
-	}
+	const assets = normalize_assets(options.assets)
 
 	const web = new koa()
 
@@ -193,4 +186,18 @@ function localize_with_preferred_locale(localize, ctx)
     const preferred_locale = ctx.getLocaleFromQuery() || ctx.getLocaleFromCookie() || ctx.getLocaleFromHeader()
 
     return (store) => localize(store, preferred_locale)
+}
+
+// Makes it a function
+function normalize_assets(assets)
+{
+	// Normalize `assets` parameter
+	// (to be a function)
+	if (typeof assets !== 'function')
+	{
+		const assets_object = assets
+		assets = () => assets_object
+	}
+
+	return assets
 }

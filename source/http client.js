@@ -129,82 +129,61 @@ export default class http_client
 						// 	}
 						// }
 
-						// If HTTP response was received,
-						// and if that HTTP response is a JSON object,
-						// then the error is the `error` property of that object.
-						// (if it exists)
-						if (!error)
-						{
-							if (response && response.body && response.body.error)
-							{
-								error = new Error('Server Error')
-								error.data = response.body.error
-							}
-						}
-
 						// If there was an error, then reject the Promise
 						if (error)
 						{
 							// `superagent` would have already output the error to console
 							// console.error(error.stack)
 
-							console.log('[react-isomorphic-render] (http request error)')
+							// console.log('[react-isomorphic-render] (http request error)')
 
-							// Initialize `error.data`
-							if (!error.data)
-							{
-								// Set error `data` from response body,
-								// if it's a JSON object
-								if (response && response.body)
-								{
-									error.data = response.body
-								}
-								// Otherwise just default to an empty object
-								else
-								{
-									error.data = {}
-								}
-							}
-							
-							// Set error `data` from response
+							// Infer additional `error` properties from the HTTP response
 							if (response)
 							{
-								// Set `error.data.status` to HTTP response status code
-								error.data.status = response.statusCode
+								// Set `error.status` to HTTP response status code
+								error.status = response.statusCode
 
-								// Shortcut for `status` on the `error` instance object itself
-								if (error.status === undefined)
+								switch (response.type)
 								{
-									error.status = error.data.status
+									// Set error `data` from response body,
+									case 'application/json':
+										// if (!is_object(error.data))
+										error.data = response.body
+
+										// Set the more meaningful message for the error (if available)
+										if (error.data.message)
+										{
+											error.message = error.data.message
+										}
+
+										break
+
+									// If the HTTP response was not a JSON object,
+									// but rather a text or an HTML page,
+									// then include that information in the `error`
+									// for future reference (e.g. easier debugging).
+
+									case 'text/plain':
+										error.message = response.text
+										break
+
+									case 'text/html':
+										error.html = response.text
+
+										// Recover the original error message (if any)
+										if (response.headers['x-error-message'])
+										{
+											error.message = response.headers['x-error-message']
+										}
+
+										// Recover the original error stack trace (if any)
+										if (response.headers['x-error-stack-trace'])
+										{
+											error.stack = JSON.parse(response.headers['x-error-stack-trace'])
+										}
+
+										break
 								}
-
-								// If the HTTP response was not a JSON object,
-								// but rather a text or an HTML page,
-								// then include that information in the `error`
-								// for future reference (e.g. easier debugging).
-
-								if (response.text)
-								{
-									const content_type = response.get('content-type').split(';')[0].trim()
-
-									switch (content_type)
-									{
-										case 'text/plain':
-											error.message = error.data.message = response.text
-											break
-
-										case 'text/html':
-											error.data.html = response.text
-											break
-									}
-								}
-							}
-
-							// Set `data` message if not set already
-							// (it is unlikely that an `error` will have no `message`)
-							if (!error.data.message)
-							{
-								error.data.message = error.message
 							}
 
 							// HTTP request failed with an `error`
