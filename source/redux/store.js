@@ -17,7 +17,7 @@ import DevTools from './dev tools'
 
 // import use_scroll from 'scroll-behavior'
 
-export default function(get_reducer, { development, development_tools, server, data, create_routes, http_client, on_preload_error, middleware, on_store_created })
+export default function(get_reducer, { development, development_tools, server, data, create_routes, http_client, promise_event_naming, on_preload_error, middleware, on_store_created })
 {
 	// server-side and client-side specifics
 	const reduxReactRouter = server ? reduxReactRouter_server : reduxReactRouter_client
@@ -33,7 +33,10 @@ export default function(get_reducer, { development, development_tools, server, d
 	// Therefore using a middleware to wait for page loading to finish.
 
 	// Generates the three promise event names automatically based on a base event name
-	const promise_event_naming = event_name => [`${event_name} pending`, `${event_name} done`, `${event_name} failed`]
+	if (!promise_event_naming)
+	{
+		promise_event_naming = event_name => [`${event_name}: pending`, `${event_name}: done`, `${event_name}: failed`]
+	}
 
 	// Redux store enhancers
 	const store_enhancers = []

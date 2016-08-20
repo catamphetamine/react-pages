@@ -1,3 +1,15 @@
+4.1.2 / 20.08.2016
+===================
+
+  * Slightly changed the behaviour of the undocumented `event` parameter of `asynchronous_middleware`: now it transforms `event` into an array of `[event: pending, event: done, event: failed]` as opposed to the older colonless `[event pending, event done, event failed]`. This could break things for those who were using this undocumented feature, but an easy hotfix is to provide `promise_event_naming` function parameter in `common.js` to retain the old Redux event naming scheme:
+
+```js
+promise_event_naming(event_name)
+{
+  return [`${event_name} pending`, `${event_name} done`, `${event_name} failed`]
+}
+```
+
 4.1.0 / 17.08.2016
 ===================
 
