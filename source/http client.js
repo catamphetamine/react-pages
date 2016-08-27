@@ -257,9 +257,14 @@ const ISO = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2}(?:\.\d*))(?:Z|(\+|-
 // Walks JSON object tree
 function parse_dates(object)
 {
+	// If it's a date in an ISO string format, then parse it
+	if (typeof object === 'string' && ISO.test(object))
+	{
+		return new Date(object)
+	}
 	// If an array is encountered, 
 	// proceed recursively with each element of this array.
-	if (object instanceof Array)
+	else if (object instanceof Array)
 	{
 		let i = 0
 		while (i < object.length)
@@ -275,16 +280,8 @@ function parse_dates(object)
 	{
 		for (let key of Object.keys(object))
 		{
-			const value = object[key]
-			if (typeof value === 'string' && ISO.test(value))
-			{
-				object[key] = new Date(value)
-			}
-			else
-			{
-				// proceed recursively
-				parse_dates(value)
-			}
+			// proceed recursively
+			object[key] = parse_dates(object[key])
 		}
 	}
 
