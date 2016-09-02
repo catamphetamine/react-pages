@@ -8,8 +8,6 @@ import use_scroll                                      from 'react-router-scroll
 
 import { render_on_client as react_render_on_client, render_on_server as react_render_on_server } from '../render'
 
-import DevTools from './dev tools'
-
 // Renders the current page React element inside the `to` DOM element.
 //
 // Returns a Promise resolving to the rendered React component.
@@ -97,6 +95,9 @@ export function render_on_client({ development, development_tools, create_page_e
 				// to be rendered sequentially
 
 				// console.log(`You're gonna see two "@@reduxReactRouter/initRoutes" events in Redux DevTools because the page has been rendered twice: first time without DevTools and second time with it`)
+
+				// React JSX syntax can't detect lowercase elements
+				const DevTools = development_tools
 
 				// This element will contain React page element and Redux-devtools
 				element = 

@@ -13,8 +13,6 @@ import createHistory_client from 'history/lib/createBrowserHistory'
 import asynchronous_middleware from './middleware/asynchronous middleware'
 import preloading_middleware from './middleware/preloading middleware'
 
-import DevTools from './dev tools'
-
 // import use_scroll from 'scroll-behavior'
 
 export default function(get_reducer, { development, development_tools, server, data, create_routes, http_client, promise_event_naming, on_preload_error, middleware, on_store_created })
@@ -127,10 +125,15 @@ export default function(get_reducer, { development, development_tools, server, d
 	// Add Redux DevTools (if they're enabled)
 	if (development && !server && development_tools)
 	{
+		if (development_tools === true)
+		{
+			throw new Error(`"development_tools" option is now not a "true" flag but rather a "DevTools" instance created by "crateDevTools()" function call. This way one can customize the tools however he likes. See https://github.com/halt-hammerzeit/react-isomorphic-render#miscellaneous-client-side-rendering-options`)
+		}
+
 		store_enhancers.push
 		(
 			// Provides support for DevTools
-			window.devToolsExtension ? window.devToolsExtension() : DevTools.instrument(),
+			window.devToolsExtension ? window.devToolsExtension() : development_tools.instrument(),
 			// Lets you write ?debug_session=<name> in address bar to persist debug sessions
 			persistState(window.location.href.match(/[?&]debug_session=([^&]+)\b/))
 		)

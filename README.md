@@ -577,8 +577,28 @@ A sidenote: these two functions aren't supposed to be used inside `onEnter` and 
   ...
 
   // (optional)
-  // Enables/disables Redux development tools (true/false)
-  development_tools: _development_tools_,
+  // Enables/disables Redux development tools.
+  //
+  // This is not an optional `true` boolean flag,
+  // but rather an optional "DevTools" instance created by "createDevTools()".
+  //
+  // An example of "DevTools.js":
+  //
+  // npm install redux-devtools redux-devtools-log-monitor redux-devtools-dock-monitor --save-dev
+  //
+  // import React from 'react'
+  // import { createDevTools } from 'redux-devtools'
+  // import LogMonitor from 'redux-devtools-log-monitor'
+  // import DockMonitor from 'redux-devtools-dock-monitor'
+  // 
+  // export default createDevTools
+  // (
+  //   <DockMonitor toggleVisibilityKey="ctrl-H" changePositionKey="ctrl-Q" defaultIsVisible>
+  //     <LogMonitor theme="tomorrow" />
+  //   </DockMonitor>
+  // )
+  //
+  development_tools: require('./DevTools.js'),
 
   // (optional)
   // Loads localized messages (asynchronously)
