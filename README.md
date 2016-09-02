@@ -598,7 +598,7 @@ A sidenote: these two functions aren't supposed to be used inside `onEnter` and 
   //   </DockMonitor>
   // )
   //
-  development_tools: require('./DevTools.js'),
+  development_tools: __development__ ? require('./DevTools.js') : false,
 
   // (optional)
   // Loads localized messages (asynchronously)
