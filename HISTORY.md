@@ -1,4 +1,4 @@
-4.1.6 / 08.09.2016
+4.1.7 / 08.09.2016
 ===================
 
   * Fixed `action is not defined` error when calling `store.getState()` inside `routes()`

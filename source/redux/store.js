@@ -70,7 +70,7 @@ export default function(get_reducer, { development, development_tools, server, d
 							throw new Error(error_message('dispatch'))
 						}
 
-						store.dispatch(action)
+						return store.dispatch(action)
 					},
 					getState()
 					{
@@ -79,7 +79,7 @@ export default function(get_reducer, { development, development_tools, server, d
 							throw new Error(error_message('getState'))
 						}
 
-						store.getState()
+						return store.getState()
 					}
 				})
 			},
