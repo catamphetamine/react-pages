@@ -468,14 +468,14 @@ A sidenote: these two functions aren't supposed to be used inside `onEnter` and 
   //
   // Also a website "favicon" URL, if any.
   //
-  // Can be an `object` or a `function(url)`.
+  // Can be an `object` or a `function(url, { store })`.
   //
   // `javascript` and `style` can be strings or objects.
   // If they are objects then also provide an `entry` parameter.
   // The objects may also contain `common` entry
   // which will also be included on the page.
   //
-  assets: (url) =>
+  assets: (url, { store }) =>
   {
     return {
       javascript: '/assets/main.js',

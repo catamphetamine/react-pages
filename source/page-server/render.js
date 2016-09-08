@@ -129,7 +129,7 @@ export default async function({ preload, localize, assets, application, request,
 
 		render_webpage_as_react_element: content =>
 		{
-			assets = assets(url)
+			assets = assets(url, { store })
 			if (assets.styles)
 			{
 				assets.style = assets.styles

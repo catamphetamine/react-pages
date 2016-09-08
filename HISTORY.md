@@ -1,3 +1,8 @@
+4.1.5 / 08.09.2016
+===================
+
+  * `assets()` function now has the second argument which is `{ store }`; this can be used, for example, to show different favicons for different users.
+
 4.1.4 / 02.09.2016
 ===================
 
