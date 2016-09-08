@@ -79,7 +79,7 @@ export default function(get_reducer, { development, development_tools, server, d
 							throw new Error(error_message('getState'))
 						}
 
-						store.getState(action)
+						store.getState()
 					}
 				})
 			},
