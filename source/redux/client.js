@@ -19,7 +19,10 @@ export default function render({ development, development_tools, load_translatio
 	common = normalize_common_options(common)
 
 	// `http` utility can be used inside Redux action creators
-	const http_client = new Http_client()
+	const http_client = new Http_client
+	({
+		format_url : common.http && common.http.url
+	})
 
 	// create ("rehydrate") Redux store
 	const store = create_store(common.get_reducer,
@@ -39,7 +42,11 @@ export default function render({ development, development_tools, load_translatio
 
 	// Customization of `http` utility
 	// which can be used inside Redux action creators
-	set_up_http_client(http_client, { store, on_before_send: common.http_request })
+	set_up_http_client(http_client,
+	{
+		store,
+		on_before_send : common.http && common.http.request
+	})
 
 	return localize_and_render
 	({

@@ -14,6 +14,11 @@ export default class http_client
 	{
 		const { secure, host, port, headers, clone_request } = options
 
+		// For those who don't wish to proxy API requests to API servers
+		// and prefer to query those API servers directly (for whatever reasons).
+		// Direct API calls will contain user's cookies (e.g. JWT token).
+		const format_url = options.format_url || this.format_url.bind(this)
+
 		// Clone HTTP request cookies on the server-side
 		// (to make authentication work)
 		if (clone_request)
@@ -45,7 +50,7 @@ export default class http_client
 			this[method] = (path, data, options = {}) =>
 			{
 				// `url` will be absolute for server-side
-				const url = this.format_url(path)
+				const url = format_url(path, this.server)
 
 				return new Promise((resolve, reject) =>
 				{
@@ -211,7 +216,7 @@ export default class http_client
 
 	// Validates the requested URL,
 	// and also prepends host and port to it on the server side.
-	format_url(path)
+	format_url(path, server)
 	{
 		// Rejects URLs of form "//www.google.ru/search",
 		// and verifies that the `path` is an internal URL.
@@ -222,7 +227,7 @@ export default class http_client
 		}
 
 		// Prepend host and port on the server side
-		if (this.server)
+		if (server)
 		{
 			const protocol = this.secure ? 'https' : 'http'
 			return `${protocol}://${this.host}:${this.port}${path}`

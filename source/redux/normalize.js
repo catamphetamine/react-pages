@@ -9,36 +9,55 @@ export function normalize_common_options(common)
 
   common = clone(common)
 
-  if (!common.routes)
+  if (!common.create_routes)
   {
-    throw new Error(`"routes" parameter is required`)
+    if (!common.routes)
+    {
+      throw new Error(`"routes" parameter is required`)
+    }
+
+    if (typeof common.routes === 'function')
+    {
+      common.create_routes = common.routes
+    }
+    else
+    {
+      const routes = common.routes
+      common.create_routes = () => routes
+    }
+
+    delete common.routes
   }
 
-  if (typeof common.routes === 'function')
+  if (!common.get_reducer)
   {
-    common.create_routes = common.routes
-  }
-  else
-  {
-    const routes = common.routes
-    common.create_routes = () => routes
-  }
+    if (!common.reducer)
+    {
+      throw new Error(`"reducer" parameter is required`)
+    }
 
-  delete common.routes
+    if (typeof common.reducer !== 'function')
+    {
+      const reducer = common.reducer
+      common.reducer = () => reducer
+    }
 
-  if (!common.reducer)
-  {
-    throw new Error(`"reducer" parameter is required`)
-  }
-
-  if (typeof common.reducer !== 'function')
-  {
-    const reducer = common.reducer
-    common.reducer = () => reducer
+    common.get_reducer = common.reducer
+    delete common.reducer
   }
 
-  common.get_reducer = common.reducer
-  delete common.reducer
+  if (common.http_request)
+  {
+    console.log('WARNING: `http_request` common setting has been renamed to `http.request`')
+
+    if (!common.http)
+    {
+      common.http = {}
+    }
+
+    common.http.request = common.http_request
+    delete common.http_request
+  }
 
   return common
 }

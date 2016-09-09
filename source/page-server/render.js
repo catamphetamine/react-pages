@@ -59,7 +59,8 @@ export default async function({ preload, localize, assets, application, request,
 		host          : application.host,
 		port          : application.port,
 		secure        : application.secure,
-		clone_request : request
+		clone_request : request,
+		format_url    : common.http && common.http.url
 	})
 
 	// initial Flux store data (if using Flux)
@@ -92,7 +93,11 @@ export default async function({ preload, localize, assets, application, request,
 
 	// Customization of `http` utility
 	// which can be used inside Redux action creators
-	set_up_http_client(http_client, { store, on_before_send: common.http_request })
+	set_up_http_client(http_client,
+	{
+		store,
+		on_before_send : common.http && common.http.request
+	})
 
 	// Internationalization
 

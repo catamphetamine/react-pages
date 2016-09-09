@@ -1,3 +1,9 @@
+4.1.10 / 10.09.2016
+===================
+
+  * Added `http.url` common option which replaces the default `format_url()` function if specified
+  * Renamed `http_request` to `http.request`
+
 4.1.9 / 10.09.2016
 ===================
 

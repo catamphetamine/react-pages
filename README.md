@@ -441,16 +441,29 @@ A sidenote: these two functions aren't supposed to be used inside `onEnter` and 
   on_store_created: ({ reload_reducer }) => {}
 
   // (optional)
-  // Will be called for each HTTP request
-  // sent using `http` utility inside Redux action creators.
-  // (`request` is a `superagent` request)
-  http_request: (request, { store }) =>
+  // `http` utility settings
+  http:
   {
-    const token = store.getState().authentication.token
-
-    if (token)
+    // (optional)
+    // Will be called for each HTTP request
+    // sent using `http` utility inside Redux action creators.
+    // (`request` is a `superagent` request)
+    request: (request, { store }) =>
     {
-      request.set('Authorization', `Bearer ${token}`)
+      const token = store.getState().authentication.token
+
+      if (token)
+      {
+        request.set('Authorization', `Bearer ${token}`)
+      }
+    },
+
+    // (optional)
+    // Custom control over `http` utility HTTP requests URL.
+    // E.g. for those who don't want to proxy API calls (for whatever reasons).
+    url: (path, is_server_side) =>
+    {
+      return `https://api-server.com${path}`
     }
   }
 }
