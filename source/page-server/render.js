@@ -14,6 +14,8 @@ import { render_on_server as react_router_render } from '../react-router/render'
 import create_store from '../redux/store'
 import set_up_http_client from '../redux/http client'
 
+import { normalize_common_options } from '../redux/normalize'
+
 // isomorphic (universal) rendering (middleware).
 // will be used in web_application.use(...)
 export default async function({ preload, localize, assets, application, request, disable_server_side_rendering, html }, common)

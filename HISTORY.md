@@ -1,4 +1,4 @@
-4.1.8 / 10.09.2016
+4.1.9 / 10.09.2016
 ===================
 
   * Added `normalize_common_options` to page server's `render()`
