@@ -1,3 +1,8 @@
+4.1.8 / 10.09.2016
+===================
+
+  * Added `normalize_common_options` to page server's `render()`
+
 4.1.7 / 08.09.2016
 ===================
 

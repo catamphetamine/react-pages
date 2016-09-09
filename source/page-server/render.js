@@ -28,7 +28,7 @@ export default async function({ preload, localize, assets, application, request,
 		create_routes,
 		wrapper
 	}
-	= common
+	= normalize_common_options(common)
 
 	let
 	{
