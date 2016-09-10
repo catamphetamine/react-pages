@@ -1,3 +1,8 @@
+5.0.1 / 10.09.2016
+===================
+
+  * Fixed `dispatch()` and `getState()` throwing errors in `onEnter` hooks
+
 5.0.0 / 10.09.2016
 ===================
 

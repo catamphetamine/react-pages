@@ -58,32 +58,7 @@ export default function(get_reducer, { development, development_tools, server, d
 		// (redux-router keeps react-router state in Redux)
 		reduxReactRouter
 		({
-			getRoutes()
-			{
-				const error_message = (method_name) => `You shouldn't be calling "${method_name}" immediately in your "routes({ dispatch, getState })" function because it's pointless. It is supposed to be called in route lifecycle hooks, e.g. "onEnter". If you still think you need calling it immediately, then create an issue in the github repo: https://github.com/halt-hammerzeit/react-isomorphic-render`
-
-				return create_routes
-				({
-					dispatch(action)
-					{
-						if (store === undefined)
-						{
-							throw new Error(error_message('dispatch'))
-						}
-
-						return store.dispatch(action)
-					},
-					getState()
-					{
-						if (store === undefined)
-						{
-							throw new Error(error_message('getState'))
-						}
-
-						return store.getState()
-					}
-				})
-			},
+			getRoutes : create_routes,
 			createHistory
 		}),
 
