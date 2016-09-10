@@ -344,6 +344,20 @@ export default connect(model => ({ pending: model.preload.pending, error: model.
 }
 ```
 
+## onEnter
+
+While [this Pull Request](https://github.com/acdlite/redux-router/pull/272) in `redux-router` repo has not been accepted yet there's another possibility to get the same functionality
+
+```js
+import { onEnter } from 'react-isomorphic-render/redux'
+
+<Route path="user">
+  <Route path=":id" component={onEnter(async ({ dispatch, getState }, redirect) => {
+    redirect('/somewhere')
+  })(UserProfile)}/>
+</Route>
+```
+
 ## Utilities
 
 ### Setting webpage title, description, <meta/> tags

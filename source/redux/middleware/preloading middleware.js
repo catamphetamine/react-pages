@@ -10,7 +10,7 @@ import { ROUTER_DID_CHANGE } from 'redux-router/lib/constants'
 import { replace }           from 'redux-router'
 
 export const Preload_method_name          = '__react_preload___'
-export const Preload_blocking_method_name = '__react_preload_blocking__'
+// export const Preload_blocking_method_name = '__react_preload_blocking__'
 
 // Returns function returning a Promise 
 // which resolves when all the required preload()s are resolved.
@@ -77,11 +77,12 @@ const preloader = (server, components, getState, dispatch, location, parameters,
 			.map(preload => () => preload(preload_options)) // bind arguments
 	}
 
-	// get all `preload_blocking` methods on the React-Router component chain
-	const blocking_preloads = get_preloaders(Preload_blocking_method_name)
+	// // get all `preload_blocking` methods on the React-Router component chain
+	// const blocking_preloads = get_preloaders(Preload_blocking_method_name)
 
 	// get all `preload` methods on the React-Router component chain
-	const preloads = get_preloaders(Preload_method_name)
+	const blocking_preloads = get_preloaders(Preload_method_name)
+	const preloads = []
 
 	// calls all `preload` methods on the React-Router component chain
 	// (in parallel) and returns a Promise
@@ -114,7 +115,7 @@ const preloader = (server, components, getState, dispatch, location, parameters,
 	// (sequentially) and returns a Promise
 	const preload_all_blocking = () =>
 	{
-		return (blocking_preloads || []).reduce((previous, preload) =>
+		return blocking_preloads.reduce((previous, preload) =>
 		{
 			return previous.then(() =>
 			{
@@ -139,20 +140,25 @@ const preloader = (server, components, getState, dispatch, location, parameters,
 		}, 
 		Promise.resolve())
 	}
-
-	// if there are `preload_blocking` methods on the React-Router component chain,
-	// then finish them first (sequentially)
+	
 	if (blocking_preloads.length > 0)
 	{
-		// first finish `preload_blocking` methods, then call all `preload`s
-		return () => preload_all_blocking().then(preload_all)
+		return preload_all_blocking
 	}
 
-	// no `preload_blocking` methods, just call all `preload`s, if any
-	if (preloads.length > 0)
-	{
-		return preload_all
-	}
+	// // if there are `preload_blocking` methods on the React-Router component chain,
+	// // then finish them first (sequentially)
+	// if (blocking_preloads.length > 0)
+	// {
+	// 	// first finish `preload_blocking` methods, then call all `preload`s
+	// 	return () => preload_all_blocking().then(preload_all)
+	// }
+	//
+	// // no `preload_blocking` methods, just call all `preload`s, if any
+	// if (preloads.length > 0)
+	// {
+	// 	return preload_all
+	// }
 }
 
 // Checks if two `location`s are the same
@@ -294,9 +300,17 @@ export default function preloading_middleware(server, on_error, dispatch_event, 
 
 				// If the error was a redirection exception (not a error),
 				// then just exit and do nothing.
-				// (happens on server side only)
+				// (happens only on server side or when using `onEnter` helper)
 				if (error._redirect)
 				{
+					if (!server)
+					{
+						// Page loading indicator could listen for this event
+						dispatch_event({ type: Preload_finished })
+
+						return dispatch_event(replace(error._redirect))
+					}
+
 					throw error
 				}
 

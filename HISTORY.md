@@ -1,3 +1,10 @@
+5.0.2 / 11.09.2016
+===================
+
+  * Fixed `on_navigation` is not a function bug
+  * All `@preload()`s are now blocking; removed the exported `Preload_blocking_method_name`
+  * Added `onEnter(({ dispatch, getState }, redirect) => {})(component)` decorator to mimic `react-router`'s `onEnter` hook
+
 5.0.1 / 10.09.2016
 ===================
 

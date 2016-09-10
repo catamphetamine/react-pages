@@ -52,6 +52,52 @@ export default function(get_reducer, { development, development_tools, server, d
 		}
 	}
 
+	const middlewares =
+	[
+		// Enables support for Ajax Http requests.
+		//
+		// Takes effect if the `dispatch`ed message has 
+		// { promise: ... }
+		//
+		// In all the other cases it will do nothing.
+		//
+		// Because `asynchronous_middleware` is `applied` to the store
+		// before user-supplied middleware, it means that standard `dispatch`
+		// of `asynchronous_middleware` won't send actions to user-supplied middleware,
+		// therefore there's an additional `dispatch_event` argument
+		// which is a function to hack around that limitation.
+		//
+		asynchronous_middleware(http_client, event => store.dispatch(event), { promise_event_naming }),
+
+		// Enables support for @preload() annotation
+		// (which preloads data required for displaying certain pages).
+		//
+		// Takes effect if the `dispatch`ed message has 
+		// { type: ROUTER_DID_CHANGE }
+		//
+		// In all the other cases it will do nothing.
+		//
+		// Because `preloading_middleware` is `applied` to the store
+		// before `reduxReactRouter` store enhancer adds its own middleware,
+		// then it means that standard `dispatch` of `preloading_middleware`
+		// won't send actions to that `reduxReactRouter` middleware,
+		// therefore using the third argument to hack around this thing.
+		//
+		preloading_middleware(server, on_preload_error, event => store.dispatch(event), preload_helpers)
+	]
+
+	if (on_navigate)
+	{
+		middlewares.push
+		(
+			// Implements `react-router` `onUpdate` handler
+			//
+			// Listens for `{ type: ROUTER_DID_CHANGE }`
+			//
+			on_route_update_middleware(on_navigate)
+		)
+	}
+
 	store_enhancers.push
 	(
 		// `redux-router` middleware
@@ -62,46 +108,8 @@ export default function(get_reducer, { development, development_tools, server, d
 			createHistory
 		}),
 
-		// Ajax and @preload middleware
-		applyMiddleware
-		(
-			// Enables support for Ajax Http requests.
-			//
-			// Takes effect if the `dispatch`ed message has 
-			// { promise: ... }
-			//
-			// In all the other cases it will do nothing.
-			//
-			// Because `asynchronous_middleware` is `applied` to the store
-			// before user-supplied middleware, it means that standard `dispatch`
-			// of `asynchronous_middleware` won't send actions to user-supplied middleware,
-			// therefore there's an additional `dispatch_event` argument
-			// which is a function to hack around that limitation.
-			//
-			asynchronous_middleware(http_client, event => store.dispatch(event), { promise_event_naming }),
-
-			// Enables support for @preload() annotation
-			// (which preloads data required for displaying certain pages).
-			//
-			// Takes effect if the `dispatch`ed message has 
-			// { type: ROUTER_DID_CHANGE }
-			//
-			// In all the other cases it will do nothing.
-			//
-			// Because `preloading_middleware` is `applied` to the store
-			// before `reduxReactRouter` store enhancer adds its own middleware,
-			// then it means that standard `dispatch` of `preloading_middleware`
-			// won't send actions to that `reduxReactRouter` middleware,
-			// therefore using the third argument to hack around this thing.
-			//
-			preloading_middleware(server, on_preload_error, event => store.dispatch(event), preload_helpers),
-
-			// Implements `react-router` `onUpdate` handler
-			//
-			// Listens for `{ type: ROUTER_DID_CHANGE }`
-			//
-			on_route_update_middleware(on_navigate)
-		)
+		// Ajax and @preload middleware (+ optional others)
+		applyMiddleware(...middlewares)
 	)
 
 	// Add Redux DevTools (if they're enabled)

@@ -2,7 +2,7 @@ import chai from 'chai'
 chai.should()
 
 import { head, title, meta, render } from '../index.es6'
-import { render as redux_render, preload, goto, redirect, Preload_started, Preload_finished, Preload_failed, Preload_method_name, Preload_blocking_method_name } from '../source/redux/index'
+import { render as redux_render, preload, goto, redirect, Preload_started, Preload_finished, Preload_failed, Preload_method_name } from '../source/redux/index'
 
 describe(`exports`, function()
 {
@@ -24,7 +24,7 @@ describe(`exports`, function()
 		Preload_failed.should.be.a('string')
 
 		Preload_method_name.should.be.a('string')
-		Preload_blocking_method_name.should.be.a('string')
+		// Preload_blocking_method_name.should.be.a('string')
 	})
 
 	it(`should export ES5`, () =>
@@ -49,7 +49,7 @@ describe(`exports`, function()
 		redux.Preload_failed.should.be.a('string')
 
 		redux.Preload_method_name.should.be.a('string')
-		redux.Preload_blocking_method_name.should.be.a('string')
+		// redux.Preload_blocking_method_name.should.be.a('string')
 
 		const server = require('../server')
 
