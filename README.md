@@ -126,7 +126,7 @@ function fetch_users()
   }
 }
 
-@preload(dispatch => dispatch(fetch_users))
+@preload(({ dispatch }) => dispatch(fetch_users))
 @connect
 (
   state    => ({ users: state.users.users }),
@@ -287,7 +287,7 @@ export default (
 As you have noticed in the (Redux) example above, `@preload()` helper is called to preload a web page before display. It is used to preload pages before rendering them (both on the server side and on the client side).
 
 ```javascript
-@preload(function(dispatch, getState, location, params) { return Promise })
+@preload(function({ dispatch, getState, location, parameters }) { returns Promise })
 ```
 
 Note: `@preload()` decorator should be placed on top of all other decorators in order to work. The reason is that it adds a static method to your `Route`'s `component` and further decorators on top of it may not retain that static method.
@@ -424,14 +424,6 @@ A sidenote: these two functions aren't supposed to be used inside `onEnter` and 
 ```javascript
 {
   // (optional)
-  // Handles errors occurring inside `@preload()`.
-  // For example, if `@preload()` throws a `new Error("Unauthorized")`,
-  // then a redirect to "/unauthorized" page can be made here.
-  // If this error handler is defined then it must handle
-  // all errors it gets (or just re`throw` them).
-  on_preload_error: (error, { url, redirect }) => redirect(`/error?url=${encode(url)}&error=${error.status}`)
-
-  // (optional)
   // User can add his own middleware to this `middleware` list
   redux_middleware: () => [...]
 
@@ -465,7 +457,34 @@ A sidenote: these two functions aren't supposed to be used inside `onEnter` and 
     {
       return `https://api-server.com${path}`
     }
-  }
+  },
+
+  // (optional)
+  // `@preload()` customization
+  preload:
+  {
+    // (optional)
+    // For those coming from `redux-connect`, the same `helpers` parameter.
+    // All properties of this object will be available as named arguments
+    // inside `@preload({ dispatch, ..., helper })` decorator
+    helpers:
+    {
+      helper: require('./helper')
+    },
+
+    // (optional)
+    // Handles errors occurring inside `@preload()`.
+    // For example, if `@preload()` throws a `new Error("Unauthorized")`,
+    // then a redirect to "/unauthorized" page can be made here.
+    // If this error handler is defined then it must handle
+    // all errors it gets (or just re`throw` them).
+    catch: (error, { url, redirect }) => redirect(`/error?url=${encode(url)}&error=${error.status}`)
+  },
+
+  // (optional)
+  // `react-router`s `onUpdate` handler
+  // (is fired when a user performs navigation)
+  on_navigate: (location) => {}
 }
 ```
 

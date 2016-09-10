@@ -9,6 +9,11 @@ export function normalize_common_options(common)
 
   common = clone(common)
 
+  if (common.on_preload_error)
+  {
+    throw new Error(`"on_preload_error" has been renamed to "preload.on_error"`)
+  }
+
   if (!common.create_routes)
   {
     if (!common.routes)

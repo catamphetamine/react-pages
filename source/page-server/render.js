@@ -26,7 +26,6 @@ export default async function({ preload, localize, assets, application, request,
 		redux_middleware,
 		on_store_created,
 		promise_event_naming,
-		on_preload_error,
 		create_routes,
 		wrapper
 	}
@@ -86,8 +85,10 @@ export default async function({ preload, localize, assets, application, request,
 			middleware: redux_middleware,
 			on_store_created,
 			promise_event_naming,
-			on_preload_error,
-			http_client
+			on_preload_error : common.preload && common.preload.on_error,
+			http_client,
+			preload_helpers : common.preload && common.preload.helpers,
+			on_navigate : common.on_navigate
 		})
 	}
 

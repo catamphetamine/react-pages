@@ -1,3 +1,10 @@
+5.0.0 / 10.09.2016
+===================
+
+  * (breaking change) `@preload()` now takes a JSON object with named parameters: `dispatch`, `getState`, `location`, `parameters` and also everything from an optional `preload.helpers` object
+  * (breaking change) Renamed `on_preload_error` to `preload.on_error`
+  * Added support for `react-router` `onUpdate` handler: a common `on_navigate` function
+
 4.1.10 / 10.09.2016
 ===================
 

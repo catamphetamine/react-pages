@@ -45,6 +45,8 @@ export function render_on_client({ development, development_tools, create_page_e
 	// triggering a render() method call for the root <ReduxRouter/> React component
 	// (see the beginning of this explanation) and the new page is finally rendered.
 
+	// (`store.history` and `store.transitionManager` are set by `redux-router`)
+
 	return match_react_router({ history: store.history, routes: create_routes(store), transition_manager: store.transitionManager })
 		.then(({ redirect, router_props }) =>
 		{

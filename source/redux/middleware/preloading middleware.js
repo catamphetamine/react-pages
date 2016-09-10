@@ -17,8 +17,15 @@ export const Preload_blocking_method_name = '__react_preload_blocking__'
 //
 // If no preloading is needed, then returns nothing.
 //
-const preloader = (server, components, getState, dispatch, location, params, options = {}) =>
+const preloader = (server, components, getState, dispatch, location, parameters, preload_helpers) =>
 {
+	let preload_options = { dispatch, getState, location, parameters }
+
+	if (preload_helpers)
+	{
+		preload_options = { ...preload_options, ...preload_helpers }
+	}
+
 	// on the client side:
 	//
 	// take the previous route components 
@@ -67,7 +74,7 @@ const preloader = (server, components, getState, dispatch, location, params, opt
 		return components
 			.filter(component => component && component[method_name]) // only look at ones with a static preload()
 			.map(component => component[method_name]) // pull out preloading methods
-			.map(preload => () => preload(dispatch, getState, location, params)) // bind arguments
+			.map(preload => () => preload(preload_options)) // bind arguments
 	}
 
 	// get all `preload_blocking` methods on the React-Router component chain
@@ -157,7 +164,7 @@ const locations_are_equal = (a, b) => (a.pathname === b.pathname) && (a.search =
 // won't send actions to that `reduxReactRouter` middleware,
 // therefore there's the third `dispatch_event` argument
 // which is a function to hack around that limitation.
-export default function preloading_middleware(server, on_error, dispatch_event)
+export default function preloading_middleware(server, on_error, dispatch_event, preload_helpers)
 {
 	return ({ getState, dispatch }) => next => action =>
 	{
@@ -171,7 +178,8 @@ export default function preloading_middleware(server, on_error, dispatch_event)
 		// When routing is initialized on the client side
 		// then ROUTER_DID_CHANGE event will be fired,
 		// so ignore this initialization event.
-		// ("getState().router" means "is on the client side now")
+		// ("getState().router" means "is on the client side now",
+		//  because "getState().router" is undefined on the server side)
 		if (getState().router && locations_are_equal(action.payload.location, getState().router.location))
 		{
 			// Ignore the event
@@ -229,7 +237,7 @@ export default function preloading_middleware(server, on_error, dispatch_event)
 		const { components, location, params } = action.payload
 
 		// Preload all the required data for this route (page)
-		const preload = preloader(server, components, getState, dispatch_event, location, params)
+		const preload = preloader(server, components, getState, dispatch_event, location, params, preload_helpers)
 
 		// If nothing to preload, just move to the next middleware
 		if (!preload)

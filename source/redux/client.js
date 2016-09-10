@@ -32,8 +32,10 @@ export default function render({ development, development_tools, load_translatio
 		middleware           : common.redux_middleware,
 		on_store_created     : common.on_store_created,
 		promise_event_naming : common.promise_event_naming,
-		on_preload_error     : common.on_preload_error,
+		on_preload_error     : common.preload && common.preload.on_error,
+		preload_helpers      : common.preload && common.preload.helpers,
 		create_routes        : common.create_routes,
+		on_navigate          : common.on_navigate,
 		data                 : window._flux_store_data,
 		http_client
 	})

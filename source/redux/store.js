@@ -12,10 +12,11 @@ import createHistory_client from 'history/lib/createBrowserHistory'
 
 import asynchronous_middleware from './middleware/asynchronous middleware'
 import preloading_middleware from './middleware/preloading middleware'
+import on_route_update_middleware from './middleware/on route update middleware'
 
 // import use_scroll from 'scroll-behavior'
 
-export default function(get_reducer, { development, development_tools, server, data, create_routes, http_client, promise_event_naming, on_preload_error, middleware, on_store_created })
+export default function(get_reducer, { development, development_tools, server, data, create_routes, http_client, promise_event_naming, on_preload_error, middleware, on_store_created, preload_helpers, on_navigate })
 {
 	// server-side and client-side specifics
 	const reduxReactRouter = server ? reduxReactRouter_server : reduxReactRouter_client
@@ -118,7 +119,13 @@ export default function(get_reducer, { development, development_tools, server, d
 			// won't send actions to that `reduxReactRouter` middleware,
 			// therefore using the third argument to hack around this thing.
 			//
-			preloading_middleware(server, on_preload_error, event => store.dispatch(event))
+			preloading_middleware(server, on_preload_error, event => store.dispatch(event), preload_helpers),
+
+			// Implements `react-router` `onUpdate` handler
+			//
+			// Listens for `{ type: ROUTER_DID_CHANGE }`
+			//
+			on_route_update_middleware(on_navigate)
 		)
 	)
 
