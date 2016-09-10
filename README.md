@@ -290,7 +290,7 @@ As you have noticed in the (Redux) example above, `@preload()` helper is called 
 @preload(function({ dispatch, getState, location, parameters }) { returns Promise })
 ```
 
-Note: `@preload()` decorator should be placed on top of all other decorators in order to work. The reason is that it adds a static method to your `Route`'s `component` and further decorators on top of it may not retain that static method.
+Note: if `@preload()` decorator seems not working then try to place it on top of all other decorators. The possible reason is that it adds a static method to your `Route`'s `component` and some decorator on top of it may not retain that static method (though all proper decorators retain all static methods nowadays).
 
 On the client side, when a user navigates a link, first it changes the Url in the address bar, then it waits for the next page to preload, and when the page is fully loaded it displays the page to the user. If preloading a page can take some time one may want to add a "spinner" to inform the user that the navigation process needs some time. It can be done by adding a Redux reducer listening to these three Redux events:
 
