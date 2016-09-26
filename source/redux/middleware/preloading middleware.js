@@ -9,7 +9,7 @@
 import { ROUTER_DID_CHANGE } from 'redux-router/lib/constants'
 import { replace }           from 'redux-router'
 
-export const Preload_method_name          = '__react_preload___'
+export const Preload_method_name          = '__react_preload__'
 // export const Preload_blocking_method_name = '__react_preload_blocking__'
 
 // Returns function returning a Promise 
