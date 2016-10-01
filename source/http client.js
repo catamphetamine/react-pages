@@ -192,7 +192,7 @@ export default class http_client
 							}
 
 							// HTTP request failed with an `error`
-							return reject(error)
+							return reject(parse_dates(error))
 						}
 
 						// HTTP request completed without errors,
