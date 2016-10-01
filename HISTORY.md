@@ -1,4 +1,4 @@
-5.0.3 / 01.10.2016
+5.0.4 / 01.10.2016
 ===================
 
   * Parsing dates in error JSON objects too

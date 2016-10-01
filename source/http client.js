@@ -153,7 +153,7 @@ export default class http_client
 									// Set error `data` from response body,
 									case 'application/json':
 										// if (!is_object(error.data))
-										error.data = response.body
+										error.data = parse_dates(response.body)
 
 										// Set the more meaningful message for the error (if available)
 										if (error.data.message)
@@ -192,7 +192,7 @@ export default class http_client
 							}
 
 							// HTTP request failed with an `error`
-							return reject(parse_dates(error))
+							return reject(error)
 						}
 
 						// HTTP request completed without errors,
