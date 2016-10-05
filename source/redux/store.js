@@ -7,6 +7,7 @@ import { reduxReactRouter as reduxReactRouter_server } from 'redux-router/server
 
 import { createRoutes } from 'react-router/lib/RouteUtils'
 
+import { useBasename } from 'history'
 import createHistory_server from 'history/lib/createMemoryHistory'
 import createHistory_client from 'history/lib/createBrowserHistory'
 
@@ -105,7 +106,10 @@ export default function(get_reducer, { development, development_tools, server, d
 		reduxReactRouter
 		({
 			getRoutes : create_routes,
-			createHistory: (...parameters) => createHistory({ ...parameters, ...history_options })
+			createHistory: (...parameters) =>
+			{
+				return useBasename(createHistory)({ ...parameters, ...history_options })
+			}
 		}),
 
 		// Ajax and @preload middleware (+ optional others)
@@ -162,6 +166,12 @@ export default function(get_reducer, { development, development_tools, server, d
 			if (!url)
 			{
 				throw new Error(`"url" parameter is required for redirect`)
+			}
+
+			// If it's a relative URL, then prepend `history` `basename` to it
+			if (url[0] === '/' && history_options && history_options.basename)
+			{
+				url = history_options.basename + url
 			}
 
 			const error = new Error(`Redirecting to ${url} (this is not an error)`)
