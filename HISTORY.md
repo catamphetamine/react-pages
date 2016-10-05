@@ -1,3 +1,8 @@
+5.0.5 / 05.10.2016
+===================
+
+  * Added common `history` options (e.g. for setting `basename`)
+
 5.0.4 / 01.10.2016
 ===================
 

@@ -88,7 +88,8 @@ export default async function({ preload, localize, assets, application, request,
 			on_preload_error : common.preload && common.preload.on_error,
 			http_client,
 			preload_helpers : common.preload && common.preload.helpers,
-			on_navigate : common.on_navigate
+			on_navigate     : common.on_navigate,
+			history_options : common.history
 		})
 	}
 

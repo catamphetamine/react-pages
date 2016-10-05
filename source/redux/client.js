@@ -36,6 +36,7 @@ export default function render({ development, development_tools, load_translatio
 		preload_helpers      : common.preload && common.preload.helpers,
 		create_routes        : common.create_routes,
 		on_navigate          : common.on_navigate,
+		history_options      : common.history,
 		data                 : window._flux_store_data,
 		http_client
 	})

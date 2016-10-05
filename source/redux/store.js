@@ -16,7 +16,7 @@ import on_route_update_middleware from './middleware/on route update middleware'
 
 // import use_scroll from 'scroll-behavior'
 
-export default function(get_reducer, { development, development_tools, server, data, create_routes, http_client, promise_event_naming, on_preload_error, middleware, on_store_created, preload_helpers, on_navigate })
+export default function(get_reducer, { development, development_tools, server, data, create_routes, http_client, promise_event_naming, on_preload_error, middleware, on_store_created, preload_helpers, on_navigate, history_options })
 {
 	// server-side and client-side specifics
 	const reduxReactRouter = server ? reduxReactRouter_server : reduxReactRouter_client
@@ -105,7 +105,7 @@ export default function(get_reducer, { development, development_tools, server, d
 		reduxReactRouter
 		({
 			getRoutes : create_routes,
-			createHistory
+			createHistory: (...parameters) => createHistory({ ...parameters, ...history_options })
 		}),
 
 		// Ajax and @preload middleware (+ optional others)
