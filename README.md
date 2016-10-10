@@ -498,7 +498,11 @@ A sidenote: these two functions aren't supposed to be used inside `onEnter` and 
   // (optional)
   // `react-router`s `onUpdate` handler
   // (is fired when a user performs navigation)
-  on_navigate: (location) => {}
+  on_navigate: (location) => {},
+
+  // (optional)
+  // `history` options (like `basename`)
+  history: {}
 }
 ```
 
