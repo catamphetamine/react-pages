@@ -55,7 +55,7 @@ export function render_on_client({ development, development_tools, create_page_e
 			// then redirect to another url
 			if (redirect)
 			{
-				store.dispatch(replace(redirect.pathname + redirect.search))
+				store.dispatch(replace(redirect.pathname + (redirect.search || '')))
 				return
 			}
 

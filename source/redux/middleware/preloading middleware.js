@@ -213,7 +213,7 @@ export default function preloading_middleware(server, on_error, dispatch_event, 
 			// Handle the error (for example, redirect to an error page)
 			on_error(error,
 			{
-				url : action.payload.location.pathname + action.payload.location.search,
+				url : action.payload.location.pathname + (action.payload.location.search || ''),
 
 				redirect(to)
 				{
