@@ -236,7 +236,7 @@ function match_url(url, store)
 			{
 				return resolve
 				({
-					redirect: redirect_location.pathname + redirect_location.search
+					redirect: redirect_location.pathname + (redirect_location.search || '')
 				})
 			}
 

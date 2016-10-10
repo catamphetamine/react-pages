@@ -1,3 +1,8 @@
+5.0.7 / 10.10.2016
+===================
+
+  * Fixed `redirectLocation.search === undefined` being appended to redirect URLs
+
 5.0.5 / 05.10.2016
 ===================
 

@@ -57,7 +57,7 @@ export function render_on_server({ disable_server_side_rendering, create_page_el
       {
         return resolve
         ({
-          redirect: redirect_location.pathname + redirect_location.search
+          redirect: redirect_location.pathname + (redirect_location.search || '')
         })
       }
 
