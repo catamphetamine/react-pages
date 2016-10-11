@@ -19,6 +19,7 @@ export function location_url(location)
 	return location.pathname + search
 }
 
+// Checks if two `location`s are the same
 export function locations_are_equal(a, b)
 {
 	if (a.pathname !== b.pathname)

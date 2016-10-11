@@ -45,6 +45,3 @@ export default function on_route_update_middleware(navigation_performed)
 		}
 	}
 }
-
-// Checks if two `location`s are the same
-const locations_are_equal = (a, b) => (a.pathname === b.pathname) && (a.search === b.search)
