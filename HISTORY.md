@@ -1,3 +1,8 @@
+5.0.9 / 11.10.2016
+===================
+
+  * Implemented a workaround for missing redirect parameters `react-router` bug
+
 5.0.7 / 10.10.2016
 ===================
 

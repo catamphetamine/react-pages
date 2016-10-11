@@ -6,6 +6,8 @@ import { render_on_client as react_render_on_client, render_on_server as react_r
 
 import { Router, match, RouterContext, browserHistory } from 'react-router'
 
+import { location_url } from '../location'
+
 // Renders `element` React element inside the `to` DOM element.
 //
 // returns a Promise resolving to the rendered React component.
@@ -57,7 +59,7 @@ export function render_on_server({ disable_server_side_rendering, create_page_el
       {
         return resolve
         ({
-          redirect: redirect_location.pathname + (redirect_location.search || '')
+          redirect: location_url(redirect_location)
         })
       }
 

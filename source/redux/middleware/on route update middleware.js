@@ -1,5 +1,7 @@
 import { ROUTER_DID_CHANGE } from 'redux-router/lib/constants'
 
+import { locations_are_equal } from '../../location'
+
 // Implements `react-router`s `onUpdate` handler
 export default function on_route_update_middleware(navigation_performed)
 {

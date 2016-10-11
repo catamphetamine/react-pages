@@ -8,6 +8,8 @@ import use_scroll                                      from 'react-router-scroll
 
 import { render_on_client as react_render_on_client, render_on_server as react_render_on_server } from '../render'
 
+import { location_url } from '../location'
+
 // Renders the current page React element inside the `to` DOM element.
 //
 // Returns a Promise resolving to the rendered React component.
@@ -55,7 +57,7 @@ export function render_on_client({ development, development_tools, create_page_e
 			// then redirect to another url
 			if (redirect)
 			{
-				store.dispatch(replace(redirect.pathname + (redirect.search || '')))
+				store.dispatch(replace(location_url(redirect)))
 				return
 			}
 
@@ -236,7 +238,7 @@ function match_url(url, store)
 			{
 				return resolve
 				({
-					redirect: redirect_location.pathname + (redirect_location.search || '')
+					redirect: location_url(redirect_location)
 				})
 			}
 

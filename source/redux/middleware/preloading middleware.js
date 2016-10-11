@@ -9,6 +9,8 @@
 import { ROUTER_DID_CHANGE } from 'redux-router/lib/constants'
 import { replace }           from 'redux-router'
 
+import { location_url, locations_are_equal } from '../../location'
+
 export const Preload_method_name          = '__react_preload__'
 // export const Preload_blocking_method_name = '__react_preload_blocking__'
 
@@ -161,9 +163,6 @@ const preloader = (server, components, getState, dispatch, location, parameters,
 	// }
 }
 
-// Checks if two `location`s are the same
-const locations_are_equal = (a, b) => (a.pathname === b.pathname) && (a.search === b.search)
-
 // Because `preloading_middleware` is `applied` to the store
 // before `reduxReactRouter` store enhancer adds its own middleware,
 // then it means that standard `dispatch` of `preloading_middleware`
@@ -213,7 +212,7 @@ export default function preloading_middleware(server, on_error, dispatch_event, 
 			// Handle the error (for example, redirect to an error page)
 			on_error(error,
 			{
-				url : action.payload.location.pathname + (action.payload.location.search || ''),
+				url : location_url(action.payload.location),
 
 				redirect(to)
 				{
