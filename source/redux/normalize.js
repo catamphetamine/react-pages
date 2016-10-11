@@ -11,7 +11,7 @@ export function normalize_common_options(common)
 
   if (common.on_preload_error)
   {
-    throw new Error(`"on_preload_error" has been renamed to "preload.on_error"`)
+    throw new Error(`"on_preload_error" has been renamed to "preload.on_error" in 5.x and to "preload.catch" in 6.x`)
   }
 
   if (!common.create_routes)

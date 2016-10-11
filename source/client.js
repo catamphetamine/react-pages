@@ -6,7 +6,7 @@ import React from 'react'
 // This function is intended to be wrapped by another function
 // which (in turn) is gonna be called from the project's code on the client-side.
 //
-export default function localize_and_render({ development, render_parameters = {}, render_on_client, wrapper, load_translation })
+export default function localize_and_render({ development, render_parameters = {}, render_on_client, wrapper, translation })
 {
 	// Initialize locale
 	const locale = window._locale
@@ -34,16 +34,16 @@ export default function localize_and_render({ development, render_parameters = {
 				}
 
 				// translation loading function must be passed
-				if (!load_translation)
+				if (!translation)
 				{
 					return Promise.reject(new Error(`You are supposed to pass 
-						"load_translation(locale) => Promise" function 
+						"translation(locale) => Promise" function 
 						as a parameter to client-side rendering function call
 						because you opted into using internationalization feature`))
 				}
 
 				// load translations and then create page element
-				return load_translation(locale).then(messages =>
+				return translation(locale).then(messages =>
 				{
 					props.locale   = locale
 					props.messages = messages

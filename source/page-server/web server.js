@@ -23,7 +23,6 @@ export default function start_webpage_rendering_server(options, common)
 		localize,
 		application,
 		disable_server_side_rendering,
-		on_error,
 
 		// Legacy 4.x API support
 		head,
@@ -33,6 +32,8 @@ export default function start_webpage_rendering_server(options, common)
 		style
 	}
 	= options
+
+	const error_handler = options.catch
 
 	// Legacy 4.x API support
 	const html = options.html ||
@@ -61,7 +62,7 @@ export default function start_webpage_rendering_server(options, common)
 		}
 		catch (error)
 		{
-			// if the error is caught here it means that `on_error` didn't resolve it
+			// if the error is caught here it means that `catch` (`error_handler`) didn't resolve it
 			// (or threw it)
 
 			// show error stack trace in development mode for easier debugging
@@ -145,9 +146,9 @@ export default function start_webpage_rendering_server(options, common)
 		}
 		catch (error)
 		{
-			if (on_error)
+			if (error_handler)
 			{
-				return on_error(error,
+				return error_handler(error,
 				{
 					url,
 					redirect: redirect_to

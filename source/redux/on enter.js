@@ -1,7 +1,6 @@
 import React, { Component } from 'react'
 import hoist_statics  from 'hoist-non-react-statics'
 
-import { connect }      from 'react-redux'
 import { redirect, Preload_method_name } from './index'
 
 export default function onEnter(on_enter)

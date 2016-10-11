@@ -1,15 +1,7 @@
 import { createStore, combineReducers, applyMiddleware, compose } from 'redux'
-import { persistState } from 'redux-devtools'
-
 import { routerStateReducer } from 'redux-router'
-import { reduxReactRouter as reduxReactRouter_client } from 'redux-router'
-import { reduxReactRouter as reduxReactRouter_server } from 'redux-router/server'
-
 import { createRoutes } from 'react-router/lib/RouteUtils'
-
 import { useBasename } from 'history'
-import createHistory_server from 'history/lib/createMemoryHistory'
-import createHistory_client from 'history/lib/createBrowserHistory'
 
 import asynchronous_middleware from './middleware/asynchronous middleware'
 import preloading_middleware from './middleware/preloading middleware'
@@ -17,12 +9,8 @@ import on_route_update_middleware from './middleware/on route update middleware'
 
 // import use_scroll from 'scroll-behavior'
 
-export default function(get_reducer, { development, development_tools, server, data, create_routes, http_client, promise_event_naming, on_preload_error, middleware, on_store_created, preload_helpers, on_navigate, history_options })
+export default function create_store(reduxReactRouter, createHistory, get_reducer, { development, development_tools, server, data, create_routes, http_client, promise_event_naming, on_preload_error, middleware, on_store_created, preload_helpers, on_navigate, history_options })
 {
-	// server-side and client-side specifics
-	const reduxReactRouter = server ? reduxReactRouter_server : reduxReactRouter_client
-	const createHistory    = server ? createHistory_server    : createHistory_client
-
 	// Simply using `useScroll` from `scroll-behavior@0.7.0`
 	// introduces scroll jumps to top when navigating the app
 	// while navigation is asynchronous and takes some time to finish,
@@ -121,15 +109,15 @@ export default function(get_reducer, { development, development_tools, server, d
 	{
 		if (development_tools === true)
 		{
-			throw new Error(`"development_tools" option is now not a "true" flag but rather a "DevTools" instance created by "crateDevTools()" function call. This way one can customize the tools however he likes. See https://github.com/halt-hammerzeit/react-isomorphic-render#miscellaneous-client-side-rendering-options`)
+			throw new Error(`"development_tools" option is now not a "true" flag but rather an object of shape { component: "DevTools" instance created by "crateDevTools()" function call, persistState }. This way one can customize the tools however he likes, and also "redux-devtools" package won't be included in production build. See https://github.com/halt-hammerzeit/react-isomorphic-render#miscellaneous-client-side-rendering-options`)
 		}
 
 		store_enhancers.push
 		(
 			// Provides support for DevTools
-			window.devToolsExtension ? window.devToolsExtension() : development_tools.instrument(),
+			window.devToolsExtension ? window.devToolsExtension() : development_tools.component.instrument(),
 			// Lets you write ?debug_session=<name> in address bar to persist debug sessions
-			persistState(window.location.href.match(/[?&]debug_session=([^&]+)\b/))
+			development_tools.persistState(window.location.href.match(/[?&]debug_session=([^&]+)\b/))
 		)
 	}
 

@@ -2,7 +2,7 @@
 
 import { push, replace } from 'redux-router'
 
-import client  from './client'
+import client  from './client/client'
 import preload from './preload'
 
 export { client as render, preload }

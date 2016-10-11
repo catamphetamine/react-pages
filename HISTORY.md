@@ -1,3 +1,12 @@
+6.0.0 / 11.10.2016
+===================
+
+  * Removed `redux-devtools` from the list of dependencies
+  * (breaking change) renamed `development_tools` to `devtools`, and it's now not just a React component but an object of shape `{ component, persistState }`
+  * (breaking change) renamed `load_translation` to `translation`
+  * (breaking change) renamed `on_error` to `catch` in server-side options
+  * (breaking change) renamed `preload.on_error` option to `preload.catch`
+
 5.0.9 / 11.10.2016
 ===================
 

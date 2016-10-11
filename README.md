@@ -403,7 +403,7 @@ When launched as a webpage server, this library performs the following locale de
  
 The resulting locale is passed as `preferred_locale` parameter into `localize()` function of the webpage rendering server which then returns `{ locale, messages }`.
 
-Later, on the client side, that `locale` returned from the `localize()` function on the server side is fed into `load_translation(locale)` function, and when translation is loaded the application is rendered with `locale` and `messages` properties passed to the `wrapper`.
+Later, on the client side, that `locale` returned from the `localize()` function on the server side is fed into `translation(locale)` function, and when translation is loaded the application is rendered with `locale` and `messages` properties passed to the `wrapper`.
 
 ### Determining current location
 
@@ -548,7 +548,10 @@ A sidenote: these two functions aren't supposed to be used inside `onEnter` and 
   // (can redirect to special "500 Error" pages).
   // If this error handler is defined then it must handle
   // all errors it gets (or just re`throw` them).
-  on_error: (error, { url, redirect }) => redirect(`/error?url=${encode(url)}&error=${error.status}`)
+  //
+  // This error handler can be the same one used as `preload.catch` option.
+  //
+  catch: (error, { url, redirect }) => redirect(`/error?url=${encode(url)}&error=${error.status}`)
 
   // (optional)
   // Custom Koa middleware (an array of middlewares).
@@ -637,22 +640,26 @@ A sidenote: these two functions aren't supposed to be used inside `onEnter` and 
   // npm install redux-devtools redux-devtools-log-monitor redux-devtools-dock-monitor --save-dev
   //
   // import React from 'react'
-  // import { createDevTools } from 'redux-devtools'
+  // import { createDevTools, persistState } from 'redux-devtools'
   // import LogMonitor from 'redux-devtools-log-monitor'
   // import DockMonitor from 'redux-devtools-dock-monitor'
   // 
-  // export default createDevTools
-  // (
-  //   <DockMonitor toggleVisibilityKey="ctrl-H" changePositionKey="ctrl-Q" defaultIsVisible>
-  //     <LogMonitor theme="tomorrow" />
-  //   </DockMonitor>
-  // )
+  // export default
+  // {
+  //   component: createDevTools
+  //   (
+  //     <DockMonitor toggleVisibilityKey="ctrl-H" changePositionKey="ctrl-Q" defaultIsVisible>
+  //       <LogMonitor theme="tomorrow" />
+  //     </DockMonitor>
+  //   ),
+  //   persistState
+  // }
   //
-  development_tools: __development__ ? require('./DevTools.js') : false,
+  devtools: __development__ ? require('./DevTools.js') : undefined,
 
   // (optional)
   // Loads localized messages (asynchronously)
-  load_translation: async locale => messages
+  translation: async locale => messages
   // (or same without `async`: locale => Promise.resolve(messages))
 }
 ```

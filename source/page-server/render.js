@@ -8,10 +8,10 @@ import fs from 'fs'
 import Html from './html'
 import Http_client from '../http client'
 
-import { render_on_server as redux_render }        from '../redux/render'
+import redux_render                                from '../redux/server/render'
 import { render_on_server as react_router_render } from '../react-router/render'
 
-import create_store from '../redux/store'
+import create_store from '../redux/server/store'
 import set_up_http_client from '../redux/http client'
 
 import { normalize_common_options } from '../redux/normalize'
@@ -85,7 +85,7 @@ export default async function({ preload, localize, assets, application, request,
 			middleware: redux_middleware,
 			on_store_created,
 			promise_event_naming,
-			on_preload_error : common.preload && common.preload.on_error,
+			on_preload_error : common.preload && common.preload.catch,
 			http_client,
 			preload_helpers : common.preload && common.preload.helpers,
 			on_navigate     : common.on_navigate,

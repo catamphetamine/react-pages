@@ -169,7 +169,7 @@ const preloader = (server, components, getState, dispatch, location, parameters,
 // won't send actions to that `reduxReactRouter` middleware,
 // therefore there's the third `dispatch_event` argument
 // which is a function to hack around that limitation.
-export default function preloading_middleware(server, on_error, dispatch_event, preload_helpers)
+export default function preloading_middleware(server, error_handler, dispatch_event, preload_helpers)
 {
 	return ({ getState, dispatch }) => next => action =>
 	{
@@ -196,7 +196,7 @@ export default function preloading_middleware(server, on_error, dispatch_event, 
 		{
 			// If no `on_preload_error` handler was set,
 			// then use default behaviour.
-			if (!on_error)
+			if (!error_handler)
 			{
 				// This error will be handled in `web server` `catch` clause
 				// if this code is being run on the server side.
@@ -210,7 +210,7 @@ export default function preloading_middleware(server, on_error, dispatch_event, 
 			}
 
 			// Handle the error (for example, redirect to an error page)
-			on_error(error,
+			error_handler(error,
 			{
 				url : location_url(action.payload.location),
 
