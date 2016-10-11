@@ -14,7 +14,7 @@ import set_up_http_client from '../http client'
 //
 // This function is what's gonna be called from the project's code on the client-side.
 //
-export default function render({ development, development_tools, translation }, common)
+export default function render({ development, devtools, translation }, common)
 {
 	common = normalize_common_options(common)
 
@@ -28,7 +28,7 @@ export default function render({ development, development_tools, translation }, 
 	const store = create_store(common.get_reducer,
 	{
 		development,
-		development_tools,
+		devtools,
 		middleware           : common.redux_middleware,
 		on_store_created     : common.on_store_created,
 		promise_event_naming : common.promise_event_naming,
@@ -57,6 +57,6 @@ export default function render({ development, development_tools, translation }, 
 		translation,
 		wrapper: common.wrapper,
 		render_on_client,
-		render_parameters: { development_tools, create_routes: common.create_routes, store }
+		render_parameters: { devtools, create_routes: common.create_routes, store }
 	})
 }

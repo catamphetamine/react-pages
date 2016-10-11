@@ -11,7 +11,7 @@ import { location_url } from '../../location'
 //
 // Returns a Promise resolving to the rendered React component.
 //
-export default function render_on_client({ development, development_tools, create_page_element, create_routes, store, to })
+export default function render_on_client({ development, devtools, create_page_element, create_routes, store, to })
 {
 	// In short, Redux-router performs react-router routing asynchronously
 	// which allows preloading pages before showing them.
@@ -83,7 +83,7 @@ export default function render_on_client({ development, development_tools, creat
 				// If Redux-devtools aren't enabled, then just return the Page element
 				// (if Redux-devtools are installed as a web browser extension
 				//  then no need to do the second render too)
-				if (!development || !development_tools || window.devToolsExtension)
+				if (!development || !devtools || window.devToolsExtension)
 				{
 					return result
 				}
@@ -98,7 +98,7 @@ export default function render_on_client({ development, development_tools, creat
 				// console.log(`You're gonna see two "@@reduxReactRouter/initRoutes" events in Redux DevTools because the page has been rendered twice: first time without DevTools and second time with it`)
 
 				// React JSX syntax can't detect lowercase elements
-				const DevTools = development_tools
+				const DevTools = devtools.component
 
 				// This element will contain React page element and Redux-devtools
 				element = 

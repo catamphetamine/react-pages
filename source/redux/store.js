@@ -9,7 +9,7 @@ import on_route_update_middleware from './middleware/on route update middleware'
 
 // import use_scroll from 'scroll-behavior'
 
-export default function create_store(reduxReactRouter, createHistory, get_reducer, { development, development_tools, server, data, create_routes, http_client, promise_event_naming, on_preload_error, middleware, on_store_created, preload_helpers, on_navigate, history_options })
+export default function create_store(reduxReactRouter, createHistory, get_reducer, { development, devtools, server, data, create_routes, http_client, promise_event_naming, on_preload_error, middleware, on_store_created, preload_helpers, on_navigate, history_options })
 {
 	// Simply using `useScroll` from `scroll-behavior@0.7.0`
 	// introduces scroll jumps to top when navigating the app
@@ -105,19 +105,14 @@ export default function create_store(reduxReactRouter, createHistory, get_reduce
 	)
 
 	// Add Redux DevTools (if they're enabled)
-	if (development && !server && development_tools)
+	if (development && !server && devtools)
 	{
-		if (development_tools === true)
-		{
-			throw new Error(`"development_tools" option is now not a "true" flag but rather an object of shape { component: "DevTools" instance created by "crateDevTools()" function call, persistState }. This way one can customize the tools however he likes, and also "redux-devtools" package won't be included in production build. See https://github.com/halt-hammerzeit/react-isomorphic-render#miscellaneous-client-side-rendering-options`)
-		}
-
 		store_enhancers.push
 		(
 			// Provides support for DevTools
-			window.devToolsExtension ? window.devToolsExtension() : development_tools.component.instrument(),
+			window.devToolsExtension ? window.devToolsExtension() : devtools.component.instrument(),
 			// Lets you write ?debug_session=<name> in address bar to persist debug sessions
-			development_tools.persistState(window.location.href.match(/[?&]debug_session=([^&]+)\b/))
+			devtools.persistState(window.location.href.match(/[?&]debug_session=([^&]+)\b/))
 		)
 	}
 
