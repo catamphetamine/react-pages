@@ -11,7 +11,7 @@ export function location_url(location)
 		search = location.search
 	}
 
-	if (!search && location.query)
+	if (!search && location.query && Object.keys(location.query) > 0)
 	{
 		search = `?${querystring.stringify(location.query)}`
 	}
