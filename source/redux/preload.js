@@ -3,12 +3,6 @@ import hoist_statics from 'hoist-non-react-statics'
 
 import { Preload_method_name } from './middleware/preloading middleware'
 
-/*
-  Note:
-    When this decorator is used, it MUST be the first (outermost) decorator.
-    Otherwise, we cannot find and call the preload and preload_deferred methods.
-*/
-
 export default function(parameters)
 {
 	return function(Wrapped)

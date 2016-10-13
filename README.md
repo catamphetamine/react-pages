@@ -502,7 +502,14 @@ A sidenote: these two functions aren't supposed to be used inside `onEnter` and 
 
   // (optional)
   // `history` options (like `basename`)
-  history: {}
+  history: {},
+
+  // (optional)
+  // Controls automatic `Date` parsing
+  // when using `http` utility, and when
+  // restoring Redux state on the client-side.
+  // (is `true` by default)
+  parse_dates: `true` / `false`
 }
 ```
 

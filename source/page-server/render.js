@@ -27,7 +27,8 @@ export default async function({ preload, localize, assets, application, request,
 		on_store_created,
 		promise_event_naming,
 		create_routes,
-		wrapper
+		wrapper,
+		parse_dates
 	}
 	= normalize_common_options(common)
 
@@ -59,7 +60,8 @@ export default async function({ preload, localize, assets, application, request,
 		port          : application.port,
 		secure        : application.secure,
 		clone_request : request,
-		format_url    : common.http && common.http.url
+		format_url    : common.http && common.http.url,
+		parse_dates
 	})
 
 	// initial Flux store data (if using Flux)
@@ -170,7 +172,8 @@ export default async function({ preload, localize, assets, application, request,
 					body_start={body_start}
 					body_end={body_end}
 					style={style}
-					store={store}>
+					store={store}
+					parse_dates={parse_dates}>
 
 					{content}
 				</Html>

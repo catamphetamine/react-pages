@@ -25,13 +25,27 @@ export default class Html extends Component
 		body        : PropTypes.func,
 		body_start  : PropTypes.node,
 		body_end    : PropTypes.node,
+		parse_dates : PropTypes.bool,
 		style       : PropTypes.func,
 		locale      : PropTypes.string
 	}
 
 	render()
 	{
-		const { development, assets, store, head, body, body_start, body_end, style, locale } = this.props
+		const
+		{
+			development,
+			assets,
+			store,
+			head,
+			body,
+			body_start,
+			body_end,
+			parse_dates,
+			style,
+			locale
+		}
+		= this.props
 
 		// when server-side rendering is disabled, content will be undefined
 		// (but server-side rendering is always enabled so this "if" condition may be removed)
@@ -73,6 +87,10 @@ export default class Html extends Component
 
 		const style_url      = assets.entry ? assets.style[assets.entry]      : assets.style
 		const javascript_url = assets.entry ? assets.javascript[assets.entry] : assets.javascript
+
+		const store_state = store.getState()
+		// Remove `redux-router` data from store
+		delete store_state.router
 
 		const html = 
 		(
@@ -133,10 +151,10 @@ export default class Html extends Component
 					{ locale && <script dangerouslySetInnerHTML={{__html: `window._locale=${JSON.stringify(locale)}`}} charSet="UTF-8"/> }
 
 					{/* JSON Date deserializer */}
-					<script dangerouslySetInnerHTML={{__html: define_json_parser}} charSet="UTF-8"/>
+					{ parse_dates !== false && <script dangerouslySetInnerHTML={{__html: define_json_parser}} charSet="UTF-8"/> }
 
 					{/* Flux store data will be reloaded into the store on the client */}
-					<script dangerouslySetInnerHTML={{__html: `window._flux_store_data=JSON.parse(${JSON.stringify(JSON.stringify(store.getState()))}, JSON.date_parser)`}} charSet="UTF-8"/>
+					<script dangerouslySetInnerHTML={{__html: `window._flux_store_data=JSON.parse(${JSON.stringify(JSON.stringify(store_state))}${parse_dates !== false ? ', JSON.date_parser' : ''})`}} charSet="UTF-8"/>
 
 					{/* javascripts */}
 

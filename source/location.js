@@ -32,7 +32,21 @@ export function locations_are_equal(a, b)
 		return false
 	}
 
-	if (!deep_equal(a.query, b.query))
+	if (a.query && !b.query)
+	{
+		if (Object.keys(a.query).length > 0)
+		{
+			return false
+		}
+	}
+	else if (!a.query && b.query)
+	{
+		if (Object.keys(b.query).length > 0)
+		{
+			return false
+		}
+	}
+	else if (!deep_equal(a.query, b.query))
 	{
 		return false
 	}

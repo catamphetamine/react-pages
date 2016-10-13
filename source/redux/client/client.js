@@ -21,7 +21,8 @@ export default function render({ development, devtools, translation }, common)
 	// `http` utility can be used inside Redux action creators
 	const http_client = new Http_client
 	({
-		format_url : common.http && common.http.url
+		format_url  : common.http && common.http.url,
+		parse_dates : common.parse_dates
 	})
 
 	// create ("rehydrate") Redux store

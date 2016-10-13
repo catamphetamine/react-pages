@@ -1,3 +1,8 @@
+6.0.2 / 13.10.2016
+===================
+
+  * Added a common `parse_dates` option (if set to `false` it disables parsing `Date`s during AJAX calls and also while initializing Redux store state on the client-side)
+
 6.0.0 / 11.10.2016
 ===================
 

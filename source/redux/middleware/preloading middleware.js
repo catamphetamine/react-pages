@@ -183,9 +183,7 @@ export default function preloading_middleware(server, error_handler, dispatch_ev
 		// When routing is initialized on the client side
 		// then ROUTER_DID_CHANGE event will be fired,
 		// so ignore this initialization event.
-		// ("getState().router" means "is on the client side now",
-		//  because "getState().router" is undefined on the server side)
-		if (getState().router && locations_are_equal(action.payload.location, getState().router.location))
+		if (!server && !getState().router)
 		{
 			// Ignore the event
 			return next(action)

@@ -14,6 +14,8 @@ export default class http_client
 	{
 		const { secure, host, port, headers, clone_request } = options
 
+		const parse_json_dates = options.parse_dates !== false
+
 		// For those who don't wish to proxy API requests to API servers
 		// and prefer to query those API servers directly (for whatever reasons).
 		// Direct API calls will contain user's cookies (e.g. JWT token).
@@ -118,6 +120,8 @@ export default class http_client
 					// Send HTTP request
 					request.end((error, response) => 
 					{
+						const response_body = parse_json_dates ? parse_dates(response.body) : response.body
+
 						// this turned out to be a lame way of handling cookies,
 						// because cookies are sent in request 
 						// with no additional parameters
@@ -153,7 +157,7 @@ export default class http_client
 									// Set error `data` from response body,
 									case 'application/json':
 										// if (!is_object(error.data))
-										error.data = parse_dates(response.body)
+										error.data = response_body
 
 										// Set the more meaningful message for the error (if available)
 										if (error.data.message)
@@ -207,7 +211,7 @@ export default class http_client
 						}
 
 						// Else, the result is HTTP response body
-						resolve(parse_dates(response.body))
+						resolve(response_body)
 					})
 				})
 			}
