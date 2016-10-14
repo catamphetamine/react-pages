@@ -439,7 +439,7 @@ Currently this library uses [`redux-router`](https://github.com/acdlite/redux-ro
 
   * Router no more being controlled via Redux actions (`dispatch(goto())`, `dispatch(redirect())`) and instead being manipulated directly via `this.context.router` (`.push()`, `.replace()`). This seems to be a right way to go since there's really no reason for redirecting via dispatching a Redux action. Dispatching a Redux action seems more elegant but at the same time keeping `router` state inside Redux store seems weird and strained.
 
-  * Preloading would require an extra bit of verbosity: instead of just writing `<Route component={Page}/>` it would be written as `<Route component={Page} onEnter={Page.preload}/>` which is gonna get a bit more verbose a copy-pasty for an application having many routes. I currently see no other way to make preloading work with bare `react-router`.
+  * Preloading would require an extra bit of verbosity: instead of just writing `<Route component={Page}/>` it would be written as `<Route component={Page} onEnter={Page.preload}/>` which is gonna get a bit more verbose and copy-pasty for an application having many routes. I currently see no other way to make preloading work with bare `react-router`.
 
 Having said all that, it's definitely possible to drop `redux-router` and rewrite it with bare `react-router` (say, `@3.x`, since the new `@4.x` is a totally another library), but currently I see no big reason for doing that: it's working fine now, no bugs, etc. The only bug is the `onEnter` hook one, but I implemented a workaround for it too (see `onEnter` section of this readme).
 
