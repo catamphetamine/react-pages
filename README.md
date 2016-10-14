@@ -433,6 +433,16 @@ return this.props.dispatch(goto('/items/1?color=red'))
 
 A sidenote: these two functions aren't supposed to be used inside `onEnter` and `onChange` `react-router` hooks. Instead use the `replace` argument supplied to these functions by `react-router` when they are called (`replace` works the same way as `redirect`).
 
+## `redux-router`
+
+Currently this library uses [`redux-router`](https://github.com/acdlite/redux-router) which seems to be not maintained anymore (e.g. they don't want to merge [my fix for `onEnter` hooks](https://github.com/acdlite/redux-router/pull/272)). I could drop `redux-router` in favour of bare `react-router`, but it would also have a couple of side-effects:
+
+  * Router no more being controlled via Redux actions (`dispatch(goto())`, `dispatch(redirect())`) and instead being manipulated directly via `this.context.router` (`.push()`, `.replace()`). This seems to be a right way to go since there's really no reason for redirecting via dispatching a Redux action. Dispatching a Redux action seems more elegant but at the same time keeping `router` state inside Redux store seems weird and strained.
+
+  * Preloading would require an extra bit of verbosity: instead of just writing `<Route component={Page}/>` it would be written as `<Route component={Page} onEnter={Page.preload}/>` which is gonna get a bit more verbose a copy-pasty for an application having many routes. I currently see no other way to make preloading work with bare `react-router`.
+
+Having said all that, it's definitely possible to drop `redux-router` and rewrite it with bare `react-router` (say, `@3.x`, since the new `@4.x` is a totally another library), but currently I see no big reason for doing that: it's working fine now, no bugs, etc. The only bug is the `onEnter` hook one, but I implemented a workaround for it too (see `onEnter` section of this readme).
+
 ## Additional `react-isomorphic-render.js` settings
 
 ```javascript
