@@ -441,7 +441,7 @@ Currently this library uses [`redux-router`](https://github.com/acdlite/redux-ro
 
   * Preloading would require an extra bit of verbosity: instead of just writing `<Route component={Page}/>` it would be written as `<Route component={Page} onEnter={Page.preload}/>` which is gonna get a bit more verbose and copy-pasty for an application having many routes. I currently see no other way to make preloading work with bare `react-router`.
 
-Having said all that, it's definitely possible to drop `redux-router` and rewrite it with bare `react-router` (say, `@3.x`, since the new `@4.x` is a totally another library), but currently I see no big reason for doing that: it's working fine now, no bugs, etc. The only bug is the `onEnter` hook one, but I implemented a workaround for it too (see `onEnter` section of this readme).
+Having said all that, it's definitely possible to drop `redux-router` and rewrite this library with bare `react-router` (say, `@3.x`, since the new `@4.x` is a totally another library), but currently I see no big reason for doing that: it's working fine now, no bugs, etc. The only bug is the `onEnter` hook one, but I implemented a workaround for it too (see `onEnter` section of this readme).
 
 ## Additional `react-isomorphic-render.js` settings
 
