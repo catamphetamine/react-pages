@@ -190,7 +190,7 @@ export default function preloading_middleware(server, error_handler, dispatch_ev
 		}
 
 		// Promise error handler
-		const error_handler = error => 
+		const handle_error = error => 
 		{
 			// If no `on_preload_error` handler was set,
 			// then use default behaviour.
@@ -326,7 +326,7 @@ export default function preloading_middleware(server, error_handler, dispatch_ev
 				// Handle preloading error
 				// (either `redirect` to an "error" page
 				//  or rethrow the error up the Promise chain)
-				error_handler(error)
+				handle_error(error)
 			})
 
 		// If on the client side, then store the current pending navigation,
