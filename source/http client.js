@@ -12,14 +12,43 @@ export default class http_client
 	// (in this case, cookies, to make authentication work on the server-side).
 	constructor(options = {})
 	{
-		const { secure, host, port, headers, clone_request } = options
+		const { secure, host, port, headers, clone_request, authentication_token } = options
 
 		const parse_json_dates = options.parse_dates !== false
 
+		// The default `format_url` gives protection against XSS attacks
+		// in a way that `Authorization: Bearer {token}` HTTP header
+		// is only exposed (sent) to local URLs, therefore an attacker
+		// theoretically won't be able to hijack that authentication token.
+		//
+		// An XSS attacker is assumed to be unable to set his own
+		// `options.format_url` because the rendered page content
+		// is placed before the `options` are even defined (inside webpack bundle).
+		//
+		// Once `http_client` instance is created, the `authentication_token` variable
+		// is erased from everywhere except the closures of HTTP methods defined below,
+		// and the token is therefore unable to be read directly by an attacker.
+		//
+		// The `format_url` function also resided in the closures of HTTP methods defined below,
+		// so it's also unable to be changed by an attacker.
+		//
+		// The only thing an attacker is left to do is to send malicious requests
+		// to the server on behalf of the user, and those requests would be executed,
+		// but the attacker won't be able to hijack the authentication token.
+		//
+		const format_url = options.format_url || this.format_url.bind(this)
+
 		// For those who don't wish to proxy API requests to API servers
 		// and prefer to query those API servers directly (for whatever reasons).
-		// Direct API calls will contain user's cookies (e.g. JWT token).
-		const format_url = options.format_url || this.format_url.bind(this)
+		// Direct API calls will contain user's cookies and HTTP headers (e.g. JWT token).
+		//
+		// Therefore warn about authentication token leakage
+		// in case a developer supplies his own custom `format_url` function.
+		//
+		if (options.format_url)
+		{
+			console.warn('[react-isomorphic-render] The default `http.url` formatter only allows requesting local paths therefore protecting authentication token (and cookies) from leaking to a 3rd party. Since you supplied your own `http.url` formatting function, implementing such anti-leak guard is your responsibility now.')
+		}
 
 		// Clone HTTP request cookies on the server-side
 		// (to make authentication work)
@@ -83,6 +112,12 @@ export default class http_client
 							default:
 								throw new Error(`Unknown HTTP method: ${method}`)
 						}
+					}
+
+					// Set JWT token in HTTP request header (if the token is passed)
+					if (authentication_token)
+					{
+						request.set('Authorization', `Bearer ${authentication_token}`)
 					}
 
 					// Server side only

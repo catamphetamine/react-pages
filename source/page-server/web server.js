@@ -23,6 +23,7 @@ export default function start_webpage_rendering_server(options, common)
 		localize,
 		application,
 		disable_server_side_rendering,
+		authentication,
 
 		// Legacy 4.x API support
 		head,
@@ -125,10 +126,14 @@ export default function start_webpage_rendering_server(options, common)
 				localize: localize_with_preferred_locale(localize, ctx),
 				disable_server_side_rendering,
 				html,
+				authentication,
 
 				// The original HTTP request can be required
 				// for inspecting cookies in `preload` function
-				request: ctx.req
+				request: ctx.req,
+
+				// Cookies for authentication token retrieval
+				cookies: ctx.cookies
 			},
 			common)
 

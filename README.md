@@ -455,6 +455,14 @@ Some "variable" parts, like comments section, can be queried from the web browse
 
 I'm planning on introducing a `@cache` decorator which is gonna decorate the pages meant for caching (e.g. user's settings page obviously has no reason to be cached while an article page definitely has). Also, an additional decorator may be introduced, something like `@dynamic`, which is gonna decorate the components rendering the "variable" parts (like user bar). These `@dynamic` components would render nothing on the server-side and would render content on the client-side, where content is taken from the already preloaded Redux store sent from the server-side. In this case, for example, the user bar component could be decorated as `@dynamic` while the comments section doesn't need to be (since it's deferred anyway and there's no data in the Redux state available right-away to render it).
 
+## CSRF protection
+
+[Cross-Site Request Forgery attacks](http://docs.spring.io/spring-security/site/docs/current/reference/html/csrf.html) are the kind of attacks when a legitimate user is tricked into navigating a malicious website which, upon loading, sends a forged HTTP request (GET, POST) to the legitimate website therefore performing an action on behalf of the legitimate user (because the "remember me" cookie, or the "session id" cookie, is also sent along).
+
+How can a legitimate website guard its users from such attacks? One solution is to ignore the "remember me" ("session id") cookie and force reading its value from an HTTP header. Because CSRF attacks can't send custom headers (at least using bare HTML/Javascript, without exploiting Adobe Flash plugin bugs, etc), this renders such hacking attempts useless. But how is the legitimate webpage supposed to obtain this "remember me" ("session id") token to send it as an HTTP header? The cookie still needs to be used for user's session tracking. It's just that this cookie should only be read by the webpage rendering service (to be injected into the resulting webpage) and never by any of the API services. This way the only thing a CSRF attacker could do is to request a webpage (without being able to analyse its content) which is never an action. And so the user is completely protected against CSRF attacks. The "remember me" ("session id") cookie is also "HttpOnly" to make it only readable on the server-side (to protect the user from session hijacking via XSS attacks).
+
+This library attempts to read authenication token from a cookie named `server_configuration.authentication.cookie` (if this setting is configured). If authentication cookie is present then its value will be sent as part of `Authorization: Bearer {token}` HTTP header when using `http` utility in Redux actions.
+
 ## Additional `react-isomorphic-render.js` settings
 
 ```javascript

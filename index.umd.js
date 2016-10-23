@@ -2,7 +2,7 @@
 
 var head = require('./build/webpage head')
 
-var client = require('./build/client')
+var client = require('./build/client').default
 
 var webpage_head = head.webpage_head
 var webpage_title = head.webpage_title

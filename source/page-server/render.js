@@ -18,7 +18,7 @@ import { normalize_common_options } from '../redux/normalize'
 
 // isomorphic (universal) rendering (middleware).
 // will be used in web_application.use(...)
-export default async function({ preload, localize, assets, application, request, disable_server_side_rendering, html }, common)
+export default async function({ preload, localize, assets, application, request, disable_server_side_rendering, html, authentication, cookies }, common)
 {
 	const
 	{
@@ -53,6 +53,13 @@ export default async function({ preload, localize, assets, application, request,
 	// Trims a question mark in the end (just in case)
 	const url = request.url.replace(/\?$/, '')
 
+	// Read authentication token from a cookie (if configured)
+	let authentication_token
+	if (authentication && authentication.cookie)
+	{
+		authentication_token = cookies.get(authentication.cookie)
+	}
+
 	// Isomorphic http client (with cookie support)
 	const http_client = new Http_client
 	({
@@ -61,7 +68,8 @@ export default async function({ preload, localize, assets, application, request,
 		secure        : application.secure,
 		clone_request : request,
 		format_url    : common.http && common.http.url,
-		parse_dates
+		parse_dates,
+		authentication_token
 	})
 
 	// initial Flux store data (if using Flux)
@@ -173,7 +181,8 @@ export default async function({ preload, localize, assets, application, request,
 					body_end={body_end}
 					style={style}
 					store={store}
-					parse_dates={parse_dates}>
+					parse_dates={parse_dates}
+					authentication_token={authentication_token}>
 
 					{content}
 				</Html>

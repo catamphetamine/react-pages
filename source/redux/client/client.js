@@ -2,7 +2,7 @@ import React from 'react'
 import ReactDOM from 'react-dom'
 
 import Http_client from '../../http client'
-import localize_and_render from '../../client'
+import localize_and_render, { authentication_token as get_authentication_token } from '../../client'
 
 import render_on_client from './render'
 import create_store from './store'
@@ -18,12 +18,20 @@ export default function render({ development, devtools, translation }, common)
 {
 	common = normalize_common_options(common)
 
+	// Read authentication token from a global variable
+	// and also erase that global variable
+	let authentication_token = get_authentication_token()
+
 	// `http` utility can be used inside Redux action creators
 	const http_client = new Http_client
 	({
 		format_url  : common.http && common.http.url,
-		parse_dates : common.parse_dates
+		parse_dates : common.parse_dates,
+		authentication_token
 	})
+
+	// Erase the local variable too
+	authentication_token = undefined
 
 	// create ("rehydrate") Redux store
 	const store = create_store(common.get_reducer,

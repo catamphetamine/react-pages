@@ -8,6 +8,10 @@ import React from 'react'
 //
 export default function localize_and_render({ development, render_parameters = {}, render_on_client, wrapper, translation })
 {
+	// Make sure authentication token global variable is erased
+	// (in case it hasn't been read and erased before)
+	authentication_token()
+
 	// Initialize locale
 	const locale = window._locale
 	if (locale)
@@ -66,4 +70,18 @@ export default function localize_and_render({ development, render_parameters = {
 		result.rerender = render_page
 		return result
 	})
+}
+
+// Reads authentication token from a global variable
+// and then erases that global variable
+export function authentication_token()
+{
+	const token = window._authentication_token
+
+	if (token)
+	{
+		delete window._authentication_token
+	}
+
+	return token
 }

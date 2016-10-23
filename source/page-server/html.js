@@ -27,7 +27,9 @@ export default class Html extends Component
 		body_end    : PropTypes.node,
 		parse_dates : PropTypes.bool,
 		style       : PropTypes.func,
-		locale      : PropTypes.string
+		locale      : PropTypes.string,
+
+		authentication_token : PropTypes.string
 	}
 
 	render()
@@ -43,7 +45,8 @@ export default class Html extends Component
 			body_end,
 			parse_dates,
 			style,
-			locale
+			locale,
+			authentication_token
 		}
 		= this.props
 
@@ -145,6 +148,9 @@ export default class Html extends Component
 					{ body_start }
 
 					{/* React page content */}
+					{/* (most of the possible XSS attack scripts are executed here,
+					     before the global authentication token variable is set,
+					     so they're unlikely to even be able to hijack it) */}
 					{ content_element }
 
 					{/* locale for international messages */}
@@ -153,15 +159,22 @@ export default class Html extends Component
 					{/* JSON Date deserializer */}
 					{ parse_dates !== false && <script dangerouslySetInnerHTML={{__html: define_json_parser}} charSet="UTF-8"/> }
 
-					{/* Flux store data will be reloaded into the store on the client */}
+					{/* Flux store data will be reloaded into the store on the client-side */}
 					<script dangerouslySetInnerHTML={{__html: `window._flux_store_data=JSON.parse(${JSON.stringify(JSON.stringify(store_state))}${parse_dates !== false ? ', JSON.date_parser' : ''})`}} charSet="UTF-8"/>
 
 					{/* javascripts */}
 
+					{/* Make JWT authentication token visible to the client-side code
+					    to set up the `http` utility used inside Redux actions.
+					    (the client-side React initialization code will
+					     automatically erase this authenticaiton token global variable
+					     to protect the user from session hijacking via an XSS attack) */}
+					{ authentication_token && <script dangerouslySetInnerHTML={{__html: `window._authentication_token=${JSON.stringify(authentication_token)}`}} charSet="UTF-8"/> }
+
 					{/* the "common.js" chunk (see webpack extract commons plugin) */}
 					{/* (needs to be included first (by design)) */}
 					{ (assets.entry && assets.javascript && assets.javascript.common) && <script src={assets.javascript.common} charSet="UTF-8"/> }
-					
+
 					{/* current application "entry" point javascript
 					    (currently there is only one entry point: "main") */}
 					<script src={ javascript_url } charSet="UTF-8"/>
