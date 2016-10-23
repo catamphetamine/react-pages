@@ -1,7 +1,7 @@
 6.1.0 / 23.10.2016
 ==================
 
-  * Introduced `server_configuration.authentication.cookie` setting which sets authentication cookie name (if this setting is configured). If the authentication cookie exists then its value is assumed to be an authentication token and when using `http` utility in Redux actions this authentication token will be automatically sent along as part of `Authorization: Bearer {token}` HTTP header.
+  * Introduced `server_configuration.authentication.cookie` setting which sets authentication cookie name (if this setting is configured). If the authentication cookie exists then its value is assumed to be an authentication token and when using `http` utility in Redux actions this authentication token will be automatically sent along as part of `Authorization: Bearer {token}` HTTP header. If you were using a custom `http.url` formatter function (which is unlikely) then be aware that this authentication token can leak to a 3rd party if you don't restrict the allowed domains in your custom `http.url` formatter function.
 
 6.0.3 / 18.10.2016
 ===================
