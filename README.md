@@ -634,6 +634,19 @@ This library attempts to read authenication token from a cookie named `server_co
   }
 
   // (optional)
+  authentication:
+  {
+    // If this parameter is set,
+    // then the page rendering server
+    // will try to extract JWT authentication token
+    // from this cookie (if present),
+    // and then it will always pass the token as part of the
+    // "Authorization: Bearer {token}" HTTP header
+    // when using `http` utility inside Redux actions.
+    cookie: 'jwt-cookie-name'
+  }
+
+  // (optional)
   // Preloads data before performing page rendering.
   //
   // If this function returns an object then this object
