@@ -5,11 +5,11 @@
 
 Server Side Rendering for `React + React-router + Redux` stack.
 
+ * Provides isomorphic HTTP client for calling REST API
+ * Asynchronously preloads pages before performing navigation
  * Supports Webpack "hot reload"
  * Supports locale detection and app internationalization
- * Provides isomorphic HTTP client for calling REST API
  * Handles HTTP Cookies correctly
- * Asynchronously preloads pages before performing navigation
 
 ## Installation
 
