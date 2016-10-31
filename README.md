@@ -56,7 +56,7 @@ export default class Wrapper extends React.Component
 }
 ```
 
-Then create your client-side main file `application.js`
+Then create your client-side application main file (`application.js`)
 
 ```javascript
 import { render } from 'react-isomorphic-render/redux'
