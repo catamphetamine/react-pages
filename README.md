@@ -19,11 +19,9 @@ $ npm install react-isomorphic-render --save
 
 ## Usage
 
-See [webapp](https://github.com/halt-hammerzeit/webapp) and [webpack-react-redux-isomorphic-render-example](https://github.com/halt-hammerzeit/webpack-react-redux-isomorphic-render-example) as references.
+(see [webapp](https://github.com/halt-hammerzeit/webapp) and [webpack-react-redux-isomorphic-render-example](https://github.com/halt-hammerzeit/webpack-react-redux-isomorphic-render-example) as references)
 
-The following usage example is for `React + React-router + Redux` setup.
-
-Create your `react-isomorphic-render.js` set up file (it configures both client side and server side)
+Start by creating your `react-isomorphic-render.js` set up file (it configures both client side and server side)
 
 ```javascript
 export default
@@ -78,6 +76,7 @@ And the `index.html` would look like this
 <html>
   <head>
     <title>react-isomorphic-render</title>
+    <link rel="stylesheet" type="text/css" href="/style.css">
   </head>
   <body>
     <div id="react"></div>
