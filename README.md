@@ -103,7 +103,7 @@ import settings from './react-isomorphic-render'
 // Create webpage rendering server
 const server = webpageServer
 ({
-  // Http host and port for executing all client-side ajax requests on server-side.
+  // HTTP host and port for executing all client-side ajax requests on server-side.
   // This is the host and port on which the web application is run.
   // (because, unlike in the web browser, all URLs on the server-side must be absolute)
   application:
@@ -183,7 +183,7 @@ app.use(function(request, response)
 
 To use `react-isomorphic-render` without proxying there are two options
 
-  * Either supply custom Koa `middleware` array option to webpage server (recommended)
+  * Either supply custom Koa `middleware` array option in webpage server configuration (recommended)
   * Or call the internal `render` function manually:
 
 ```js
@@ -265,7 +265,7 @@ export default class Page extends Component
   {
     return (
       <div>
-        <title("Users")/>
+        {title("Users")}
         <ul>{this.props.users.map(user => <li>{user.name}</li>)}</ul>
         <button onClick={this.props.fetch_users}>Refresh</button>
       </div>
