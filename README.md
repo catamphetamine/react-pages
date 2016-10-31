@@ -329,7 +329,7 @@ And a "spinner" component
 import React       from 'react'
 import { connect } from 'react-redux'
 
-export default connect(model => ({ pending: model.preload.pending, error: model.preload.error }))
+export default connect(state => ({ pending: state.preload.pending }))
 (function Spinner(props)
 {
   return <div className={"preloading " + (props.pending ? "preloading-show" : "")}/>
