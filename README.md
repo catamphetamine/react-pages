@@ -413,13 +413,13 @@ const meta =
 ]
 
 // sets specific webpage <head/> tags
-head('WebApp', meta)
+{ head('WebApp', meta) }
 
 // webpage title will be replaced with this one
-title('New webpage title')
+{ title('New webpage title') }
 
 // will add additional <meta/> tags to the webpage <head/>
-meta({ ... same `meta` as above ... })
+{ meta({ ... same `meta` as above ... }) }
 ```
 
 ### Locale detection
@@ -432,12 +432,12 @@ This library performs the following locale detection steps for each webpage rend
  
 The resulting locales array is passed as `preferredLocales` parameter into `localize()` function of the webpage rendering server which then returns `{ locale, messages }`.
 
-Later, on the client side, that `locale` returned from the `localize()` function on the server side is fed into `translation(locale)` function, and when translation is loaded the application is rendered with `locale` and `messages` properties passed to the `wrapper`.
+Later, on the client side, that `locale` returned from the `localize()` function on the server side is passed into `translation(locale)` function to load the `messages` on the client-side, and when translation is loaded the application is rendered with `locale` and `messages` properties passed to the `wrapper`.
 
 ### Determining current location
 
 ```javascript
-@connect(model => ({ location: model.router.location }))
+@connect(state => ({ location: state.router.location }))
 class Component extends React.Component
 {
   render()
@@ -449,7 +449,7 @@ class Component extends React.Component
 
 ### Changing current location
 
-When using Redux, these two helpers change current location isomorphically: they work both on client and server.
+These two helper Redux actions change the current location (both on client and server).
 
 ```javascript
 import { goto, redirect } from 'react-isomorphic-render/redux'
@@ -474,15 +474,7 @@ Having said all that, it's definitely possible to drop `redux-router` and rewrit
 
 ## Caching
 
-I'm currently working on a simple cache implementation. Obviously, for a highload project it would be insane to render a React page for every HTTP request.
-
-React is cumbersome when it comes to partial caching tricks (e.g. caching a header and a footer while rendering only the content part) because of having those `react-dataid` and `react-data-checksum` attributes guarding the resulting HTML markup integrity. I.e. one can't just render the content of a page and then inject the already cached header and footer markup there because then `react-dataid` counters would be messed up and `react-data-checksum` wouldn't match, so React would just discard the whole server-rendered markup and rerender it from scratch in the web browser, which is stupid. See [this discussion in `facebook/react` repo](https://github.com/facebook/react/issues/5869#issuecomment-250967382) for more info. Facebook seems not interested in fixing this issue since they're not using server-side rendering at all.
-
-My current strategy is to render the "constant" parts of the page on the server-side and then render all "variable" parts of the page on the client side inside `componentDidMount`. In this case, the "constant" parts would be: header, footer, menu, page content. And the "variable" parts of the page would be: user bar with the currently logged in user name and userpic, notifications badge with the number of unread messages for this user, the comments section (they don't strictly need to be indexed by the search engine). This way the search engines would index the base content, and all the other content which is gonna be different for different HTTP requests, will be rendered in the web browser when the page is loaded. This way the server stays cool serving pages from cache, the clients get quick content delivery, the search engines index the pages (and with higher scores), and everyone wins.
-
-Some "variable" parts, like comments section, can be queried from the web browser to the server after the page loads, since the extra latency introduced wouldn't affect the user's perception (comments reside below the article and their importance is secondary while the article itself being of the most importance). Some "variable" parts, like user's name and userpic, and the amount of unread notifications, would benefit from instant rendering, without an extra roundtrip to the server, since they're visible right-away. This can be accomplished by injecting additional Redux state into the page just retrieved from cache on the server-side. I'm guessing that would be the `preload` common option (see below)
-
-I'm planning on introducing a `@cache` decorator which is gonna decorate the pages meant for caching (e.g. user's settings page obviously has no reason to be cached while an article page definitely has). Also, an additional decorator may be introduced, something like `@dynamic`, which is gonna decorate the components rendering the "variable" parts (like user bar). These `@dynamic` components would render nothing on the server-side and would render content on the client-side, where content is taken from the already preloaded Redux store sent from the server-side. In this case, for example, the user bar component could be decorated as `@dynamic` while the comments section doesn't need to be (since it's deferred anyway and there's no data in the Redux state available right-away to render it).
+[Some thoughts on caching rendered pages](https://github.com/halt-hammerzeit/react-isomorphic-render/blob/master/CACHING.md)
 
 ## CSRF protection
 
