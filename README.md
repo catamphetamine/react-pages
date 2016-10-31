@@ -507,12 +507,7 @@ This library attempts to read authenication token from a cookie named `settings.
     // (`request` is a `superagent` request)
     request: (request, { store }) =>
     {
-      const token = store.getState().authentication.token
-
-      if (token)
-      {
-        request.set('Authorization', `Bearer ${token}`)
-      }
+      request.set('X-Something', store.getState().something.value)
     }
 
     // (optional)
