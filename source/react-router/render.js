@@ -2,7 +2,8 @@ import React          from 'react'
 import ReactDOM       from 'react-dom'
 import ReactDOMServer from 'react-dom/server'
 
-import { render_on_client as react_render_on_client, render_on_server as react_render_on_server } from '../render'
+import react_render_on_client from '../render on client'
+import react_render_on_server from '../render on server'
 
 import { Router, match, RouterContext, browserHistory } from 'react-router'
 

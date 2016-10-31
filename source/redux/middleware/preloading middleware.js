@@ -11,8 +11,8 @@ import { replace }           from 'redux-router'
 
 import { location_url, locations_are_equal } from '../../location'
 
-export const Preload_method_name          = '__react_preload__'
-// export const Preload_blocking_method_name = '__react_preload_blocking__'
+export const Preload_method_name  = '__react_preload__'
+export const Preload_options_name = '__react_preload_options__'
 
 // Returns function returning a Promise 
 // which resolves when all the required preload()s are resolved.
@@ -21,11 +21,11 @@ export const Preload_method_name          = '__react_preload__'
 //
 const preloader = (server, components, getState, dispatch, location, parameters, preload_helpers) =>
 {
-	let preload_options = { dispatch, getState, location, parameters }
+	let preload_arguments = { dispatch, getState, location, parameters }
 
 	if (preload_helpers)
 	{
-		preload_options = { ...preload_options, ...preload_helpers }
+		preload_arguments = { ...preload_arguments, ...preload_helpers }
 	}
 
 	// on the client side:
@@ -46,9 +46,17 @@ const preloader = (server, components, getState, dispatch, location, parameters,
 	// the last component in the chain still needs to be reloaded
 	// even though it has remained the same.
 	//
-	// ("getState().router" means "is on the client side now")
+	// `params` comparison could render the above workaround obsolete,
+	// but `react-router` doesn't provide per-route params
+	// instead providing page-wide `params`
+	// (i.e. combined `params` from all routes of the routed path),
+	// and there's no way of simply doing `if (previous_params !== new_params) { preload() }`
+	// because that would re-@preload() all parent components every time
+	// even if they stayed the same (e.g. the root `<App/>` route component).
 	//
-	if (getState().router)
+	// (also, GET query parameters would also need to be compared in that case)
+	//
+	if (!server)
 	{
 		let previous_route_components = getState().router.components
 
@@ -59,108 +67,95 @@ const preloader = (server, components, getState, dispatch, location, parameters,
 		}
 	}
 
-	// if you have `disable_server_side_rendering` set to true 
-	// then there is a possibility @preload() won't work for top level components.
-	// however `disable_server_side_rendering` is not a documented feature
-	// therefore it's not officially supported and therefore it's not really a bug.
-	//
-	// if someone needs `disable_server_side_rendering`
-	// with @preload()ing on the root React component
-	// then they can submit a Pull Request fixing this.
-
 	// finds all `preload` (or `preload_deferred`) methods 
 	// (they will be executed in parallel)
-	function get_preloaders(method_name)
+	function get_preloaders()
 	{
 		// find all `preload` methods on the React-Router component chain
 		return components
-			.filter(component => component && component[method_name]) // only look at ones with a static preload()
-			.map(component => component[method_name]) // pull out preloading methods
-			.map(preload => () => preload(preload_options)) // bind arguments
-	}
-
-	// // get all `preload_blocking` methods on the React-Router component chain
-	// const blocking_preloads = get_preloaders(Preload_blocking_method_name)
-
-	// get all `preload` methods on the React-Router component chain
-	const blocking_preloads = get_preloaders(Preload_method_name)
-	const preloads = []
-
-	// calls all `preload` methods on the React-Router component chain
-	// (in parallel) and returns a Promise
-	const preload_all = () => 
-	{
-		return Promise.all(preloads.map(preload =>
-		{
-			try
-			{
-				// `preload()` returns a Promise
-				const promise = preload()
-
-				// Sanity check
-				if (!promise.then)
+			.filter(component => component && component[Preload_method_name])
+			.map(component =>
+			({
+				preload: () =>
 				{
-					return Promise.reject(`Preload function didn't return a Promise:`, preload)
-					// throw new Error(`Preload function didn't return a Promise:`, preload)
-				}
-
-				return promise
-			}
-			catch (error)
-			{
-				return Promise.reject(error)
-			}
-		}))
-	}
-
-	// calls all `preload_blocking` methods on the React-Router component chain
-	// (sequentially) and returns a Promise
-	const preload_all_blocking = () =>
-	{
-		return blocking_preloads.reduce((previous, preload) =>
-		{
-			return previous.then(() =>
-			{
-				try
-				{
-					const promise = preload()
-
-					// sanity check
-					if (!promise.then)
+					try
 					{
-						return Promise.reject(`Preload function didn't return a Promise:`, preload)
-						// throw new Error(`Preload function didn't return a Promise:`, preload)
-					}
+						// `preload()` returns a Promise
+						const promise = component[Preload_method_name](preload_arguments)
 
-					return promise
-				}
-				catch (error)
-				{
-					return Promise.reject(error)
-				}
-			})
-		}, 
+						// Sanity check
+						if (typeof promise.then !== 'function')
+						{
+							return Promise.reject(`Preload function didn't return a Promise:`, preload)
+						}
+
+						return promise
+					}
+					catch (error)
+					{
+						return Promise.reject(error)
+					}
+				},
+				options: component[Preload_options_name] || {}
+			}))
+	}
+
+	// Get all `preload` methods on the React-Router component chain
+	const preloads = get_preloaders()
+
+	// Construct `preload` chain
+
+	let chain = []
+	let parallel = []
+
+	for (let preloader of get_preloaders())
+	{
+		if (preloader.options.blocking === false)
+		{
+			parallel.push(preloader.preload)
+			continue
+		}
+
+		// Copy-pasta
+		if (parallel.length > 0)
+		{
+			parallel.push(preloader.preload)
+			chain.push(parallel)
+			parallel = []
+		}
+		else
+		{
+			chain.push(preloader.preload)
+		}
+	}
+
+	// Copy-pasta
+	if (parallel.length > 0)
+	{
+		chain.push(parallel.length > 1 ? parallel : parallel[0])
+		parallel = []
+	}
+
+	// Convert `preload` chain into `Promise` chain
+
+	if (chain.length === 0)
+	{
+		return
+	}
+
+	return function()
+	{
+		return chain.reduce((promise, link) =>
+		{
+			if (Array.isArray(link))
+			{
+				return promise.then(() => Promise.all(link.map(_ => _())))
+			}
+
+			return promise.then(link)
+		},
 		Promise.resolve())
 	}
-	
-	if (blocking_preloads.length > 0)
-	{
-		return preload_all_blocking
-	}
-
-	// // if there are `preload_blocking` methods on the React-Router component chain,
-	// // then finish them first (sequentially)
-	// if (blocking_preloads.length > 0)
-	// {
-	// 	// first finish `preload_blocking` methods, then call all `preload`s
-	// 	return () => preload_all_blocking().then(preload_all)
-	// }
-	//
-	// // no `preload_blocking` methods, just call all `preload`s, if any
-	// if (preloads.length > 0)
-	// {
-	// 	return preload_all
-	// }
 }
 
 // Because `preloading_middleware` is `applied` to the store

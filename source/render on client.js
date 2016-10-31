@@ -15,10 +15,10 @@ export default function render_on_client({ development, element, to, subsequent_
 	{
 		window.React = React // enable debugger
 
-		if (!to || !to.firstChild || !to.firstChild.attributes || !to.firstChild.attributes['data-react-checksum'])
-		{
-			console.error('Server-side React render was discarded. Make sure that your initial render does not contain any client-side code.')
-		}
+		// if (!to || !to.firstChild || !to.firstChild.attributes || !to.firstChild.attributes['data-react-checksum'])
+		// {
+		// 	console.error('Server-side React render was discarded. Make sure that your initial render does not contain any client-side code.')
+		// }
 	}
 
 	return { component }

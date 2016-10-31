@@ -8,21 +8,18 @@ import { location_url } from '../../location'
 
 // Returns a Promise resolving to { status, content, redirect }.
 //
-export default function render_on_server({ disable_server_side_rendering, create_page_element, render_webpage_as_react_element, url, store })
+export default function render_on_server({ monitoring, disable_server_side_rendering, create_page_element, render_webpage_as_react_element, url, store })
 {
-	// Maybe no one really needs to `disable_server_side_rendering`
-	if (disable_server_side_rendering)
-	{
-		// Render the empty <Html/> component into Html markup string
-		return Promise.resolve({ content: react_render_on_server({ render_webpage_as_react_element }) })
-	}
-
 	// HTTP response status code
 	let http_status_code
+
+	const routing_finished = monitoring.started('request.route')
 
 	// Perform routing for this `url`
 	return match_url(url, store).then(routing_result =>
 	{
+		routing_finished()
+
 		// Return in case of an HTTP redirect
 		if (routing_result.redirect)
 		{
@@ -32,6 +29,8 @@ export default function render_on_server({ disable_server_side_rendering, create
 		// Http response status code
 		http_status_code = get_http_response_status_code_for_the_route(routing_result.matched_routes)
 
+		const preloading_finished = monitoring.started('request.preload')
+
 		// When `url` matching process finished,
 		// it immediately launched preloading process,
 		// so it's preloading the page now.
@@ -40,12 +39,24 @@ export default function render_on_server({ disable_server_side_rendering, create
 		//
 		return wait_for_page_to_preload(store).then(() => 
 		{
+			preloading_finished()
+
+			if (disable_server_side_rendering)
+			{
+				// Render the empty <Html/> component into Html markup string
+				return { content: react_render_on_server({ render_webpage_as_react_element }) }
+			}
+
 			// Renders the current page React component to a React element
 			// (`<ReduxRouter/>` is gonna get the matched route from the `store`)
 			const page_element = create_page_element(<ReduxRouter/>, { store })
 
+			const rendering_finished = monitoring.started('request.render')
+
 			// Render the current page's React element to HTML markup
 			const content = react_render_on_server({ render_webpage_as_react_element, page_element })
+
+			rendering_finished()
 
 			// return HTTP status code and HTML markup
 			return { status: http_status_code, content }

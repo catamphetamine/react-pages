@@ -1,9 +1,9 @@
 import React, { Component } from 'react'
 import hoist_statics from 'hoist-non-react-statics'
 
-import { Preload_method_name } from './middleware/preloading middleware'
+import { Preload_method_name, Preload_options_name } from './middleware/preloading middleware'
 
-export default function(parameters)
+export default function(preload, options)
 {
 	return function(Wrapped)
 	{
@@ -15,20 +15,8 @@ export default function(parameters)
 			}
 		}
 
-		let preload
-		// let preload_blocking
-
-		if (typeof parameters === 'function')
-		{
-			preload = parameters
-		}
-		else
-		{
-			throw new Error(`Invalid @preload() parameters: ${parameters}`)
-		}
-
-		Preload[Preload_method_name]          = preload
-		// Preload[Preload_blocking_method_name] = preload_blocking
+		Preload[Preload_method_name]  = preload
+		Preload[Preload_options_name] = options
 
 		Preload.displayName = `Preload(${get_display_name(Wrapped)})`
 		

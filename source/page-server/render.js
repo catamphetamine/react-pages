@@ -3,8 +3,6 @@
 
 import React from 'react'
 
-import fs from 'fs'
-
 import Html from './html'
 import Http_client from '../http client'
 
@@ -16,10 +14,15 @@ import set_up_http_client from '../redux/http client'
 
 import { normalize_common_options } from '../redux/normalize'
 
+import start_monitoring from './monitoring'
+
 // isomorphic (universal) rendering (middleware).
 // will be used in web_application.use(...)
-export default async function({ preload, localize, assets, application, request, disable_server_side_rendering, html, authentication, cookies }, common)
+export default async function({ monitoring, preload, localize, assets, application, request, disable, loading, html, authentication, cookies }, common)
 {
+	// Make sure `monitoring` is defined (either `StatsD` or a stub)
+	monitoring = monitoring || start_monitoring({})
+
 	const
 	{
 		get_reducer,
@@ -47,6 +50,9 @@ export default async function({ preload, localize, assets, application, request,
 		console.warn(`"html.style" parameter is deprecated and will be removed in the next major release. Use "html.head" instead: if (development) return [<style dangerouslySetInnerHTML={{ __html: style }} charSet="UTF-8"/>, ...]`)
 	}
 
+	// Make `assets` into a function
+	assets = normalize_assets(assets)
+
 	// In development mode Redux DevTools are activated, for example
 	const development = process.env.NODE_ENV !== 'production'
 
@@ -69,7 +75,8 @@ export default async function({ preload, localize, assets, application, request,
 		clone_request : request,
 		format_url    : common.http && common.http.url,
 		parse_dates,
-		authentication_token
+		authentication_token,
+		authentication_token_header: authentication ? authentication.header : undefined
 	})
 
 	// initial Flux store data (if using Flux)
@@ -79,7 +86,10 @@ export default async function({ preload, localize, assets, application, request,
 	// (for example to authenticate the user and retrieve user selected language)
 	if (preload)
 	{
-		store_data = (await preload(http_client, { request })) || store_data
+		await monitoring.measure('request.preload', async () =>
+		{
+			store_data = (await preload(http_client, { request })) || store_data
+		}) 
 	}
 
 	// create Redux store
@@ -129,9 +139,13 @@ export default async function({ preload, localize, assets, application, request,
 	const render = store ? redux_render : react_router_render
 
 	// Render the web page
+	let result
+
 	return await render
 	({
-		disable_server_side_rendering,
+		monitoring,
+
+		disable_server_side_rendering: disable,
 		
 		url,
 
@@ -184,7 +198,7 @@ export default async function({ preload, localize, assets, application, request,
 					parse_dates={parse_dates}
 					authentication_token={authentication_token}>
 
-					{content}
+					{disable ? loading : content}
 				</Html>
 			)
 
@@ -196,4 +210,18 @@ export default async function({ preload, localize, assets, application, request,
 		// create_routes is only used for bare React-router rendering
 		create_routes: store ? undefined : create_routes
 	})
+}
+
+// Makes it a function
+function normalize_assets(assets)
+{
+	// Normalize `assets` parameter
+	// (to be a function)
+	if (typeof assets !== 'function')
+	{
+		const assets_object = assets
+		assets = () => assets_object
+	}
+
+	return assets
 }

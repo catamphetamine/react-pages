@@ -17,7 +17,7 @@ See [webapp](https://github.com/halt-hammerzeit/webapp) and [webpack-react-redux
 
 The following usage example is for `React + React-router + Redux` setup.
 
-Create your `react-isomorphic-render.js` set up file (it will be used both on client and server)
+Create your `react-isomorphic-render.js` set up file (it configures both client side and server side)
 
 ```javascript
 export default
@@ -33,64 +33,6 @@ export default
   // Wraps React page component with arbitrary elements (e.g. <Provider/>, etc; see an example below)
   wrapper: require('./src/client/wrapper')
 }
-```
-
-Start webpage rendering server
-
-```javascript
-import webpage_server from 'react-isomorphic-render/server'
-import settings from './react-isomorphic-render'
-
-// Create webpage rendering server
-const server = webpage_server
-({
-  // Http host and port for executing all client-side ajax requests on server-side.
-  // This is the host and port on which the web application is run.
-  application:
-  {
-    host: '192.168.0.1',
-    port: 80,
-    // secure: true // for HTTPS
-  },
-
-  // URLs of javascript and CSS files
-  // which will be insterted into the <head/> element of the resulting Html webpage
-  // as <script src="..."/> and <link rel="style" href="..."/> respectively.
-  // (can be a function)
-  assets:
-  {
-    javascript: '/assets/application.js',
-    style: '/assets/application.css'
-  }
-},
-settings)
-
-// Start webpage rendering server
-// (`server.listen(port, [host], [callback])`)
-server.listen(3000, function(error)
-{
-  if (error)
-  {
-    throw error
-  }
-
-  console.log(`Webpage rendering server is listening at http://localhost:${port}`)
-})
-```
-
-Create your client-side main file `application.js`
-
-```javascript
-import { render } from 'react-isomorphic-render/redux'
-import settings from './react-isomorphic-render'
-
-// Renders the page in web browser
-render
-({
-  // enable/disable development mode
-  development: true
-},
-settings)
 ```
 
 An example of a `wrapper` component:
@@ -109,77 +51,90 @@ export default class Wrapper extends React.Component
 }
 ```
 
-And, finally, React pages would look like this (optionally use `@preload()` helper to load the neccessary data before the page is rendered)
+Then create your client-side main file `application.js`
 
 ```javascript
-import { title }              from 'react-isomorphic-render'
-import { preload }            from 'react-isomorphic-render/redux'
-import { connect }            from 'react-redux'
-import { bindActionCreators } from 'redux'
+import { render } from 'react-isomorphic-render/redux'
+import settings from './react-isomorphic-render'
 
-// fetches the list of users from the server
-function fetch_users()
-{
-  return {
-    promise: http => http.get('/api/users').then(ids => Promise.map(ids, id => http.get(`/api/users/${id}`))),
-    events: ['GET_USERS_PENDING', 'GET_USERS_SUCCESS', 'GET_USERS_FAILURE']
-  }
-}
-
-@preload(({ dispatch }) => dispatch(fetch_users))
-@connect
-(
-  state    => ({ users: state.users.users }),
-  dispatch => bindActionCreators({ fetch_users }, dispatch)
-)
-export default class Page extends Component
-{
-  static propTypes =
-  {
-    users       : PropTypes.array.isRequired,
-    fetch_users : PropTypes.func.isRequired
-  }
-
-  render()
-  {
-    return (
-      <div>
-        <title("Users")/>
-        <ul>{this.props.users.map(user => <li>{user.name}</li>)}</ul>
-        <button onClick={this.props.fetch_users}>Refresh</button>
-      </div>
-    )
-  }
-
-  // Observing action result example (advanced).
-  //
-  // Suppose you make a `delete_users()` function 
-  // analagous to the `fetch_users()` function.
-  //
-  // Then you can call it like this:
-  //
-  // <button onClick={::this.delete_users}>Delete all users</button>
-  //
-  // (async/await Babel syntax is used here; can be rewritten as usual Promises)
-  //
-  async delete_users()
-  {
-    try
-    {
-      const count = await this.props.delete_users()
-      alert(`Deleted ${count} users`)
-    }
-    catch (error)
-    {
-      alert(error)
-    }
-  }
-}
+// Renders the page in web browser
+render
+({
+  // enable/disable development mode
+  development: true
+},
+settings)
 ```
 
-The final step is to set up the main web server (`192.168.0.1:80` in this example) to proxy all HTTP requests for webpages to the webpage rendering server you've set up.
+And the `index.html` would look like this
 
-An example of how HTTP request routing on your main web server can be set up (with `page-server` running on port `3000`):
+```html
+<html>
+  <head>
+    <title>react-isomorphic-render</title>
+  </head>
+  <body>
+    <div id="react"></div>
+    <script src="/application.js"></script>
+  </body>
+</html>
+```
+
+Client side rendering should work now.
+
+## Server side
+
+Now it's time to add Server Side Rendering. Strictly speaking, it's not required but it's a nice-to-have feature.
+
+`index.html` will be generated on-the-fly by page rendering server for each HTTP request, so the old `index.html` may be deleted as it's of no use now.
+
+Start the webpage rendering server:
+
+```javascript
+import webpageServer from 'react-isomorphic-render/server'
+import settings from './react-isomorphic-render'
+
+// Create webpage rendering server
+const server = webpageServer
+({
+  // Http host and port for executing all client-side ajax requests on server-side.
+  // This is the host and port on which the web application is run.
+  // (because, unlike in the web browser, all URLs on the server-side must be absolute)
+  application:
+  {
+    host: '192.168.0.1',
+    port: 80,
+    // secure: true // for HTTPS
+  },
+
+  // URLs of the "static" javascript and CSS files
+  // which will be insterted into the <head/> element of the resulting Html webpage
+  // as <script src="..."/> and <link rel="style" href="..."/> respectively.
+  // (also can be a function returning an object)
+  assets:
+  {
+    javascript: '/assets/application.js',
+    style: '/assets/application.css'
+  }
+},
+settings)
+
+// Start webpage rendering server on port 3000
+// (`server.listen(port, [host], [callback])`)
+server.listen(3000, function(error)
+{
+  if (error)
+  {
+    throw error
+  }
+
+  console.log(`Webpage rendering server is listening at http://localhost:${port}`)
+})
+```
+
+The final step is to set up the main web server (`192.168.0.1:80` in this example) to proxy all HTTP requests for webpages to the webpage rendering server you've just set up.
+
+An example of how HTTP request routing on your main web server can be set up (with page rendering server running on port `3000`):
 
  * all HTTP GET requests starting with `/assets` return static files from your `assets` folder
  * all HTTP requests starting with `/api` call your REST API methods
@@ -222,8 +177,8 @@ app.use(function(request, response)
 
 To use `react-isomorphic-render` without proxying there are two options
 
-  * Supply custom Koa `middleware` array option to webpage server
-  * Or call `render` function manually:
+  * Either supply custom Koa `middleware` array option to webpage server (recommended)
+  * Or call the internal `render` function manually:
 
 ```js
 import { render } from 'react-isomorphic-render/server'
@@ -267,32 +222,85 @@ catch (error)
 }
 ```
 
-## HTTP response status code
-
-To set custom HTTP response status code for a specific route set the `status` property of that `<Route/>`.
-
-```javascript
-export default (
-  <Route path="/" component={Layout}>
-    <IndexRoute component={Home}/>
-    <Route path="blog"  component={Blog}/>
-    <Route path="about" component={About}/>
-    <Route path="*"     component={Page_not_found} status={404}/>
-  </Route>
-)
-```
-
 ## Page preloading
 
-As you have noticed in the (Redux) example above, `@preload()` helper is called to preload a web page before display. It is used to preload pages before rendering them (both on the server side and on the client side).
+For page preloading consider using `@preload()` helper to load the neccessary data before the page is rendered.
+
+```javascript
+import { title }              from 'react-isomorphic-render'
+import { preload }            from 'react-isomorphic-render/redux'
+import { connect }            from 'react-redux'
+import { bindActionCreators } from 'redux'
+
+// fetches the list of users from the server
+function fetchUsers()
+{
+  return {
+    promise: http => http.get('/api/users').then(ids => Promise.map(ids, id => http.get(`/api/users/${id}`))),
+    events: ['GET_USERS_PENDING', 'GET_USERS_SUCCESS', 'GET_USERS_FAILURE']
+  }
+}
+
+@preload(({ dispatch }) => dispatch(fetchUsers))
+@connect
+(
+  state    => ({ users: state.users.users }),
+  dispatch => bindActionCreators({ fetchUsers }, dispatch)
+)
+export default class Page extends Component
+{
+  static propTypes =
+  {
+    users      : PropTypes.array.isRequired,
+    fetchUsers : PropTypes.func.isRequired
+  }
+
+  render()
+  {
+    return (
+      <div>
+        <title("Users")/>
+        <ul>{this.props.users.map(user => <li>{user.name}</li>)}</ul>
+        <button onClick={this.props.fetch_users}>Refresh</button>
+      </div>
+    )
+  }
+
+  // Observing action result example (advanced).
+  //
+  // Suppose you make a `deleteUsers()` function 
+  // analagous to the `fetchUsers()` function.
+  //
+  // Then you can call it like this:
+  //
+  // <button onClick={::this.deleteUsers}>Delete all users</button>
+  //
+  // (async/await Babel syntax is used here; can be rewritten as usual Promises)
+  //
+  async deleteUsers()
+  {
+    try
+    {
+      const count = await this.props.deleteUsers()
+      alert(`Deleted ${count} users`)
+    }
+    catch (error)
+    {
+      alert(error)
+    }
+  }
+}
+```
+
+In the example above `@preload()` helper is called to preload a web page before display. It is used to preload pages before rendering them (both on the server side and on the client side). Its arguments are:
 
 ```javascript
 @preload(function({ dispatch, getState, location, parameters }) { returns Promise })
 ```
 
-Note: if `@preload()` decorator seems not working then try to place it on top of all other decorators. The possible reason is that it adds a static method to your `Route`'s `component` and some decorator on top of it may not retain that static method (though all proper decorators retain all static methods nowadays).
+Note: if `@preload()` decorator seems not working then try to place it on top of all other decorators. The possible reason is that it adds a static method to your `Route`'s `component` and some decorator on top of it may not retain that static method (though all proper decorators are agreed to retain static methods and variables).
 
-On the client side, when a user navigates a link, first it changes the Url in the address bar, then it waits for the next page to preload, and when the page is fully loaded it displays the page to the user. If preloading a page can take some time one may want to add a "spinner" to inform the user that the navigation process needs some time. It can be done by adding a Redux reducer listening to these three Redux events:
+On the client side, when a user navigates a link, first it changes the URL in the address bar, then it waits for the next page to preload, and, when the next page is fully loaded, then it is displayed to the user. Sometimes preloading a page can take some time to finish so one may want to add a "spinner" to inform the user that the application isn't frozen and the navigation process needs some time to finish. This can be achieved by adding a Redux reducer listening to these three Redux events:
 
 ```javascript
 import { Preload_started, Preload_finished, Preload_failed } from 'react-isomorphic-render/redux'
@@ -308,6 +316,8 @@ export default function(state = {}, event = {})
   }
 }
 ```
+
+And a "spinner" component
 
 ```javascript
 import React       from 'react'
@@ -342,6 +352,21 @@ export default connect(model => ({ pending: model.preload.pending, error: model.
   display: block;
   cursor: wait;
 }
+```
+
+## HTTP response status code
+
+To set a custom HTTP response status code for a specific route set the `status` property of that `<Route/>`.
+
+```javascript
+export default (
+  <Route path="/" component={Layout}>
+    <IndexRoute component={Home}/>
+    <Route path="blog"  component={Blog}/>
+    <Route path="about" component={About}/>
+    <Route path="*"     component={PageNotFound} status={404}/>
+  </Route>
+)
 ```
 
 ## onEnter
@@ -393,15 +418,13 @@ meta({ ... same `meta` as above ... })
 
 ### Locale detection
 
-When launched as a webpage server, this library performs the following locale detection steps for each webpage rendering HTTP request:
+This library performs the following locale detection steps for each webpage rendering HTTP request:
 
  * Checks the `locale` query parameter (if it's an HTTP GET request)
  * Checks the `locale` cookie
  * Checks the `Accept-Language` HTTP header
-
-(for more info see [`koa-locale`](https://www.npmjs.com/package/koa-locale))
  
-The resulting locale is passed as `preferred_locale` parameter into `localize()` function of the webpage rendering server which then returns `{ locale, messages }`.
+The resulting locales array is passed as `preferredLocales` parameter into `localize()` function of the webpage rendering server which then returns `{ locale, messages }`.
 
 Later, on the client side, that `locale` returned from the `localize()` function on the server side is fed into `translation(locale)` function, and when translation is loaded the application is rendered with `locale` and `messages` properties passed to the `wrapper`.
 
@@ -461,7 +484,7 @@ I'm planning on introducing a `@cache` decorator which is gonna decorate the pag
 
 How can a legitimate website guard its users from such attacks? One solution is to ignore the "remember me" ("session id") cookie and force reading its value from an HTTP header. Because CSRF attacks can't send custom headers (at least using bare HTML/Javascript, without exploiting Adobe Flash plugin bugs, etc), this renders such hacking attempts useless. But how is the legitimate webpage supposed to obtain this "remember me" ("session id") token to send it as an HTTP header? The cookie still needs to be used for user's session tracking. It's just that this cookie should only be read by the webpage rendering service (to be injected into the resulting webpage) and never by any of the API services. This way the only thing a CSRF attacker could do is to request a webpage (without being able to analyse its content) which is never an action. And so the user is completely protected against CSRF attacks. The "remember me" ("session id") cookie is also "HttpOnly" to make it only readable on the server-side (to protect the user from session hijacking via XSS attacks).
 
-This library attempts to read authenication token from a cookie named `server_configuration.authentication.cookie` (if this setting is configured). If authentication cookie is present then its value will be sent as part of `Authorization: Bearer {token}` HTTP header when using `http` utility in Redux actions.
+This library attempts to read authenication token from a cookie named `serverConfiguration.authentication.cookie` (if this setting is configured). If authentication cookie is present then its value will be sent as part of `Authorization: Bearer {token}` HTTP header when using `http` utility in Redux actions.
 
 ## Additional `react-isomorphic-render.js` settings
 
@@ -474,7 +497,7 @@ This library attempts to read authenication token from a cookie named `server_co
   // (optional)
   // Is called when Redux store has been created
   // (can be used for setting up Webpack Hot Module Replacement)
-  on_store_created: ({ reload_reducer }) => {}
+  on_store_created: ({ reloadReducer }) => {}
 
   // (optional)
   // `http` utility settings
@@ -497,7 +520,7 @@ This library attempts to read authenication token from a cookie named `server_co
     // (optional)
     // Custom control over `http` utility HTTP requests URL.
     // E.g. for those who don't want to proxy API calls (for whatever reasons).
-    url: (path, is_server_side) =>
+    url: (path, isServerSide) =>
     {
       return `https://api-server.com${path}`
     }
@@ -611,7 +634,7 @@ This library attempts to read authenication token from a cookie named `server_co
     // (or doing whatever else can be done with a React element).
     // Returns either a React element or an array of React elements
     // which will be inserted into server rendered webpage's <body/>
-    body: react_page_element => react_page_element
+    body: reactPageElement => reactPageElement
 
     // (optional)
     // Returns React element or an array of React elements.
@@ -658,18 +681,22 @@ This library attempts to read authenication token from a cookie named `server_co
   // (for example, a Json Web Token cookie value can be put to the store
   //  to later be set as an `Authorization` header for `http` utility requests)
   //
-  preload: async (http_client, { request }) => {}
-  // (or same without `async`: (http_client, { request }) => Promise.resolve({})
+  preload: async (httpClient, { request }) => {}
+  // (or same without `async`: (httpClient, { request }) => Promise.resolve({})
 
   // (optional)
   // Returns the suitable `locale` and `messages` for this HTTP request.
-  // When running as a webpage server, `preferred_locale` will be set.
-  // When rendering manually via `render` function, `preferred_locale` will not be set.
-  localize: async (store, preferred_locale) => { locale, messages }
-  // (or same without `async`: (store, preferred_locale) => Promise.resolve({ locale, messages }))
+  // `preferredLocales` is an array of the preferred locales for this user
+  // (from the most preferred to the least preferred)
+  localize: async (store, preferredLocales) => { locale, messages }
+  // (or same without `async`: (store, preferredLocales) => Promise.resolve({ locale, messages }))
 
-  // Disables server-side rendering (for whatever reason)
-  disable_server_side_rendering: `true`/`false`
+  // Disables server-side rendering (e.g. as a performance optimization)
+  disable: `true`/`false`
+
+  // (optional)
+  // A React element for "loading" page (when server-side rendering is disabled)
+  loading: <div className="loading">Loading...</div>
 }
 ```
 

@@ -12,7 +12,7 @@ export default class http_client
 	// (in this case, cookies, to make authentication work on the server-side).
 	constructor(options = {})
 	{
-		const { secure, host, port, headers, clone_request, authentication_token } = options
+		const { secure, host, port, headers, clone_request, authentication_token, authentication_token_header } = options
 
 		const parse_json_dates = options.parse_dates !== false
 
@@ -117,7 +117,7 @@ export default class http_client
 					// Set JWT token in HTTP request header (if the token is passed)
 					if (authentication_token)
 					{
-						request.set('Authorization', `Bearer ${authentication_token}`)
+						request.set(authentication_token_header || 'Authorization', `Bearer ${authentication_token}`)
 					}
 
 					// Server side only

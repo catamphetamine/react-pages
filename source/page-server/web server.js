@@ -1,29 +1,31 @@
-import fs   from 'fs'
-import path from 'path'
+import koa from 'koa'
 
-import koa        from 'koa'
-import koa_locale from 'koa-locale'
-
-import render      from './render'
-
+import render from './render'
+import { get_preferred_locales } from './locale'
 import render_stack_trace from './html stack trace'
-
 import { normalize_common_options } from '../redux/normalize'
+
+import start_monitoring from './monitoring'
 
 export default function start_webpage_rendering_server(options, common)
 {
 	// In development mode errors are printed as HTML, for example
 	const development = process.env.NODE_ENV !== 'production'
 
+	// StatsD monitoring (optional)
+	const monitoring = start_monitoring(options)
+
 	common = normalize_common_options(common)
 
 	const
 	{
+		assets,
 		preload,
 		localize,
 		application,
-		disable_server_side_rendering,
 		authentication,
+		disable,
+		loading,
 
 		// Legacy 4.x API support
 		head,
@@ -46,23 +48,28 @@ export default function start_webpage_rendering_server(options, common)
 		style
 	}
 
-	const assets = normalize_assets(options.assets)
-
 	const web = new koa()
-
-	// Adds helper methods for getting locale from Http request
-	// (the second parameter is the Http Get parameter name)
-	koa_locale(web, 'locale')
 
 	// Handles errors
 	web.use(async (ctx, next) =>
 	{
+		// Trims a question mark in the end (just in case)
+		const url = ctx.request.originalUrl.replace(/\?$/, '')
+
+		monitoring.increment('request.count')
+		monitoring.increment(`request.url.count.${url}`)
+
+		const finished = monitoring.started('request')
+		const finished_url = monitoring.started(`request.url.time.${url}`)
+
 		try
 		{
 			await next()
 		}
 		catch (error)
 		{
+			monitoring.increment('requests.errors')
+
 			// if the error is caught here it means that `catch` (`error_handler`) didn't resolve it
 			// (or threw it)
 
@@ -92,8 +99,18 @@ export default function start_webpage_rendering_server(options, common)
 			// log the error
 			console.log('[react-isomorphic-render] Webpage rendering server error')
 
+			if (options.log)
+			{
+				options.log.error(error)
+			}
+
 			ctx.status = typeof error.status === 'number' ? error.status : 500
 			ctx.message = error.message || 'Internal error'
+		}
+		finally
+		{
+			finished()
+			finished_url()
 		}
 	})
 
@@ -113,6 +130,8 @@ export default function start_webpage_rendering_server(options, common)
 		// Trims a question mark in the end (just in case)
 		const url = ctx.request.originalUrl.replace(/\?$/, '')
 
+		monitoring.increment(`request.url.hits.${url}`)
+
 		// Performs HTTP redirect
 		const redirect_to = to => ctx.redirect(to)
 
@@ -123,8 +142,9 @@ export default function start_webpage_rendering_server(options, common)
 				application,
 				assets,
 				preload,
-				localize: localize_with_preferred_locale(localize, ctx),
-				disable_server_side_rendering,
+				localize: localize ? (store) => localize(store, get_preferred_locales(ctx)) : undefined,
+				disable,
+				loading,
 				html,
 				authentication,
 
@@ -151,6 +171,8 @@ export default function start_webpage_rendering_server(options, common)
 		}
 		catch (error)
 		{
+			monitoring.increment('requests.errors.handled')
+
 			if (error_handler)
 			{
 				return error_handler(error,
@@ -175,35 +197,4 @@ export default function start_webpage_rendering_server(options, common)
 	})
 
 	return web
-}
-
-// Give `localize` a hint on which locale to choose
-function localize_with_preferred_locale(localize, ctx)
-{
-	if (!localize)
-	{
-		return
-	}
-
-    // Preferred locale (e.g. 'ru-RU').
-    // Can be obtained from `language` HTTP GET parameter,
-    // or from `language` cookie,
-    // or from 'Accept-Language' HTTP header.
-    const preferred_locale = ctx.getLocaleFromQuery() || ctx.getLocaleFromCookie() || ctx.getLocaleFromHeader()
-
-    return (store) => localize(store, preferred_locale)
-}
-
-// Makes it a function
-function normalize_assets(assets)
-{
-	// Normalize `assets` parameter
-	// (to be a function)
-	if (typeof assets !== 'function')
-	{
-		const assets_object = assets
-		assets = () => assets_object
-	}
-
-	return assets
 }

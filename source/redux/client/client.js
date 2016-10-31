@@ -27,7 +27,8 @@ export default function render({ development, devtools, translation }, common)
 	({
 		format_url  : common.http && common.http.url,
 		parse_dates : common.parse_dates,
-		authentication_token
+		authentication_token,
+		authentication_token_header: common.authentication ? common.authentication.header : undefined
 	})
 
 	// Erase the local variable too

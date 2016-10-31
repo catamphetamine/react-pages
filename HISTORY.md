@@ -1,3 +1,15 @@
+7.0.0 / 31.10.2016
+==================
+
+  * (shouldn't break anything, but just in case) `koa-locale` is not required anymore, instead extracted a couple of functions from it and using them internally to get preferred locales
+  * (breaking change) renamed `disable_server_side_rendering` setting to just `disable`
+  * (breaking change) `preferredLocale` arugument of `localize` function is now an array (`preferredLocales`)
+  * (breaking change) `authentication` settings were moved from server settings to common settings
+  * Added `header` parameter to `authentication` settings
+  * `@preload()` decorator now takes a second `options` argument which can specify `blocking: false` for child route components to start preloading immediately instead of waiting for this preload to finish first
+  * Added `loading` parameter for server configuration (returns a React element for "loading" page when server-side rendering is disabled)
+  * Started working towards StatsD monitoring (rendering timings, not yet even tested)
+
 6.1.0 / 23.10.2016
 ==================
 

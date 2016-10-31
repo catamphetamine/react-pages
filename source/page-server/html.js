@@ -19,8 +19,8 @@ export default class Html extends Component
 	{
 		development : PropTypes.bool,
 		assets      : PropTypes.object.isRequired,
-		content     : PropTypes.node,
 		store       : PropTypes.object.isRequired,
+		children    : PropTypes.node,
 		head        : PropTypes.node,
 		body        : PropTypes.func,
 		body_start  : PropTypes.node,
@@ -50,9 +50,7 @@ export default class Html extends Component
 		}
 		= this.props
 
-		// when server-side rendering is disabled, content will be undefined
-		// (but server-side rendering is always enabled so this "if" condition may be removed)
-		let content_markup = this.props.children ? ReactDOMServer.renderToString(this.props.children) : ''
+		const content_markup = this.props.children ? ReactDOMServer.renderToString(this.props.children) : ''
 
 		let content_element = <div id="react" dangerouslySetInnerHTML={{ __html: content_markup }}/>
 
@@ -63,26 +61,24 @@ export default class Html extends Component
 
 		const webpage_head = server_generated_webpage_head()
 
-		const html_attributes = webpage_head.htmlAttributes.toComponent()
+		let html_attributes = webpage_head.htmlAttributes.toComponent()
 
 		// Fixing `react-helmet` bug here
 		// until they release the fix
 		// https://github.com/nfl/react-helmet/issues/158
 		if (Array.isArray(html_attributes))
 		{
-			// const array = html_attributes
-			// html_attributes = {}
-			// for (var key in array)
-			// {
-			//		html_attributes[key] = array[key]
-			// }
+			// A workaround
+			html_attributes = {}
 
-			console.log(`You're gonna see a React warning in the console:` + `\n` +
-				`"Warning: React.createElement(...): Expected props argument of html to be a plain object".` + `\n` +
-				`This is not an error and this warning will be fixed in "react-helmet" package` + `\n` +
-				`https://github.com/nfl/react-helmet/issues/158`)
+			// console.log(`You're gonna see a React warning in the console:` + `\n` +
+			// 	`"Warning: React.createElement(...): Expected props argument of html to be a plain object".` + `\n` +
+			// 	`This is not an error and this warning will be fixed in "react-helmet" package` + `\n` +
+			// 	`https://github.com/nfl/react-helmet/issues/158` + `\n` + `\n` +
+			// 	`This error happens when there's no page content to render ("content" is undefined in Html.js)`)
 		}
 
+		// Set `<html lang="...">` if specified
 		if (locale)
 		{
 			html_attributes.lang = get_language_from_locale(locale)
@@ -169,7 +165,10 @@ export default class Html extends Component
 					    (the client-side React initialization code will
 					     automatically erase this authenticaiton token global variable
 					     to protect the user from session hijacking via an XSS attack) */}
-					{ authentication_token && <script dangerouslySetInnerHTML={{__html: `window._authentication_token=${JSON.stringify(authentication_token)}`}} charSet="UTF-8"/> }
+					{ authentication_token && <script data-authentication-token dangerouslySetInnerHTML={{__html: `window._authentication_token=${JSON.stringify(authentication_token)}`}} charSet="UTF-8"/> }
+					{/* Remove the <script/> tag above as soon as it executes
+					    to prevent potentially exposing authentication token during an XSS attack */}
+					{ authentication_token && <script dangerouslySetInnerHTML={{__html: `document.body.removeChild(document.querySelector('script[data-authentication-token]'))`}} charSet="UTF-8"/> }
 
 					{/* the "common.js" chunk (see webpack extract commons plugin) */}
 					{/* (needs to be included first (by design)) */}
