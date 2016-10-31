@@ -628,14 +628,16 @@ This library attempts to read authenication token from a cookie named `settings.
   // If this error handler is defined then it must handle
   // all errors it gets (or just re`throw` them).
   //
-  // This error handler can be the same one used as `preload.catch` option.
+  // This error handler can (and most likely should)
+  // be the same one used as `preload.catch` option.
   //
   catch: (error, { url, redirect }) => redirect(`/error?url=${encode(url)}&error=${error.status}`)
 
   // (optional)
   // Custom Koa middleware (an array of middlewares).
   // Inserted before page rendering middleware.
-  // (if anyone needs that for whatever reason)
+  // (if anyone needs that for extending
+  //  page rendering service with extra functionality)
   middleware: [...]
 
   // (optional)
@@ -666,26 +668,17 @@ This library attempts to read authenication token from a cookie named `settings.
     // Allows adding arbitrary React elements to the end of the <body/>
     // (use `key`s to prevent React warning when returning an array of React elements)
     body_end: (url) => React element or an array of React elements
-
-    // (optional)
-    // (is used only in development mode, for "flash of unstyled content")
-    // This function returns CSS text which will be inserted 
-    // into server rendered webpage's <head/> <style/> tag.
-    // If you're using Webpack then the CSS text is the result of a require() call.
-    style: () => 'body { background: white }'
   }
 
   // (optional)
   // Preloads data before performing page rendering.
   //
   // If this function returns an object then this object
-  // will be merged into Redux store.
+  // will be the initial Redux state.
   // 
   // `request` is the original HTTP request for the webpage.
-  // It can be used, for example, to get a cookie value 
-  // and put it to Redux store.
-  // (for example, a Json Web Token cookie value can be put to the store
-  //  to later be set as an `Authorization` header for `http` utility requests)
+  // It can be used, for example, to load the currently
+  // logged in user info (user name, user picture, etc).
   //
   preload: async (httpClient, { request }) => {}
   // (or same without `async`: (httpClient, { request }) => Promise.resolve({})
@@ -698,11 +691,16 @@ This library attempts to read authenication token from a cookie named `settings.
   // (or same without `async`: (store, preferredLocales) => Promise.resolve({ locale, messages }))
 
   // Disables server-side rendering (e.g. as a performance optimization)
+  // (is `false` by default)
   disable: `true`/`false`
 
   // (optional)
   // A React element for "loading" page (when server-side rendering is disabled)
   loading: <div className="loading">Loading...</div>
+
+  // (optional)
+  // A custom `log`
+  log: bunyan.createLogger(...)
 }
 ```
 
@@ -741,13 +739,14 @@ This library attempts to read authenication token from a cookie named `settings.
   devtools: __development__ ? require('./DevTools.js') : undefined,
 
   // (optional)
-  // Loads localized messages (asynchronously)
+  // Loads localized messages (asynchronously).
+  // Is required when defining `localize` in page rendering server settings.
   translation: async locale => messages
   // (or same without `async`: locale => Promise.resolve(messages))
 }
 ```
 
-Client-side `render` function returns a `Promise` resolving to
+Client-side `render` function returns a `Promise` resolving to an object
 
 ```js
 {
