@@ -512,7 +512,14 @@ This library attempts to read authenication token from a cookie named `settings.
 
     // (optional)
     // Custom control over `http` utility HTTP requests URL.
-    // E.g. for those who don't want to proxy API calls (for whatever reasons).
+    // E.g. for those who don't want to proxy API calls (for whatever reasons),
+    // and prefer to query REST API server directly from the web browser.
+    // The default `url` formatter only allows local paths
+    // to be requested therefore guarding against
+    // leaking cookies and authentication token headers to a 3rd party.
+    // Therefore by supplying a custom `url` formatter
+    // a developer takes full responsibility for guarding
+    // cookies and authentication token headers from being leaked to a 3rd party.
     url: (path, isServerSide) =>
     {
       return `https://api-server.com${path}`
