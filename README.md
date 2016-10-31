@@ -482,7 +482,7 @@ Having said all that, it's definitely possible to drop `redux-router` and rewrit
 
 How can a legitimate website guard its users from such attacks? One solution is to ignore the "remember me" ("session id") cookie and force reading its value from an HTTP header. Because CSRF attacks can't send custom headers (at least using bare HTML/Javascript, without exploiting Adobe Flash plugin bugs, etc), this renders such hacking attempts useless. But how is the legitimate webpage supposed to obtain this "remember me" ("session id") token to send it as an HTTP header? The cookie still needs to be used for user's session tracking. It's just that this cookie should only be read by the webpage rendering service (to be injected into the resulting webpage) and never by any of the API services. This way the only thing a CSRF attacker could do is to request a webpage (without being able to analyse its content) which is never an action. And so the user is completely protected against CSRF attacks. The "remember me" ("session id") cookie is also "HttpOnly" to make it only readable on the server-side (to protect the user from session hijacking via XSS attacks).
 
-This library attempts to read authenication token from a cookie named `serverConfiguration.authentication.cookie` (if this setting is configured). If authentication cookie is present then its value will be sent as part of `Authorization: Bearer {token}` HTTP header when using `http` utility in Redux actions.
+This library attempts to read authenication token from a cookie named `settings.authentication.cookie` (if this setting is configured). If authentication cookie is present then its value will be sent as part of `Authorization: Bearer {token}` HTTP header when using `http` utility in Redux actions.
 
 ## Additional `react-isomorphic-render.js` settings
 
@@ -513,7 +513,7 @@ This library attempts to read authenication token from a cookie named `serverCon
       {
         request.set('Authorization', `Bearer ${token}`)
       }
-    },
+    }
 
     // (optional)
     // Custom control over `http` utility HTTP requests URL.
@@ -522,7 +522,7 @@ This library attempts to read authenication token from a cookie named `serverCon
     {
       return `https://api-server.com${path}`
     }
-  },
+  }
 
   // (optional)
   // `@preload()` customization
@@ -544,16 +544,35 @@ This library attempts to read authenication token from a cookie named `serverCon
     // If this error handler is defined then it must handle
     // all errors it gets (or just re`throw` them).
     catch: (error, { url, redirect }) => redirect(`/error?url=${encode(url)}&error=${error.status}`)
-  },
+  }
+
+  // (optional)
+  authentication:
+  {
+    // If this parameter is set,
+    // then the page rendering server
+    // will try to extract JWT authentication token
+    // from this cookie (if present),
+    // and then it will always pass the token as part of the
+    // "Authorization: Bearer {token}" HTTP header
+    // when using `http` utility inside Redux actions.
+    cookie: 'jwt-cookie-name'
+
+    // (optional)
+    // The HTTP header containing authentication token
+    // (e.g. "Authorization: Bearer {token}").
+    // Is "Authorization" by default.
+    header: 'Authorization'
+  }
 
   // (optional)
   // `react-router`s `onUpdate` handler
   // (is fired when a user performs navigation)
-  on_navigate: (location) => {},
+  on_navigate: (location) => {}
 
   // (optional)
   // `history` options (like `basename`)
-  history: {},
+  history: {}
 
   // (optional)
   // Controls automatic `Date` parsing
@@ -652,19 +671,6 @@ This library attempts to read authenication token from a cookie named `serverCon
     // into server rendered webpage's <head/> <style/> tag.
     // If you're using Webpack then the CSS text is the result of a require() call.
     style: () => 'body { background: white }'
-  }
-
-  // (optional)
-  authentication:
-  {
-    // If this parameter is set,
-    // then the page rendering server
-    // will try to extract JWT authentication token
-    // from this cookie (if present),
-    // and then it will always pass the token as part of the
-    // "Authorization: Bearer {token}" HTTP header
-    // when using `http` utility inside Redux actions.
-    cookie: 'jwt-cookie-name'
   }
 
   // (optional)
