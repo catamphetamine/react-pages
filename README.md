@@ -27,14 +27,17 @@ Start by creating your `react-isomorphic-render.js` set up file (it configures b
 export default
 {
   // Redux reducer
-  // (either an object or a function returning an object)
+  // (either a reducer or a function returning a reducer)
   reducer: require('./src/client/redux/reducer'),
 
   // React-router routes
-  // (either a `<Route/>` element or a `function({ dispatch, getState })` returning a `<Route/>` element)
+  // (either a `<Route/>` element or a
+  //  `function({ dispatch, getState })`
+  //  returning a `<Route/>` element)
   routes: require('./src/client/routes'),
   
-  // Wraps React page component with arbitrary elements (e.g. <Provider/>, etc; see an example below)
+  // Wraps React page component with arbitrary elements
+  // (e.g. Redux <Provider/>, and other "context providers")
   wrapper: require('./src/client/wrapper')
 }
 ```
@@ -45,11 +48,9 @@ An example of a `wrapper` component:
 // Can be also a "React pure component" (i.e. a function)
 export default class Wrapper extends React.Component
 {
-  // Wraps React page component with arbitrary elements (e.g. Redux Provider)
   render()
   {
     const { store, children } = this.props
-
     return <Provider store={store}>{children}</Provider>
   }
 }
