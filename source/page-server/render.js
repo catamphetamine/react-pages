@@ -198,7 +198,7 @@ export default async function({ monitoring, preload, localize, assets, applicati
 					parse_dates={parse_dates}
 					authentication_token={authentication_token}>
 
-					{disable ? loading : content}
+					{render === false ? loading : content}
 				</Html>
 			)
 
