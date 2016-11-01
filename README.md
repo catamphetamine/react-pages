@@ -146,7 +146,7 @@ An example of how HTTP request routing on your main web server can be set up (wi
  * all HTTP requests starting with `/api` call your REST API methods
  * all the other HTTP GET requests are proxied to `http://localhost:3000` for webpage rendering
 
-Proxying can be easily set up, for example, with [http-proxy](https://github.com/nodejitsu/node-http-proxy)
+Proxying can be easily set up, for example, with [http-proxy](https://github.com/nodejitsu/node-http-proxy) in Node.js
 
 ```js
 const path = require('path')
@@ -178,6 +178,8 @@ app.use(function(request, response)
   proxy.web(request, response, { target: 'http://localhost:3000' })
 })
 ```
+
+For production usage something like the [NginX proxy](https://www.sep.com/sep-blog/2014/08/20/hosting-the-node-api-in-nginx-with-a-reverse-proxy/), obviously, would be a much better fit.
 
 ## Without proxying
 
