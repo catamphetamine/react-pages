@@ -155,7 +155,7 @@ const httpProxy = require('http-proxy')
 
 // Use Express or Koa, for example
 const app = express()
-const proxy = httpProxy.createProxyServer(options)
+const proxy = httpProxy.createProxyServer({})
 
 // Serve static files
 app.use('/assets', express.static(path.join(__dirname, '../assets')))
