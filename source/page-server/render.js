@@ -18,7 +18,7 @@ import start_monitoring from './monitoring'
 
 // isomorphic (universal) rendering (middleware).
 // will be used in web_application.use(...)
-export default async function({ monitoring, preload, localize, assets, application, request, disable, loading, html, authentication, cookies }, common)
+export default async function({ monitoring, preload, localize, assets, application, request, render, loading, html, authentication, cookies }, common)
 {
 	// Make sure `monitoring` is defined (either `StatsD` or a stub)
 	monitoring = monitoring || start_monitoring({})
@@ -136,16 +136,16 @@ export default async function({ monitoring, preload, localize, assets, applicati
 
 	// If Redux is being used, then render for Redux.
 	// Else render for pure React.
-	const render = store ? redux_render : react_router_render
+	const render_page = store ? redux_render : react_router_render
 
 	// Render the web page
 	let result
 
-	return await render
+	return await render_page
 	({
 		monitoring,
 
-		disable_server_side_rendering: disable,
+		disable_server_side_rendering: render === false,
 		
 		url,
 

@@ -1,3 +1,8 @@
+7.0.1 / 01.11.2016
+==================
+
+  * Quick change: renamed `disable: true` to `render: false` in server rendering settings
+
 7.0.0 / 31.10.2016
 ==================
 

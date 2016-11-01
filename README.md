@@ -692,9 +692,11 @@ This library attempts to read authenication token from a cookie named `settings.
   localize: async (store, preferredLocales) => { locale, messages }
   // (or same without `async`: (store, preferredLocales) => Promise.resolve({ locale, messages }))
 
-  // Disables server-side rendering (e.g. as a performance optimization)
-  // (is `false` by default)
-  disable: `true`/`false`
+  // Is Server Side Rendering enabled?
+  // (is `true` by default)
+  // Can be used to temporarily disable server-side rendering
+  // (e.g. as a performance optimization)
+  render: `true`/`false`
 
   // (optional)
   // A React element for "loading" page (when server-side rendering is disabled)

@@ -1,6 +1,6 @@
 import koa from 'koa'
 
-import render from './render'
+import render_page from './render'
 import { get_preferred_locales } from './locale'
 import render_stack_trace from './html stack trace'
 import { normalize_common_options } from '../redux/normalize'
@@ -24,7 +24,7 @@ export default function start_webpage_rendering_server(options, common)
 		localize,
 		application,
 		authentication,
-		disable,
+		render,
 		loading,
 
 		// Legacy 4.x API support
@@ -137,13 +137,13 @@ export default function start_webpage_rendering_server(options, common)
 
 		try
 		{
-			const { status, content, redirect } = await render
+			const { status, content, redirect } = await render_page
 			({
 				application,
 				assets,
 				preload,
 				localize: localize ? (store) => localize(store, get_preferred_locales(ctx)) : undefined,
-				disable,
+				render,
 				loading,
 				html,
 				authentication,
