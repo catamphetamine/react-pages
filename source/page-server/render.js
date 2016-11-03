@@ -14,15 +14,12 @@ import set_up_http_client from '../redux/http client'
 
 import { normalize_common_options } from '../redux/normalize'
 
-import start_monitoring from './monitoring'
+import timer from '../timer'
 
 // isomorphic (universal) rendering (middleware).
 // will be used in web_application.use(...)
-export default async function({ monitoring, preload, localize, assets, application, request, render, loading, html, authentication, cookies }, common)
+export default async function({ preload, localize, assets, application, request, render, loading, html, authentication, cookies }, common)
 {
-	// Make sure `monitoring` is defined (either `StatsD` or a stub)
-	monitoring = monitoring || start_monitoring({})
-
 	const
 	{
 		get_reducer,
@@ -82,14 +79,15 @@ export default async function({ monitoring, preload, localize, assets, applicati
 	// initial Flux store data (if using Flux)
 	let store_data = {}
 
+	let server_side_preload_time = 0
+
 	// supports custom preloading before the page is rendered
 	// (for example to authenticate the user and retrieve user selected language)
 	if (preload)
 	{
-		await monitoring.measure('request.preload', async () =>
-		{
-			store_data = (await preload(http_client, { request })) || store_data
-		}) 
+		const preload_timer = timer()
+		store_data = await preload(http_client, { request })
+		server_side_preload_time = preload_timer()
 	}
 
 	// create Redux store
@@ -125,13 +123,25 @@ export default async function({ monitoring, preload, localize, assets, applicati
 
 	let locale
 	let messages
+	let messagesJSON
 
 	if (localize)
 	{
-		const result = await localize(store)
+		let result = localize(store)
+
+		// Legacy support for `async` `localize`
+		// (may be removed in versions > `7.x`)
+		if (typeof result.then === 'function')
+		{
+			result = await result
+		}
 
 		locale   = result.locale
 		messages = result.messages
+
+		// A tiny optimization to avoid calculating
+		// `JSON.stringify(messages)` for each rendered page.
+		messagesJSON = result.messagesJSON || JSON.stringify(messages)
 	}
 
 	// If Redux is being used, then render for Redux.
@@ -139,12 +149,8 @@ export default async function({ monitoring, preload, localize, assets, applicati
 	const render_page = store ? redux_render : react_router_render
 
 	// Render the web page
-	let result
-
-	return await render_page
+	const result = await render_page
 	({
-		monitoring,
-
 		disable_server_side_rendering: render === false,
 		
 		url,
@@ -189,6 +195,7 @@ export default async function({ monitoring, preload, localize, assets, applicati
 					development={development}
 					assets={assets}
 					locale={locale}
+					locale_messages_json={messagesJSON}
 					head={head}
 					body={body}
 					body_start={body_start}
@@ -210,6 +217,10 @@ export default async function({ monitoring, preload, localize, assets, applicati
 		// create_routes is only used for bare React-router rendering
 		create_routes: store ? undefined : create_routes
 	})
+
+	result.time.preload += server_side_preload_time
+
+	return result
 }
 
 // Makes it a function

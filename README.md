@@ -209,6 +209,10 @@ try
     // getting URL, cloning cookies, and inside `preload`.
     request,
 
+    // Cookies object with `.get(name)` function
+    // (only needed if using `authentication` cookie feature)
+    cookies,
+
     // The rest optional parameters are the same
     // as for webpage server and are all optional
   },
@@ -434,8 +438,6 @@ This library performs the following locale detection steps for each webpage rend
  
 The resulting locales array is passed as `preferredLocales` parameter into `localize()` function of the webpage rendering server which then returns `{ locale, messages }`.
 
-Later, on the client side, that `locale` returned from the `localize()` function on the server side is passed into `translation(locale)` function to load the `messages` on the client-side, and when translation is loaded the application is rendered with `locale` and `messages` properties passed to the `wrapper`.
-
 ### Determining current location
 
 ```javascript
@@ -477,6 +479,80 @@ Having said all that, it's definitely possible to drop `redux-router` and rewrit
 ## Caching
 
 [Some thoughts on caching rendered pages](https://github.com/halt-hammerzeit/react-isomorphic-render/blob/master/CACHING.md)
+
+## Monitoring
+
+If [StatsD](http://docs.datadoghq.com/guides/dogstatsd/) is configured in page rendering service settings, then page rendering metrics is sent via UDP to that StatsD instance.
+
+StatsD settings in page rendering service configuration:
+
+```js
+{
+  ...
+
+  profile:
+  {
+    ...,
+
+    statsd:
+    {
+      host: 'localhost',
+      port: 8125,
+      // (optional)
+      prefix: 'webpage'
+    }
+  }
+}
+```
+
+The reported stats are:
+
+ * `count` — rendered pages count
+ * `preload` — page preload time
+ * `render` — page React rendering time
+ * `time` - total time spent preloading and rendering the page
+
+Speaking of StatsD itself, either install the original StatsD and Graphite or use something like [Telegraf](https://github.com/influxdata/telegraf) and [InfluxDB](https://www.influxdata.com/), for example.
+
+Telegraf example:
+
+```
+# Configure `statsd` in rendering service settings.
+# Restart webpage rendering service.
+# Install Telegraf (macOS).
+brew install telegraf
+# Generate Telegraf config.
+telegraf -input-filter statsd -output-filter file config > telegraf.conf
+# Run Telegraf.
+telegraf -config telegraf.conf
+# Request a webpage and see rendering stats being output to the terminal.
+```
+
+Additionally, each page rendering request stats can be reported
+
+```js
+{
+  profile:
+  {
+    report({ url, route, time: { preload, render, total } })
+    {
+      if (total > 1000) // in milliseconds
+      {
+        db.query('insert into page_rendering_stats ...')
+      }
+    }
+    ...
+  }
+}
+```
+
+The arguments for `report()` are
+
+ * `url` — the requested URL (without the `protocol://host:port` part)
+ * `route` — `react-router` route string (e.g. `/user/:userId/post/:postId`)
+ * `time.preload` — page preload time
+ * `time.render` — page React rendering time
+ * `time.total` — total time spent preloading and rendering the page
 
 ## CSRF protection
 
@@ -682,15 +758,26 @@ This library attempts to read authenication token from a cookie named `settings.
   // It can be used, for example, to load the currently
   // logged in user info (user name, user picture, etc).
   //
-  preload: async (httpClient, { request }) => {}
+  preload: async (httpClient, { request }) => ({})
   // (or same without `async`: (httpClient, { request }) => Promise.resolve({})
 
   // (optional)
-  // Returns the suitable `locale` and `messages` for this HTTP request.
-  // `preferredLocales` is an array of the preferred locales for this user
+  //
+  // Returns an object of shape `{ locale, messages }`,
+  // where `locale` is the page locale chosen for this HTTP request,
+  // and `messages` are the translated messages for this `locale`
+  // (an object of shape `{ "message.key": "Message value", ... }`).
+  //
+  // The returned object may optionally have
+  // the third property `messagesJSON`
+  // to avoid calculating `JSON.stringify(messages)`
+  // for each rendered page (a tiny optimization).
+  //
+  // `preferredLocales` argument is an array
+  // of the preferred locales for this user
   // (from the most preferred to the least preferred)
-  localize: async (store, preferredLocales) => { locale, messages }
-  // (or same without `async`: (store, preferredLocales) => Promise.resolve({ locale, messages }))
+  //
+  localize: (store, preferredLocales) => ({ locale: preferredLocales[0], messages: { 'page.heading': 'Test' } })
 
   // Is Server Side Rendering enabled?
   // (is `true` by default)
@@ -740,11 +827,13 @@ This library attempts to read authenication token from a cookie named `settings.
   //   persistState
   // }
   //
-  devtools: __development__ ? require('./DevTools.js') : undefined,
+  devtools: __development__ ? require('./DevTools.js') : undefined  // (optional)
 
   // (optional)
   // Loads localized messages (asynchronously).
-  // Is required when defining `localize` in page rendering server settings.
+  // The main purpose for introducting this function
+  // is to enable Webpack Hot Module Replacement (aka "hot reload)
+  // for translation files in development mode.
   translation: async locale => messages
   // (or same without `async`: locale => Promise.resolve(messages))
 }

@@ -28,6 +28,7 @@ export default class Html extends Component
 		parse_dates : PropTypes.bool,
 		style       : PropTypes.func,
 		locale      : PropTypes.string,
+		locale_messages_json : PropTypes.object,
 
 		authentication_token : PropTypes.string
 	}
@@ -46,6 +47,7 @@ export default class Html extends Component
 			parse_dates,
 			style,
 			locale,
+			locale_messages_json,
 			authentication_token
 		}
 		= this.props
@@ -151,6 +153,9 @@ export default class Html extends Component
 
 					{/* locale for international messages */}
 					{ locale && <script dangerouslySetInnerHTML={{__html: `window._locale=${JSON.stringify(locale)}`}} charSet="UTF-8"/> }
+
+					{/* localized messages */}
+					{ locale && <script dangerouslySetInnerHTML={{__html: `window._locale_messages=${locale_messages_json}`}} charSet="UTF-8"/> }
 
 					{/* JSON Date deserializer */}
 					{ parse_dates !== false && <script dangerouslySetInnerHTML={{__html: define_json_parser}} charSet="UTF-8"/> }

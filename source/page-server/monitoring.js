@@ -5,17 +5,26 @@ export default function(settings)
 {
 	let statsd
 
-	if (settings.statsd)
-	{
-		statsd = new StatsD(settings.statsd.host, settings.statsd.port,
-		{
-			on_error : monitoring.error,
-			scope    : settings.statsd.prefix
-		})
-	}
-
 	const monitoring =
 	{
+		report: (stats) =>
+		{
+			if (!settings.report)
+			{
+				return
+			}
+
+			if (settings.threshold)
+			{
+				if (stats.time < settings.threshold)
+				{
+					return
+				}
+			}
+
+			return settings.report(stats)
+		},
+
 		increment: (name) =>
 		{
 			if (!statsd)
@@ -30,23 +39,30 @@ export default function(settings)
 		{
 			const finished = monitoring.started(name)
 
+			let result
+
 			try
 			{
-				const result = action()
-				if (typeof result.then === 'function')
-				{
-					return result.then(finished, (error) =>
-					{
-						finished()
-						return Promise.reject(error)
-					})
-				}
-				return result
+				result = action()
 			}
-			finally
+			catch (error)
 			{
 				finished()
+				throw error()
 			}
+
+			if (typeof result.then === 'function')
+			{
+				// No `.finally()` on `Promise`
+				return result.then(finished, (error) =>
+				{
+					finished()
+					return Promise.reject(error)
+				})
+			}
+
+			finished()
+			return result
 		},
 
 		started: (name) =>
@@ -60,11 +76,21 @@ export default function(settings)
 			return () => timer.stop()
 		},
 
+		time: (name, value) =>
+		{
+			if (!statsd)
+			{
+				return
+			}
+
+			statsd.timing(name, value)
+		},
+
 		error: (error) =>
 		{
 			if (settings.log)
 			{
-				return log.error(error)
+				return settings.log.error(error)
 			}
 
 			console.error(error)
@@ -79,6 +105,15 @@ export default function(settings)
 
 			statsd.close()
 		}
+	}
+
+	if (settings.statsd)
+	{
+		statsd = new StatsD(settings.statsd.host, settings.statsd.port,
+		{
+			on_error : monitoring.error,
+			scope    : settings.statsd.prefix
+		})
 	}
 
 	return monitoring

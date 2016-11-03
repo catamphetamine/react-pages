@@ -6,6 +6,7 @@ import render_stack_trace from './html stack trace'
 import { normalize_common_options } from '../redux/normalize'
 
 import start_monitoring from './monitoring'
+import timer from '../timer'
 
 export default function start_webpage_rendering_server(options, common)
 {
@@ -13,7 +14,7 @@ export default function start_webpage_rendering_server(options, common)
 	const development = process.env.NODE_ENV !== 'production'
 
 	// StatsD monitoring (optional)
-	const monitoring = start_monitoring(options)
+	const monitoring = start_monitoring(options.profile)
 
 	common = normalize_common_options(common)
 
@@ -53,23 +54,12 @@ export default function start_webpage_rendering_server(options, common)
 	// Handles errors
 	web.use(async (ctx, next) =>
 	{
-		// Trims a question mark in the end (just in case)
-		const url = ctx.request.originalUrl.replace(/\?$/, '')
-
-		monitoring.increment('request.count')
-		monitoring.increment(`request.url.count.${url}`)
-
-		const finished = monitoring.started('request')
-		const finished_url = monitoring.started(`request.url.time.${url}`)
-
 		try
 		{
 			await next()
 		}
 		catch (error)
 		{
-			monitoring.increment('requests.errors')
-
 			// if the error is caught here it means that `catch` (`error_handler`) didn't resolve it
 			// (or threw it)
 
@@ -107,11 +97,6 @@ export default function start_webpage_rendering_server(options, common)
 			ctx.status = typeof error.status === 'number' ? error.status : 500
 			ctx.message = error.message || 'Internal error'
 		}
-		finally
-		{
-			finished()
-			finished_url()
-		}
 	})
 
 	// Custom Koa middleware extension point
@@ -130,14 +115,17 @@ export default function start_webpage_rendering_server(options, common)
 		// Trims a question mark in the end (just in case)
 		const url = ctx.request.originalUrl.replace(/\?$/, '')
 
-		monitoring.increment(`request.url.hits.${url}`)
-
 		// Performs HTTP redirect
 		const redirect_to = to => ctx.redirect(to)
 
+		monitoring.increment(`count`)
+		const finished = monitoring.started('time')
+
+		const total_timer = timer()
+
 		try
 		{
-			const { status, content, redirect } = await render_page
+			const { status, content, redirect, route, time } = await render_page
 			({
 				application,
 				assets,
@@ -168,11 +156,25 @@ export default function start_webpage_rendering_server(options, common)
 			}
 
 			ctx.body = content
+
+			finished()
+
+			monitoring.time('preload', time.preload)
+			monitoring.time('render', time.render)
+
+			monitoring.report
+			({
+				url: ctx.path + (ctx.querystring ? `?${ctx.querystring}` : ''),
+				route,
+				time:
+				{
+					...time,
+					total: total_timer()
+				}
+			})
 		}
 		catch (error)
 		{
-			monitoring.increment('requests.errors.handled')
-
 			if (error_handler)
 			{
 				return error_handler(error,
@@ -184,16 +186,6 @@ export default function start_webpage_rendering_server(options, common)
 
 			throw error
 		}
-
-		// This turned out to be a lame way to do it,
-		// because cookies are sent in request 
-		// with no additional parameters
-		// such as `path`, `httpOnly` and `expires`,
-		// so there were cookie duplication issues.
-		//
-		// Now superagent.agent() handles cookies correctly.
-		//
-		// ctx.set('set-cookie', _http_client.cookies)
 	})
 
 	return web

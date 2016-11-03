@@ -13,7 +13,7 @@ import { location_url } from '../location'
 //
 // returns a Promise resolving to the rendered React component.
 //
-export function render_on_client({ development, element, create_page_element, to })
+export function render_on_client({ development, create_page_element, to })
 {
   const router_element = <Router history={browserHistory} routes={create_routes()}/>
 

@@ -1,3 +1,12 @@
+7.1.0 / 02.11.2016
+==================
+
+  * Releasing StatsD monitoring metrics
+  * Added a possibility to report page rendering time for any rendered page
+  * `translation: async locale => messages` function parameter is now not required. If it's not passed then all translated messages, received from `localize()` function parameter on the server-side, are embedded immediately in the `<html/>` markup sent as the page service reply. `translation` function still may be passed in development mode to enable Webpack Hot Module Replacement for translation data.
+  * `localize` function is now recommended to be synchronous (not `async`) because it seems convenient that way (no one really needs to do something complex and asynchronous for translating a page each time a request comes in: it should instead be fast and simple, like caching all translations to RAM at startup and then just synchronously returning them from the RAM cache for each page render). Older `async localize` functions will still work (for this `7.x` version at least)
+  * `localize` function may now return a 3rd property as part of the result object: `messagesJSON`. It's a tiny optimization to avoid calculating `JSON.stringify(messages)` for each rendered page.
+
 7.0.1 / 01.11.2016
 ==================
 

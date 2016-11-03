@@ -19,6 +19,12 @@ export default function localize_and_render({ development, render_parameters = {
 		delete window._locale
 	}
 
+	let messages = window._locale_messages
+	if (messages)
+	{
+		delete window._locale_messages
+	}
+
 	// renders current React page.
 	// returns the rendered React page component.
 	function render_page()
@@ -29,32 +35,29 @@ export default function localize_and_render({ development, render_parameters = {
 		({
 			...render_parameters,
 			development,
-			create_page_element : (element, props = {}) =>
+			create_page_element : async (element, props = {}) =>
 			{
 				// if no i18n is required, then simply create Page element
 				if (!locale)
 				{
-					return Promise.resolve(React.createElement(wrapper, props, element))
+					return React.createElement(wrapper, props, element)
 				}
 
-				// translation loading function must be passed
-				if (!translation)
+				// translation loading function may be passed
+				// (its main purpose is to enable Webpack HMR
+				//  in dev mode for translated messages)
+				if (translation)
 				{
-					return Promise.reject(new Error(`You are supposed to pass 
-						"translation(locale) => Promise" function 
-						as a parameter to client-side rendering function call
-						because you opted into using internationalization feature`))
+					messages = await translation(locale)
 				}
 
 				// load translations and then create page element
-				return translation(locale).then(messages =>
-				{
-					props.locale   = locale
-					props.messages = messages
 
-					// create React page element
-					return React.createElement(wrapper, props, element)
-				})
+				props.locale   = locale
+				props.messages = messages
+
+				// create React page element
+				return React.createElement(wrapper, props, element)
 			},
 			to: document.getElementById('react')
 		})
