@@ -42,7 +42,10 @@ export default function render_on_server({ disable_server_side_rendering, create
 
 		// Concatenated `react-router` route string.
 		// E.g. "/user/:user_id/post/:post_id"
-		const route = routing_result.matched_routes.map(route => route.path.replace(/^\//, '').replace(/\/$/, '')).join('/')
+		const route = routing_result.matched_routes
+			.filter(route => route.path)
+			.map(route => route.path.replace(/^\//, '').replace(/\/$/, ''))
+			.join('/') || '/'
 
 		// Profiling
 		const time = {}
