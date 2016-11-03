@@ -26,6 +26,10 @@ export default function render_on_server({ disable_server_side_rendering, create
 	// Routing only takes a couple of milliseconds
 	// const routing_finished = monitoring.started('route')
 
+	// Page preload starts inside `match_url()` function
+	// (somewhere inside `redux-router`'s `store.dispatch(match(...))`)
+	const preload_timer = timer()
+
 	// Perform routing for this `url`
 	return match_url(url, store).then(routing_result =>
 	{
@@ -49,8 +53,6 @@ export default function render_on_server({ disable_server_side_rendering, create
 
 		// Profiling
 		const time = {}
-
-		const preload_timer = timer()
 
 		// When `url` matching process finished,
 		// it immediately launched preloading process,
