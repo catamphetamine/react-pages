@@ -24,7 +24,7 @@ function timed_react_render_on_server(named_arguments)
 export default function render_on_server({ disable_server_side_rendering, create_page_element, render_webpage_as_react_element, url, store })
 {
 	// Routing only takes a couple of milliseconds
-	// const routing_finished = monitoring.started('route')
+	// const routing_timer = timer()
 
 	// Page preload starts inside `match_url()` function
 	// (somewhere inside `redux-router`'s `store.dispatch(match(...))`)
@@ -33,7 +33,7 @@ export default function render_on_server({ disable_server_side_rendering, create
 	// Perform routing for this `url`
 	return match_url(url, store).then(routing_result =>
 	{
-		// routing_finished()
+		// routing_timer()
 
 		// Return in case of an HTTP redirect
 		if (routing_result.redirect)

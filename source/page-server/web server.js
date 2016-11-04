@@ -5,16 +5,12 @@ import { get_preferred_locales } from './locale'
 import render_stack_trace from './html stack trace'
 import { normalize_common_options } from '../redux/normalize'
 
-import start_monitoring from './monitoring'
 import timer from '../timer'
 
 export default function start_webpage_rendering_server(options, common)
 {
 	// In development mode errors are printed as HTML, for example
 	const development = process.env.NODE_ENV !== 'production'
-
-	// StatsD monitoring (optional)
-	const monitoring = start_monitoring(options.profile)
 
 	common = normalize_common_options(common)
 
@@ -27,6 +23,7 @@ export default function start_webpage_rendering_server(options, common)
 		authentication,
 		render,
 		loading,
+		stats,
 
 		// Legacy 4.x API support
 		head,
@@ -118,9 +115,6 @@ export default function start_webpage_rendering_server(options, common)
 		// Performs HTTP redirect
 		const redirect_to = to => ctx.redirect(to)
 
-		monitoring.increment(`count`)
-		const finished = monitoring.started('time')
-
 		const total_timer = timer()
 
 		try
@@ -159,19 +153,19 @@ export default function start_webpage_rendering_server(options, common)
 
 			finished()
 
-			monitoring.time('preload', time.preload)
-			monitoring.time('render', time.render)
-
-			monitoring.report
-			({
-				url: ctx.path + (ctx.querystring ? `?${ctx.querystring}` : ''),
-				route,
-				time:
-				{
-					...time,
-					total: total_timer()
-				}
-			})
+			if (stats)
+			{
+				stats
+				({
+					url: ctx.path + (ctx.querystring ? `?${ctx.querystring}` : ''),
+					route,
+					time:
+					{
+						...time,
+						total: total_timer()
+					}
+				})
+			}
 		}
 		catch (error)
 		{
