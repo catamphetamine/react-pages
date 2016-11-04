@@ -2,9 +2,11 @@
 
 ## Motivation
 
-I didn't do benchmarking for React server side rendering, but [some benchmark I found on the internets](https://github.com/patrick-steele-idem/marko-vs-react) says that rendering a React page on server side could take about 10ms, which means a naive approach would be able to handle roughly a hundred page renders per second, multiplied by the number of CPU cores. I don't think it could be considered that low: since websites are Single Page Applications nowadays, all subsequent navigation will happen in the user's web browser and the page rendering server won't be involved.
+Server Side Rendering using `ReactDOM.renderToString()` method call often [takes more than 200ms](https://codedump.io/share/xjW15JpT26nT/1/react-rendertostring-performance-and-caching-react-components) for pages using a large amount of React components (say, more than 1000 components). This is the rendering time I'm getting in my project for a page with a "rich" content table of 100 rows. Rendering user profile page takes about 150ms. Rendering dummy pages is really fast, like 20ms, but in a real world web applications pages won't be blank and will likely contain lots of content, so [the recommended watermark of 200ms](https://developers.google.com/speed/docs/insights/Server) is easily exceeded.
 
-A thousand page renders (for a 10 Core CPU) per second would be high enough, I guess, to serve all those people coming to the website from Google. I don't think anyone is getting 1000 * 60 * 60 * 24 = 100 million unique visitors per day. Well, maybe chinese folks do...
+Aside from getting lower ranking in Google search engine, this also means a naive approach would be able to handle roughly 10 server-side page renders per second, multiplied by the number of CPU cores. I'm explicitly saying "server-side page renders" because websites are Single Page Applications nowadays and all subsequent navigation will happen in the user's web browser and the page rendering server won't be involved.
+
+A hundred page renders per second (for a 10 Core CPU) would probably be acceptable for an average website, if it's getting about 100 * 60 * 60 * 24 = 10 million unique visitors per day. 10 million users per day is not that much though. For example, in China they would laugh out loud if someone said this is "highload" or ["web scale"](http://www.mongodb-is-web-scale.com/)...
 
 ## Chinese folks read on
 

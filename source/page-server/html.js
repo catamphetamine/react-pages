@@ -28,7 +28,7 @@ export default class Html extends Component
 		parse_dates : PropTypes.bool,
 		style       : PropTypes.func,
 		locale      : PropTypes.string,
-		locale_messages_json : PropTypes.object,
+		locale_messages_json : PropTypes.string,
 
 		authentication_token : PropTypes.string
 	}
