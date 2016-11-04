@@ -535,11 +535,11 @@ Where the metrics collected are
  * `render` — page React rendering time
  * `time` - total time spent preloading and rendering the page
 
-Speaking of StatsD itself, one could either install the original StatsD + Graphite bundle or use something like [Telegraf](https://github.com/influxdata/telegraf) + [InfluxDB](https://www.influxdata.com/) + [Grafana](http://grafana.org/), for example.
+Speaking of StatsD itself, one could either install the conventional StatsD + Graphite bundle or, for example, use something like [Telegraf](https://github.com/influxdata/telegraf) + [InfluxDB](https://www.influxdata.com/) + [Grafana](http://grafana.org/).
 
 Telegraf starter example:
 
-```
+```sh
 # Configure `statsd` in rendering service settings.
 # Restart webpage rendering service.
 # Install Telegraf (macOS).
