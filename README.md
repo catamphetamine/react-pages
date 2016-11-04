@@ -540,8 +540,6 @@ Speaking of StatsD itself, one could either install the conventional StatsD + Gr
 Telegraf starter example:
 
 ```sh
-# Configure `statsd` in rendering service settings.
-# Restart webpage rendering service.
 # Install Telegraf (macOS).
 brew install telegraf
 # Generate Telegraf config.
