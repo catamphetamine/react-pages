@@ -482,39 +482,62 @@ Having said all that, it's definitely possible to drop `redux-router` and rewrit
 
 ## Monitoring
 
-If [StatsD](http://docs.datadoghq.com/guides/dogstatsd/) is configured in page rendering service settings, then page rendering metrics is sent via UDP to that StatsD instance.
-
-StatsD settings in page rendering service configuration:
+For each rendered page stats are reported if `stats()` parameter function is passed as part of the rendering service settings.
 
 ```js
 {
   ...
 
-  profile:
+  stats({ url, route, time: { preload, render, total } })
   {
-    ...,
-
-    statsd:
+    if (total > 1000) // in milliseconds
     {
-      host: 'localhost',
-      port: 8125,
-      // (optional)
-      prefix: 'webpage'
+      db.query('insert into server_side_rendering_stats ...')
     }
   }
 }
 ```
 
-The reported stats are:
+The arguments for the `stats()` function are:
+
+ * `url` — the requested URL (without the `protocol://host:port` part)
+ * `route` — `react-router` route string (e.g. `/user/:userId/post/:postId`)
+ * `time.preload` — page preload time
+ * `time.render` — page React rendering time
+ * `time.total` — total time spent preloading and rendering the page
+
+Besides simply logging individual long-taking page renders one could also set up an overall Server Side Rendering performance monitoring using, for example, [StatsD](http://docs.datadoghq.com/guides/dogstatsd/)
+
+```js
+{
+  ...
+
+  stats({ url, route, time: { preload, render, total } })
+  {
+    statsd.increment('count')
+
+    statsd.timing('preload', preload)
+    statsd.timing('render', render)
+    statsd.timing('total', total)
+
+    if (total > 1000) // in milliseconds
+    {
+      db.query('insert into server_side_rendering_stats ...')
+    }
+  }
+}
+```
+
+Where the metrics collected are
 
  * `count` — rendered pages count
  * `preload` — page preload time
  * `render` — page React rendering time
  * `time` - total time spent preloading and rendering the page
 
-Speaking of StatsD itself, either install the original StatsD and Graphite or use something like [Telegraf](https://github.com/influxdata/telegraf) and [InfluxDB](https://www.influxdata.com/), for example.
+Speaking of StatsD itself, one could either install the original StatsD + Graphite bundle or use something like [Telegraf](https://github.com/influxdata/telegraf) + [InfluxDB](https://www.influxdata.com/) + [Grafana](http://grafana.org/), for example.
 
-Telegraf example:
+Telegraf starter example:
 
 ```
 # Configure `statsd` in rendering service settings.
@@ -527,32 +550,6 @@ telegraf -input-filter statsd -output-filter file config > telegraf.conf
 telegraf -config telegraf.conf
 # Request a webpage and see rendering stats being output to the terminal.
 ```
-
-Additionally, each page rendering request stats can be reported
-
-```js
-{
-  profile:
-  {
-    report({ url, route, time: { preload, render, total } })
-    {
-      if (total > 1000) // in milliseconds
-      {
-        db.query('insert into page_rendering_stats ...')
-      }
-    }
-    ...
-  }
-}
-```
-
-The arguments for `report()` are
-
- * `url` — the requested URL (without the `protocol://host:port` part)
- * `route` — `react-router` route string (e.g. `/user/:userId/post/:postId`)
- * `time.preload` — page preload time
- * `time.render` — page React rendering time
- * `time.total` — total time spent preloading and rendering the page
 
 ## CSRF protection
 
