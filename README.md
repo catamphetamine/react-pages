@@ -482,7 +482,7 @@ Having said all that, it's definitely possible to drop `redux-router` and rewrit
 
 ## Monitoring
 
-For each rendered page stats are reported if `stats()` parameter function is passed as part of the rendering service settings.
+For each page being rendered stats are reported if `stats()` parameter function is passed as part of the rendering service settings.
 
 ```js
 {
