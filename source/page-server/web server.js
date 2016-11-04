@@ -151,8 +151,6 @@ export default function start_webpage_rendering_server(options, common)
 
 			ctx.body = content
 
-			finished()
-
 			if (stats)
 			{
 				stats
