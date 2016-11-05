@@ -20,6 +20,9 @@ import timer from '../timer'
 // will be used in web_application.use(...)
 export default async function({ preload, localize, assets, application, request, render, loading, html, authentication, error_handler, cookies }, common)
 {
+	// Trims a question mark in the end (just in case)
+	const url = request.url.replace(/\?$/, '')
+
 	let store
 
 	try
@@ -56,9 +59,6 @@ export default async function({ preload, localize, assets, application, request,
 
 		// In development mode Redux DevTools are activated, for example
 		const development = process.env.NODE_ENV !== 'production'
-
-		// Trims a question mark in the end (just in case)
-		const url = request.url.replace(/\?$/, '')
 
 		// Read authentication token from a cookie (if configured)
 		let authentication_token
