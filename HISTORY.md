@@ -1,5 +1,11 @@
+7.1.7 / 05.11.2016
+==================
+
+  * Added `dispatch` and `getState` to error handler parameters
+
 7.1.4 / 04.11.2016
 ==================
+
   * Removing StatsD from this library since all stats are passed to the `report` user-defined function and therefore the user can choose whether to even use StatsD or any other monitoring solution. Therefore removing `profile.statsd` section. Therefore collapsing `profile.report` path into just `stats` parameter function (the arguments stayed the same).
 
 7.1.0 / 02.11.2016

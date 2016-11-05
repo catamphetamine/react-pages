@@ -112,71 +112,53 @@ export default function start_webpage_rendering_server(options, common)
 		// Trims a question mark in the end (just in case)
 		const url = ctx.request.originalUrl.replace(/\?$/, '')
 
-		// Performs HTTP redirect
-		const redirect_to = to => ctx.redirect(to)
-
 		const total_timer = timer()
 
-		try
+		const { status, content, redirect, route, time } = await render_page
+		({
+			application,
+			assets,
+			preload,
+			localize: localize ? (store) => localize(store, get_preferred_locales(ctx)) : undefined,
+			render,
+			loading,
+			html,
+			authentication,
+			error_handler,
+
+			// The original HTTP request can be required
+			// for inspecting cookies in `preload` function
+			request: ctx.req,
+
+			// Cookies for authentication token retrieval
+			cookies: ctx.cookies
+		},
+		common)
+
+		if (redirect)
 		{
-			const { status, content, redirect, route, time } = await render_page
-			({
-				application,
-				assets,
-				preload,
-				localize: localize ? (store) => localize(store, get_preferred_locales(ctx)) : undefined,
-				render,
-				loading,
-				html,
-				authentication,
-
-				// The original HTTP request can be required
-				// for inspecting cookies in `preload` function
-				request: ctx.req,
-
-				// Cookies for authentication token retrieval
-				cookies: ctx.cookies
-			},
-			common)
-
-			if (redirect)
-			{
-				return redirect_to(redirect)
-			}
-
-			if (status)
-			{
-				ctx.status = status
-			}
-
-			ctx.body = content
-
-			if (stats)
-			{
-				stats
-				({
-					url: ctx.path + (ctx.querystring ? `?${ctx.querystring}` : ''),
-					route,
-					time:
-					{
-						...time,
-						total: total_timer()
-					}
-				})
-			}
+			return ctx.redirect(redirect)
 		}
-		catch (error)
-		{
-			if (error_handler)
-			{
-				return error_handler(error,
-				{
-					url,
-					redirect: redirect_to
-				})
-			}
 
-			throw error
+		if (status)
+		{
+			ctx.status = status
+		}
+
+		ctx.body = content
+
+		if (stats)
+		{
+			stats
+			({
+				url: ctx.path + (ctx.querystring ? `?${ctx.querystring}` : ''),
+				route,
+				time:
+				{
+					...time,
+					total: total_timer()
+				}
+			})
 		}
 	})
 

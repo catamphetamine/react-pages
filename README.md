@@ -618,7 +618,7 @@ This library attempts to read authenication token from a cookie named `settings.
     // then a redirect to "/unauthorized" page can be made here.
     // If this error handler is defined then it must handle
     // all errors it gets (or just re`throw` them).
-    catch: (error, { url, redirect }) => redirect(`/error?url=${encode(url)}&error=${error.status}`)
+    catch: (error, { url, redirect, dispatch, getState }) => redirect(`/error?url=${encode(url)}&error=${error.status}`)
   }
 
   // (optional)
@@ -704,7 +704,11 @@ This library attempts to read authenication token from a cookie named `settings.
   // This error handler can (and most likely should)
   // be the same one used as `preload.catch` option.
   //
-  catch: (error, { url, redirect }) => redirect(`/error?url=${encode(url)}&error=${error.status}`)
+  // One difference is that `dispatch` and `getState`
+  // parameters will be `undefined` on the server side
+  // if the error happened before Redux store is created.
+  //
+  catch: (error, { url, redirect, dispatch?, getState? }) => redirect(`/error?url=${encode(url)}&error=${error.status}`)
 
   // (optional)
   // Custom Koa middleware (an array of middlewares).

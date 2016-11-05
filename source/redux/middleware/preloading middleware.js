@@ -215,7 +215,10 @@ export default function preloading_middleware(server, error_handler, dispatch_ev
 					// won't send actions to that `reduxReactRouter` middleware,
 					// therefore using this `dispatch_event` function to hack around that.
 					dispatch_event(replace(to))
-				}
+				},
+
+				dispatch: dispatch_event,
+				getState
 			})
 
 			// On the server-side the page rendering process
