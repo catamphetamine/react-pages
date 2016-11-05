@@ -3,7 +3,15 @@
 // import DocumentMeta from 'react-document-meta'
 
 import React from 'react'
-import Helmet from 'react-helmet'
+
+// A temporary workaround for broken Webpack import.
+// https://github.com/nfl/react-helmet/issues/190
+import _Helmet from 'react-helmet'
+var Helmet = _Helmet
+if (typeof Helmet === 'object')
+{
+	Helmet = Helmet.default
+}
 
 // sets webpage title
 export function webpage_title(title)
