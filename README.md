@@ -206,7 +206,7 @@ try
     assets,
 
     // Original HTTP request, which is used for
-    // getting URL, cloning cookies, and inside `preload`.
+    // getting URL, cloning cookies, and inside `initialize`.
     request,
 
     // Cookies object with `.get(name)` function
