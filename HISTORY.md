@@ -1,3 +1,8 @@
+7.1.10 / 07.11.2016
+===================
+
+  * Removed `catch` from page rendering server parameters – it is now taken from `preload.catch` common setting
+
 7.1.7 / 05.11.2016
 ==================
 

@@ -506,6 +506,8 @@ The arguments for the `stats()` function are:
  * `time.render` — page React rendering time
  * `time.total` — total time spent preloading and rendering the page
 
+Rendering a complex React page takes about 200ms (`time.render`). This is quite slow but that's how React Server Side Rendering currently is.
+
 Besides simply logging individual long-taking page renders one could also set up an overall Server Side Rendering performance monitoring using, for example, [StatsD](http://docs.datadoghq.com/guides/dogstatsd/)
 
 ```js
@@ -694,21 +696,6 @@ This library attempts to read authenication token from a cookie named `settings.
       entry: 'webpack entry key' // e.g. 'main'
     }
   },
-
-  // (optional)
-  // Is called when an error happens on the server side
-  // (can redirect to special "500 Error" pages).
-  // If this error handler is defined then it must handle
-  // all errors it gets (or just re`throw` them).
-  //
-  // This error handler can (and most likely should)
-  // be the same one used as `preload.catch` option.
-  //
-  // One difference is that `dispatch` and `getState`
-  // parameters will be `undefined` on the server side
-  // if the error happened before Redux store is created.
-  //
-  catch: (error, { url, redirect, dispatch?, getState? }) => redirect(`/error?url=${encode(url)}&error=${error.status}`)
 
   // (optional)
   // Custom Koa middleware (an array of middlewares).

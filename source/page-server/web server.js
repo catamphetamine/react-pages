@@ -34,6 +34,8 @@ export default function start_webpage_rendering_server(options, common)
 	}
 	= options
 
+	// Legacy 7.x API support.
+	// (will be removed later)
 	const error_handler = options.catch
 
 	// Legacy 4.x API support
@@ -124,6 +126,9 @@ export default function start_webpage_rendering_server(options, common)
 			loading,
 			html,
 			authentication,
+			
+			// Legacy 7.x API support.
+			// (will be removed later)
 			error_handler,
 
 			// The original HTTP request can be required

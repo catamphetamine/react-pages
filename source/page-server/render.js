@@ -23,134 +23,140 @@ export default async function({ preload, localize, assets, application, request,
 	// Trims a question mark in the end (just in case)
 	const url = request.url.replace(/\?$/, '')
 
+	const
+	{
+		get_reducer,
+		redux_middleware,
+		on_store_created,
+		promise_event_naming,
+		create_routes,
+		wrapper,
+		preload,
+		parse_dates
+	}
+	= normalize_common_options(common)
+
+	// Legacy 7.x API support.
+	// (will be removed later)
+	error_handler = error_handler || (preload && preload.catch)
+	// const error_handler = preload && preload.catch
+
+	let
+	{
+		head,
+		body,
+		body_start,
+		body_end,
+		style
+	}
+	= html
+
+	if (style)
+	{
+		console.warn(`"html.style" parameter is deprecated and will be removed in the next major release. Use "html.head" instead: if (development) return [<style dangerouslySetInnerHTML={{ __html: style }} charSet="UTF-8"/>, ...]`)
+	}
+
+	// Make `assets` into a function
+	assets = normalize_assets(assets)
+
+	// In development mode Redux DevTools are activated, for example
+	const development = process.env.NODE_ENV !== 'production'
+
+	// Read authentication token from a cookie (if configured)
+	let authentication_token
+	if (authentication && authentication.cookie)
+	{
+		authentication_token = cookies.get(authentication.cookie)
+	}
+
+	// Isomorphic http client (with cookie support)
+	const http_client = new Http_client
+	({
+		host          : application.host,
+		port          : application.port,
+		secure        : application.secure,
+		clone_request : request,
+		format_url    : common.http && common.http.url,
+		parse_dates,
+		authentication_token,
+		authentication_token_header: authentication ? authentication.header : undefined
+	})
+
+	// initial Flux store data (if using Flux)
+	let store_data = {}
+
+	let server_side_preload_time = 0
+
+	// supports custom preloading before the page is rendered
+	// (for example to authenticate the user and retrieve user selected language)
+	if (preload)
+	{
+		const preload_timer = timer()
+		store_data = await preload(http_client, { request })
+		server_side_preload_time = preload_timer()
+	}
+
 	let store
+
+	// create Redux store
+	if (get_reducer)
+	{
+		store = create_store(get_reducer,
+		{
+			development,
+			server: true,
+			create_routes,
+			data: store_data,
+			middleware: redux_middleware,
+			on_store_created,
+			promise_event_naming,
+			on_preload_error : common.preload && common.preload.catch,
+			http_client,
+			preload_helpers : common.preload && common.preload.helpers,
+			on_navigate     : common.on_navigate,
+			history_options : common.history
+		})
+	}
+
+	// Customization of `http` utility
+	// which can be used inside Redux action creators
+	set_up_http_client(http_client,
+	{
+		store,
+		on_before_send : common.http && common.http.request
+	})
+
+	// Internationalization
+
+	let locale
+	let messages
+	let messagesJSON
+
+	if (localize)
+	{
+		let result = localize(store)
+
+		// Legacy support for `async` `localize`
+		// (may be removed in versions > `7.x`)
+		if (typeof result.then === 'function')
+		{
+			result = await result
+		}
+
+		locale   = result.locale
+		messages = result.messages
+
+		// A tiny optimization to avoid calculating
+		// `JSON.stringify(messages)` for each rendered page.
+		messagesJSON = result.messagesJSON || JSON.stringify(messages)
+	}
+
+	// If Redux is being used, then render for Redux.
+	// Else render for pure React.
+	const render_page = store ? redux_render : react_router_render
 
 	try
 	{
-		const
-		{
-			get_reducer,
-			redux_middleware,
-			on_store_created,
-			promise_event_naming,
-			create_routes,
-			wrapper,
-			parse_dates
-		}
-		= normalize_common_options(common)
-
-		let
-		{
-			head,
-			body,
-			body_start,
-			body_end,
-			style
-		}
-		= html
-
-		if (style)
-		{
-			console.warn(`"html.style" parameter is deprecated and will be removed in the next major release. Use "html.head" instead: if (development) return [<style dangerouslySetInnerHTML={{ __html: style }} charSet="UTF-8"/>, ...]`)
-		}
-
-		// Make `assets` into a function
-		assets = normalize_assets(assets)
-
-		// In development mode Redux DevTools are activated, for example
-		const development = process.env.NODE_ENV !== 'production'
-
-		// Read authentication token from a cookie (if configured)
-		let authentication_token
-		if (authentication && authentication.cookie)
-		{
-			authentication_token = cookies.get(authentication.cookie)
-		}
-
-		// Isomorphic http client (with cookie support)
-		const http_client = new Http_client
-		({
-			host          : application.host,
-			port          : application.port,
-			secure        : application.secure,
-			clone_request : request,
-			format_url    : common.http && common.http.url,
-			parse_dates,
-			authentication_token,
-			authentication_token_header: authentication ? authentication.header : undefined
-		})
-
-		// initial Flux store data (if using Flux)
-		let store_data = {}
-
-		let server_side_preload_time = 0
-
-		// supports custom preloading before the page is rendered
-		// (for example to authenticate the user and retrieve user selected language)
-		if (preload)
-		{
-			const preload_timer = timer()
-			store_data = await preload(http_client, { request })
-			server_side_preload_time = preload_timer()
-		}
-
-		// create Redux store
-		if (get_reducer)
-		{
-			store = create_store(get_reducer,
-			{
-				development,
-				server: true,
-				create_routes,
-				data: store_data,
-				middleware: redux_middleware,
-				on_store_created,
-				promise_event_naming,
-				on_preload_error : common.preload && common.preload.catch,
-				http_client,
-				preload_helpers : common.preload && common.preload.helpers,
-				on_navigate     : common.on_navigate,
-				history_options : common.history
-			})
-		}
-
-		// Customization of `http` utility
-		// which can be used inside Redux action creators
-		set_up_http_client(http_client,
-		{
-			store,
-			on_before_send : common.http && common.http.request
-		})
-
-		// Internationalization
-
-		let locale
-		let messages
-		let messagesJSON
-
-		if (localize)
-		{
-			let result = localize(store)
-
-			// Legacy support for `async` `localize`
-			// (may be removed in versions > `7.x`)
-			if (typeof result.then === 'function')
-			{
-				result = await result
-			}
-
-			locale   = result.locale
-			messages = result.messages
-
-			// A tiny optimization to avoid calculating
-			// `JSON.stringify(messages)` for each rendered page.
-			messagesJSON = result.messagesJSON || JSON.stringify(messages)
-		}
-
-		// If Redux is being used, then render for Redux.
-		// Else render for pure React.
-		const render_page = store ? redux_render : react_router_render
-
 		// Render the web page
 		const result = await render_page
 		({
