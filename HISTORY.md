@@ -1,3 +1,8 @@
+7.1.11 / 07.11.2016
+===================
+
+  * Renamed page rendering server setting `preload` to `initialize`, and now splitting `preload` timing into two separate timings: `initialize` and `preload`.
+
 7.1.10 / 07.11.2016
 ===================
 

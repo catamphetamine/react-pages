@@ -18,7 +18,7 @@ import timer from '../timer'
 
 // isomorphic (universal) rendering (middleware).
 // will be used in web_application.use(...)
-export default async function({ preload, localize, assets, application, request, render, loading, html, authentication, error_handler, cookies }, common)
+export default async function({ preload, initialize, localize, assets, application, request, render, loading, html, authentication, error_handler, cookies }, common)
 {
 	// Trims a question mark in the end (just in case)
 	const url = request.url.replace(/\?$/, '')
@@ -39,6 +39,10 @@ export default async function({ preload, localize, assets, application, request,
 	// (will be removed later)
 	error_handler = error_handler || (common.preload && common.preload.catch)
 	// const error_handler = common.preload && common.preload.catch
+
+	// Legacy 7.x API support.
+	// (will be removed later)
+	initialize = initialize || preload
 
 	let
 	{
@@ -84,15 +88,15 @@ export default async function({ preload, localize, assets, application, request,
 	// initial Flux store data (if using Flux)
 	let store_data = {}
 
-	let server_side_preload_time = 0
+	let initialize_time = 0
 
 	// supports custom preloading before the page is rendered
 	// (for example to authenticate the user and retrieve user selected language)
-	if (preload)
+	if (initialize)
 	{
-		const preload_timer = timer()
-		store_data = await preload(http_client, { request })
-		server_side_preload_time = preload_timer()
+		const initialize_timer = timer()
+		store_data = await initialize(http_client, { request })
+		initialize_time = initialize_timer()
 	}
 
 	let store
@@ -226,7 +230,7 @@ export default async function({ preload, localize, assets, application, request,
 			create_routes: store ? undefined : create_routes
 		})
 
-		result.time.preload += server_side_preload_time
+		result.time.initialize = initialize_time
 
 		return result
 	}

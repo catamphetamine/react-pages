@@ -17,7 +17,6 @@ export default function start_webpage_rendering_server(options, common)
 	const
 	{
 		assets,
-		preload,
 		localize,
 		application,
 		authentication,
@@ -33,6 +32,10 @@ export default function start_webpage_rendering_server(options, common)
 		style
 	}
 	= options
+
+	// Legacy 7.x API support.
+	// (will be removed later)
+	const initialize = options.initialize || options.preload
 
 	// Legacy 7.x API support.
 	// (will be removed later)
@@ -120,13 +123,13 @@ export default function start_webpage_rendering_server(options, common)
 		({
 			application,
 			assets,
-			preload,
+			initialize,
 			localize: localize ? (store) => localize(store, get_preferred_locales(ctx)) : undefined,
 			render,
 			loading,
 			html,
 			authentication,
-			
+
 			// Legacy 7.x API support.
 			// (will be removed later)
 			error_handler,

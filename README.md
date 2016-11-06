@@ -488,7 +488,7 @@ For each page being rendered stats are reported if `stats()` parameter function 
 {
   ...
 
-  stats({ url, route, time: { preload, render, total } })
+  stats({ url, route, time: { initialize, preload, render, total } })
   {
     if (total > 1000) // in milliseconds
     {
@@ -502,6 +502,7 @@ The arguments for the `stats()` function are:
 
  * `url` — the requested URL (without the `protocol://host:port` part)
  * `route` — `react-router` route string (e.g. `/user/:userId/post/:postId`)
+ * `time.initialize` — server side `initialize()` function execution time (if defined)
  * `time.preload` — page preload time
  * `time.render` — page React rendering time
  * `time.total` — total time spent preloading and rendering the page
@@ -514,10 +515,11 @@ Besides simply logging individual long-taking page renders one could also set up
 {
   ...
 
-  stats({ url, route, time: { preload, render, total } })
+  stats({ url, route, time: { initialize, preload, render, total } })
   {
     statsd.increment('count')
 
+    statsd.timing('initialize', initialize)
     statsd.timing('preload', preload)
     statsd.timing('render', render)
     statsd.timing('total', total)
@@ -533,6 +535,7 @@ Besides simply logging individual long-taking page renders one could also set up
 Where the metrics collected are
 
  * `count` — rendered pages count
+ * `initialize` — server side `initialize()` function execution time (if defined)
  * `preload` — page preload time
  * `render` — page React rendering time
  * `time` - total time spent preloading and rendering the page
@@ -735,16 +738,17 @@ This library attempts to read authenication token from a cookie named `settings.
   }
 
   // (optional)
-  // Preloads data before performing page rendering.
+  // Initializes Redux state before performing
+  // page preloading and rendering.
   //
-  // If this function returns an object then this object
-  // will be the initial Redux state.
+  // If defined, this function must return an object
+  // which is gonna be the initial Redux state.
   // 
   // `request` is the original HTTP request for the webpage.
   // It can be used, for example, to load the currently
   // logged in user info (user name, user picture, etc).
   //
-  preload: async (httpClient, { request }) => ({})
+  initialize: async (httpClient, { request }) => ({})
   // (or same without `async`: (httpClient, { request }) => Promise.resolve({})
 
   // (optional)
