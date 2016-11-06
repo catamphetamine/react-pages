@@ -31,15 +31,14 @@ export default async function({ preload, localize, assets, application, request,
 		promise_event_naming,
 		create_routes,
 		wrapper,
-		preload,
 		parse_dates
 	}
 	= normalize_common_options(common)
 
 	// Legacy 7.x API support.
 	// (will be removed later)
-	error_handler = error_handler || (preload && preload.catch)
-	// const error_handler = preload && preload.catch
+	error_handler = error_handler || (common.preload && common.preload.catch)
+	// const error_handler = common.preload && common.preload.catch
 
 	let
 	{
