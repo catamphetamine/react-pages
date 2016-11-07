@@ -213,9 +213,6 @@ try
     // (only needed if using `authentication` cookie feature)
     cookies,
 
-    // Performs HTTP redirect to a URL
-    redirect,
-
     // The rest optional parameters are the same
     // as for webpage server and are all optional
   },
@@ -225,6 +222,11 @@ try
   if (redirect)
   {
     return redirect_to(redirect)
+  }
+
+  if (!content)
+  {
+    throw new Error("`render` didn't return neither `redirect` nor `content`")
   }
 
   response.status(status || 200)
