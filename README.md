@@ -224,11 +224,6 @@ try
     return redirect_to(redirect)
   }
 
-  if (!content)
-  {
-    throw new Error("`render` didn't return neither `redirect` nor `content`")
-  }
-
   response.status(status || 200)
   response.send(content)
 }

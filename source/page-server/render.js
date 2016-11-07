@@ -239,23 +239,28 @@ export default async function({ preload, initialize, localize, assets, applicati
 	}
 	catch (error)
 	{
-		if (error_handler)
+		if (!error_handler)
 		{
-			const result = {}
-
-			error_handler(error,
-			{
-				url,
-				redirect : to => result.redirect = to,
-
-				dispatch : store ? store.dispatch : undefined,
-				getState : store ? store.getState : undefined
-			})
-
-			return result
+			throw error
 		}
 
-		throw error
+		const result = {}
+
+		error_handler(error,
+		{
+			url,
+			redirect : to => result.redirect = to,
+
+			dispatch : store.dispatch,
+			getState : store.getState
+		})
+
+		if (!result.redirect)
+		{
+			throw new Error('Preload error handler must either redirect to a URL or throw an error')
+		}
+
+		return result
 	}
 }
 

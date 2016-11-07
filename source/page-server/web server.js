@@ -153,11 +153,6 @@ export default function start_webpage_rendering_server(options, common)
 			ctx.status = status
 		}
 
-		if (!content)
-		{
-			throw new Error("`render` didn't return neither `redirect` nor `content`")
-		}
-
 		ctx.body = content
 
 		if (stats)
