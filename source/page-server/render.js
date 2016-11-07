@@ -230,7 +230,10 @@ export default async function({ preload, initialize, localize, assets, applicati
 			create_routes: store ? undefined : create_routes
 		})
 
-		result.time.initialize = initialize_time
+		if (result.time)
+		{
+			result.time.initialize = initialize_time
+		}
 
 		return result
 	}
