@@ -18,7 +18,7 @@ import timer from '../timer'
 
 // isomorphic (universal) rendering (middleware).
 // will be used in web_application.use(...)
-export default async function({ preload, initialize, localize, assets, application, request, render, loading, html, authentication, error_handler, cookies }, common)
+export default async function({ preload, initialize, localize, assets, application, request, render, loading, html, authentication, error_handler, redirect, cookies }, common)
 {
 	// Trims a question mark in the end (just in case)
 	const url = request.url.replace(/\?$/, '')
@@ -244,7 +244,7 @@ export default async function({ preload, initialize, localize, assets, applicati
 			return error_handler(error,
 			{
 				url,
-				redirect : to => request.redirect(to),
+				redirect,
 
 				dispatch : store ? store.dispatch : undefined,
 				getState : store ? store.getState : undefined

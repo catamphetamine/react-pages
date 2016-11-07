@@ -213,6 +213,9 @@ try
     // (only needed if using `authentication` cookie feature)
     cookies,
 
+    // Performs HTTP redirect to a URL
+    redirect,
+
     // The rest optional parameters are the same
     // as for webpage server and are all optional
   },
@@ -221,7 +224,7 @@ try
 
   if (redirect)
   {
-    return request.redirect(redirect)
+    return redirect_to(redirect)
   }
 
   response.status(status || 200)

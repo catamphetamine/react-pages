@@ -134,6 +134,9 @@ export default function start_webpage_rendering_server(options, common)
 			// (will be removed later)
 			error_handler,
 
+			// Performs HTTP redirect to a URL
+			redirect: to => ctx.redirect(to),
+
 			// The original HTTP request can be required
 			// for inspecting cookies in `preload` function
 			request: ctx.req,
