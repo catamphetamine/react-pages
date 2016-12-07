@@ -65,8 +65,7 @@ export default class Html extends Component
 
 		let html_attributes = webpage_head.htmlAttributes.toComponent()
 
-		// Fixing `react-helmet` bug here
-		// until they release the fix
+		// Fixing `react-helmet` bug here (they've fixed it in `3.2.3`)
 		// https://github.com/nfl/react-helmet/issues/158
 		if (Array.isArray(html_attributes))
 		{
