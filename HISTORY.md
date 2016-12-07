@@ -1,3 +1,8 @@
+7.1.17 / 07.12.2016
+===================
+
+  * Added `{ store }` as a second parameter of `head`, `body_start` and `body_end` (which are now also `bodyStart` and `bodyEnd`)
+
 7.1.16 / 03.12.2016
 ===================
 

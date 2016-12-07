@@ -23,13 +23,7 @@ export default function start_webpage_rendering_server(options, common)
 		render,
 		loading,
 		stats,
-
-		// Legacy 4.x API support
-		head,
-		body,
-		body_start,
-		body_end,
-		style
+		html
 	}
 	= options
 
@@ -40,16 +34,6 @@ export default function start_webpage_rendering_server(options, common)
 	// Legacy 7.x API support.
 	// (will be removed later)
 	const error_handler = options.catch
-
-	// Legacy 4.x API support
-	const html = options.html ||
-	{
-		head,
-		body,
-		body_start,
-		body_end,
-		style
-	}
 
 	const web = new koa()
 

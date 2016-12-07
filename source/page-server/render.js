@@ -44,15 +44,20 @@ export default async function({ preload, initialize, localize, assets, applicati
 	// (will be removed later)
 	initialize = initialize || preload
 
+	// If `html` is not set then don't throw an error
+	html = html || {}
+
 	let
 	{
 		head,
 		body,
-		body_start,
-		body_end,
 		style
 	}
 	= html
+
+	// camelCase support for those who prefer it
+	let body_start = html.body_start || html.bodyStart
+	let body_end   = html.body_end   || html.bodyEnd
 
 	if (style)
 	{
@@ -188,17 +193,17 @@ export default async function({ preload, initialize, localize, assets, applicati
 
 				if (head)
 				{
-					head = head(url)
+					head = head(url, { store })
 				}
 
 				if (body_start)
 				{
-					body_start = body_start(url)
+					body_start = body_start(url, { store })
 				}
 
 				if (body_end)
 				{
-					body_end = body_end(url)
+					body_end = body_end(url, { store })
 				}
 
 				const markup = 

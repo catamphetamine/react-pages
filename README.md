@@ -732,7 +732,7 @@ This library attempts to read authenication token from a cookie named `settings.
     // Returns React element an array of React elements
     // which will be inserted into server rendered webpage's <head/>
     // (in case of an array use `key`s to prevent React warning)
-    head: (url) => React element or an array of React elements
+    head: (url, { store }) => React element or an array of React elements
 
     // (optional)
     // Allows for wrapping React page component with arbitrary elements
@@ -745,13 +745,15 @@ This library attempts to read authenication token from a cookie named `settings.
     // Returns React element or an array of React elements.
     // Allows adding arbitrary React elements to the start of the <body/>
     // (use `key`s to prevent React warning when returning an array of React elements)
-    body_start: (url) => React element or an array of React elements
+    bodyStart: (url, { store }) => React element or an array of React elements
+    // (aka `body_start`)
 
     // (optional)
     // Returns React element or an array of React elements.
     // Allows adding arbitrary React elements to the end of the <body/>
     // (use `key`s to prevent React warning when returning an array of React elements)
-    body_end: (url) => React element or an array of React elements
+    bodyEnd: (url, { store }) => React element or an array of React elements
+    // (aka `body_end`)
   }
 
   // (optional)
