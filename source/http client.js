@@ -103,7 +103,7 @@ export default class http_client
 							case 'patch':
 							case 'head':
 							case 'options':
-								request.send(data)
+								request.send(has_binary_data(data) ? construct_form_data(data) : data)
 								break
 
 							case 'delete':
@@ -150,6 +150,28 @@ export default class http_client
 					for (let listener of this.on_before_send_listeners)
 					{
 						listener(request)
+					}
+
+					// File upload progress metering
+					// https://developer.mozilla.org/en/docs/Web/API/XMLHttpRequest/Using_XMLHttpRequest
+					if (options.progress)
+					{
+						request.on('progress', function(event)
+						{
+							if (event.direction !== 'upload')
+							{
+								// Only interested in file upload progress metering
+								return
+							}
+
+							if (!event.lengthComputable)
+							{
+								// Unable to compute progress information since the total size is unknown
+								return
+							}
+
+							options.progress(event.percent, event)
+						})
 					}
 
 					// Send HTTP request
@@ -332,4 +354,70 @@ function parse_dates(object)
 
 	// Dates have been converted for this JSON object
 	return object
+}
+
+function has_binary_data(data)
+{
+	for (let key of Object.keys(data))
+	{
+		const parameter = data[key]
+
+		if (typeof HTMLInputElement !== 'undefined' && parameter instanceof HTMLInputElement)
+		{
+			return true
+		}
+
+		if (typeof FileList !== 'undefined' && parameter instanceof FileList)
+		{
+			return true
+		}
+
+		// `File` is a subclass of `Blob`
+		// https://developer.mozilla.org/en-US/docs/Web/API/Blob
+		if (typeof Blob !== 'undefined' && parameter instanceof Blob)
+		{
+			return true
+		}
+	}
+}
+
+function construct_form_data(data)
+{
+	// Just in case (who knows)
+	if (typeof FormData === 'undefined')
+	{
+		// Silent fallback
+		return data
+	}
+
+	const form_data = new FormData()
+
+	for (let key of Object.keys(data))
+	{
+		let parameter = data[key]
+
+		// For an `<input type="file"/>` DOM element just take its `.files`
+		if (typeof HTMLInputElement !== 'undefined' && parameter instanceof HTMLInputElement)
+		{
+			parameter = parameter.files
+		}
+
+		// For a `FileList` parameter (e.g. `multiple` file upload),
+		// iterate the `File`s in the `FileList`
+		// and add them to the form data as a `[File]` array.
+		if (typeof FileList !== 'undefined' && parameter instanceof FileList)
+		{
+			let i = 0
+			while (i < parameter.length)
+			{
+				form_data.append(key, parameter[i])
+				i++
+			}
+			continue
+		}
+
+		form_data.append(key, parameter)
+	}
+
+	return form_data
 }

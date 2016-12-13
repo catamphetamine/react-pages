@@ -236,6 +236,61 @@ catch (error)
 }
 ```
 
+## Ajax
+
+If a Redux action returns an object with `promise` (function) and `events` (array) keys then this action is assumed asynchronous.
+
+ * An event of `type` `events[0]` is dispatched
+ * `promise` function gets called and returns a `Promise`
+ * If the `Promise` succeeds then an event of `type` `events[1]` is dispatched having `result` property set to the `Promise` result
+ * If the `Promise` fails then an event of `type` `events[2]` is dispatched having `error` property set to the `Promise` error
+
+Example:
+
+```js
+function fetchAdmins() {
+  return {
+    promise: http => http.get('/api/users', { role: 'admin' }),
+    events: ['GET_USERS_PENDING', 'GET_USERS_SUCCESS', 'GET_USERS_FAILURE']
+  }
+}
+```
+
+The argument of the `promise` function is the built-in `http` utility having methods `get`, `head`, `post`, `put`, `patch`, `delete`, each taking three arguments: the `url` of the HTTP request, `parameters` object, and an `options` object.
+
+Using ES6 `async/await` the `promise` function can be rewritten as
+
+```js
+function fetchAdmins() {
+  return {
+    promise: async http => await http.get('/api/users', { role: 'admin' }),
+    events: ['GET_USERS_PENDING', 'GET_USERS_SUCCESS', 'GET_USERS_FAILURE']
+  }
+}
+```
+
+For file upload any of these types of parameters are accepted:
+
+* In case of a [`File`](https://developer.mozilla.org/en-US/docs/Web/API/File) parameter it will be a single file upload.
+* In case of a [`FileList`](https://developer.mozilla.org/en-US/docs/Web/API/FileList) parameter with a single `File` inside it would be treated as a single `File`.
+* In case of a `FileList` parameter with multiple `File`s inside multiple file upload will be performed.
+* In case of an `<input type="file"/>` DOM element parameter its `.files` will be taken as a `FileList` parameter.
+
+Progress can be metered by passing `progress` option as part of the `options` argument.
+
+```js
+function uploadItemPhoto(itemId, file) {
+  return {
+    promise: http => http.post(
+      '/item/photo',
+      { itemId, file },
+      { progress(percent) { console.log(percent) } }
+    ),
+    events: ['UPLOAD_ITEM_PHOTO_PENDING', 'UPLOAD_ITEM_PHOTO_SUCCESS', 'UPLOAD_ITEM_PHOTO_FAILURE']
+  }
+}
+```
+
 ## Page preloading
 
 For page preloading consider using `@preload()` helper to load the neccessary data before the page is rendered.

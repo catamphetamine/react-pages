@@ -93,7 +93,27 @@ export default function create_store(reduxReactRouter, createHistory, get_reduce
 		// (redux-router keeps react-router state in Redux)
 		reduxReactRouter
 		({
-			getRoutes : create_routes,
+			getRoutes: ({ dispatch, getState }) =>
+			{
+				function get_state()
+				{
+					try
+					{
+						return getState()
+					}
+					// "TypeError: Cannot read property 'getState' of undefined".
+					// This error is thrown when calling `getState()`
+					// directly inside `getRoutes()`, before the `store` is created.
+					catch (error)
+					{
+						// Pretend that Redux state is the
+						// result of `initialize` function call.
+						return data
+					}
+				}
+
+				return create_routes({ dispatch, getState: get_state })
+			},
 			createHistory: (...parameters) =>
 			{
 				return useBasename(createHistory)({ ...parameters, ...history_options })

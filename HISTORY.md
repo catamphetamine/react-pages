@@ -1,3 +1,13 @@
+7.1.19 / 13.12.2016
+===================
+
+  * Added support for file upload using `http` tool: it automatically constructs a `FormData` instance if it finds an `HTMLInputElement`, a `FileList`, or a `File`. It also supports file upload progress metering via the new `progress` option.
+
+7.1.18 / 13.12.2016
+===================
+
+  * Calling `getState()` directly inside `getRoutes()` doesn't throw "TypeError: Cannot read property 'getState' of undefined" now: instead if the store hasn't been created yet it simply returns the result of the `initialize` function parameter (if specified, otherwise - an empty object)
+
 7.1.17 / 07.12.2016
 ===================
 
