@@ -3,6 +3,7 @@ import ReactDOMServer from 'react-dom/server'
 
 import { server_generated_webpage_head } from '../webpage head'
 import { get_language_from_locale } from '../helpers'
+import { ISO_date_regexp } from '../date parser'
 
 /**
  * Wrapper component containing HTML metadata and boilerplate tags.
@@ -201,7 +202,7 @@ const define_json_parser =
 `
 if (!JSON.date_parser)
 {
-	var ISO = /^(\\d{4})-(\\d{2})-(\\d{2})T(\\d{2}):(\\d{2}):(\\d{2}(?:\\.\\d*))(?:Z|(\\+|-)([\\d|:]*))?$/;
+	var ISO = /^${ISO_date_regexp}$/;
 
 	JSON.date_parser = function(key, value)
 	{

@@ -1,3 +1,8 @@
+7.1.20 / 14.12.2016
+===================
+
+  * Fixed faulty `Date` parsing regular expression which previously caused any four-digit number to be treated as a `Date`
+
 7.1.19 / 13.12.2016
 ===================
 
