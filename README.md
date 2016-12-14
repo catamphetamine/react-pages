@@ -291,6 +291,8 @@ function uploadItemPhoto(itemId, file) {
 }
 ```
 
+By default, when using `http` utility all JSON responses get parsed for javascript `Date`s which are then automatically converted from `String`s to `Date`s. This is convenient, and also safe because such date `String`s have to be in a very specific ISO format in order to get parsed (`year-month-dayThours:minutes:secondstimezone`), but if someone prefers to disable this feature then there's a flag in configuration to turn that off (see `parse_dates`).
+
 ## Page preloading
 
 For page preloading consider using `@preload()` helper to load the neccessary data before the page is rendered.
