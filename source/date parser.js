@@ -12,13 +12,13 @@ const time = `(${hours}\\:${minutes}|${midnight_weird})(\\:${seconds}([\\.,]${mi
 
 const timezone_hours = `([01]\\d|2[0-3])`
 const timezone_minutes = `[0-5]\\d`
-const timezone = `([zZ]|([\\+-])${timezone_hours}\\:?(${timezone_minutes})?)?`
+const timezone = `([zZ]|([\\+-])${timezone_hours}\\:?(${timezone_minutes})?)`
 
 const year = '\\d{4}'
 const month = '(0[1-9]|1[0-2])'
 const day = '([12]\\d|0[1-9]|3[01])'
 
-export const ISO_date_regexp = `${year}-${month}-${day}([T\\s]${time}${timezone})?`
+export const ISO_date_regexp = `${year}-${month}-${day}T${time}${timezone}`
 export const ISO_date_matcher = new RegExp('^' + ISO_date_regexp + '$')
 
 // JSON date deserializer.
