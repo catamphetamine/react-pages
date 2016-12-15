@@ -55,6 +55,7 @@ export default class Html extends Component
 
 		const content_markup = this.props.children ? ReactDOMServer.renderToString(this.props.children) : ''
 
+		{/* Using `dangerouslySetInnerHTML` here to prevent React from escaping the HTML markup */}
 		let content_element = <div id="react" dangerouslySetInnerHTML={{ __html: content_markup }}/>
 
 		if (body)
@@ -127,15 +128,6 @@ export default class Html extends Component
 							charSet="UTF-8"/>
 					}
 
-					{/* (will be done only in development mode)
-
-					    resolves the initial style flash (flicker) 
-					    on page load in development mode 
-					    (caused by Webpack style-loader mounting CSS styles 
-					     through javascript after page load)
-					    by mounting the entire CSS stylesheet in a <style/> tag */}
-					{ development && style && <style dangerouslySetInnerHTML={{__html: style()}} charSet="UTF-8"/> }
-
 					{ head }
 
 					{ assets.icon && <link rel="shortcut icon" href={assets.icon}/> }
@@ -151,17 +143,24 @@ export default class Html extends Component
 					     so they're unlikely to even be able to hijack it) */}
 					{ content_element }
 
-					{/* locale for international messages */}
-					{ locale && <script dangerouslySetInnerHTML={{__html: `window._locale=${JSON.stringify(locale)}`}} charSet="UTF-8"/> }
+					{/* Locale for international messages (maybe could be removed). */}
+					{/* Using `dangerouslySetInnerHTML` here to prevent React from escaping
+					    "potentially dangerous" characters, e.g. double qoutes. */}
+					{/* The value is considered XSS-safe. */}
+					{ locale && <script charSet="UTF-8" dangerouslySetInnerHTML={{__html: `window._locale=${JSON.stringify(locale)}`}}/> }
 
-					{/* localized messages */}
-					{ locale && <script dangerouslySetInnerHTML={{__html: `window._locale_messages=${locale_messages_json}`}} charSet="UTF-8"/> }
+					{/* Localized messages. */}
+					{/* Using `dangerouslySetInnerHTML` here to prevent React from escaping
+					    "potentially dangerous" characters, e.g. double qoutes. */}
+					{/* The value is considered XSS-safe. */}
+					{ locale && <script charSet="UTF-8" dangerouslySetInnerHTML={{__html: `window._locale_messages=${locale_messages_json}`}}/> }
 
 					{/* JSON Date deserializer */}
 					{ parse_dates !== false && <script dangerouslySetInnerHTML={{__html: define_json_parser}} charSet="UTF-8"/> }
 
-					{/* Flux store data will be reloaded into the store on the client-side */}
-					<script dangerouslySetInnerHTML={{__html: `window._flux_store_data=JSON.parse(${JSON.stringify(JSON.stringify(store_state))}${parse_dates !== false ? ', JSON.date_parser' : ''})`}} charSet="UTF-8"/>
+					{/* Flux store data will be reloaded into the store on the client-side. */}
+					{/* Using `dangerouslySetInnerHTML` here to prevent React from escaping "potentially dangerous" characters */}
+					<script dangerouslySetInnerHTML={{__html: `window._flux_store_data=JSON.parse(${JSON.stringify(safe_json_stringify(store_state))}${parse_dates !== false ? ', JSON.date_parser' : ''})`}} charSet="UTF-8"/>
 
 					{/* javascripts */}
 
@@ -170,10 +169,12 @@ export default class Html extends Component
 					    (the client-side React initialization code will
 					     automatically erase this authenticaiton token global variable
 					     to protect the user from session hijacking via an XSS attack) */}
-					{ authentication_token && <script data-authentication-token dangerouslySetInnerHTML={{__html: `window._authentication_token=${JSON.stringify(authentication_token)}`}} charSet="UTF-8"/> }
+					{/* The value is considered XSS-safe. */}
+					{ authentication_token && <script charSet="UTF-8" data-authentication-token dangerouslySetInnerHTML={{__html: `window._authentication_token=${JSON.stringify(authentication_token)}`}}/> }
 					{/* Remove the <script/> tag above as soon as it executes
 					    to prevent potentially exposing authentication token during an XSS attack */}
-					{ authentication_token && <script dangerouslySetInnerHTML={{__html: `document.body.removeChild(document.querySelector('script[data-authentication-token]'))`}} charSet="UTF-8"/> }
+					{/* The value is XSS-safe. */}
+					{ authentication_token && <script charSet="UTF-8" dangerouslySetInnerHTML={{__html: `document.body.removeChild(document.querySelector('script[data-authentication-token]'))`}}/> }
 
 					{/* the "common.js" chunk (see webpack extract commons plugin) */}
 					{/* (needs to be included first (by design)) */}
@@ -202,11 +203,9 @@ const define_json_parser =
 `
 if (!JSON.date_parser)
 {
-	var ISO = /^${ISO_date_regexp}$/;
-
 	JSON.date_parser = function(key, value)
 	{
-		if (typeof value === 'string' && ISO.test(value))
+		if (typeof value === 'string' && /^${ISO_date_regexp}$/.test(value))
 		{
 			return new Date(value)
 		}
@@ -215,3 +214,13 @@ if (!JSON.date_parser)
 	}
 }
 `
+
+function safe_json_stringify(json)
+{
+	// The default javascript JSON.stringify doesn't escape forward slashes,
+	// but it is allowed by the JSON specification, so we manually do it here.
+	// (and javascript regular expressions don't support "negative lookbehind"
+	//  so it's simply replacing all forward slashes with escaped ones,
+	//  but also make sure to not call it twice on the same JSON)
+	return JSON.stringify(json).replace(/\//g, '\\/')
+}

@@ -1,3 +1,8 @@
+7.1.23 / 15.12.2016
+===================
+
+  * Fixed an XSS attack hole when Redux state data was inserted in a page inside a `<script/>` tag without escaping closing tags.
+
 7.1.20 / 14.12.2016
 ===================
 
