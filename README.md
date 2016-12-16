@@ -635,7 +635,7 @@ After specifying the correct `reducer` parameter function the next step is to se
 
   reducer: () => require('./reducer'),
 
-  on_store_created({ reloadReducer })
+  onStoreCreated({ reloadReducer })
   {
     // (for Webpack users only)
     // Client side hot module reload for Redux reducers
