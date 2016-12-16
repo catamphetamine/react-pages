@@ -64,5 +64,29 @@ export function normalize_common_options(common)
     delete common.http_request
   }
 
+  if (common.onStoreCreated)
+  {
+    common.on_store_created = common.onStoreCreated
+    delete common.onStoreCreated
+  }
+
+  if (common.reduxMiddleware)
+  {
+    common.redux_middleware = common.reduxMiddleware
+    delete common.reduxMiddleware
+  }
+
+  if (common.onNavigate)
+  {
+    common.on_navigate = common.onNavigate
+    delete common.onNavigate
+  }
+
+  if (common.parseDates)
+  {
+    common.parse_dates = common.parseDates
+    delete common.parseDates
+  }
+
   return common
 }

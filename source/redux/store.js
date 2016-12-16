@@ -200,9 +200,12 @@ export default function create_store(reduxReactRouter, createHistory, get_reduce
 	// `reload` helper function gives the web application means to hot reload its Redux reducers
 	if (on_store_created)
 	{
+		const reload_reducer = () => store.replaceReducer(overall_reducer())
+		
 		on_store_created
 		({
-			reload_reducer: () => store.replaceReducer(overall_reducer())
+			reload_reducer,
+			reloadReducer: reload_reducer
 		})
 	}
 

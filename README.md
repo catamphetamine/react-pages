@@ -291,7 +291,7 @@ function uploadItemPhoto(itemId, file) {
 }
 ```
 
-By default, when using `http` utility all JSON responses get parsed for javascript `Date`s which are then automatically converted from `String`s to `Date`s. This is convenient, and also safe because such date `String`s have to be in a very specific ISO format in order to get parsed (`year-month-dayThours:minutes:secondstimezone`), but if someone prefers to disable this feature then there's a flag in configuration to turn that off (see `parse_dates`).
+By default, when using `http` utility all JSON responses get parsed for javascript `Date`s which are then automatically converted from `String`s to `Date`s. This is convenient, and also safe because such date `String`s have to be in a very specific ISO format in order to get parsed (`year-month-dayThours:minutes:secondstimezone`), but if someone prefers to disable this feature then there's a flag in configuration to turn that off (see `parseDates`).
 
 ## Page preloading
 
@@ -621,18 +621,68 @@ How can a legitimate website guard its users from such attacks? One solution is 
 
 This library attempts to read authenication token from a cookie named `settings.authentication.cookie` (if this setting is configured). If authentication cookie is present then its value will be sent as part of `Authorization: Bearer {token}` HTTP header when using `http` utility in Redux actions.
 
+## Webpack HMR
+
+Webpack's [Hot Module Replacement](https://webpack.github.io/docs/hot-module-replacement.html) (aka Hot Reload) works both on React components and Redux reducers.
+
+For enabling HMR on Redux reducers first one should make sure that the `reducer` parameter is a function and that it's not simply `reducer: () => reducer` but is instead `reducer: () => require('./reducer')`, i.e. the `require()` call has to be inside the `reducer` parameter function itself, because that's how Webpack HMR works: explicit `require()`s must be placed inside `module.hot.accept` handler, not at the top of the file as usually (i.e. not `import reducer from './reducer'` — that wouldn't ever hot reload).
+
+After specifying the correct `reducer` parameter function the next step is to set up `onStoreCreated` handler like this:
+
+```js
+{
+  ...
+
+  reducer: () => require('./reducer'),
+
+  on_store_created({ reloadReducer })
+  {
+    // (for Webpack users only)
+    // Client side hot module reload for Redux reducers
+    // http://webpack.github.io/docs/hot-module-replacement.html#accept
+    if (process.env.NODE_ENV !== 'production' && module.hot)
+    {
+      // This path must be equal to the path
+      // inside the `require()` call in the `reducer` parameter
+      module.hot.accept('./reducer', reloadReducer)
+    }
+  }
+}
+```
+
+For enabling HMR on React Components I would suggest either the good-old [react-transform-hmr](https://github.com/gaearon/react-transform-hmr) (which I'm using myself) or the new [react-hot-loader 3](https://github.com/gaearon/react-hot-loader) (which is still in beta). Those who don't like either of them can try to set up React Components HMR manually and in that case the instructions would be the same as for Redux reducers above: first make sure that `routes` parameter is a function having `require()` calls for `<Route/>` Components inside itself (not at the top of the file), and then use the `Promise` returned from the `render()` function call:
+
+```js
+render
+({
+  ...
+
+  routes: () => require('./routes')
+},
+common)
+.then(({ rerender }) =>
+{
+  if (module.hot)
+  {
+    // This path must be equal to the path
+    // inside the `require()` call in the `routes` parameter
+    module.hot.accept('./routes', rerender)
+  }
+})
+```
+
 ## Additional `react-isomorphic-render.js` settings
 
 ```javascript
 {
   // (optional)
   // User can add his own middleware to this `middleware` list
-  redux_middleware: () => [...]
+  reduxMiddleware: () => [...]
 
   // (optional)
   // Is called when Redux store has been created
   // (can be used for setting up Webpack Hot Module Replacement)
-  on_store_created: ({ reloadReducer }) => {}
+  onStoreCreated: ({ reloadReducer }) => {}
 
   // (optional)
   // `http` utility settings
@@ -707,7 +757,7 @@ This library attempts to read authenication token from a cookie named `settings.
   // (optional)
   // `react-router`s `onUpdate` handler
   // (is fired when a user performs navigation)
-  on_navigate: (location) => {}
+  onNavigate: (location) => {}
 
   // (optional)
   // `history` options (like `basename`)
@@ -718,7 +768,7 @@ This library attempts to read authenication token from a cookie named `settings.
   // when using `http` utility, and when
   // restoring Redux state on the client-side.
   // (is `true` by default)
-  parse_dates: `true` / `false`
+  parseDates: `true` / `false`
 }
 ```
 

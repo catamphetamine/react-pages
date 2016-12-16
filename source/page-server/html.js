@@ -160,6 +160,8 @@ export default class Html extends Component
 
 					{/* Flux store data will be reloaded into the store on the client-side. */}
 					{/* Using `dangerouslySetInnerHTML` here to prevent React from escaping "potentially dangerous" characters */}
+					{/* At the same time all forward slashes are escaped to prevent XSS attacks.
+					    https://medium.com/node-security/the-most-common-xss-vulnerability-in-react-js-applications-2bdffbcc1fa0#.8dhdig4us */}
 					<script dangerouslySetInnerHTML={{__html: `window._flux_store_data=JSON.parse(${JSON.stringify(safe_json_stringify(store_state))}${parse_dates !== false ? ', JSON.date_parser' : ''})`}} charSet="UTF-8"/>
 
 					{/* javascripts */}
