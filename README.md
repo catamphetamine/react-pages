@@ -637,10 +637,7 @@ After specifying the correct `reducer` parameter function the next step is to se
 
   onStoreCreated({ reloadReducer })
   {
-    // (for Webpack users only)
-    // Client side hot module reload for Redux reducers
-    // http://webpack.github.io/docs/hot-module-replacement.html#accept
-    if (process.env.NODE_ENV !== 'production' && module.hot)
+    if (module.hot)
     {
       // This path must be equal to the path
       // inside the `require()` call in the `reducer` parameter
