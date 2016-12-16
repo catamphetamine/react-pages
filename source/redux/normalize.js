@@ -82,7 +82,7 @@ export function normalize_common_options(common)
     delete common.onNavigate
   }
 
-  if (common.parseDates)
+  if (common.parseDates !== undefined)
   {
     common.parse_dates = common.parseDates
     delete common.parseDates
