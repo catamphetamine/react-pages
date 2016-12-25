@@ -103,14 +103,16 @@ import settings from './react-isomorphic-render'
 // Create webpage rendering server
 const server = webpageServer
 ({
-  // HTTP host and port for executing all client-side ajax requests on server-side.
-  // This is the host and port on which the web application is run.
-  // (because, unlike in the web browser, all URLs on the server-side must be absolute)
+  // HTTP host and port for performing all AJAX requests
+  // when rendering pages on server-side.
+  // E.g. an AJAX request to `/items/5` will be transformed to
+  // `http://${host}:${port}/items/5` during server-side rendering.
+  // Specify `secure: true` flag to use `https` protocol instead of `http`.
   application:
   {
     host: '192.168.0.1',
     port: 80,
-    // secure: true // for HTTPS
+    // secure: true
   },
 
   // URLs of the "static" javascript and CSS files
