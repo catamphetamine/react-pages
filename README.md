@@ -142,6 +142,22 @@ server.listen(3000, function(error)
 })
 ```
 
+`server` is just a [Koa](http://koajs.com/) application, so alternatively it could be started like this:
+
+```js
+import http from 'http'
+const server = webpageServer({...})
+http.createServer(server.callback()).listen(3000, error => ...)
+```
+
+And for HTTPS websites start the page server like this:
+
+```js
+import https from 'https'
+const server = webpageServer({...})
+https.createServer(options, server.callback()).listen(3001, error => ...)
+```
+
 The final step is to set up the main web server (`192.168.0.1:80` in this example) to proxy all HTTP requests for webpages to the webpage rendering server you've just set up.
 
 An example of how HTTP request routing on your main web server can be set up (with page rendering server running on port `3000`):
