@@ -11,6 +11,8 @@ Server Side Rendering for `React + React-router + Redux` stack.
  * Supports locale detection and app internationalization
  * Handles HTTP Cookies correctly
 
+Note: Server Side Rendering of a moderately complex React page takes about 200 milliseconds (as of 2016). It's a blocking CPU-intensive operation. Facebook doesn't use Server Side Rendering itself so optimizing this part of the React library is not a priority for them. If these timings don't suit the project's needs then this library can still be used for Server Side Routing and instant data prefetching while leaving rendering of the pages content to the web browser (`render: false` flag). And if Facebook decides to optimize React Server Side Rendering some day then the `render` flag could be switched back to `true` again.
+
 ## Installation
 
 ```bash
