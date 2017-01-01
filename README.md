@@ -5,13 +5,26 @@
 
 Server Side Rendering for `React + React-router + Redux` stack.
 
- * Provides isomorphic HTTP client for calling REST API
- * Asynchronously preloads pages before performing navigation
+ * Provides isomorphic HTTP client for calling REST API in Redux "action creators"
+ * Asynchronously preloads pages before performing client-side navigation
  * Supports Webpack "hot reload"
- * Supports locale detection and app internationalization
- * Handles HTTP Cookies correctly
+ * Provides supplementary utilities (optional locale detection and app internationalization, handles HTTP Cookies correctly, etc)
 
-Note: Server Side Rendering of a moderately complex React page takes about 200 milliseconds (as of 2016). It's a blocking CPU-intensive operation. Facebook doesn't use Server Side Rendering itself so optimizing this part of the React library is not a priority for them. If these timings don't suit the project's needs then this library can still be used for Server Side Routing and instant data prefetching while leaving rendering of the pages content to the web browser (`render: false` flag). And if Facebook decides to optimize React Server Side Rendering some day then the `render` flag could be switched back to `true` again.
+## Why Server Side Rendering
+
+### World-Wide Web Concepts
+
+The original concept of the web was one of a network of "resources" interconnected with "hyperlinks": a user could query a "resource" by a "Universal Resource Link" (URL) and then could travel to any of the connected "resources" just by navigating corresponding hyperlinks, and then it would all repeat recursively therefore interconnecting each and every "resource" into a giant web. The "resources" were ment to be "documents", like reports, articles, papers, news, etc. The web wasn't meant at all for the applications. At first javascript was only used to bring some naive interactivity into static documents, like following the cursor with a sprinkle, or adding snow to a page, or applying some effect to a picture upon mouseover. Initially javascript was never meant to be a means of operating on the page's "content". It was just for "presentation" ("view"), not the "content". Ajax wasn't originally meant for "content" too: it was just for tiny utility things like hitting a "Like" button, but it was then too turned into a machinery for fetching the page's "content". And so [the Web became broken](https://ponyfoo.com/articles/stop-breaking-the-web). And to completely fix that and make the Web 100% pure again total Server Side Rendering for each dynamic website is the only way to go. This is still a purely esthetical argument and nobody would really care (except purists and perfectionists) if it didn't come to being able to be indexed by Google...
+
+### Search engines
+
+Search engine crawlers like Google bot won't wait for a page to make its Ajax calls to an API server for data: they would simply abort all asynchronous javascript and index the page as is. Don't mistake it for web crawlers not being able to execute javascript — they're perfectly fine with doing that (watch out though for using the latest and greatest and always use polyfills for the older browsers since web crawlers may be using those under the hood). So the only thing preventing a dynamic website from being indexed by a crawler is Ajax, not javascript. This therefore brings two solutions: one is to perform everything (routing, data fetching, rendering) on the server side and the other is to perform routing and data fetching on the server side leaving rendering to the client's web browser. Both these approaches work with web crawlers. And this is what this library does.
+
+While the first approach is more elegant and pure, currently it is a very CPU intensive task to render a moderately complex React page (takes about 200 milliseconds of blocking CPU core time as of 2016). Facebook doesn't use Server Side Rendering itself so optimizing this part of the React library is not a priority for them. So until this (if ever possible) Server Side Rendering performance issue is fixed I prefer the second approach: performing routing and page preloading on the server side while leaving page rendering to the client. This is achieved by using `render: false` flag (described much further in this document).
+
+### Page loading time
+
+The final argument in favour of Server Side Rendering is that even if a website doesn't need search engine indexing it would still benefit from employing Server Side Rendering because that would save that additional HTTP roundtrip from the web browser to the API server for fetching the page's data. And no matter how fast the API server is, [latency is unbeatable](https://www.igvita.com/2012/07/19/latency-the-new-web-performance-bottleneck/) being about 100ms. So, by performing routing and page preloading on the server side one can speed up website loading by about 100ms. Not that it mattered that much for non-perfectionists but still why not do it when it's so simple to implement.
 
 ## Installation
 
