@@ -566,10 +566,8 @@ The resulting locales array is passed as `preferredLocales` parameter into `loca
 
 ```javascript
 @connect(state => ({ location: state.router.location }))
-class Component extends React.Component
-{
-  render()
-  {
+class Component extends React.Component {
+  render() {
     return <span>{this.props.location}</span>
   }
 }
@@ -612,10 +610,8 @@ For each page being rendered stats are reported if `stats()` parameter function 
 {
   ...
 
-  stats({ url, route, time: { initialize, preload, render, total } })
-  {
-    if (total > 1000) // in milliseconds
-    {
+  stats({ url, route, time: { initialize, preload, render, total } }) {
+    if (total > 1000) { // in milliseconds
       db.query('insert into server_side_rendering_stats ...')
     }
   }
@@ -639,8 +635,7 @@ Besides simply logging individual long-taking page renders one could also set up
 {
   ...
 
-  stats({ url, route, time: { initialize, preload, render, total } })
-  {
+  stats({ url, route, time: { initialize, preload, render, total } }) {
     statsd.increment('count')
 
     statsd.timing('initialize', initialize)
@@ -648,8 +643,7 @@ Besides simply logging individual long-taking page renders one could also set up
     statsd.timing('render', render)
     statsd.timing('total', total)
 
-    if (total > 1000) // in milliseconds
-    {
+    if (total > 1000) { // in milliseconds
       db.query('insert into server_side_rendering_stats ...')
     }
   }
@@ -700,10 +694,8 @@ After specifying the correct `reducer` parameter function the next step is to se
 
   reducer: () => require('./reducer'),
 
-  onStoreCreated({ reloadReducer })
-  {
-    if (module.hot)
-    {
+  onStoreCreated({ reloadReducer }) {
+    if (module.hot) {
       // This path must be equal to the path
       // inside the `require()` call in the `reducer` parameter
       module.hot.accept('./reducer', reloadReducer)
@@ -715,17 +707,11 @@ After specifying the correct `reducer` parameter function the next step is to se
 For enabling HMR on React Components I would suggest either the good-old [react-transform-hmr](https://github.com/gaearon/react-transform-hmr) (which I'm using myself) or the new [react-hot-loader 3](https://github.com/gaearon/react-hot-loader) (which is still in beta). Those who don't like either of them can try to set up React Components HMR manually and in that case the instructions would be the same as for Redux reducers above: first make sure that `routes` parameter is a function having `require()` calls for `<Route/>` Components inside itself (not at the top of the file), and then use the `Promise` returned from the `render()` function call:
 
 ```js
-render
-({
+render({
   ...
-
   routes: () => require('./routes')
-},
-common)
-.then(({ rerender }) =>
-{
-  if (module.hot)
-  {
+}, common).then(({ rerender }) => {
+  if (module.hot) {
     // This path must be equal to the path
     // inside the `require()` call in the `routes` parameter
     module.hot.accept('./routes', rerender)
