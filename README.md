@@ -508,7 +508,7 @@ export default (
 
 ## onEnter
 
-While [this Pull Request](https://github.com/acdlite/redux-router/pull/272) in `redux-router` repo has not been accepted yet there's another possibility to get the same functionality
+Some people requested support for `react-router`'s `onEnter` feature. While [this Pull Request](https://github.com/acdlite/redux-router/pull/272) in `redux-router` repo has not been accepted yet there's another possibility to get the same functionality
 
 ```js
 import { onEnter } from 'react-isomorphic-render/redux'
