@@ -7,8 +7,8 @@ Server Side Rendering for `React + React-router + Redux` stack.
 
  * Provides an isomorphic HTTP client for calling REST API in Redux ["action creators"](http://redux.js.org/docs/basics/Actions.html)
  * Asynchronously preloads pages before performing client-side navigation
- * Supports Webpack "hot reload"
- * Provides supplementary utilities (optional locale detection and app internationalization, handles HTTP Cookies correctly, etc)
+ * Supports Webpack "hot reload" (aka "Hot Module Replacement")
+ * Provides supplementary utilities (optional locale detection and app internationalization, setting page `<title/>` and `<meta/>`, programmatic redirects,  handles HTTP Cookies correctly, etc)
 
 ## Why Server Side Rendering
 
@@ -291,6 +291,19 @@ If a Redux action returns an object with `promise` (function) and `events` (arra
 Example:
 
 ```js
+function asynchronousAction() {
+  return {
+    promise: () => Promise.resolve({ success: true }),
+    events: ['PROMISE_PENDING', 'PROMISE_SUCCESS', 'PROMISE_FAILURE']
+  }
+}
+```
+
+### HTTP utility
+
+For convenience, the argument of the `promise` function is the built-in `http` utility having methods `get`, `head`, `post`, `put`, `patch`, `delete`, each returning a `Promise` and taking three arguments: the `url` of the HTTP request, `parameters` object, and an `options` object. It can be used to easily query HTTP REST API endpoints in Redux action creators.
+
+```js
 function fetchAdmins() {
   return {
     promise: http => http.get('/api/users', { role: 'admin' }),
@@ -299,9 +312,7 @@ function fetchAdmins() {
 }
 ```
 
-The argument of the `promise` function is the built-in `http` utility having methods `get`, `head`, `post`, `put`, `patch`, `delete`, each taking three arguments: the `url` of the HTTP request, `parameters` object, and an `options` object.
-
-Using ES6 `async/await` the `promise` function can be rewritten as
+Using ES6 `async/await` this `promise` function can be rewritten as
 
 ```js
 function fetchAdmins() {
@@ -312,7 +323,9 @@ function fetchAdmins() {
 }
 ```
 
-For file upload any of these types of parameters are accepted:
+### File upload
+
+The `http` utility will also upload files if they're passed as part of `parameters` (example below). Any of these types of file `parameters` are accepted:
 
 * In case of a [`File`](https://developer.mozilla.org/en-US/docs/Web/API/File) parameter it will be a single file upload.
 * In case of a [`FileList`](https://developer.mozilla.org/en-US/docs/Web/API/FileList) parameter with a single `File` inside it would be treated as a single `File`.
@@ -322,6 +335,32 @@ For file upload any of these types of parameters are accepted:
 Progress can be metered by passing `progress` option as part of the `options` argument.
 
 ```js
+// React component
+class ItemPage extends React.Component {
+  render() {
+    return (
+      <div>
+        ...
+        <input type="file" onChange={this.onFileSelected}/>
+      </div>
+    )
+  }
+
+  // Make sure to `.bind()` this handler
+  onFileSelected(event) {
+    const file = event.target.files[0]
+
+    // Could also pass just `event.target.files` as `file`
+    dispatch(uploadItemPhoto(itemId, file))
+
+    // Reset the selected file
+    // so that onChange would trigger again
+    // even with the same file.
+    event.target.value = null
+  }
+}
+
+// Redux action creator
 function uploadItemPhoto(itemId, file) {
   return {
     promise: http => http.post(
@@ -334,7 +373,9 @@ function uploadItemPhoto(itemId, file) {
 }
 ```
 
-By default, when using `http` utility all JSON responses get parsed for javascript `Date`s which are then automatically converted from `String`s to `Date`s. This is convenient, and also safe because such date `String`s have to be in a very specific ISO format in order to get parsed (`year-month-dayThours:minutes:secondstimezone`), but if someone prefers to disable this feature then there's a flag in configuration to turn that off (see `parseDates`).
+### JSON Date parsing
+
+By default, when using `http` utility all JSON responses get parsed for javascript `Date`s which are then automatically converted from `String`s to `Date`s. This is convenient, and also safe because such date `String`s have to be in a very specific ISO format in order to get parsed (`year-month-dayThours:minutes:secondstimezone`), but if someone still prefers to disable this feature then there's the `parseDates: false` flag in the configuration to turn that off.
 
 ## Page preloading
 
