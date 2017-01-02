@@ -506,20 +506,6 @@ export default (
 )
 ```
 
-## onEnter
-
-Some people requested support for `react-router`'s `onEnter` feature. While [this Pull Request](https://github.com/acdlite/redux-router/pull/272) in `redux-router` repo has not been accepted yet there's another possibility to get the same functionality
-
-```js
-import { onEnter } from 'react-isomorphic-render/redux'
-
-<Route path="user">
-  <Route path=":id" component={onEnter(async ({ dispatch, getState }, redirect) => {
-    redirect('/somewhere')
-  })(UserProfile)}/>
-</Route>
-```
-
 ## Utilities
 
 ### Setting webpage title, description, <meta/> tags
@@ -587,6 +573,20 @@ return this.props.dispatch(goto('/items/1?color=red'))
 ```
 
 A sidenote: these two functions aren't supposed to be used inside `onEnter` and `onChange` `react-router` hooks. Instead use the `replace` argument supplied to these functions by `react-router` when they are called (`replace` works the same way as `redirect`).
+
+### onEnter
+
+Some people requested support for using `dispatch` and `getState` in `react-router`'s `onEnter` hooks. While [this Pull Request](https://github.com/acdlite/redux-router/pull/272) in `redux-router` repo has not been accepted yet use the `onEnter` helper to get this functionality:
+
+```js
+import { onEnter } from 'react-isomorphic-render/redux'
+
+<Route path="user">
+  <Route path=":id" component={onEnter(async ({ dispatch, getState }, redirect) => {
+    redirect('/somewhere')
+  })(UserProfile)}/>
+</Route>
+```
 
 ## Caching
 
