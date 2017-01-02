@@ -5,7 +5,7 @@
 
 Server Side Rendering for `React + React-router + Redux` stack.
 
- * Provides an isomorphic HTTP client for calling REST API in Redux "action creators"
+ * Provides an isomorphic HTTP client for calling REST API in Redux ["action creators"](http://redux.js.org/docs/basics/Actions.html)
  * Asynchronously preloads pages before performing client-side navigation
  * Supports Webpack "hot reload"
  * Provides supplementary utilities (optional locale detection and app internationalization, handles HTTP Cookies correctly, etc)
