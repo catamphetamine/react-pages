@@ -281,7 +281,7 @@ catch (error)
 
 ## Ajax
 
-If a Redux action returns an object with `promise` (function) and `events` (array) keys then this action is assumed asynchronous.
+If a Redux action creator returns an object with `promise` (function) and `events` (array) keys then this action is assumed asynchronous.
 
  * An event of `type` `events[0]` is dispatched
  * `promise` function gets called and returns a `Promise`
