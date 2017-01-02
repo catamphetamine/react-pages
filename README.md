@@ -935,10 +935,16 @@ common)
   //
   localize: (store, preferredLocales) => ({ locale: preferredLocales[0], messages: { 'page.heading': 'Test' } })
 
-  // Is Server Side Rendering enabled?
+  // Is React Server Side Rendering enabled?
   // (is `true` by default)
-  // Can be used to temporarily disable server-side rendering
-  // (e.g. as a performance optimization)
+  //
+  // (does not affect server side routing
+  //  and server side page preloading)
+  //
+  // Can be used to offload React server-side rendering
+  // from the server side to the client's web browser
+  // (as a performance optimization) by setting it to `false`.
+  //
   render: `true`/`false`
 
   // (optional)
