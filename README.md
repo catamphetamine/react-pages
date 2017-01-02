@@ -228,7 +228,7 @@ For production usage something like the [NginX proxy](https://www.sep.com/sep-bl
 
 ## Without proxying
 
-Some people still requested the ability to run page rendering server without proxying for some reason, so I implemented that feature for those who think they need it. To use `react-isomorphic-render` without proxying there are two options
+Some people still requested the ability to run page rendering server without proxying (for some reason), so I implemented that feature for those who think they need it. To use `react-isomorphic-render` without proxying there are two options
 
   * Either supply custom Koa `middleware` array option in webpage server configuration (recommended)
   * Or call the internal `render` function manually:
