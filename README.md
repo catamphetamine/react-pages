@@ -5,10 +5,10 @@
 
 Server Side Rendering for `React + React-router + Redux` stack.
 
- * Provides an isomorphic HTTP client for calling REST API in Redux ["action creators"](http://redux.js.org/docs/basics/Actions.html)
  * Asynchronously preloads pages before performing client-side navigation
+ * Provides an isomorphic HTTP client for calling REST API in Redux ["action creators"](http://redux.js.org/docs/basics/Actions.html)
  * Supports Webpack "hot reload" (aka "Hot Module Replacement")
- * Provides supplementary utilities (optional locale detection and app internationalization, setting page `<title/>` and `<meta/>`, programmatic redirects,  handles HTTP Cookies correctly, etc)
+ * Provides supplementary utilities: locale detection for internationalization, easy setting page `<title/>` and `<meta/>`, programmatic redirects, 100% correct handling of HTTP Cookies, etc
 
 ## Why Server Side Rendering
 
