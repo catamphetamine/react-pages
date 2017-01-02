@@ -388,8 +388,7 @@ import { connect }            from 'react-redux'
 import { bindActionCreators } from 'redux'
 
 // fetches the list of users from the server
-function fetchUsers()
-{
+function fetchUsers() {
   return {
     promise: http => http.get('/api/users').then(ids => Promise.map(ids, id => http.get(`/api/users/${id}`))),
     events: ['GET_USERS_PENDING', 'GET_USERS_SUCCESS', 'GET_USERS_FAILURE']
@@ -397,21 +396,17 @@ function fetchUsers()
 }
 
 @preload(({ dispatch }) => dispatch(fetchUsers))
-@connect
-(
+@connect(
   state    => ({ users: state.users.users }),
   dispatch => bindActionCreators({ fetchUsers }, dispatch)
 )
-export default class Page extends Component
-{
-  static propTypes =
-  {
+export default class Page extends Component {
+  static propTypes = {
     users      : PropTypes.array.isRequired,
     fetchUsers : PropTypes.func.isRequired
   }
 
-  render()
-  {
+  render() {
     return (
       <div>
         {title("Users")}
@@ -432,15 +427,11 @@ export default class Page extends Component
   //
   // (async/await Babel syntax is used here; can be rewritten as usual Promises)
   //
-  async deleteUsers()
-  {
-    try
-    {
+  async deleteUsers() {
+    try {
       const count = await this.props.deleteUsers()
       alert(`Deleted ${count} users`)
-    }
-    catch (error)
-    {
+    } catch (error) {
       alert(error)
     }
   }
@@ -460,10 +451,8 @@ On the client side, when a user navigates a link, first it changes the URL in th
 ```javascript
 import { Preload_started, Preload_finished, Preload_failed } from 'react-isomorphic-render/redux'
 
-export default function(state = {}, event = {})
-{
-  switch (event.type)
-  {
+export default function(state = {}, event = {}) {
+  switch (event.type) {
     case Preload_started  : return { ...state, pending: true,  error: false }
     case Preload_finished : return { ...state, pending: false }
     case Preload_failed   : return { ...state, pending: false, error: event.error }
@@ -479,31 +468,24 @@ import React       from 'react'
 import { connect } from 'react-redux'
 
 export default connect(state => ({ pending: state.preload.pending }))
-(function Spinner(props)
-{
+(function Spinner(props) {
   return <div className={"preloading " + (props.pending ? "preloading-show" : "")}/>
 })
 ```
 
 ```css
-.preloading
-{
+.preloading {
   position: fixed;
-
   top    : 0;
   left   : 0;
   right  : 0;
   bottom : 0;
-
   z-index: 1;
-
   background-color: rgba(0, 0, 0, 0.2);
-
   display: none;
 }
 
-.preloading-show
-{
+.preloading-show {
   display: block;
   cursor: wait;
 }
@@ -547,8 +529,7 @@ Uses [react-helmet](https://github.com/nfl/react-helmet) under the hood.
 ```javascript
 import { head, title, meta } from 'react-isomorphic-render'
 
-const meta =
-[
+const meta = [
   // <meta charset="utf-8"/>
   { charset: 'utf-8' },
 
