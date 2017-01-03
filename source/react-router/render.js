@@ -13,9 +13,9 @@ import { location_url } from '../location'
 //
 // returns a Promise resolving to the rendered React component.
 //
-export function render_on_client({ development, create_page_element, to })
+export function render_on_client({ development, routes, create_page_element, to })
 {
-  const router_element = <Router history={browserHistory} routes={create_routes()}/>
+  const router_element = <Router history={browserHistory} routes={ typeof routes === 'function' ? routes() : routes }/>
 
   return create_page_element(router_element).then(element =>
   {
@@ -31,7 +31,7 @@ export function render_on_client({ development, create_page_element, to })
 
 // returns a Promise resolving to { status, content, redirect }
 //
-export function render_on_server({ disable_server_side_rendering, create_page_element, render_webpage_as_react_element, create_routes, url })
+export function render_on_server({ disable_server_side_rendering, create_page_element, render_webpage_as_react_element, routes, url })
 {
   // Maybe no one really needs to `disable_server_side_rendering`
   if (disable_server_side_rendering)
@@ -45,7 +45,7 @@ export function render_on_server({ disable_server_side_rendering, create_page_el
   return new Promise((resolve, reject) =>
   {
     // perform React-router routing
-    match({ routes: create_routes(), location: url }, (error, redirect_location, render_props) =>
+    match({ routes: typeof routes === 'function' ? routes() : routes, location: url }, (error, redirect_location, render_props) =>
     {
       // routing process failed
       if (error)

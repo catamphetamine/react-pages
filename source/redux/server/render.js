@@ -21,7 +21,7 @@ function timed_react_render_on_server(named_arguments)
 
 // Returns a Promise resolving to { status, content, redirect }.
 //
-export default function render_on_server({ disable_server_side_rendering, create_page_element, render_webpage_as_react_element, url, store })
+export default function render_on_server({ disable_server_side_rendering, create_page_element, render_webpage, url, store })
 {
 	// Routing only takes a couple of milliseconds
 	// const routing_timer = timer()
@@ -67,7 +67,7 @@ export default function render_on_server({ disable_server_side_rendering, create
 			if (disable_server_side_rendering)
 			{
 				// Render the empty <Html/> component into Html markup string
-				const rendered = timed_react_render_on_server({ render_webpage_as_react_element })
+				const rendered = timed_react_render_on_server({ render_webpage })
 				time.render = rendered.time
 
 				// return  HTML markup
@@ -79,7 +79,7 @@ export default function render_on_server({ disable_server_side_rendering, create
 			const page_element = create_page_element(<ReduxRouter/>, { store })
 
 			// Render the current page's React element to HTML markup
-			const rendered = timed_react_render_on_server({ render_webpage_as_react_element, page_element })
+			const rendered = timed_react_render_on_server({ render_webpage, page_element })
 			// Rendering a complex React page takes about 200ms (`time.render`).
 			// This is quite slow but that's how React Server Side Rendering currently is.
 			time.render = rendered.time

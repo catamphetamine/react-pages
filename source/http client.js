@@ -5,7 +5,7 @@ import parse_dates from './date parser'
 
 // This is an isomorphic (universal) HTTP client
 // which works both on Node.js and in the web browser,
-// and therefore can be used in Flux actions (for HTTP requests)
+// and therefore can be used in Redux actions (for HTTP requests)
 export default class http_client
 {
 	// Constructs a new instance of Http client.

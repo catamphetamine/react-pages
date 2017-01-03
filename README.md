@@ -874,30 +874,20 @@ render({
   html:
   {
     // (optional)
-    // Returns React element an array of React elements
-    // which will be inserted into server rendered webpage's <head/>
-    // (in case of an array use `key`s to prevent React warning)
-    head: (url, { store }) => React element or an array of React elements
+    // Markup inserted into server rendered webpage's <head/>.
+    // Can be either a function returning a value or just a value.
+    head: (url, { store }) => String, or React.Element, or an array of React.Elements
 
     // (optional)
-    // Allows for wrapping React page component with arbitrary elements
-    // (or doing whatever else can be done with a React element).
-    // Returns either a React element or an array of React elements
-    // which will be inserted into server rendered webpage's <body/>
-    body: reactPageElement => reactPageElement
-
-    // (optional)
-    // Returns React element or an array of React elements.
-    // Allows adding arbitrary React elements to the start of the <body/>
-    // (use `key`s to prevent React warning when returning an array of React elements)
-    bodyStart: (url, { store }) => React element or an array of React elements
+    // Markup inserted to the start of the server rendered webpage's <body/>.
+    // Can be either a function returning a value or just a value.
+    bodyStart: (url, { store }) => String, or React.Element, or an array of React.Elements
     // (aka `body_start`)
 
     // (optional)
-    // Returns React element or an array of React elements.
-    // Allows adding arbitrary React elements to the end of the <body/>
-    // (use `key`s to prevent React warning when returning an array of React elements)
-    bodyEnd: (url, { store }) => React element or an array of React elements
+    // Markup inserted to the end of the server rendered webpage's <body/>.
+    // Can be either a function returning a value or just a value.
+    bodyEnd: (url, { store }) => String, or React.Element, or an array of React.Elements
     // (aka `body_end`)
   }
 
@@ -946,7 +936,9 @@ render({
   render: `true`/`false`
 
   // (optional)
-  // A React element for "loading" page (when server-side rendering is disabled)
+  // Markup for "loading" screen
+  // (when server-side rendering is disabled).
+  // Can be a String, or a React.Element, or an array of React.Elements
   loading: <div className="loading">Loading...</div>
 
   // (optional)

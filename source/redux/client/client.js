@@ -35,7 +35,7 @@ export default function render({ development, devtools, translation }, common)
 	authentication_token = undefined
 
 	// create ("rehydrate") Redux store
-	const store = create_store(common.get_reducer,
+	const store = create_store(common.reducer,
 	{
 		development,
 		devtools,
@@ -44,14 +44,14 @@ export default function render({ development, devtools, translation }, common)
 		promise_event_naming : common.promise_event_naming,
 		on_preload_error     : common.preload && common.preload.catch,
 		preload_helpers      : common.preload && common.preload.helpers,
-		create_routes        : common.create_routes,
+		routes               : common.routes,
 		on_navigate          : common.on_navigate,
 		history_options      : common.history,
-		data                 : window._flux_store_data,
+		data                 : window._store_data,
 		http_client
 	})
 
-	delete window._flux_store_data
+	delete window._store_data
 
 	// Customization of `http` utility
 	// which can be used inside Redux action creators
@@ -67,6 +67,6 @@ export default function render({ development, devtools, translation }, common)
 		translation,
 		wrapper: common.wrapper,
 		render_on_client,
-		render_parameters: { devtools, create_routes: common.create_routes, store }
+		render_parameters: { devtools, routes: common.routes, store }
 	})
 }

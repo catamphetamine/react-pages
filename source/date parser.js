@@ -8,7 +8,7 @@ const minutes = '[0-5]\\d'
 const midnight_weird = '24\\:00'
 const seconds = '[0-5]\\d'
 const milliseconds = '\\d+'
-const time = `(${hours}\\:${minutes}|${midnight_weird})(\\:${seconds}([\\.,]${milliseconds})?)?`
+const time = `(${hours}\\:${minutes}|${midnight_weird})\\:${seconds}([\\.,]${milliseconds})?`
 
 const timezone_hours = `([01]\\d|2[0-3])`
 const timezone_minutes = `[0-5]\\d`

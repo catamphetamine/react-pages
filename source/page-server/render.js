@@ -2,6 +2,7 @@
 // import 'source-map-support/register'
 
 import React from 'react'
+import ReactDOM from 'react-dom/server'
 
 import Html from './html'
 import Http_client from '../http client'
@@ -18,54 +19,24 @@ import timer from '../timer'
 
 // isomorphic (universal) rendering (middleware).
 // will be used in web_application.use(...)
-export default async function({ preload, initialize, localize, assets, application, request, render, loading, html, authentication, error_handler, cookies }, common)
+export default async function({ initialize, localize, assets, application, request, render, loading, html, authentication, cookies }, common)
 {
 	// Trims a question mark in the end (just in case)
 	const url = request.url.replace(/\?$/, '')
 
 	const
 	{
-		get_reducer,
+		reducer,
 		redux_middleware,
 		on_store_created,
 		promise_event_naming,
-		create_routes,
+		routes,
 		wrapper,
 		parse_dates
 	}
 	= normalize_common_options(common)
 
-	// Legacy 7.x API support.
-	// (will be removed later)
-	error_handler = error_handler || (common.preload && common.preload.catch)
-	// const error_handler = common.preload && common.preload.catch
-
-	// Legacy 7.x API support.
-	// (will be removed later)
-	initialize = initialize || preload
-
-	// If `html` is not set then don't throw an error
-	html = html || {}
-
-	let
-	{
-		head,
-		body,
-		style
-	}
-	= html
-
-	// camelCase support for those who prefer it
-	let body_start = html.body_start || html.bodyStart
-	let body_end   = html.body_end   || html.bodyEnd
-
-	if (style)
-	{
-		console.warn(`"html.style" parameter is deprecated and will be removed in the next major release. Use "html.head" instead: if (development) return [<style dangerouslySetInnerHTML={{ __html: style }} charSet="UTF-8"/>, ...]`)
-	}
-
-	// Make `assets` into a function
-	assets = normalize_assets(assets)
+	const error_handler = common.preload && common.preload.catch
 
 	// In development mode Redux DevTools are activated, for example
 	const development = process.env.NODE_ENV !== 'production'
@@ -90,7 +61,7 @@ export default async function({ preload, initialize, localize, assets, applicati
 		authentication_token_header: authentication ? authentication.header : undefined
 	})
 
-	// initial Flux store data (if using Flux)
+	// initial store data (if using Redux)
 	let store_data = {}
 
 	let initialize_time = 0
@@ -107,13 +78,13 @@ export default async function({ preload, initialize, localize, assets, applicati
 	let store
 
 	// create Redux store
-	if (get_reducer)
+	if (reducer)
 	{
-		store = create_store(get_reducer,
+		store = create_store(reducer,
 		{
 			development,
 			server: true,
-			create_routes,
+			routes,
 			data: store_data,
 			middleware: redux_middleware,
 			on_store_created,
@@ -134,6 +105,35 @@ export default async function({ preload, initialize, localize, assets, applicati
 		on_before_send : common.http && common.http.request
 	})
 
+	// If `html` is not set then don't throw an error
+	html = html || {}
+
+	let
+	{
+		head,
+		style
+	}
+	= html
+
+	// camelCase support for those who prefer it
+	let body_start = html.body_start || html.bodyStart
+	let body_end   = html.body_end   || html.bodyEnd
+
+	const store_parameter = { store }
+
+	// Normalize
+	head       = normalize_markup(typeof head       === 'function' ? head      (url, store_parameter) : head)
+	body_start = normalize_markup(typeof body_start === 'function' ? body_start(url, store_parameter) : body_start)
+	body_end   = normalize_markup(typeof body_end   === 'function' ? body_end  (url, store_parameter) : body_end)
+
+	// Normalize
+	assets = typeof assets === 'function' ? assets(url, store_parameter) : assets
+
+	if (assets.styles)
+	{
+		assets.style = assets.styles
+	}
+
 	// Internationalization
 
 	let locale
@@ -142,14 +142,7 @@ export default async function({ preload, initialize, localize, assets, applicati
 
 	if (localize)
 	{
-		let result = localize(store)
-
-		// Legacy support for `async` `localize`
-		// (may be removed in versions > `7.x`)
-		if (typeof result.then === 'function')
-		{
-			result = await result
-		}
+		const result = localize(store)
 
 		locale   = result.locale
 		messages = result.messages
@@ -162,7 +155,7 @@ export default async function({ preload, initialize, localize, assets, applicati
 	// If Redux is being used, then render for Redux.
 	// Else render for pure React.
 	const render_page = store ? redux_render : react_router_render
-
+	
 	try
 	{
 		// Render the web page
@@ -183,56 +176,29 @@ export default async function({ preload, initialize, localize, assets, applicati
 				return React.createElement(wrapper, props, child_element)
 			},
 
-			render_webpage_as_react_element: content =>
+			render_webpage: content =>
 			{
-				assets = assets(url, { store })
-				if (assets.styles)
-				{
-					assets.style = assets.styles
-				}
-
-				if (head)
-				{
-					head = head(url, { store })
-				}
-
-				if (body_start)
-				{
-					body_start = body_start(url, { store })
-				}
-
-				if (body_end)
-				{
-					body_end = body_end(url, { store })
-				}
-
-				const markup = 
-				(
-					<Html
-						development={development}
-						assets={assets}
-						locale={locale}
-						locale_messages_json={messagesJSON}
-						head={head}
-						body={body}
-						body_start={body_start}
-						body_end={body_end}
-						style={style}
-						store={store}
-						parse_dates={parse_dates}
-						authentication_token={authentication_token}>
-
-						{render === false ? loading : content}
-					</Html>
-				)
+				const markup = Html
+				({
+					development,
+					assets,
+					locale,
+					locale_messages_json: messagesJSON,
+					head,
+					body_start,
+					body_end,
+					style,
+					store,
+					parse_dates,
+					authentication_token,
+					content: render === false ? normalize_markup(loading) : (content && ReactDOM.renderToString(content))
+				})
 
 				return markup
 			},
 
 			store,
-
-			// create_routes is only used for bare React-router rendering
-			create_routes: store ? undefined : create_routes
+			routes
 		})
 
 		if (result.time)
@@ -269,16 +235,28 @@ export default async function({ preload, initialize, localize, assets, applicati
 	}
 }
 
-// Makes it a function
-function normalize_assets(assets)
+// Converts React.Elements to Strings
+function normalize_markup(anything)
 {
-	// Normalize `assets` parameter
-	// (to be a function)
-	if (typeof assets !== 'function')
+	if (!anything)
 	{
-		const assets_object = assets
-		assets = () => assets_object
+		return ''
 	}
 
-	return assets
+	if (typeof anything === 'function')
+	{
+		return anything
+	}
+
+	if (typeof anything === 'string')
+	{
+		return anything
+	}
+
+	if (Array.isArray(anything))
+	{
+		return anything.map(normalize_markup).join('')
+	}
+
+	return ReactDOM.renderToString(anything)
 }

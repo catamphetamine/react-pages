@@ -3,7 +3,6 @@ import koa from 'koa'
 import render_page from './render'
 import { get_preferred_locales } from './locale'
 import render_stack_trace from './html stack trace'
-import { normalize_common_options } from '../redux/normalize'
 
 import timer from '../timer'
 
@@ -11,8 +10,6 @@ export default function start_webpage_rendering_server(options, common)
 {
 	// In development mode errors are printed as HTML, for example
 	const development = process.env.NODE_ENV !== 'production'
-
-	common = normalize_common_options(common)
 
 	const
 	{
@@ -23,17 +20,10 @@ export default function start_webpage_rendering_server(options, common)
 		render,
 		loading,
 		stats,
-		html
+		html,
+		initialize
 	}
 	= options
-
-	// Legacy 7.x API support.
-	// (will be removed later)
-	const initialize = options.initialize || options.preload
-
-	// Legacy 7.x API support.
-	// (will be removed later)
-	const error_handler = options.catch
 
 	const web = new koa()
 
@@ -46,7 +36,8 @@ export default function start_webpage_rendering_server(options, common)
 		}
 		catch (error)
 		{
-			// if the error is caught here it means that `catch` (`error_handler`) didn't resolve it
+			// if the error is caught here it means that `catch`
+			// (error handler parameter) didn't resolve it
 			// (or threw it)
 
 			// show error stack trace in development mode for easier debugging
@@ -113,10 +104,6 @@ export default function start_webpage_rendering_server(options, common)
 			loading,
 			html,
 			authentication,
-
-			// Legacy 7.x API support.
-			// (will be removed later)
-			error_handler,
 
 			// The original HTTP request can be required
 			// for inspecting cookies in `preload` function

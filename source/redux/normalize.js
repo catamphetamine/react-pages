@@ -2,91 +2,56 @@ import { clone } from '../helpers'
 
 export function normalize_common_options(common)
 {
-  if (!common)
-  {
-    throw new Error(`Common options weren't passed. Perhaps you've upgraded to react-isomorphic-render 4.0.0 in which case check the new API documentation.`)
-  }
+	if (!common)
+	{
+		throw new Error(`Common options weren't passed. Perhaps you've upgraded to react-isomorphic-render 4.0.0 in which case check the new API documentation.`)
+	}
 
-  common = clone(common)
+	common = clone(common)
 
-  if (common.on_preload_error)
-  {
-    throw new Error(`"on_preload_error" has been renamed to "preload.on_error" in 5.x and to "preload.catch" in 6.x`)
-  }
+	if (!common.routes)
+	{
+		throw new Error(`"routes" parameter is required`)
+	}
 
-  if (!common.create_routes)
-  {
-    if (!common.routes)
-    {
-      throw new Error(`"routes" parameter is required`)
-    }
+	if (!common.reducer)
+	{
+		throw new Error(`"reducer" parameter is required`)
+	}
 
-    if (typeof common.routes === 'function')
-    {
-      common.create_routes = common.routes
-    }
-    else
-    {
-      const routes = common.routes
-      common.create_routes = () => routes
-    }
+	// camelCase aliasing
+	if (common.onStoreCreated)
+	{
+		common.on_store_created = common.onStoreCreated
+		delete common.onStoreCreated
+	}
 
-    delete common.routes
-  }
+	// camelCase aliasing
+	if (common.reduxMiddleware)
+	{
+		common.redux_middleware = common.reduxMiddleware
+		delete common.reduxMiddleware
+	}
 
-  if (!common.get_reducer)
-  {
-    if (!common.reducer)
-    {
-      throw new Error(`"reducer" parameter is required`)
-    }
+	// camelCase aliasing
+	if (common.onNavigate)
+	{
+		common.on_navigate = common.onNavigate
+		delete common.onNavigate
+	}
 
-    if (typeof common.reducer !== 'function')
-    {
-      const reducer = common.reducer
-      common.reducer = () => reducer
-    }
+	// camelCase aliasing
+	if (common.parseDates !== undefined)
+	{
+		common.parse_dates = common.parseDates
+		delete common.parseDates
+	}
 
-    common.get_reducer = common.reducer
-    delete common.reducer
-  }
+	// Default value for `parse_dates` is `true`
+	if (common.parse_dates !== false)
+	{
+		common.parse_dates = true
+	}
 
-  if (common.http_request)
-  {
-    console.log('WARNING: `http_request` common setting has been renamed to `http.request`')
-
-    if (!common.http)
-    {
-      common.http = {}
-    }
-
-    common.http.request = common.http_request
-    delete common.http_request
-  }
-
-  if (common.onStoreCreated)
-  {
-    common.on_store_created = common.onStoreCreated
-    delete common.onStoreCreated
-  }
-
-  if (common.reduxMiddleware)
-  {
-    common.redux_middleware = common.reduxMiddleware
-    delete common.reduxMiddleware
-  }
-
-  if (common.onNavigate)
-  {
-    common.on_navigate = common.onNavigate
-    delete common.onNavigate
-  }
-
-  if (common.parseDates !== undefined)
-  {
-    common.parse_dates = common.parseDates
-    delete common.parseDates
-  }
-
-  return common
+	return common
 }

@@ -1,3 +1,18 @@
+8.0.0 / 03.01.2017
+==================
+
+  * Refactored `Html.js`: it is now not a React component but rather a simple HTML string (because that's faster).
+
+  Removed all of the old deprecated parameters (which were deprecated in previous versions):
+
+  * `reduxMiddleware` function now doesn't get an empty array as an argument
+  * Removed server-side `preload` function parameter (a more appropriate name is `initialize`)
+  * Removed server-side `catch` function parameter (use `common.catch`)
+  * Removed `html.style` parameter (use `html.head` instead, for example)
+  * Server-side `localize` now must not return a `Promise` (because it's more performant that way: just cache the messages server-side)
+  * `on_preload_error` and `preload.on_error` are no longer being aliased to `preload.catch`
+  * `http_request` is no longer being aliased to `http.request`
+
 7.1.23 / 15.12.2016
 ===================
 

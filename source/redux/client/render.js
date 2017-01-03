@@ -11,7 +11,7 @@ import { location_url } from '../../location'
 //
 // Returns a Promise resolving to the rendered React component.
 //
-export default function render_on_client({ development, devtools, create_page_element, create_routes, store, to })
+export default function render_on_client({ development, devtools, create_page_element, routes, store, to })
 {
 	// In short, Redux-router performs react-router routing asynchronously
 	// which allows preloading pages before showing them.
@@ -46,7 +46,12 @@ export default function render_on_client({ development, devtools, create_page_el
 
 	// (`store.history` and `store.transitionManager` are set by `redux-router`)
 
-	return match_react_router({ history: store.history, routes: create_routes(store), transition_manager: store.transitionManager })
+	return match_react_router
+	({
+		history: store.history,
+		routes: typeof routes === 'function' ? routes(store) : routes,
+		transition_manager: store.transitionManager
+	})
 		.then(({ redirect, router_props }) =>
 		{
 			// If a decision to perform a redirect was made 

@@ -9,7 +9,7 @@ import on_route_update_middleware from './middleware/on route update middleware'
 
 // import use_scroll from 'scroll-behavior'
 
-export default function create_store(reduxReactRouter, createHistory, get_reducer, { development, devtools, server, data, create_routes, http_client, promise_event_naming, on_preload_error, middleware, on_store_created, preload_helpers, on_navigate, history_options })
+export default function create_store(reduxReactRouter, createHistory, reducer, { development, devtools, server, data, routes, http_client, promise_event_naming, on_preload_error, middleware, on_store_created, preload_helpers, on_navigate, history_options })
 {
 	// Simply using `useScroll` from `scroll-behavior@0.7.0`
 	// introduces scroll jumps to top when navigating the app
@@ -29,12 +29,10 @@ export default function create_store(reduxReactRouter, createHistory, get_reduce
 	// Redux store enhancers
 	const store_enhancers = []
 
-	// User may supply his own middleware
+	// User may supply his own Redux middleware
 	if (middleware)
 	{
-		// Passing in an empty array for compatibility with old API
-		// (the empty array argument will be removed in the next major release)
-		const middleware_list = middleware([])
+		const middleware_list = middleware()
 		if (middleware_list.length > 0)
 		{
 			store_enhancers.push(applyMiddleware(...middleware_list))
@@ -112,7 +110,7 @@ export default function create_store(reduxReactRouter, createHistory, get_reduce
 					}
 				}
 
-				return create_routes({ dispatch, getState: get_state })
+				return typeof routes === 'function' ? routes({ dispatch, getState: get_state }) : routes;
 			},
 			createHistory: (...parameters) =>
 			{
@@ -140,7 +138,7 @@ export default function create_store(reduxReactRouter, createHistory, get_reduce
 	// overall Redux reducer = web application reducers + redux-router reducer
 	const overall_reducer = () =>
 	{
-		const reducers = get_reducer()
+		const reducers = typeof reducer === 'function' ? reducer() : reducer
 		reducers.router = routerStateReducer
 		return combineReducers(reducers)
 	}

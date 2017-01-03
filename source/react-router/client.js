@@ -26,6 +26,6 @@ export default function render({ development, translation }, common)
     translation,
     wrapper: common.wrapper,
     render_on_client,
-    render_parameters: { create_routes: common.create_routes }
+    render_parameters: { routes: common.routes }
   })
 }
