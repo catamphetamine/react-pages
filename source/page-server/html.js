@@ -207,4 +207,4 @@ const template = nunjucks.compile
 		</body>
 	</html>
 `
-.replace(/[\t\n]/g, ''))
+.replace(/\t/g, ''))
