@@ -145,6 +145,12 @@ function match_react_router({ history, routes, transition_manager })
 		let location
 		const unlisten = history.listen(historyLocation => location = historyLocation)
 
+		// Support history 3.x
+		if(history.getCurrentLocation)
+		{
+			location = history.getCurrentLocation()
+		}
+
 		// Match `location` to a route (`<Route/>`s)
 		transition_manager.match(location, (error, redirect_location, next_router_state) =>
 		{
