@@ -1,13 +1,12 @@
 {
   "name": "react-isomorphic-render",
-  "version": "8.0.1",
+  "version": "8.0.2",
   "description": "Isomorphic rendering with React, Redux, React-router and Redux-router. Includes support for Webpack",
   "main": "index.umd.js",
   "//jsnext:main": "index.es6.js",
   "dependencies": {
     "babel-runtime": "^6.6.1",
     "deep-equal": "^1.0.1",
-    "history": "^2.0.1",
     "hoist-non-react-statics": "^1.0.5",
     "koa": "^2.0.0",
     "nunjucks": "^3.0.0",
@@ -45,7 +44,8 @@
   "peerDependencies": {
     "react": ">= 0.14.0",
     "react-dom": ">= 0.14.0",
-    "react-router": "^2.1.1",
+    "react-router": ">= 2.0.0",
+    "history": ">= 2.0.0",
     "redux": "^3.0.0"
   },
   "scripts": {
