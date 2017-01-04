@@ -1,3 +1,8 @@
+8.0.6 / 04.01.2017
+==================
+
+  * Updated the project to work with both `react-router@2` and `react-router@3`
+
 8.0.0 / 03.01.2017
 ==================
 

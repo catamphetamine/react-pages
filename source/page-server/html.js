@@ -125,7 +125,7 @@ const template = nunjucks.compile
 				 so they're unlikely to even be able to hijack it)
 			#}
 			<div id="react">
-				{{ content | safe }}
+				{{- content | safe -}}
 			</div>
 
 			{#
