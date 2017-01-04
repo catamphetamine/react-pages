@@ -1,7 +1,7 @@
 import React from 'react'
 import { ReduxRouter, replace } from 'redux-router'
 import { RouterContext, applyRouterMiddleware, match } from 'react-router'
-import use_scroll from 'react-router-scroll'
+import { useScroll } from 'react-router-scroll'
 
 import react_render_on_client from '../../render on client'
 
@@ -63,7 +63,7 @@ export default function render_on_client({ development, devtools, create_page_el
 				return
 			}
 
-			const router_element = <ReduxRouter {...router_props} RoutingContext={applyRouterMiddleware(use_scroll())}/>
+			const router_element = <ReduxRouter {...router_props} RoutingContext={applyRouterMiddleware(useScroll())}/>
 
 			// Wraps <ReduxRouter/> with arbitrary React components (e.g. Redux <Provider/>),
 			// loads internationalization messages,
