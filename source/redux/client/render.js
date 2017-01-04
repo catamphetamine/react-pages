@@ -63,7 +63,25 @@ export default function render_on_client({ development, devtools, create_page_el
 				return
 			}
 
-			const router_element = <ReduxRouter {...router_props} RoutingContext={applyRouterMiddleware(useScroll())}/>
+			// This is a temporary workaround for fixing `redux-router`
+			// to work with `react-router@3`.
+			// The maintainers of `redux-router` don't want to merge my pull requests,
+			// so I'm making this workaround here.
+			// https://github.com/acdlite/redux-router/pull/282
+
+			// import { createRouterObject } from 'react-router/lib/RouterUtils';
+			const createRouterObject = require('react-router/lib/RouterUtils').createRouterObject
+
+			class ReduxRouterFixed extends ReduxRouter
+			{
+				constructor(props, context)
+				{
+					super(props, context)
+					this.router = createRouterObject(context.store.history, context.store.transitionManager, {})
+				}
+			}
+
+			const router_element = <ReduxRouterFixed {...router_props} RoutingContext={applyRouterMiddleware(useScroll())}/>
 
 			// Wraps <ReduxRouter/> with arbitrary React components (e.g. Redux <Provider/>),
 			// loads internationalization messages,
