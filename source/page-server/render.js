@@ -51,9 +51,9 @@ export default async function({ initialize, localize, assets, application, reque
 	// Isomorphic http client (with cookie support)
 	const http_client = new Http_client
 	({
-		host          : application.host,
-		port          : application.port,
-		secure        : application.secure,
+		host          : application ? application.host : undefined,
+		port          : application ? application.port : undefined,
+		secure        : application ? application.secure : false,
 		clone_request : request,
 		format_url    : common.http && common.http.url,
 		parse_dates,
