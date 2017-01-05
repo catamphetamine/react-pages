@@ -9,8 +9,11 @@ require('react-router/lib/RouterUtils').createRouterObject = function(history, t
   return createRouterObject(history, transitionManager, state)
 }
 
+const ReduxRouter = require('redux-router').ReduxRouter
+const replace = require('redux-router').replace
+
 import React from 'react'
-import { ReduxRouter, replace } from 'redux-router'
+// import { ReduxRouter, replace } from 'redux-router'
 import { RouterContext, applyRouterMiddleware, match } from 'react-router'
 import { useScroll } from 'react-router-scroll'
 
