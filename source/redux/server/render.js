@@ -1,6 +1,19 @@
 import React           from 'react'
 import { match }       from 'redux-router/server'
-import { ReduxRouter } from 'redux-router'
+// import { ReduxRouter } from 'redux-router'
+
+// This is a temporary workaround for fixing `redux-router`
+// to work with `react-router@3`.
+// The maintainers of `redux-router` don't want to merge my pull requests,
+// so I'm making this workaround here.
+// https://github.com/acdlite/redux-router/pull/282
+const createRouterObject = require('react-router/lib/RouterUtils').createRouterObject
+require('react-router/lib/RouterUtils').createRouterObject = function(history, transitionManager, state = {})
+{
+  return createRouterObject(history, transitionManager, state)
+}
+
+const ReduxRouter = require('redux-router').ReduxRouter
 
 import react_render_on_server from '../../render on server'
 
