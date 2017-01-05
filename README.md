@@ -438,13 +438,25 @@ export default class Page extends Component {
 }
 ```
 
-In the example above `@preload()` helper is called to preload a web page before display. It is used to preload pages before rendering them (both on the server side and on the client side). Its arguments are:
+In the example above `@preload()` helper is called to preload a web page before display. It is used to preload pages before rendering them (both on the server side and on the client side). `@preload()` decorator takes a function which must return a `Promise`:
 
 ```javascript
-@preload(function({ dispatch, getState, location, parameters }) { returns Promise })
+@preload(function({ dispatch, getState, location, parameters }) { return Promise })
 ```
 
-Note: if `@preload()` decorator seems not working then try to place it on top of all other decorators. The possible reason is that it adds a static method to your `Route`'s `component` and some decorator on top of it may not retain that static method (though all proper decorators are agreed to retain static methods and variables).
+Or, using `async/await`:
+
+```javascript
+@preload(async ({ dispatch, getState, location, parameters }) => await doSomething())
+```
+
+When `dispatch` is called with a special "asynchronous" action (having `promise` and `events` properties) then such a `dispatch()` call will return a `Promise`, that's why in the example above it's written as:
+
+```js
+@preload(({ dispatch }) => dispatch(fetchUsers))
+```
+
+Note: if `@preload()` decorator seems not working (though it definitely should) then try to place it on top of all other decorators. The possible reason is that it adds a static method to your `Route`'s `component` and some decorator on top of it may not retain that static method (though all proper decorators are agreed to retain static methods and variables).
 
 On the client side, when a user navigates a link, first it changes the URL in the address bar, then it waits for the next page to preload, and, when the next page is fully loaded, then it is displayed to the user. Sometimes preloading a page can take some time to finish so one may want to add a "spinner" to inform the user that the application isn't frozen and the navigation process needs some time to finish. This can be achieved by adding a Redux reducer listening to these three Redux events:
 
