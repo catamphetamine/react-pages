@@ -747,6 +747,7 @@ render({
     // cookies and authentication token headers from being leaked to a 3rd party.
     url: (path, isServerSide) =>
     {
+      // In this case `.application` configuration parameter may be removed
       return `https://api-server.com${path}`
     }
   }
