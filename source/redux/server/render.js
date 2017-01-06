@@ -93,7 +93,9 @@ export default function render_on_server({ disable_server_side_rendering, create
 
 			// Render the current page's React element to HTML markup
 			const rendered = timed_react_render_on_server({ render_webpage, page_element })
-			// Rendering a complex React page takes about 200ms (`time.render`).
+
+			// Rendering a complex React page (having more than 1000 components)
+			// takes about 100ms (`time.render`).
 			// This is quite slow but that's how React Server Side Rendering currently is.
 			time.render = rendered.time
 

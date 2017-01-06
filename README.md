@@ -28,7 +28,7 @@ Search engine crawlers like Google bot won't wait for a page to make its Ajax ca
 
 So the only thing preventing a dynamic website from being indexed by a crawler is Ajax, not javascript. This therefore brings two solutions: one is to perform everything (routing, data fetching, rendering) on the server side and the other is to perform routing and data fetching on the server side leaving rendering to the client's web browser. Both these approaches work with web crawlers. And this is what this library provides.
 
-While the first approach is more elegant and pure, currently it is a very CPU intensive task to render a moderately complex React page using `ReactDOM.renderToString()` (takes about 200 milliseconds of blocking CPU core time as of 2016). Facebook doesn't use Server Side Rendering itself so optimizing this part of the React library is not a priority for them. So until this (if ever possible) Server Side Rendering performance issue is fixed I prefer the second approach: performing routing and page preloading on the server side while leaving page rendering to the client. This is achieved by using `render: false` flag (described much further in this document).
+While the first approach is more elegant and pure, currently it is a very CPU intensive task to render a moderately complex React page using `ReactDOM.renderToString()` (takes about 100 milliseconds of blocking CPU single core time for complex pages having more than 1000 components, as of 2016). Facebook doesn't use Server Side Rendering itself so optimizing this part of the React library is not a priority for them. So until this (if ever possible) Server Side Rendering performance issue is fixed I prefer the second approach: performing routing and page preloading on the server side while leaving page rendering to the client. This is achieved by using `render: false` flag (described much further in this document).
 
 ### Page loading time
 
@@ -629,7 +629,7 @@ The arguments for the `stats()` function are:
  * `time.render` — page React rendering time
  * `time.total` — total time spent preloading and rendering the page
 
-Rendering a complex React page takes about 200ms (`time.render`). This is quite slow but that's how React Server Side Rendering currently is.
+Rendering a complex React page (having more than 1000 components) takes about 100ms (`time.render`). This is quite slow but that's how React Server Side Rendering currently is.
 
 Besides simply logging individual long-taking page renders one could also set up an overall Server Side Rendering performance monitoring using, for example, [StatsD](http://docs.datadoghq.com/guides/dogstatsd/)
 

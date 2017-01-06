@@ -2,7 +2,7 @@
 
 ## Motivation
 
-Server Side Rendering using `ReactDOM.renderToString()` method call often [takes more than 200ms](https://codedump.io/share/xjW15JpT26nT/1/react-rendertostring-performance-and-caching-react-components) for pages using a large amount of React components (say, more than 1000 components). This is the rendering time I'm getting in my project for a page with a "rich" content table of 100 rows. Rendering user profile page takes about 150ms. Rendering dummy pages is really fast, like 20ms, but in a real world web applications pages won't be blank and will likely contain lots of content, so [the recommended watermark of 200ms](https://developers.google.com/speed/docs/insights/Server) is easily exceeded.
+Server Side Rendering using `ReactDOM.renderToString()` method [takes about 100ms](https://codedump.io/share/xjW15JpT26nT/1/react-rendertostring-performance-and-caching-react-components) for a quite complex React page (having more than 1000 components). Add to this the time to query a database and [the recommended watermark of 200ms](https://developers.google.com/speed/docs/insights/Server) can be easily exceeded.
 
 Aside from getting lower ranking in Google search engine, this also means a naive approach would be able to handle roughly 10 server-side page renders per second, multiplied by the number of CPU cores. I'm explicitly saying "server-side page renders" because websites are Single Page Applications nowadays and all subsequent navigation will happen in the user's web browser and the page rendering server won't be involved.
 
