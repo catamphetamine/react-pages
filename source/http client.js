@@ -178,8 +178,6 @@ export default class http_client
 					// Send HTTP request
 					request.end((error, response) => 
 					{
-						const response_body = parse_json_dates ? parse_dates(response.body) : response.body
-
 						// this turned out to be a lame way of handling cookies,
 						// because cookies are sent in request 
 						// with no additional parameters
@@ -215,7 +213,7 @@ export default class http_client
 									// Set error `data` from response body,
 									case 'application/json':
 										// if (!is_object(error.data))
-										error.data = response_body
+										error.data = get_response_body(response, parse_json_dates)
 
 										// Set the more meaningful message for the error (if available)
 										if (error.data.message)
@@ -269,7 +267,7 @@ export default class http_client
 						}
 
 						// Else, the result is HTTP response body
-						resolve(response_body)
+						resolve(get_response_body(response, parse_json_dates))
 					})
 				})
 			}
@@ -370,4 +368,16 @@ function construct_form_data(data)
 	}
 
 	return form_data
+}
+
+function get_response_body(response, parse_json_dates)
+{
+	let response_body = response.body
+	
+	if (response.type === 'application/json' && parse_json_dates)
+	{
+		response_body = parse_dates(response_body)
+	}
+
+	return response_body
 }
