@@ -68,11 +68,11 @@ export default
 An example of a `wrapper` component:
 
 ```javascript
-// Can be also a "React pure component" (i.e. a function)
-export default class Wrapper extends React.Component
-{
-  render()
-  {
+import React from 'react'
+import { Provider } from 'react-redux'
+
+export default class Wrapper extends React.Component {
+  render() {
     const { store, children } = this.props
     return <Provider store={store}>{children}</Provider>
   }
@@ -85,54 +85,59 @@ Then create your client-side application main file (`application.js`)
 import { render } from 'react-isomorphic-render/redux'
 import settings from './react-isomorphic-render'
 
+// Include styles in the bundle
+require('../styles/main.css')
+
 // Renders the page in web browser
-render
-({
-  // enable/disable development mode
-  development: true
-},
-settings)
+render({}, settings)
 ```
 
-And the `index.html` would look like this
+And the `index.html` would look like this:
 
 ```html
 <html>
   <head>
     <title>react-isomorphic-render</title>
-    <link rel="stylesheet" type="text/css" href="/style.css">
+    <link rel="stylesheet" type="text/css" href="/assets/main.css">
   </head>
   <body>
     <div id="react"></div>
-    <script src="/application.js"></script>
+    <script src="/assets/main.js"></script>
   </body>
 </html>
 ```
 
-Client side rendering should work now.
+Notice the `/assets/main.css` and `/assets/main.js` paths: I suppose you're running [`webpack-dev-server`](https://webpack.github.io/docs/webpack-dev-server.html) and this `index.html` file is put into the `build` folder.
+
+Now open `localhost:8080` in a web browser. Client side rendering should work now.
 
 ## Server side
 
-Now it's time to add Server Side Rendering. Strictly speaking, it's not required but it's a nice-to-have feature.
+Now it's time to add Server Side Rendering, and also serving "static files" via HTTP for production mode, when `webpack-dev-server` is not running.
 
 `index.html` will be generated on-the-fly by page rendering server for each HTTP request, so the old `index.html` may be deleted as it's of no use now.
 
-Start the webpage rendering server:
+Start the webpage rendering server (also serving assets):
 
 ```javascript
+import path from 'path'
 import webpageServer from 'react-isomorphic-render/server'
+import statics from 'koa-static'
+import mount from 'koa-mount'
+
 import settings from './react-isomorphic-render'
 
+// Cache assets in the web browser for 1 year by default
+const maxAge = 365 * 24 * 60 * 60;
+
 // Create webpage rendering server
-const server = webpageServer
-({
+const server = webpageServer({
   // HTTP host and port for performing all AJAX requests
   // when rendering pages on server-side.
   // E.g. an AJAX request to `/items/5` will be transformed to
   // `http://${host}:${port}/items/5` during server-side rendering.
   // Specify `secure: true` flag to use `https` protocol instead of `http`.
-  application:
-  {
+  application: {
     host: '192.168.0.1',
     port: 80,
     // secure: true
@@ -144,23 +149,25 @@ const server = webpageServer
   // (also can be a function returning an object)
   // (this is for the main application JS and CSS only,
   //  for 3rd party JS and CSS use `html` parameter instead)
-  assets:
-  {
-    javascript: '/assets/application.js',
-    style: '/assets/application.css'
-  }
+  assets: {
+    javascript: '/assets/main.js',
+    style: '/assets/main.css'
+  },
+
+  // (optional)
+  // Custom Koa middlewares.
+  // Inserted before page rendering middleware.
+  // Adjust the path to the Webpack `build` folder.
+  middleware: [mount('/assets', statics(path.join(__dirname, '../build'), { maxAge }))]
 },
 settings)
 
 // Start webpage rendering server on port 3000
 // (`server.listen(port, [host], [callback])`)
-server.listen(3000, function(error)
-{
-  if (error)
-  {
+server.listen(3000, function(error) {
+  if (error) {
     throw error
   }
-
   console.log(`Webpage rendering server is listening at http://localhost:${port}`)
 })
 ```
@@ -183,15 +190,19 @@ const server = webpageServer({...})
 https.createServer(options, server.callback()).listen(3001, error => ...)
 ```
 
-The final step is to set up the main web server (`192.168.0.1:80` in this example) to proxy all HTTP requests for webpages to the webpage rendering server you've just set up.
+Now [disable javascript in Chrome DevTools](http://stackoverflow.com/questions/13405383/how-to-disable-javascript-in-chrome-developer-tools), go to `localhost:3000` and the server should respond with a rendered page.
 
-An example of how HTTP request routing on your main web server can be set up (with page rendering server running on port `3000`):
+## Proxying
+
+In the example above all HTTP requests to the server are served with HTML pages which is not the case in real-world applications: for example, a request to `/items` REST API should return a JSON response from the database.
+
+To accomplish that a proxy server is set up which routes all HTTP requests to their appropriate destination. For example, API requests go to the REST API server, requests for static files return static files, and HTTP requests for webpages are routed to the webpage rendering server. So the HTTP proxying plan would look like this:
 
  * all HTTP GET requests starting with `/assets` return static files from your `assets` folder
- * all HTTP requests starting with `/api` call your REST API methods
+ * all HTTP requests starting with `/api` are proxied to the REST API service
  * all the other HTTP GET requests are proxied to `http://localhost:3000` for webpage rendering
 
-Proxying can be easily set up, for example, with [http-proxy](https://github.com/nodejitsu/node-http-proxy) in Node.js
+For development purposes, proxying can be easily set up, for example, using [http-proxy](https://github.com/nodejitsu/node-http-proxy) library in Node.js
 
 ```js
 const path = require('path')
@@ -206,46 +217,41 @@ const proxy = httpProxy.createProxyServer({})
 app.use('/assets', express.static(path.join(__dirname, '../assets')))
 
 // Define the REST API
-app.get('/api', function(request, response)
-{
+app.get('/api', function(request, response) {
   response.send({ result: true })
 })
 
 // Or just extract the REST API into its own microservice
-// app.get('/api', function(request, response)
-// {
+// app.get('/api', function(request, response) {
 //   proxy.web(request, response, { target: 'http://localhost:3001' })
 // })
 
 // Proxy all unmatched HTTP requests to webpage rendering service
-app.use(function(request, response)
-{
+app.use(function(request, response) {
   proxy.web(request, response, { target: 'http://localhost:3000' })
 })
 ```
 
-For production usage something like the [NginX proxy](https://www.sep.com/sep-blog/2014/08/20/hosting-the-node-api-in-nginx-with-a-reverse-proxy/), obviously, would be a much better fit.
+For production usage something like the [NginX proxy](https://www.sep.com/sep-blog/2014/08/20/hosting-the-node-api-in-nginx-with-a-reverse-proxy/) is a better solution.
 
 ## Without proxying
 
-Some people still requested the ability to run page rendering server without proxying (for some reason), so I implemented that feature for those who think they need it. To use `react-isomorphic-render` without proxying there are two options
+To use `react-isomorphic-render` without proxying there are two options
 
-  * Either supply custom Koa `middleware` array option in webpage server configuration (recommended)
+  * Either supply custom Koa `middleware` array option in webpage server configuration
   * Or call the internal `render` function manually:
 
 ```js
 import { render } from 'react-isomorphic-render/server'
 
-try
-{
+try {
   // Returns a Promise.
   //
   // status  - HTTP response status
   // content - rendered HTML document (markup)
   // redirect - redirection URL (in case of HTTP redirect)
   //
-  const { status, content, redirect } = await render
-  ({
+  const { status, content, redirect } = await render({
     // Takes the same parameters as webpage server
     application: { host, port },
     assets,
@@ -264,16 +270,13 @@ try
   // The second `settings` parameter is the same as for webpage server
   settings)
 
-  if (redirect)
-  {
+  if (redirect) {
     return redirect_to(redirect)
   }
 
   response.status(status || 200)
   response.send(content)
-}
-catch (error)
-{
+} catch (error) {
   response.status(500)
   response.send('Internal server error')
 }
@@ -992,7 +995,7 @@ render({
   //   persistState
   // }
   //
-  devtools: __development__ ? require('./DevTools.js') : undefined  // (optional)
+  devtools: process.env.REDUX_DEVTOOLS && require('./DevTools.js')
 
   // (optional)
   // Loads localized messages (asynchronously).

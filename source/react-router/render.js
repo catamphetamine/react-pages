@@ -13,7 +13,7 @@ import { location_url } from '../location'
 //
 // returns a Promise resolving to the rendered React component.
 //
-export function render_on_client({ development, routes, create_page_element, to })
+export function render_on_client({ routes, create_page_element, to })
 {
   const router_element = <Router history={browserHistory} routes={ typeof routes === 'function' ? routes() : routes }/>
 
@@ -22,7 +22,6 @@ export function render_on_client({ development, routes, create_page_element, to 
     // render the wrapped React page element to DOM
     return react_render_on_client
     ({
-      development, // development mode flag
       element,     // wrapped React page element
       to           // DOM element containing React markup
     })

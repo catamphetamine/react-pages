@@ -8,9 +8,6 @@ import timer from '../timer'
 
 export default function start_webpage_rendering_server(options, common)
 {
-	// In development mode errors are printed as HTML, for example
-	const development = process.env.NODE_ENV !== 'production'
-
 	const
 	{
 		assets,
@@ -41,7 +38,7 @@ export default function start_webpage_rendering_server(options, common)
 			// (or threw it)
 
 			// show error stack trace in development mode for easier debugging
-			if (development)
+			if (process.env.NODE_ENV !== 'production')
 			{
 				try
 				{

@@ -16,13 +16,12 @@ import { normalize_common_options } from './normalize'
 // The following code hasn't been tested.
 // Should work.
 //
-export default function render({ development, translation }, common)
+export default function render({ translation }, common)
 {
   common = normalize_common_options(common)
 
   return localize_and_render
   ({
-    development,
     translation,
     wrapper: common.wrapper,
     render_on_client,

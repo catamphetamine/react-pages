@@ -1,3 +1,8 @@
+8.0.11 / 07.01.2017
+===================
+
+  * `development` flag is no longer effective, set up a proper `process.env.NODE_ENV` instead (`development === process.env.NODE_ENV !== 'production'`)
+
 8.0.6 / 04.01.2017
 ==================
 

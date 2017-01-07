@@ -9,7 +9,7 @@ import on_route_update_middleware from './middleware/on route update middleware'
 
 // import use_scroll from 'scroll-behavior'
 
-export default function create_store(reduxReactRouter, createHistory, reducer, { development, devtools, server, data, routes, http_client, promise_event_naming, on_preload_error, middleware, on_store_created, preload_helpers, on_navigate, history_options })
+export default function create_store(reduxReactRouter, createHistory, reducer, { devtools, server, data, routes, http_client, promise_event_naming, on_preload_error, middleware, on_store_created, preload_helpers, on_navigate, history_options })
 {
 	// Simply using `useScroll` from `scroll-behavior@0.7.0`
 	// introduces scroll jumps to top when navigating the app
@@ -123,7 +123,7 @@ export default function create_store(reduxReactRouter, createHistory, reducer, {
 	)
 
 	// Add Redux DevTools (if they're enabled)
-	if (development && !server && devtools)
+	if (process.env.NODE_ENV !== 'production' && !server && devtools)
 	{
 		store_enhancers.push
 		(
@@ -187,7 +187,7 @@ export default function create_store(reduxReactRouter, createHistory, reducer, {
 	// // client side hot module reload for Redux reducers attempt
 	// // (won't work because it's not an immediate parent module for the reducers)
 	// // https://github.com/webpack/webpack/issues/1790
-	// if (development && module.hot)
+	// if (process.env.NODE_ENV !== 'production' && module.hot)
 	// {
 	// 	module.hot.accept(reducers_path, () =>
 	// 	{

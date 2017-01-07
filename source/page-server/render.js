@@ -38,9 +38,6 @@ export default async function({ initialize, localize, assets, application, reque
 
 	const error_handler = common.preload && common.preload.catch
 
-	// In development mode Redux DevTools are activated, for example
-	const development = process.env.NODE_ENV !== 'production'
-
 	// Read authentication token from a cookie (if configured)
 	let authentication_token
 	if (authentication && authentication.cookie)
@@ -82,7 +79,6 @@ export default async function({ initialize, localize, assets, application, reque
 	{
 		store = create_store(reducer,
 		{
-			development,
 			server: true,
 			routes,
 			data: store_data,
@@ -180,7 +176,6 @@ export default async function({ initialize, localize, assets, application, reque
 			{
 				const markup = Html
 				({
-					development,
 					assets,
 					locale,
 					locale_messages_json: messagesJSON,

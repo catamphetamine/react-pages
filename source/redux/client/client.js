@@ -14,7 +14,7 @@ import set_up_http_client from '../http client'
 //
 // This function is what's gonna be called from the project's code on the client-side.
 //
-export default function render({ development, devtools, translation }, common)
+export default function render({ devtools, translation }, common)
 {
 	common = normalize_common_options(common)
 
@@ -37,7 +37,6 @@ export default function render({ development, devtools, translation }, common)
 	// create ("rehydrate") Redux store
 	const store = create_store(common.reducer,
 	{
-		development,
 		devtools,
 		middleware           : common.redux_middleware,
 		on_store_created     : common.on_store_created,
@@ -63,7 +62,6 @@ export default function render({ development, devtools, translation }, common)
 
 	return localize_and_render
 	({
-		development,
 		translation,
 		wrapper: common.wrapper,
 		render_on_client,

@@ -25,7 +25,7 @@ import { location_url } from '../../location'
 //
 // Returns a Promise resolving to the rendered React component.
 //
-export default function render_on_client({ development, devtools, create_page_element, routes, store, to })
+export default function render_on_client({ devtools, create_page_element, routes, store, to })
 {
 	// In short, Redux-router performs react-router routing asynchronously
 	// which allows preloading pages before showing them.
@@ -87,7 +87,6 @@ export default function render_on_client({ development, devtools, create_page_el
 				// Render the wrapped React page element to DOM
 				const component = react_render_on_client
 				({
-					development, // development mode flag
 					element,     // wrapped React page element
 					to           // DOM element containing React markup
 				})
@@ -102,7 +101,7 @@ export default function render_on_client({ development, devtools, create_page_el
 				// If Redux-devtools aren't enabled, then just return the Page element
 				// (if Redux-devtools are installed as a web browser extension
 				//  then no need to do the second render too)
-				if (!development || !devtools || window.devToolsExtension)
+				if (process.env.NODE_ENV === 'production' || !devtools || window.devToolsExtension)
 				{
 					return result
 				}
@@ -132,7 +131,6 @@ export default function render_on_client({ development, devtools, create_page_el
 				// Render the wrapped React page element to DOM
 				result.component = react_render_on_client
 				({
-					development, // development mode flag
 					element,     // wrapped React page element
 					to,          // DOM element containing React markup
 					subsequent_render: true // Prevents "Server-side React render was discarded" warning

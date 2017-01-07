@@ -6,7 +6,7 @@ import React from 'react'
 // This function is intended to be wrapped by another function
 // which (in turn) is gonna be called from the project's code on the client-side.
 //
-export default function localize_and_render({ development, render_parameters = {}, render_on_client, wrapper, translation })
+export default function localize_and_render({ render_parameters = {}, render_on_client, wrapper, translation })
 {
 	// Make sure authentication token global variable is erased
 	// (in case it hasn't been read and erased before)
@@ -34,7 +34,6 @@ export default function localize_and_render({ development, render_parameters = {
 		return render_on_client
 		({
 			...render_parameters,
-			development,
 			create_page_element : async (element, props = {}) =>
 			{
 				// if no i18n is required, then simply create Page element
