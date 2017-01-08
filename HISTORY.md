@@ -1,3 +1,8 @@
+8.0.13 / 08.01.2017
+===================
+
+  * Added proper ES6 exports (`package.module` for Webpack 2 ES6 "tree shaking"). Prefer direct `import { ... } from 'react-isomorphic-render'` now instead of the old `import { ... } from 'react-isomorphic-render/redux'` (`/redux` export is still gonna be around for this major version for compatibility reasons)
+
 8.0.11 / 07.01.2017
 ===================
 

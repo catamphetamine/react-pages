@@ -5,11 +5,44 @@
 		"es2015",
 		"stage-0"
 	],
-
+	
 	"plugins":
 	[
 		"transform-runtime",
-		"add-module-exports",
 		"transform-react-display-name"
-	]
+	],
+
+	"env":
+	{
+		"commonjs":
+		{
+			"presets":
+			[
+				"react",
+				"es2015",
+				"stage-0"
+			],
+			
+			"plugins":
+			[
+				"transform-runtime",
+				"transform-react-display-name"
+			]
+		},
+		"es6":
+		{
+			"presets":
+			[
+				"react",
+				["es2015", { modules: false }],
+				"stage-0"
+			],
+			
+			"plugins":
+			[
+				"transform-runtime",
+				"transform-react-display-name"
+			]
+		}
+	}
 }

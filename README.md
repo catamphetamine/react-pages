@@ -82,7 +82,8 @@ export default class Wrapper extends React.Component {
 Then create your client-side application main file (`application.js`)
 
 ```javascript
-import { render } from 'react-isomorphic-render/redux'
+import { render } from 'react-isomorphic-render'
+
 import settings from './react-isomorphic-render'
 
 // Include styles in the bundle
@@ -385,10 +386,9 @@ By default, when using `http` utility all JSON responses get parsed for javascri
 For page preloading consider using `@preload()` helper to load the neccessary data before the page is rendered.
 
 ```javascript
-import { title }              from 'react-isomorphic-render'
-import { preload }            from 'react-isomorphic-render/redux'
 import { connect }            from 'react-redux'
 import { bindActionCreators } from 'redux'
+import { title, preload }     from 'react-isomorphic-render'
 
 // fetches the list of users from the server
 function fetchUsers() {
@@ -464,13 +464,13 @@ Note: if `@preload()` decorator seems not working (though it definitely should) 
 On the client side, when a user navigates a link, first it changes the URL in the address bar, then it waits for the next page to preload, and, when the next page is fully loaded, then it is displayed to the user. Sometimes preloading a page can take some time to finish so one may want to add a "spinner" to inform the user that the application isn't frozen and the navigation process needs some time to finish. This can be achieved by adding a Redux reducer listening to these three Redux events:
 
 ```javascript
-import { Preload_started, Preload_finished, Preload_failed } from 'react-isomorphic-render/redux'
+import { PRELOAD_STARTED, PRELOAD_FINISHED, PRELOAD_FAILED } from 'react-isomorphic-render'
 
 export default function(state = {}, event = {}) {
   switch (event.type) {
-    case Preload_started  : return { ...state, pending: true,  error: false }
-    case Preload_finished : return { ...state, pending: false }
-    case Preload_failed   : return { ...state, pending: false, error: event.error }
+    case PRELOAD_STARTED  : return { ...state, pending: true,  error: false }
+    case PRELOAD_FINISHED : return { ...state, pending: false }
+    case PRELOAD_FAILED   : return { ...state, pending: false, error: event.error }
     default               : return state
   }
 }
@@ -579,7 +579,7 @@ class Component extends React.Component {
 These two helper Redux actions change the current location (both on client and server).
 
 ```javascript
-import { goto, redirect } from 'react-isomorphic-render/redux'
+import { goto, redirect } from 'react-isomorphic-render'
 
 // Usage example
 // (`goto` navigates to a URL while adding a new entry in browsing history,
@@ -594,7 +594,7 @@ A sidenote: these two functions aren't supposed to be used inside `onEnter` and 
 Some people requested support for using `dispatch` and `getState` in `react-router`'s `onEnter` hooks. While [this Pull Request](https://github.com/acdlite/redux-router/pull/272) in `redux-router` repo has not been accepted yet use the `onEnter` helper to get this functionality:
 
 ```js
-import { onEnter } from 'react-isomorphic-render/redux'
+import { onEnter } from 'react-isomorphic-render'
 
 <Route path="user">
   <Route path=":id" component={onEnter(async ({ dispatch, getState }, redirect) => {

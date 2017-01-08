@@ -14,6 +14,10 @@ import { location_url, locations_are_equal } from '../../location'
 export const Preload_method_name  = '__react_preload__'
 export const Preload_options_name = '__react_preload_options__'
 
+export const Preload_started  = '@@react-isomorphic-render/redux/preload started'
+export const Preload_finished = '@@react-isomorphic-render/redux/preload finished'
+export const Preload_failed   = '@@react-isomorphic-render/redux/preload failed'
+
 // Returns function returning a Promise 
 // which resolves when all the required preload()s are resolved.
 //
@@ -362,7 +366,3 @@ export default function preloading_middleware(server, error_handler, dispatch_ev
 		}
 	}
 }
-
-export const Preload_started  = '@@react-isomorphic-render/redux/preload started'
-export const Preload_finished = '@@react-isomorphic-render/redux/preload finished'
-export const Preload_failed   = '@@react-isomorphic-render/redux/preload failed'

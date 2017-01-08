@@ -1,7 +1,8 @@
 import React, { Component } from 'react'
 import hoist_statics  from 'hoist-non-react-statics'
+import { replace as redirect } from 'redux-router'
 
-import { redirect, Preload_method_name } from './index'
+import { Preload_method_name } from './middleware/preloading middleware'
 
 export default function onEnter(on_enter)
 {

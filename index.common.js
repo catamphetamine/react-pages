@@ -1,4 +1,16 @@
-// For backwards compatibility until version 9.0.0
+// Helpers
+
+var head = require('./build/webpage head')
+
+var webpage_head = head.webpage_head
+var webpage_title = head.webpage_title
+var webpage_meta = head.webpage_meta
+
+exports.head  = webpage_head
+exports.title = webpage_title
+exports.meta  = webpage_meta
+
+// Redux
 
 exports.preload = require('./build/redux/preload').default
 exports.render = require('./build/redux/client/client').default
