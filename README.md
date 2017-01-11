@@ -201,12 +201,13 @@ app.get('/api', function(request, response) {
   response.send({ result: true })
 })
 
-// Or just extract the REST API into its own microservice
+// Or just extract the REST API into its
+// own microservice running on port 3001:
 // app.get('/api', function(request, response) {
 //   proxy.web(request, response, { target: 'http://localhost:3001' })
 // })
 
-// Proxy all unmatched HTTP requests to webpage rendering service
+// Proxy all other HTTP requests to webpage rendering service
 app.use(function(request, response) {
   proxy.web(request, response, { target: 'http://localhost:3000' })
 })
