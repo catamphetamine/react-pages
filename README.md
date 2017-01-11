@@ -148,7 +148,7 @@ server.listen(3000, function(error) {
   if (error) {
     throw error
   }
-  console.log(`Webpage rendering server is listening at http://localhost:${port}`)
+  console.log(`Webpage rendering server is listening at http://localhost:3000`)
 })
 ```
 
