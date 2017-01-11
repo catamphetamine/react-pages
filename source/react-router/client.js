@@ -6,7 +6,7 @@ import { exists }           from '../helpers'
 
 import localize_and_render from '../client'
 
-import { normalize_common_options } from './normalize'
+import normalize_common_settings from './normalize'
 
 // Performs client-side rendering
 // along with varios stuff like loading localized messages.
@@ -18,7 +18,7 @@ import { normalize_common_options } from './normalize'
 //
 export default function render({ translation }, common)
 {
-  common = normalize_common_options(common)
+  common = normalize_common_settings(common)
 
   return localize_and_render
   ({

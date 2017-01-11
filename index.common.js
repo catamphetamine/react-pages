@@ -28,9 +28,25 @@ exports.PRELOAD_METHOD_NAME  = exports.Preload_method_name
 exports.Preload_options_name = preloading_middleware.Preload_options_name
 exports.PRELOAD_OPTIONS_NAME = exports.Preload_options_name
 
-var redux_router = require('redux-router')
+exports.action = require('./build/redux/asynchronous action handler').action
+exports.create_handler = require('./build/redux/asynchronous action handler').create_handler
+exports.createHandler = exports.create_handler
+exports.state_connector = require('./build/redux/asynchronous action handler').state_connector
+exports.stateConnector = exports.state_connector
 
-exports.goto     = redux_router.push
-exports.redirect = redux_router.replace
+exports.underscoredToCamelCase = require('./build/redux/naming').underscoredToCamelCase
 
-exports.onEnter = require('./build/redux/on enter').default
+exports.event_name = require('./build/redux/naming').event_name
+exports.eventName  = exports.event_name
+
+// var redux_router = require('./build/redux/redux-router')
+
+// exports.goto     = redux_router.push
+// exports.redirect = redux_router.replace
+
+exports.goto     = function(location) { return { type: '@@react-isomorphic-render/goto', location } }
+exports.redirect = function(location) { return { type: '@@react-isomorphic-render/redirect', location } }
+
+exports.Link = require('./build/redux/link').default
+
+// exports.onEnter = require('./build/redux/on enter').default

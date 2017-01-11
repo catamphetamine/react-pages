@@ -1,20 +1,7 @@
-// This is a temporary workaround for fixing `redux-router`
-// to work with `react-router@3`.
-// The maintainers of `redux-router` don't want to merge my pull requests,
-// so I'm making this workaround here.
-// https://github.com/acdlite/redux-router/pull/282
-const createRouterObject = require('react-router/lib/RouterUtils').createRouterObject
-require('react-router/lib/RouterUtils').createRouterObject = function(history, transitionManager, state = {})
-{
-  return createRouterObject(history, transitionManager, state)
-}
-
-const ReduxRouter = require('redux-router').ReduxRouter
-const replace = require('redux-router').replace
-
 import React from 'react'
-// import { ReduxRouter, replace } from 'redux-router'
-import { RouterContext, applyRouterMiddleware, match } from 'react-router'
+// import { ReduxRouter, replace } from '../redux-router'
+// import { RouterContext, applyRouterMiddleware, match } from 'react-router'
+import { Router, applyRouterMiddleware, match } from 'react-router'
 import { useScroll } from 'react-router-scroll'
 
 import react_render_on_client from '../../render on client'
@@ -25,7 +12,7 @@ import { location_url } from '../../location'
 //
 // Returns a Promise resolving to the rendered React component.
 //
-export default function render_on_client({ devtools, create_page_element, routes, store, to })
+export default function render_on_client({ devtools, create_page_element, routes, store, to, on_navigate })
 {
 	// In short, Redux-router performs react-router routing asynchronously
 	// which allows preloading pages before showing them.
@@ -64,7 +51,7 @@ export default function render_on_client({ devtools, create_page_element, routes
 	({
 		history: store.history,
 		routes: typeof routes === 'function' ? routes(store) : routes,
-		transition_manager: store.transitionManager
+		// transition_manager: store.transitionManager
 	})
 		.then(({ redirect, router_props }) =>
 		{
@@ -73,11 +60,24 @@ export default function render_on_client({ devtools, create_page_element, routes
 			// then redirect to another url
 			if (redirect)
 			{
-				store.dispatch(replace(location_url(redirect)))
-				return
+				return store.dispatch
+				({
+					type: '@@react-isomorphic-render/redirect',
+					location: redirect
+				})
 			}
 
-			const router_element = <ReduxRouter {...router_props} RoutingContext={applyRouterMiddleware(useScroll())}/>
+			// const router_element = <ReduxRouter {...router_props} RoutingContext={applyRouterMiddleware(useScroll())}/>
+
+			const onUpdate = function()
+			{
+				if (on_navigate)
+				{
+					on_navigate(this.state.location)
+				}
+			}
+
+			const router_element = <Router {...router_props} onUpdate={onUpdate} history={store.history} render={applyRouterMiddleware(useScroll())}/>
 
 			// Wraps <ReduxRouter/> with arbitrary React components (e.g. Redux <Provider/>),
 			// loads internationalization messages,
@@ -149,54 +149,54 @@ export default function render_on_client({ devtools, create_page_element, routes
 // to use the supplied `transitionManager` instead of creating a new one.
 // https://github.com/reactjs/react-router/blob/master/modules/match.js
 //
-function match_react_router({ history, routes, transition_manager })
+function match_react_router({ history, routes })
 {
 	return new Promise((resolve, reject) =>
 	{
-		// Get `location` from `history`
-		let location
-		const unlisten = history.listen(historyLocation => location = historyLocation)
+		// // Get `location` from `history`
+		// let location
+		// const unlisten = history.listen(historyLocation => location = historyLocation)
 
-		// Support history 3.x
-		if(history.getCurrentLocation)
-		{
-			location = history.getCurrentLocation()
-		}
+		// // Support history 3.x
+		// if(history.getCurrentLocation)
+		// {
+		// 	location = history.getCurrentLocation()
+		// }
 
-		// Match `location` to a route (`<Route/>`s)
-		transition_manager.match(location, (error, redirect_location, next_router_state) =>
-		{
-			if (error)
-			{
-				return reject(error)
-			}
-
-			if (redirect_location)
-			{
-				return resolve({ redirect: redirect_location })
-			}
-
-			resolve({ router_props: next_router_state })
-
-			// Defer removing the listener to here to prevent DOM histories from having
-			// to unwind DOM event listeners unnecessarily, in case callback renders a
-			// <Router> and attaches another history listener.
-			unlisten()
-		})
-
-		// match({ history, routes }, (error, redirect_location, router_props) =>
+		// // Match `location` to a route (`<Route/>`s)
+		// transition_manager.match(location, (error, redirect_location, next_router_state) =>
 		// {
 		// 	if (error)
 		// 	{
 		// 		return reject(error)
 		// 	}
-		//
+
 		// 	if (redirect_location)
 		// 	{
 		// 		return resolve({ redirect: redirect_location })
 		// 	}
-		//
-		// 	return resolve({ router_props })
+
+		// 	resolve({ router_props: next_router_state })
+
+		// 	// Defer removing the listener to here to prevent DOM histories from having
+		// 	// to unwind DOM event listeners unnecessarily, in case callback renders a
+		// 	// <Router> and attaches another history listener.
+		// 	unlisten()
 		// })
+
+		match({ history, routes }, (error, redirect_location, router_props) =>
+		{
+			if (error)
+			{
+				return reject(error)
+			}
+		
+			if (redirect_location)
+			{
+				return resolve({ redirect: redirect_location })
+			}
+		
+			return resolve({ router_props })
+		})
 	})
 }

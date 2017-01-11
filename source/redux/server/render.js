@@ -1,19 +1,7 @@
-import React           from 'react'
-import { match }       from 'redux-router/server'
-// import { ReduxRouter } from 'redux-router'
-
-// This is a temporary workaround for fixing `redux-router`
-// to work with `react-router@3`.
-// The maintainers of `redux-router` don't want to merge my pull requests,
-// so I'm making this workaround here.
-// https://github.com/acdlite/redux-router/pull/282
-const createRouterObject = require('react-router/lib/RouterUtils').createRouterObject
-require('react-router/lib/RouterUtils').createRouterObject = function(history, transitionManager, state = {})
-{
-  return createRouterObject(history, transitionManager, state)
-}
-
-const ReduxRouter = require('redux-router').ReduxRouter
+import React from 'react'
+// import { match } from '../redux-router/server'
+// import { ReduxRouter } from '../redux-router'
+import { Router, match } from 'react-router'
 
 import react_render_on_server from '../../render on server'
 
@@ -34,7 +22,7 @@ function timed_react_render_on_server(named_arguments)
 
 // Returns a Promise resolving to { status, content, redirect }.
 //
-export default function render_on_server({ disable_server_side_rendering, create_page_element, render_webpage, url, store })
+export default function render_on_server({ disable_server_side_rendering, create_page_element, render_webpage, url, store, routes })
 {
 	// Routing only takes a couple of milliseconds
 	// const routing_timer = timer()
@@ -44,7 +32,8 @@ export default function render_on_server({ disable_server_side_rendering, create
 	const preload_timer = timer()
 
 	// Perform routing for this `url`
-	return match_url(url, store).then(routing_result =>
+	// return match_url(url, store).then(routing_result =>
+	return match_url(url, store, routes).then(routing_result =>
 	{
 		// routing_timer()
 
@@ -55,11 +44,11 @@ export default function render_on_server({ disable_server_side_rendering, create
 		}
 
 		// Http response status code
-		const http_status_code = get_http_response_status_code_for_the_route(routing_result.matched_routes)
+		const http_status_code = get_http_response_status_code_for_the_route(routing_result.router_state.routes)
 
 		// Concatenated `react-router` route string.
 		// E.g. "/user/:user_id/post/:post_id"
-		const route = routing_result.matched_routes
+		const route = routing_result.router_state.routes
 			.filter(route => route.path)
 			.map(route => route.path.replace(/^\//, '').replace(/\/$/, ''))
 			.join('/') || '/'
@@ -73,7 +62,8 @@ export default function render_on_server({ disable_server_side_rendering, create
 		//
 		// After the page has finished preloading, render it
 		//
-		return wait_for_page_to_preload(store).then(() => 
+		// return wait_for_page_to_preload(store).then(() => 
+		return store.dispatch({ type: '@@react-isomorphic-render/preload', location: url }).then(() =>
 		{
 			time.preload = preload_timer()
 
@@ -89,7 +79,8 @@ export default function render_on_server({ disable_server_side_rendering, create
 
 			// Renders the current page React component to a React element
 			// (`<ReduxRouter/>` is gonna get the matched route from the `store`)
-			const page_element = create_page_element(<ReduxRouter/>, { store })
+			const page_element = create_page_element(<Router {...routing_result.router_state}/>, { store })
+			// const page_element = create_page_element(<ReduxRouter/>, { store })
 
 			// Render the current page's React element to HTML markup
 			const rendered = timed_react_render_on_server({ render_webpage, page_element })
@@ -117,23 +108,23 @@ export default function render_on_server({ disable_server_side_rendering, create
 	})
 }
 
-// Waits for all `@preload()` calls to finish.
-function wait_for_page_to_preload(store)
-{
-	// This promise was previously set by "preloading middleware"
-	// if there were any @preload() calls on the current route components
-	const promise = store.getState().router
+// // Waits for all `@preload()` calls to finish.
+// function wait_for_page_to_preload(store)
+// {
+// 	// This promise was previously set by "preloading middleware"
+// 	// if there were any @preload() calls on the current route components
+// 	const promise = store.getState().router
 
-	// Validate the currently preloading promise
-	if (promise && typeof promise.then === 'function')
-	{
-		// If it's really a Promise then return it
-		return promise
-	}
+// 	// Validate the currently preloading promise
+// 	if (promise && typeof promise.then === 'function')
+// 	{
+// 		// If it's really a Promise then return it
+// 		return promise
+// 	}
 
-	// Otherwise, if nothing is being preloaded, just return a dummy Promise
-	return Promise.resolve()
-}
+// 	// Otherwise, if nothing is being preloaded, just return a dummy Promise
+// 	return Promise.resolve()
+// }
 
 // One can set a `status` prop for a react-router `Route`
 // to be returned as an Http response status code (404, etc)
@@ -151,17 +142,21 @@ function get_http_response_status_code_for_the_route(matched_routes)
 //
 //   matched_routes - the matched hierarchy of React-router `<Route/>`s
 //
-function match_url(url, store)
+// function match_url(url, store)
+function match_url(url, store, routes)
 {
+	routes = typeof routes === 'function' ? routes(store) : routes
+
 	// (not using `promisify()` helper here 
 	//  to avoid introducing dependency on `bluebird` Promise library)
 	//
 	return new Promise((resolve, reject) =>
 	{
-		// perform routing for this `url`
-		store.dispatch(match(url, (error, redirect_location, router_state) =>
+		// Perform routing for this `url`
+		// store.dispatch(match(url, (error, redirect_location, router_state) =>
+		match({ routes, location: url }, (error, redirect_location, router_state) =>
 		{
-			// if a decision to perform a redirect was made 
+			// If a decision to perform a redirect was made 
 			// during the routing process,
 			// then redirect to another url
 			if (redirect_location)
@@ -172,19 +167,20 @@ function match_url(url, store)
 				})
 			}
 
-			// routing process failed
+			// Routing process failed
 			if (error)
 			{
 				return reject(error)
 			}
 
-			// don't know what this if condition is for
+			// In case some weird stuff happened
 			if (!router_state)
 			{
 				return reject(new Error('No router state'))
 			}
 
-			return resolve({ matched_routes: router_state.routes })
-		}))
+			// return resolve({ matched_routes: router_state.routes })
+			return resolve({ router_state })
+		})
 	})
 }

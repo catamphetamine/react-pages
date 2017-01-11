@@ -6,13 +6,15 @@
 //
 // in all the other cases it will do nothing
 
-import { ROUTER_DID_CHANGE } from 'redux-router/lib/constants'
-import { replace }           from 'redux-router'
+import { match } from 'react-router'
+
+// import { ROUTER_DID_CHANGE } from '../redux-router/constants'
+// import { replace }           from '../redux-router'
 
 import { location_url, locations_are_equal } from '../../location'
 
-export const Preload_method_name  = '__react_preload__'
-export const Preload_options_name = '__react_preload_options__'
+export const Preload_method_name  = '__preload__'
+export const Preload_options_name = '__preload_options__'
 
 export const Preload_started  = '@@react-isomorphic-render/redux/preload started'
 export const Preload_finished = '@@react-isomorphic-render/redux/preload finished'
@@ -60,16 +62,16 @@ const preloader = (server, components, getState, dispatch, location, parameters,
 	//
 	// (also, GET query parameters would also need to be compared in that case)
 	//
-	if (!server)
-	{
-		let previous_route_components = getState().router.components
+	// if (!server)
+	// {
+	// 	let previous_route_components = getState().router.components
 
-		while (components.length > 1 && previous_route_components[0] === components[0])
-		{
-			previous_route_components = previous_route_components.slice(1)
-			components                = components.slice(1)
-		}
-	}
+	// 	while (components.length > 1 && previous_route_components[0] === components[0])
+	// 	{
+	// 		previous_route_components = previous_route_components.slice(1)
+	// 		components                = components.slice(1)
+	// 	}
+	// }
 
 	// finds all `preload` (or `preload_deferred`) methods 
 	// (they will be executed in parallel)
@@ -85,12 +87,18 @@ const preloader = (server, components, getState, dispatch, location, parameters,
 					try
 					{
 						// `preload()` returns a Promise
-						const promise = component[Preload_method_name](preload_arguments)
+						let promise = component[Preload_method_name](preload_arguments)
 
 						// Sanity check
 						if (typeof promise.then !== 'function')
 						{
 							return Promise.reject(`Preload function didn't return a Promise:`, preload)
+						}
+
+						// Convert `array`s into `Promise.all(array)`
+						if (Array.isArray(promise))
+						{
+							promise = Promise.all(promise)
 						}
 
 						return promise
@@ -168,25 +176,31 @@ const preloader = (server, components, getState, dispatch, location, parameters,
 // won't send actions to that `reduxReactRouter` middleware,
 // therefore there's the third `dispatch_event` argument
 // which is a function to hack around that limitation.
-export default function preloading_middleware(server, error_handler, dispatch_event, preload_helpers)
+export default function preloading_middleware(server, error_handler, dispatch_event, preload_helpers, routes, history)
 {
 	return ({ getState, dispatch }) => next => action =>
 	{
-		// If it isn't a `redux-router` navigation event then do nothing
-		if (action.type !== ROUTER_DID_CHANGE)
+		if (action.type !== '@@react-isomorphic-render/preload')
 		{
 			// Do nothing
 			return next(action)
 		}
 
-		// When routing is initialized on the client side
-		// then ROUTER_DID_CHANGE event will be fired,
-		// so ignore this initialization event.
-		if (!server && !getState().router)
-		{
-			// Ignore the event
-			return next(action)
-		}
+		// // If it isn't a `redux-router` navigation event then do nothing
+		// if (action.type !== ROUTER_DID_CHANGE)
+		// {
+		// 	// Do nothing
+		// 	return next(action)
+		// }
+
+		// // When routing is initialized on the client side
+		// // then ROUTER_DID_CHANGE event will be fired,
+		// // so ignore this initialization event.
+		// if (!server && !getState().router)
+		// {
+		// 	// Ignore the event
+		// 	return next(action)
+		// }
 
 		// Promise error handler
 		const handle_error = error => 
@@ -237,132 +251,188 @@ export default function preloading_middleware(server, error_handler, dispatch_ev
 			}
 		}
 
-		// All these three properties are the next `react-router` state
-		// (taken from `history.listen(function(error, nextRouterState))`)
-		const { components, location, params } = action.payload
 
-		// Preload all the required data for this route (page)
-		const preload = preloader(server, components, getState, dispatch_event, location, params, preload_helpers)
 
-		// If nothing to preload, just move to the next middleware
-		if (!preload)
+		return match_promise(routes, {
+			dispatch: dispatch_event,
+			getState
+		}, history, action.location).then(({ redirect, router_state }) =>
 		{
-			return next(action)
-		}
-
-		// `window.__preloading_page` holds client side page preloading status.
-		// If there's preceeding navigation pending, then cancel that previous navigation.
-		if (!server && window.__preloading_page && !window.__preloading_page.cancelled)
-		{
-			// window.__preloading_page.promise.cancel()
-			window.__preloading_page.cancelled = true
-		}
-
-		// Page loading indicator could listen for this event
-		dispatch_event({ type: Preload_started })
-
-		// Holds the cancellation flag for this navigation process
-		const preloading = { cancelled: false }
-
-		// This Promise is only used in server-side rendering.
-		// Client-side rendering never uses this Promise.
-		const promise = 
-			// preload this route
-			preload()
-			// proceed with routing
-			.then(() =>
+			if (redirect)
 			{
-				// If this navigation process was cancelled
-				// before @preload() finished its work,
-				// then don't take any further steps on this cancelled navigation.
-				if (preloading.cancelled)
+				// Shouldn't happen in the current setup
+				if (server)
 				{
-					return
-				}
-
-				// Page loading indicator could listen for this event
-				dispatch_event({ type: Preload_finished })
-
-				// Pass ROUTER_DID_CHANGE to redux-router middleware
-				// so that react-router renders the new route.
-				next(action)
-			})
-			.catch(error =>
-			{
-				// If this navigation process was cancelled
-				// before @preload() finished its work,
-				// then don't take any further steps on this cancelled navigation.
-				if (preloading.cancelled)
-				{
-					return
-				}
-
-				// If the error was a redirection exception (not a error),
-				// then just exit and do nothing.
-				// (happens only on server side or when using `onEnter` helper)
-				if (error._redirect)
-				{
-					if (!server)
-					{
-						// Page loading indicator could listen for this event
-						dispatch_event({ type: Preload_finished })
-
-						return dispatch_event(replace(error._redirect))
-					}
-
+					const error = new Error()
+					error._redirect = location_url(redirect)
 					throw error
 				}
 
-				// Reset the Promise temporarily placed into the router state 
-				// by the code below
-				// (fixes "Invariant Violation: `mapStateToProps` must return an object.
-				//  Instead received [object Promise]")
-				if (server)
-				{
-					getState().router = null
-				}
-
-				// Page loading indicator could listen for this event
-				dispatch_event({ type: Preload_failed, error })
-
-				// Handle preloading error
-				// (either `redirect` to an "error" page
-				//  or rethrow the error up the Promise chain)
-				handle_error(error)
-			})
-
-		// If on the client side, then store the current pending navigation,
-		// so that it can be cancelled when a new navigation process takes place
-		// before the current navigation process finishes.
-		if (!server)
-		{
-			// preloading.promise = promise
-			window.__preloading_page = preloading
-		}
-
-		// On the server side
-		if (server)
-		{
-			// `state.router` is null until `replaceRoutesMiddleware` is called 
-			// with the currently paused ROUTER_DID_CHANGE action as a parameter
-			// in a subsequent middleware call, so until that next middleware is called
-			// we can use this router state variable to store the promise 
-			// to let the server know when it can render the page.
-			//
-			// This variable will be instantly available
-			// (and therefore .then()-nable)
-			// in ./source/redux/render.js,
-			// and when everything has finished preloading (asynchronously), 
-			// then the next middleware is called,
-			// `replaceRoutesMiddleware` gets control,
-			// and replaces `state.router` with the proper Redux-router router state. 
-			//
-			// (the `promise` above could still resolve instantly, hence the `if` check)
-			//
-			if (!getState().router)
-			{
-				getState().router = promise
+				return dispatch_event({ type: '@@react-isomorphic-render/redirect', location: redirect })
 			}
-		}
+
+			// All these three properties are the next `react-router` state
+			// (taken from `history.listen(function(error, nextRouterState))`)
+			// const { components, location, params } = action.payload
+			const { components, location, params } = router_state
+
+			// Preload all the required data for this route (page)
+			const preload = preloader(server, components, getState, dispatch_event, location, params, preload_helpers)
+
+			// If nothing to preload, just move to the next middleware
+			if (!preload)
+			{
+				if (!server)
+				{
+					return dispatch_event({ type: '@@react-isomorphic-render/goto', location })
+				}
+				return
+			}
+
+			// `window.__preloading_page` holds client side page preloading status.
+			// If there's preceeding navigation pending, then cancel that previous navigation.
+			if (!server && window.__preloading_page && !window.__preloading_page.cancelled)
+			{
+				// window.__preloading_page.promise.cancel()
+				window.__preloading_page.cancelled = true
+			}
+
+			// Page loading indicator could listen for this event
+			dispatch_event({ type: Preload_started })
+
+			// Holds the cancellation flag for this navigation process
+			const preloading = { cancelled: false }
+
+			// If on the client side, then store the current pending navigation,
+			// so that it can be cancelled when a new navigation process takes place
+			// before the current navigation process finishes.
+			if (!server)
+			{
+				// preloading.promise = promise
+				window.__preloading_page = preloading
+			}
+
+			// This Promise is only used in server-side rendering.
+			// Client-side rendering never uses this Promise.
+			
+			// preload this route
+			return preload()
+				// proceed with routing
+				.then(() =>
+				{
+					// If this navigation process was cancelled
+					// before @preload() finished its work,
+					// then don't take any further steps on this cancelled navigation.
+					if (preloading.cancelled)
+					{
+						return
+					}
+
+					// Page loading indicator could listen for this event
+					dispatch_event({ type: Preload_finished })
+
+					if (!server)
+					{
+						dispatch_event({ type: '@@react-isomorphic-render/goto', location })
+					}
+
+					// // Pass ROUTER_DID_CHANGE to redux-router middleware
+					// // so that react-router renders the new route.
+					// next(action)
+				})
+				.catch(error =>
+				{
+					// If this navigation process was cancelled
+					// before @preload() finished its work,
+					// then don't take any further steps on this cancelled navigation.
+					if (preloading.cancelled)
+					{
+						return
+					}
+
+					// If the error was a redirection exception (not a error),
+					// then just exit and do nothing.
+					// (happens only on server side or when using `onEnter` helper)
+					if (error._redirect)
+					{
+						if (!server)
+						{
+							// Page loading indicator could listen for this event
+							dispatch_event({ type: Preload_finished })
+
+							return dispatch_event({ type: '@@react-isomorphic-render/redirect', location: error._redirect })
+
+							// return dispatch_event(replace(error._redirect))
+						}
+
+						throw error
+					}
+
+					// // Reset the Promise temporarily placed into the router state 
+					// // by the code below
+					// // (fixes "Invariant Violation: `mapStateToProps` must return an object.
+					// //  Instead received [object Promise]")
+					// if (server)
+					// {
+					// 	getState().router = null
+					// }
+
+					// Page loading indicator could listen for this event
+					dispatch_event({ type: Preload_failed, error })
+
+					// Handle preloading error
+					// (either `redirect` to an "error" page
+					//  or rethrow the error up the Promise chain)
+					handle_error(error)
+				})
+		})
+
+		// // On the server side
+		// if (server)
+		// {
+		// 	// `state.router` is null until `replaceRoutesMiddleware` is called 
+		// 	// with the currently paused ROUTER_DID_CHANGE action as a parameter
+		// 	// in a subsequent middleware call, so until that next middleware is called
+		// 	// we can use this router state variable to store the promise 
+		// 	// to let the server know when it can render the page.
+		// 	//
+		// 	// This variable will be instantly available
+		// 	// (and therefore .then()-nable)
+		// 	// in ./source/redux/render.js,
+		// 	// and when everything has finished preloading (asynchronously), 
+		// 	// then the next middleware is called,
+		// 	// `replaceRoutesMiddleware` gets control,
+		// 	// and replaces `state.router` with the proper Redux-router router state. 
+		// 	//
+		// 	// (the `promise` above could still resolve instantly, hence the `if` check)
+		// 	//
+		// 	if (!getState().router)
+		// 	{
+		// 		getState().router = promise
+		// 	}
+		// }
 	}
+}
+
+function match_promise(routes, store, history, location)
+{
+	routes = typeof routes === 'function' ? routes(store) : routes
+
+	return new Promise((resolve, reject) =>
+	{
+		match({ history, routes, location }, (error, redirect_location, router_state) =>
+		{
+			if (error)
+			{
+				return reject(error)
+			}
+		
+			if (redirect_location)
+			{
+				return resolve({ redirect: redirect_location })
+			}
+		
+			return resolve({ router_state })
+		})
+	})
 }

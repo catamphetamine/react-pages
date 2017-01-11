@@ -5,36 +5,29 @@ import React from 'react'
 import ReactDOM from 'react-dom/server'
 
 import Html from './html'
-import Http_client from '../http client'
-
-import redux_render                                from '../redux/server/render'
+import redux_render from '../redux/server/render'
 import { render_on_server as react_router_render } from '../react-router/render'
-
-import create_store from '../redux/server/store'
-import set_up_http_client from '../redux/http client'
-
-import { normalize_common_options } from '../redux/normalize'
-
+import create_store from '../redux/server/create store'
+import create_http_client from '../redux/server/create http client'
+import normalize_common_settings from '../redux/normalize'
 import timer from '../timer'
 
 // isomorphic (universal) rendering (middleware).
 // will be used in web_application.use(...)
-export default async function({ initialize, localize, assets, application, request, render, loading, html, authentication, cookies }, common)
+export default async function(common, { initialize, localize, assets, application, request, render, loading, html, authentication, cookies })
 {
 	// Trims a question mark in the end (just in case)
 	const url = request.url.replace(/\?$/, '')
 
+	common = normalize_common_settings(common)
+
 	const
 	{
-		reducer,
-		redux_middleware,
-		on_store_created,
-		promise_event_naming,
 		routes,
 		wrapper,
 		parse_dates
 	}
-	= normalize_common_options(common)
+	= normalize_common_settings(common)
 
 	const error_handler = common.preload && common.preload.catch
 
@@ -45,25 +38,18 @@ export default async function({ initialize, localize, assets, application, reque
 		authentication_token = cookies.get(authentication.cookie)
 	}
 
-	// Isomorphic http client (with cookie support)
-	const http_client = new Http_client
-	({
-		host          : application ? application.host : undefined,
-		port          : application ? application.port : undefined,
-		secure        : application ? application.secure : false,
-		clone_request : request,
-		format_url    : common.http && common.http.url,
-		parse_dates,
-		authentication_token,
-		authentication_token_header: authentication ? authentication.header : undefined
-	})
+	// Create Redux store
 
-	// initial store data (if using Redux)
+	// Create HTTP client (Redux action creator `http` utility)
+	const http_client = create_http_client(common, authentication_token, application, request)
+
+	// Initial store data
 	let store_data = {}
 
+	// Time to fetch initial store data
 	let initialize_time = 0
 
-	// supports custom preloading before the page is rendered
+	// Supports custom preloading before the page is rendered
 	// (for example to authenticate the user and retrieve user selected language)
 	if (initialize)
 	{
@@ -72,34 +58,8 @@ export default async function({ initialize, localize, assets, application, reque
 		initialize_time = initialize_timer()
 	}
 
-	let store
-
-	// create Redux store
-	if (reducer)
-	{
-		store = create_store(reducer,
-		{
-			server: true,
-			routes,
-			data: store_data,
-			middleware: redux_middleware,
-			on_store_created,
-			promise_event_naming,
-			on_preload_error : common.preload && common.preload.catch,
-			http_client,
-			preload_helpers : common.preload && common.preload.helpers,
-			on_navigate     : common.on_navigate,
-			history_options : common.history
-		})
-	}
-
-	// Customization of `http` utility
-	// which can be used inside Redux action creators
-	set_up_http_client(http_client,
-	{
-		store,
-		on_before_send : common.http && common.http.request
-	})
+	// Create Redux store
+	const store = create_store(common, store_data, http_client)
 
 	// If `html` is not set then don't throw an error
 	html = html || {}
@@ -117,12 +77,13 @@ export default async function({ initialize, localize, assets, application, reque
 
 	const store_parameter = { store }
 
-	// Normalize
+	// Normalize `html` parameters
 	head       = normalize_markup(typeof head       === 'function' ? head      (url, store_parameter) : head)
 	body_start = normalize_markup(typeof body_start === 'function' ? body_start(url, store_parameter) : body_start)
 	body_end   = normalize_markup(typeof body_end   === 'function' ? body_end  (url, store_parameter) : body_end)
 
-	// Normalize
+	// Normalize assets
+
 	assets = typeof assets === 'function' ? assets(url, store_parameter) : assets
 
 	if (assets.styles)

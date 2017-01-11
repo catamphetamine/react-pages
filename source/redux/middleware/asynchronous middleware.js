@@ -12,7 +12,7 @@ import { exists, is_object } from '../../helpers'
 // of `asynchronous_middleware` won't send actions to user-supplied middleware,
 // therefore there's an additional `dispatch_event` argument
 // which is a function to hack around that limitation.
-export default function asynchronous_middleware(http_client, dispatch_event, { promise_event_naming })
+export default function asynchronous_middleware(http_client, dispatch_event, { asynchronous_action_event_naming })
 {
 	return ({ dispatch, getState }) =>
 	{
@@ -43,13 +43,13 @@ export default function asynchronous_middleware(http_client, dispatch_event, { p
 			// generate the three event names automatically based on a base event name
 			if (typeof event === 'string')
 			{
-				events = promise_event_naming(event)
+				events = asynchronous_action_event_naming(event)
 			}
 
 			// sanity check
 			if (!events || events.length !== 3)
 			{
-				throw new Error(`"events" property must be an array of events: e.g. ['pending', 'success', 'error']`)
+				throw new Error(`"events" property must be an array of 3 event names: e.g. ['pending', 'success', 'error']`)
 			}
 
 			// event names

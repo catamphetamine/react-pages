@@ -6,7 +6,7 @@ import render_stack_trace from './html stack trace'
 
 import timer from '../timer'
 
-export default function start_webpage_rendering_server(options, common)
+export default function start_webpage_rendering_server(common, options)
 {
 	const
 	{
@@ -91,8 +91,8 @@ export default function start_webpage_rendering_server(options, common)
 
 		const total_timer = timer()
 
-		const { status, content, redirect, route, time } = await render_page
-		({
+		const { status, content, redirect, route, time } = await render_page(common,
+		{
 			application,
 			assets,
 			initialize,
@@ -108,8 +108,7 @@ export default function start_webpage_rendering_server(options, common)
 
 			// Cookies for authentication token retrieval
 			cookies: ctx.cookies
-		},
-		common)
+		})
 
 		if (redirect)
 		{

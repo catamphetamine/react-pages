@@ -8,7 +8,7 @@ export const meta  = webpage_meta
 
 // Redux
 
-import { push, replace } from 'redux-router'
+// import { push, replace } from './es6/redux/redux-router'
 
 import client  from './es6/redux/client/client'
 import preload from './es6/redux/preload'
@@ -30,7 +30,41 @@ export
 }
 from './es6/redux/middleware/preloading middleware'
 
-export const goto     = push
-export const redirect = replace
+export
+{
+	action,
+	create_handler,
+	create_handler as createHandler,
+	state_connector,
+	state_connector as stateConnector
+}
+from './es6/redux/asynchronous action handler'
 
-export { default as onEnter } from './es6/redux/on enter'
+export
+{
+	default as asynchronous_action_handler,
+	default as asynchronousActionHandler
+}
+from './es6/redux/asynchronous action handler'
+
+export
+{
+	underscoredToCamelCase,
+	event_name,
+	event_name as eventName
+}
+from './es6/redux/naming'
+
+// export const goto     = push
+// export const redirect = replace
+
+export const goto     = function(location) { return { type: '@@react-isomorphic-render/goto', location } }
+export const redirect = function(location) { return { type: '@@react-isomorphic-render/redirect', location } }
+
+export
+{
+	default as Link
+}
+from './es6/redux/Link'
+
+// export { default as onEnter } from './es6/redux/on enter'

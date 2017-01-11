@@ -1,3 +1,24 @@
+9.0.0 / 10.01.2017
+==================
+
+  A couple of TODOs for `9.0.0`:
+
+  * Clean up the new code - remove commented out pieces left from `8.0.0`
+  * Fix `onEnter` being called twice (both on server and client) - this is not considered a blocker for `9.0.0` release since `@preload()` supercedes `onEnter` and therefore `onEnter` may not be used at all. But I'll look into it.
+  * Maybe implement the minor `previous_route_components` optimization from `8.0.0` for preloading pages
+
+  Changes:
+
+  * Added "asynchronous action handlers" (see README)
+  <!--* Since `redux-router` maintainers are incompetent and lazy, they don't want to merge my Pull Requests, I'm forking `redux-router` repo as part of this library (`./source/redux/redux-router`) and making the neccessary changes to the code.-->
+  * (breaking change) Removed `redux-router` out of this library. Use `import { Link } from 'react-isomorphic-render'` instead of `import { Link } from 'react-router'`
+  * (breaking change) `import` everything from `react-isomorphic-render` now, not from `react-isomorphic-render/redux`
+  * (breaking change) Changed the order of arguments for `render()` and `pageRenderingService()`: they both now take the common settings first, then the specific settings. Migration: `render({...}, settigs)` -> `render(settings, {...})`, `pageRenderingService({...}, settings)` -> `pageRenderingService(settings, {...})`
+  * (breaking change) Removed `onStoreCreated` due to it not being used anymore (Redux reducers hot reload is now moved to `application.js` client-side main file)
+  * (breaking change) `@onEnter` workaround helper is no longer neccessary because I fixed the `redux-router` `onEnter` bug
+  * (breaking change) `onNavigate` moved to client-side `render()` function parameters
+  * Renamed `promise_event_naming` to `asynchronous_action_event_naming` and added a camelCase alias. And it no longer has a default.
+
 8.0.13 / 08.01.2017
 ===================
 
@@ -201,10 +222,10 @@
 4.1.2 / 20.08.2016
 ===================
 
-  * Slightly changed the behaviour of the undocumented `event` parameter of `asynchronous_middleware`: now it transforms `event` into an array of `[event: pending, event: done, event: failed]` as opposed to the older colonless `[event pending, event done, event failed]`. This could break things for those who were using this undocumented feature, but an easy hotfix is to provide `promise_event_naming` function parameter in `common.js` to retain the old Redux event naming scheme:
+  * Slightly changed the behaviour of the undocumented `event` parameter of `asynchronous_middleware`: now it transforms `event` into an array of `[event: pending, event: done, event: failed]` as opposed to the older colonless `[event pending, event done, event failed]`. This could break things for those who were using this undocumented feature, but an easy hotfix is to provide `asynchronous_action_event_naming` function parameter in `common.js` to retain the old Redux event naming scheme:
 
 ```js
-promise_event_naming(event_name)
+asynchronous_action_event_naming(event_name)
 {
   return [`${event_name} pending`, `${event_name} done`, `${event_name} failed`]
 }

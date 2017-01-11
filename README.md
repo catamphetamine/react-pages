@@ -47,8 +47,7 @@ $ npm install react-isomorphic-render --save
 Start by creating your `react-isomorphic-render.js` set up file (it configures both client side and server side)
 
 ```javascript
-export default
-{
+export default {
   // Redux reducer
   // (either a reducer or a function returning a reducer)
   reducer: require('./src/client/redux/reducer'),
@@ -59,6 +58,7 @@ export default
   //  returning a `<Route/>` element)
   routes: require('./src/client/routes'),
   
+  // A React component.
   // Wraps React page component with arbitrary elements
   // (e.g. Redux <Provider/>, and other "context providers")
   wrapper: require('./src/client/wrapper')
@@ -74,23 +74,22 @@ import { Provider } from 'react-redux'
 export default class Wrapper extends React.Component {
   render() {
     const { store, children } = this.props
-    return <Provider store={store}>{children}</Provider>
+    return <Provider store={ store }>{ children }</Provider>
   }
 }
 ```
 
-Then create your client-side application main file (`application.js`)
+Then create your client-side main application file (`application.js`)
 
 ```javascript
-import { render } from 'react-isomorphic-render'
-
-import settings from './react-isomorphic-render'
-
-// Include styles in the bundle
+// Include CSS styles in the bundle
 require('../styles/main.css')
 
-// Renders the page in web browser
-render({}, settings)
+import { render } from 'react-isomorphic-render'
+import settings from './react-isomorphic-render'
+
+// Render the page in web browser
+render(settings)
 ```
 
 And the `index.html` would look like this:
@@ -132,7 +131,7 @@ import settings from './react-isomorphic-render'
 const maxAge = 365 * 24 * 60 * 60;
 
 // Create webpage rendering server
-const server = webpageServer({
+const server = webpageServer(settings, {
   // HTTP host and port for performing all AJAX requests
   // when rendering pages on server-side.
   // E.g. an AJAX request to `/items/5` will be transformed to
@@ -160,8 +159,7 @@ const server = webpageServer({
   // Inserted before page rendering middleware.
   // Adjust the path to the Webpack `build` folder.
   middleware: [mount('/assets', statics(path.join(__dirname, '../build'), { maxAge }))]
-},
-settings)
+})
 
 // Start webpage rendering server on port 3000
 // (`server.listen(port, [host], [callback])`)
@@ -178,7 +176,7 @@ server.listen(3000, function(error) {
 ```js
 import http from 'http'
 import webpageServer from 'react-isomorphic-render/server'
-const server = webpageServer({...})
+const server = webpageServer(settings, {...})
 http.createServer(server.callback()).listen(3000, error => ...)
 ```
 
@@ -187,7 +185,7 @@ And for HTTPS websites start the page server like this:
 ```js
 import https from 'https'
 import webpageServer from 'react-isomorphic-render/server'
-const server = webpageServer({...})
+const server = webpageServer(settings, {...})
 https.createServer(options, server.callback()).listen(3001, error => ...)
 ```
 
@@ -233,9 +231,11 @@ app.use(function(request, response) {
 })
 ```
 
-For production usage something like the [NginX proxy](https://www.sep.com/sep-blog/2014/08/20/hosting-the-node-api-in-nginx-with-a-reverse-proxy/) is a better solution.
+For production usage something like the [NginX proxy](https://www.sep.com/sep-blog/2014/08/20/hosting-the-node-api-in-nginx-with-a-reverse-proxy/) is a better solution (both for proxying and for serving static files).
 
 ## Without proxying
+
+(Advanced section, may be skipped)
 
 To use `react-isomorphic-render` without proxying there are two options
 
@@ -244,6 +244,7 @@ To use `react-isomorphic-render` without proxying there are two options
 
 ```js
 import { render } from 'react-isomorphic-render/server'
+import settings from './react-isomorphic-render'
 
 try {
   // Returns a Promise.
@@ -252,7 +253,7 @@ try {
   // content - rendered HTML document (markup)
   // redirect - redirection URL (in case of HTTP redirect)
   //
-  const { status, content, redirect } = await render({
+  const { status, content, redirect } = await render(settings, {
     // Takes the same parameters as webpage server
     application: { host, port },
     assets,
@@ -267,9 +268,7 @@ try {
 
     // The rest optional parameters are the same
     // as for webpage server and are all optional
-  },
-  // The second `settings` parameter is the same as for webpage server
-  settings)
+  })
 
   if (redirect) {
     return redirect_to(redirect)
@@ -298,10 +297,12 @@ Example:
 function asynchronousAction() {
   return {
     promise: () => Promise.resolve({ success: true }),
-    events: ['PROMISE_PENDING', 'PROMISE_SUCCESS', 'PROMISE_FAILURE']
+    events: ['PROMISE_PENDING', 'PROMISE_SUCCESS', 'PROMISE_ERROR']
   }
 }
 ```
+
+When you find yourself copy-pasting those `_PENDING`, `_SUCCESS` and `_ERROR` event names from one action creator to another then take a look at `asynchronousActionEventNaming` setting described in the [Additional `react-isomorphic-render.js` settings](https://github.com/halt-hammerzeit/react-isomorphic-render#additional-react-isomorphic-renderjs-settings) section of this document.
 
 ### HTTP utility
 
@@ -386,9 +387,8 @@ By default, when using `http` utility all JSON responses get parsed for javascri
 For page preloading consider using `@preload()` helper to load the neccessary data before the page is rendered.
 
 ```javascript
-import { connect }            from 'react-redux'
-import { bindActionCreators } from 'redux'
-import { title, preload }     from 'react-isomorphic-render'
+import { connect } from 'react-redux'
+import { title, preload } from 'react-isomorphic-render'
 
 // fetches the list of users from the server
 function fetchUsers() {
@@ -400,43 +400,19 @@ function fetchUsers() {
 
 @preload(({ dispatch }) => dispatch(fetchUsers))
 @connect(
-  state    => ({ users: state.users.users }),
-  dispatch => bindActionCreators({ fetchUsers }, dispatch)
+  state => ({ users: state.users.users }),
+  { fetchUsers })
 )
 export default class Page extends Component {
-  static propTypes = {
-    users      : PropTypes.array.isRequired,
-    fetchUsers : PropTypes.func.isRequired
-  }
-
   render() {
+    const { users, fetchUsers } = this.props
     return (
       <div>
-        {title("Users")}
-        <ul>{this.props.users.map(user => <li>{user.name}</li>)}</ul>
-        <button onClick={this.props.fetch_users}>Refresh</button>
+        { title("Users") }
+        <ul>{ users.map(user => <li>{ user.name }</li>) }</ul>
+        <button onClick={ fetchUsers }>Refresh</button>
       </div>
     )
-  }
-
-  // Observing action result example (advanced).
-  //
-  // Suppose you make a `deleteUsers()` function 
-  // analagous to the `fetchUsers()` function.
-  //
-  // Then you can call it like this:
-  //
-  // <button onClick={::this.deleteUsers}>Delete all users</button>
-  //
-  // (async/await Babel syntax is used here; can be rewritten as usual Promises)
-  //
-  async deleteUsers() {
-    try {
-      const count = await this.props.deleteUsers()
-      alert(`Deleted ${count} users`)
-    } catch (error) {
-      alert(error)
-    }
   }
 }
 ```
@@ -447,27 +423,40 @@ In the example above `@preload()` helper is called to preload a web page before 
 @preload(function({ dispatch, getState, location, parameters }) { return Promise })
 ```
 
-Or, using `async/await`:
-
-```javascript
-@preload(async ({ dispatch, getState, location, parameters }) => await doSomething())
-```
-
 When `dispatch` is called with a special "asynchronous" action (having `promise` and `events` properties) then such a `dispatch()` call will return a `Promise`, that's why in the example above it's written as:
 
 ```js
 @preload(({ dispatch }) => dispatch(fetchUsers))
 ```
 
-Note: if `@preload()` decorator seems not working (though it definitely should) then try to place it on top of all other decorators. The possible reason is that it adds a static method to your `Route`'s `component` and some decorator on top of it may not retain that static method (though all proper decorators are agreed to retain static methods and variables).
+Note: `transform-decorators-legacy` Babel plugin is needed at the moment to make decorators work in Babel
+
+```sh
+npm install babel-plugin-transform-decorators-legacy --save
+```
+
+#### .babelrc
+
+```js
+{
+  "presets": [
+    ...
+  ],
+  "plugins": [
+    "transform-decorators-legacy"
+  ]
+}
+```
+
+P.S.: if `@preload()` decorator seems not working (though it definitely should) then try to place it on top of all other decorators. The possible reason is that it adds a static method to your `Route`'s `component` and some decorator on top of it may not retain that static method (though all proper decorators are agreed to retain static methods and variables).
 
 On the client side, when a user navigates a link, first it changes the URL in the address bar, then it waits for the next page to preload, and, when the next page is fully loaded, then it is displayed to the user. Sometimes preloading a page can take some time to finish so one may want to add a "spinner" to inform the user that the application isn't frozen and the navigation process needs some time to finish. This can be achieved by adding a Redux reducer listening to these three Redux events:
 
 ```javascript
 import { PRELOAD_STARTED, PRELOAD_FINISHED, PRELOAD_FAILED } from 'react-isomorphic-render'
 
-export default function(state = {}, event = {}) {
-  switch (event.type) {
+export default function(state = {}, action = {}) {
+  switch (action.type) {
     case PRELOAD_STARTED  : return { ...state, pending: true,  error: false }
     case PRELOAD_FINISHED : return { ...state, pending: false }
     case PRELOAD_FAILED   : return { ...state, pending: false, error: event.error }
@@ -482,10 +471,10 @@ And a "spinner" component
 import React       from 'react'
 import { connect } from 'react-redux'
 
-export default connect(state => ({ pending: state.preload.pending }))
-(function Spinner(props) {
-  return <div className={"preloading " + (props.pending ? "preloading-show" : "")}/>
-})
+@connect(state => ({ pending: state.preload.pending }))
+export default function Spinner(props) {
+  return <div className={ `preloading ${props.pending ? 'preloading--shown' : ''}` }/>
+}
 ```
 
 ```css
@@ -500,7 +489,7 @@ export default connect(state => ({ pending: state.preload.pending }))
   display: none;
 }
 
-.preloading-show {
+.preloading--shown {
   display: block;
   cursor: wait;
 }
@@ -553,6 +542,182 @@ const meta = [
 { meta({ ... same `meta` as above ... }) }
 ```
 
+### Handling asynchronous actions
+
+Once one starts writing a lot of Ajax calls in Redux it becomes obvious that there's **a lot** of boilerplate copy-pasting involved. To reduce those tremendous amounts of copy-pasta an "asynchronous action handler" may be used:
+
+#### redux/blogPost.js
+
+```js
+import { action, createHandler, stateConnector } from 'react-isomorphic-render'
+// (`./react-isomorphic-render-async.js` settings file is described below)
+import settings from './react-isomorphic-render-async'
+
+const handler = createHandler(settings)
+
+// Post comment Redux "action creator"
+export const postComment = action({
+  namespace: 'BLOG_POST',
+  event: 'POST_COMMENT',
+  promise(userId, blogPostId, commentText, http) {
+    return http.post(`/blog/posts/${blogPostId}/comment`, {
+      userId: userId,
+      text: commentText
+    })
+  }
+},
+handler)
+
+// Get comments Redux "action creator"
+export const getComments = action({
+  namespace: 'BLOG_POST',
+  event: 'GET_COMMENTS',
+  promise(blogPostId, http) {
+    return http.get(`/blog/posts/${blogPostId}/comments`)
+  },
+  // The fetched comments will be placed
+  // into the `comments` Redux state property.
+  result: 'comments'
+  // Or write it as a reducer:
+  // result: (state, result) => ({ ...state, comments: result })
+},
+handler)
+
+// This is for the Redux `@connect()` helper below
+handler.addStateProperties('comments')
+
+// A developer can additionally handle any other custom events
+handler.handle(eventName('BLOG_POST', 'CUSTOM_EVENT'), (state, action) => ({
+  ...state,
+  customProperty: action.result
+}))
+
+// This is for the Redux `@connect()` helper below
+handler.addStateProperties('customProperty')
+
+// A little helper for Redux `@connect()`
+export const connector = stateConnector(handler)
+
+// This is the Redux reducer which now
+// handles the asynchronous actions defined above.
+export default handler.reducer()
+```
+
+#### redux/reducer.js
+
+```js
+export { default as blogPost } from './blogPost'
+...
+```
+
+And a React component would look like this
+
+```js
+import React, { Component } from 'react'
+import { connect } from 'react-redux'
+import { preload } from 'react-isomorphic-render'
+import { connector, getComments, postComment } from './redux/blogPost'
+
+// Preload comments before showing the page
+// (see "Page preloading" section of this document)
+@preload(({ dispatch, getState, parameters }) => {
+  return dispatch(getComments(parameters.blogPostId))
+})
+// See `react-redux` documentation on `@connect()` decorator
+@connect((state) => ({
+  userId: state.user.id,
+  // `connector` will populate the Redux `props`
+  ...connector(state.blogPost)
+}), {
+  postComment
+})
+export default class BlogPostPage extends Component {
+  render() {
+    const {
+      getCommentsPending,
+      getCommentsError,
+      comments
+    } = this.props
+
+    if (getCommentsError) {
+      return <div>Couldn't load comments</div>
+    }
+
+    return (
+      <div>
+        <ul>
+          { comments.map(comment => <li>{comment}</li>) }
+        </ul>
+        {this.renderPostCommentForm()}
+      </div>
+    )
+  }
+
+  renderPostCommentForm() {
+    const {
+      userId,
+      params,
+      postComment,
+      postCommentPending,
+      postCommentError
+    } = this.props
+
+    if (postCommentPending) {
+      return <div>Posting comment...</div>
+    }
+
+    if (postCommentError) {
+      return <div>Couldn't post comment</div>
+    }
+
+    return (
+      <button onClick={() => postComment(userId, params.blogPostId, 'text')}>
+        Post comment
+      </button>
+    )
+  }
+}
+```
+
+And the additional configuration would be:
+
+#### react-isomorphic-render.js
+
+```js
+import asyncSettings from './react-isomorphic-render-async'
+
+export default {
+  // All the settings as before
+
+  ...asyncSettings
+}
+```
+
+#### react-isomorphic-render-async.js
+
+```js
+import { underscoredToCamelCase } from 'react-isomorphic-render'
+
+export default {
+  // When supplying `event` instead of `events`
+  // as part of an asynchronous Redux action
+  // this will generate `events` from `event`
+  // using this function.
+  asynchronousActionEventNaming: event => ([
+    `${event}_PENDING`,
+    `${event}_SUCCESS`,
+    `${event}_ERROR`
+  ]),
+
+  // When using "asynchronous action handlers" feature
+  // this function will generate a Redux state property name from an event name.
+  // E.g. event `GET_USERS_ERROR` => state.`getUsersError`.
+  asynchronousActionHandlerStatePropertyNaming: underscoredToCamelCase,
+}
+```
+
+Notice the extraction of these two configuration parameters into a separate file `react-isomorphic-render-async.js`: it is done to break circular dependency on `./react-isomorphic-render.js` file because `routes` `import` React page components which in turn `import` action creators which in turn import `./react-isomorphic-render.js` hence the circular (recursive) dependency (same goes for `reducer`).
+
 ### Locale detection
 
 This library performs the following locale detection steps for each webpage rendering HTTP request:
@@ -580,28 +745,21 @@ These two helper Redux actions change the current location (both on client and s
 
 ```javascript
 import { goto, redirect } from 'react-isomorphic-render'
+import { connect } from 'react-redux'
 
 // Usage example
 // (`goto` navigates to a URL while adding a new entry in browsing history,
 //  `redirect` does the same replacing the current entry in browsing history)
-return this.props.dispatch(goto('/items/1?color=red'))
+@connect(state = {}, { goto, redirect })
+class Page extends Component {
+  handleClick(event) {
+    return this.props.goto('/items/1?color=red')
+    // return this.props.redirect('/somewhere')
+  }
+}
 ```
 
 A sidenote: these two functions aren't supposed to be used inside `onEnter` and `onChange` `react-router` hooks. Instead use the `replace` argument supplied to these functions by `react-router` when they are called (`replace` works the same way as `redirect`).
-
-### onEnter
-
-Some people requested support for using `dispatch` and `getState` in `react-router`'s `onEnter` hooks. While [this Pull Request](https://github.com/acdlite/redux-router/pull/272) in `redux-router` repo has not been accepted yet use the `onEnter` helper to get this functionality:
-
-```js
-import { onEnter } from 'react-isomorphic-render'
-
-<Route path="user">
-  <Route path=":id" component={onEnter(async ({ dispatch, getState }, redirect) => {
-    redirect('/somewhere')
-  })(UserProfile)}/>
-</Route>
-```
 
 ## Caching
 
@@ -687,55 +845,102 @@ This library attempts to read authenication token from a cookie named `settings.
 
 ## Webpack HMR
 
-Webpack's [Hot Module Replacement](https://webpack.github.io/docs/hot-module-replacement.html) (aka Hot Reload) works both on React components and Redux reducers.
+Webpack's [Hot Module Replacement](https://webpack.github.io/docs/hot-module-replacement.html) (aka Hot Reload) works for React components and Redux reducers and Redux action creators.
 
-For enabling HMR on Redux reducers first one should make sure that the `reducer` parameter is a function and that it's not simply `reducer: () => reducer` but is instead `reducer: () => require('./reducer')`, i.e. the `require()` call has to be inside the `reducer` parameter function itself, because that's how Webpack HMR works: explicit `require()`s must be placed inside `module.hot.accept` handler, not at the top of the file as usually (i.e. not `import reducer from './reducer'` — that wouldn't ever hot reload).
+HMR setup for Redux reducers is as simple as adding `store.hotReload()` (as shown below). For enabling [HMR on React Components](https://webpack.js.org/guides/hmr-react/) (and Redux action creators) I would suggest the new [react-hot-loader 3](https://github.com/gaearon/react-hot-loader) (which is still in beta, so install it like `npm install react-hot-loader@3.0.0-beta.6 --save`):
 
-After specifying the correct `reducer` parameter function the next step is to set up `onStoreCreated` handler like this:
-
-```js
-{
-  ...
-
-  reducer: () => require('./reducer'),
-
-  onStoreCreated({ reloadReducer }) {
-    if (module.hot) {
-      // This path must be equal to the path
-      // inside the `require()` call in the `reducer` parameter
-      module.hot.accept('./reducer', reloadReducer)
-    }
-  }
-}
-```
-
-For enabling HMR on React Components I would suggest either the good-old [react-transform-hmr](https://github.com/gaearon/react-transform-hmr) (which I'm using myself) or the new [react-hot-loader 3](https://github.com/gaearon/react-hot-loader) (which is still in beta). Those who don't like either of them can try to set up React Components HMR manually and in that case the instructions would be the same as for Redux reducers above: first make sure that `routes` parameter is a function having `require()` calls for `<Route/>` Components inside itself (not at the top of the file), and then use the `Promise` returned from the `render()` function call:
+#### application.js
 
 ```js
-render({
-  ...
-  routes: () => require('./routes')
-}, common).then(({ rerender }) => {
+import settings from './react-isomorphic-render'
+
+render(settings).then(({ store, rerender }) => {
   if (module.hot) {
     // This path must be equal to the path
     // inside the `require()` call in the `routes` parameter
-    module.hot.accept('./routes', rerender)
+    module.hot.accept('./react-isomorphic-render', () => {
+      rerender()
+      // Update reducer (for Webpack 2 ES6)
+      store.hotReload(settings.reducer)
+      // Update reducer (for Webpack 1)
+      // store.hotReload(require('./react-isomorphic-render').reducer)
+    })
   }
 })
 ```
 
-## Additional `react-isomorphic-render.js` settings
+#### wrapper.js
+
+```js
+import React, { Component, PropTypes } from 'react'
+import { Provider } from 'react-redux'
+import { AppContainer } from 'react-hot-loader'
+
+export default class Wrapper extends Component {
+  static propTypes = {
+    store: React.PropTypes.object.isRequired
+  }
+
+  render() {
+    const { store, children } = this.props;
+
+    return (
+      <AppContainer>
+        <Provider store={ store }>
+          { children }
+        </Provider>
+      </AppContainer>
+    )
+  }
+}
+```
+
+#### .babelrc
+
+```js
+{
+  "presets": [
+    "react",
+    // For Webpack 2 ES6:
+    ["es2015", { modules: false }],
+    // For Webpack 1:
+    // "es2015",
+    "stage-2"
+  ],
+
+  "plugins": [
+    "react-hot-loader/babel"
+  ]
+}
+```
+
+#### webpack.config.js
+
+```js
+export default {
+  entry: {
+    main: [
+      'react-hot-loader/patch',
+      'webpack-hot-middleware/client?http://localhost:8080',
+      'webpack/hot/only-dev-server',
+      './src/application.js'
+    ]
+  },
+  plugins: [
+    new webpack.HotModuleReplacementPlugin(),
+    ...
+  ],
+  ...
+}
+```
+
+## Other `react-isomorphic-render.js` settings
 
 ```javascript
 {
   // (optional)
   // User can add his own middleware to this `middleware` list
   reduxMiddleware: () => [...]
-
-  // (optional)
-  // Is called when Redux store has been created
-  // (can be used for setting up Webpack Hot Module Replacement)
-  onStoreCreated: ({ reloadReducer }) => {}
 
   // (optional)
   // `http` utility settings
@@ -809,11 +1014,6 @@ render({
   }
 
   // (optional)
-  // `react-router`s `onUpdate` handler
-  // (is fired when a user performs navigation)
-  onNavigate: (location) => {}
-
-  // (optional)
   // `history` options (like `basename`)
   history: {}
 
@@ -823,10 +1023,38 @@ render({
   // restoring Redux state on the client-side.
   // (is `true` by default)
   parseDates: `true` / `false`
+
+  // (optional)
+  // When supplying `event` instead of `events`
+  // as part of an asynchronous Redux action
+  // this will generate `events` from `event`
+  // using this function.
+  asynchronousActionEventNaming: event => ([
+    `${event}_PENDING`,
+    `${event}_SUCCESS`,
+    `${event}_ERROR`
+  ])
+
+  // (optional)
+  // When using asynchronous action handlers
+  // this function will generate a Redux state property name for an event name.
+  // E.g. event `GET_USERS_ERROR` => state.`getUsersError`.
+  asynchronousActionHandlerStatePropertyNaming(event) {
+    // Converts `CAPS_LOCK_UNDERSCORED_NAMES` to `camelCasedNames`
+    return event.split('_')
+      .map((word, i) =>  {
+        let firstLetter = word.slice(0, 1)
+        if (i === 0) {
+          firstLetter = firstLetter.toLowerCase()
+        }
+        return firstLetter + word.slice(1).toLowerCase()
+      })
+      .join('')
+  }
 }
 ```
 
-## Miscellaneous webpage rendering server options
+## Other webpage rendering server options
 
 ```javascript
 {
@@ -963,11 +1191,17 @@ render({
 }
 ```
 
-## Miscellaneous client-side rendering options
+## Other client-side rendering options
 
 ```javascript
 {
   ...
+
+  // (optional)
+  // `react-router`s `onUpdate` handler
+  // (is fired when a user performs navigation)
+  // (can be used for Google Analytics, for example)
+  onNavigate: (location) => {}
 
   // (optional)
   // Enables/disables Redux development tools.
@@ -1016,17 +1250,17 @@ Client-side `render` function returns a `Promise` resolving to an object
   rerender   // (Redux) rerender React application
 }
 ```
-
+<!-- 
 ## `redux-router`
 
-Currently this library uses [`redux-router`](https://github.com/acdlite/redux-router) which seems to be not maintained anymore (e.g. they don't want to merge [my fix for `onEnter` hooks](https://github.com/acdlite/redux-router/pull/272)). Fear not though: it's working fine as it is. I could drop `redux-router` in favour of bare `react-router` any time, but it would also have a couple of side-effects:
+Currently this library uses a fork of [`redux-router`](https://github.com/acdlite/redux-router) which seems to work fine. I could drop `redux-router` in favour of bare `react-router` any time, but it would also have a couple of side-effects:
 
   * Router no more being controlled via Redux actions (`dispatch(goto())`, `dispatch(redirect())`) and instead being manipulated directly via `this.context.router` (`.push()`, `.replace()`). This seems to be a right way to go since there's really no reason for redirecting via dispatching a Redux action. Dispatching a Redux action seems more elegant but at the same time keeping `router` state inside Redux store seems weird and strained.
 
   * Preloading would require an extra bit of verbosity: instead of just writing `<Route component={Page}/>` it would be written as `<Route component={Page} onEnter={Page.preload}/>` which is gonna get a bit more verbose and copy-pasty for an application having many routes. I currently see no other way to make preloading work with bare `react-router`.
 
-Having said all that, it's definitely possible to drop `redux-router` and rewrite this library with bare `react-router` (say, `react-router@3.x`, since the new `react-router@4.x` is a totally different library), but currently I see no big reason for doing that: it's working fine now, no bugs, etc. The only bug is the `onEnter` hook one, but I implemented a workaround for it too (see `onEnter` section of this readme).
-
+Having said all that, it's definitely possible to drop `redux-router` and rewrite this library with bare `react-router`, but currently I see no big reason for doing that as it's working fine as it is. Furthermore, `react-router` authors don't care at all about the users of their library and they constantly rewrite it from scratch dropping support for previous versions. Even the freshly released `react-router@3.0.0` which is used by this library is already considered "obsolete" by those authors which makes them incompetent and really bad mannered. They promote `react-router@4.0.0` now (which is aplha at the time of writing). Maybe they'd come up with whole new `react-router@5.0.0` tomorrow, who knows how high are they.
+ -->
 ## Gotchas
 
 This library is build system agnostic: you can use your favourite Grunt, Gulp, Browserify, RequireJS, Webpack, etc.

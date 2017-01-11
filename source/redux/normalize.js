@@ -1,29 +1,44 @@
 import { clone } from '../helpers'
 
-export function normalize_common_options(common)
+export default function normalize_common_settings(common, options = {})
 {
-	if (!common)
+	if (common === undefined)
 	{
-		throw new Error(`Common options weren't passed. Perhaps you've upgraded to react-isomorphic-render 4.0.0 in which case check the new API documentation.`)
+		throw new Error(`Common settings weren't passed.`)
+	}
+
+	if (typeof common !== 'object')
+	{
+		throw new Error(`Expected a settings object, got ${typeof common}: ${common}`)
 	}
 
 	common = clone(common)
 
-	if (!common.routes)
+	if (options.full !== false)
 	{
-		throw new Error(`"routes" parameter is required`)
-	}
+		if (!common.routes)
+		{
+			throw new Error(`"routes" parameter is required`)
+		}
 
-	if (!common.reducer)
-	{
-		throw new Error(`"reducer" parameter is required`)
+		if (!common.reducer)
+		{
+			throw new Error(`"reducer" parameter is required`)
+		}
 	}
 
 	// camelCase aliasing
-	if (common.onStoreCreated)
+	if (common.asynchronousActionEventNaming)
 	{
-		common.on_store_created = common.onStoreCreated
-		delete common.onStoreCreated
+		common.asynchronous_action_event_naming = common.asynchronousActionEventNaming
+		delete common.asynchronousActionEventNaming
+	}
+
+	// camelCase aliasing
+	if (common.asynchronousActionHandlerStatePropertyNaming)
+	{
+		common.asynchronous_action_handler_state_property_naming = common.asynchronousActionHandlerStatePropertyNaming
+		delete common.asynchronousActionHandlerStatePropertyNaming
 	}
 
 	// camelCase aliasing

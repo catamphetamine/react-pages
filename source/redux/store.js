@@ -1,15 +1,19 @@
 import { createStore, combineReducers, applyMiddleware, compose } from 'redux'
-import { routerStateReducer } from 'redux-router'
+// import { routerStateReducer } from './redux-router'
 import { createRoutes } from 'react-router/lib/RouteUtils'
-import { useBasename } from 'history'
+// import { useBasename } from 'history'
 
 import asynchronous_middleware from './middleware/asynchronous middleware'
 import preloading_middleware from './middleware/preloading middleware'
-import on_route_update_middleware from './middleware/on route update middleware'
+// import on_route_update_middleware from './middleware/on route update middleware'
+import history_middleware from './middleware/history middleware'
+
+import { useRouterHistory } from 'react-router'
 
 // import use_scroll from 'scroll-behavior'
 
-export default function create_store(reduxReactRouter, createHistory, reducer, { devtools, server, data, routes, http_client, promise_event_naming, on_preload_error, middleware, on_store_created, preload_helpers, on_navigate, history_options })
+// reduxReactRouter, 
+export default function create_store(createHistory, reducer, { devtools, server, data, routes, http_client, asynchronous_action_event_naming, on_preload_error, middleware, on_store_created, preload_helpers, history_options })
 {
 	// Simply using `useScroll` from `scroll-behavior@0.7.0`
 	// introduces scroll jumps to top when navigating the app
@@ -19,12 +23,6 @@ export default function create_store(reduxReactRouter, createHistory, reducer, {
 	// const createHistory = server ? createHistory_server    : () => use_scroll(createHistory_client())
 	//
 	// Therefore using a middleware to wait for page loading to finish.
-
-	// Generates the three promise event names automatically based on a base event name
-	if (!promise_event_naming)
-	{
-		promise_event_naming = event_name => [`${event_name}: pending`, `${event_name}: done`, `${event_name}: failed`]
-	}
 
 	// Redux store enhancers
 	const store_enhancers = []
@@ -39,6 +37,10 @@ export default function create_store(reduxReactRouter, createHistory, reducer, {
 		}
 	}
 
+	const history = useRouterHistory(createHistory)(history_options)
+
+	// Redux middlewares are applied in reverse order
+	// (which is counter-intuitive)
 	const middlewares =
 	[
 		// Enables support for Ajax Http requests.
@@ -54,7 +56,7 @@ export default function create_store(reduxReactRouter, createHistory, reducer, {
 		// therefore there's an additional `dispatch_event` argument
 		// which is a function to hack around that limitation.
 		//
-		asynchronous_middleware(http_client, event => store.dispatch(event), { promise_event_naming }),
+		asynchronous_middleware(http_client, event => store.dispatch(event), { asynchronous_action_event_naming }),
 
 		// Enables support for @preload() annotation
 		// (which preloads data required for displaying certain pages).
@@ -70,61 +72,51 @@ export default function create_store(reduxReactRouter, createHistory, reducer, {
 		// won't send actions to that `reduxReactRouter` middleware,
 		// therefore using the third argument to hack around this thing.
 		//
-		preloading_middleware(server, on_preload_error, event => store.dispatch(event), preload_helpers)
+		preloading_middleware(server, on_preload_error, event => store.dispatch(event), preload_helpers, routes, history),
+
+		history_middleware(history)
 	]
 
-	if (on_navigate)
-	{
-		middlewares.push
-		(
-			// Implements `react-router` `onUpdate` handler
-			//
-			// Listens for `{ type: ROUTER_DID_CHANGE }`
-			//
-			on_route_update_middleware(on_navigate)
-		)
-	}
+	// if (on_navigate && !server)
+	// {
+	// 	// Redux middlewares are applied in reverse order
+	// 	// (which is counter-intuitive)
+	// 	middlewares.push
+	// 	(
+	// 		// Implements `react-router` `onUpdate` handler
+	// 		//
+	// 		// Listens for `{ type: ROUTER_DID_CHANGE }`
+	// 		//
+	// 		on_route_update_middleware(on_navigate, history)
+	// 	)
+	// }
 
+	// Redux middlewares are applied in reverse order
+	// (which is counter-intuitive)
 	store_enhancers.push
 	(
-		// `redux-router` middleware
-		// (redux-router keeps react-router state in Redux)
-		reduxReactRouter
-		({
-			getRoutes: ({ dispatch, getState }) =>
-			{
-				function get_state()
-				{
-					try
-					{
-						return getState()
-					}
-					// "TypeError: Cannot read property 'getState' of undefined".
-					// This error is thrown when calling `getState()`
-					// directly inside `getRoutes()`, before the `store` is created.
-					catch (error)
-					{
-						// Pretend that Redux state is the
-						// result of `initialize` function call.
-						return data
-					}
-				}
+		// // `redux-router` middleware
+		// // (redux-router keeps react-router state in Redux)
+		// reduxReactRouter
+		// ({
+		// 	routes,
+		// 	createHistory(...parameters)
+		// 	{
+		// 		return useBasename(createHistory)({ ...parameters, ...history_options })
+		// 	}
+		// }),
 
-				return typeof routes === 'function' ? routes({ dispatch, getState: get_state }) : routes;
-			},
-			createHistory: (...parameters) =>
-			{
-				return useBasename(createHistory)({ ...parameters, ...history_options })
-			}
-		}),
-
-		// Ajax and @preload middleware (+ optional others)
+		// Ajax and @preload middleware (+ optional others).
+		// Redux middlewares are applied in reverse order
+		// (which is counter-intuitive)
 		applyMiddleware(...middlewares)
 	)
 
 	// Add Redux DevTools (if they're enabled)
 	if (process.env.NODE_ENV !== 'production' && !server && devtools)
 	{
+		// Redux middlewares are applied in reverse order
+		// (which is counter-intuitive)
 		store_enhancers.push
 		(
 			// Provides support for DevTools
@@ -136,17 +128,19 @@ export default function create_store(reduxReactRouter, createHistory, reducer, {
 
 	// adds redux-router reducers to the list of all reducers.
 	// overall Redux reducer = web application reducers + redux-router reducer
-	const overall_reducer = () =>
+	const overall_reducer = (reducer) =>
 	{
 		const reducers = typeof reducer === 'function' ? reducer() : reducer
-		reducers.router = routerStateReducer
+		// reducers.router = routerStateReducer
 		return combineReducers(reducers)
 	}
 
 	// create Redux store 
 	// with the overall Redux reducer 
 	// and the initial Redux store data (aka "the state")
-	const store = compose(...store_enhancers)(createStore)(overall_reducer(), data)
+	const store = compose(...store_enhancers)(createStore)(overall_reducer(reducer), data)
+
+	store.history = history
 
 	// Because History API won't work on the server side,
 	// instrument it with redirection handlers (isomorphic redirection)
@@ -191,21 +185,13 @@ export default function create_store(reduxReactRouter, createHistory, reducer, {
 	// {
 	// 	module.hot.accept(reducers_path, () =>
 	// 	{
-	// 		store.replaceReducer(overall_reducer())
+	// 		store.replaceReducer(overall_reducer(reducer))
 	// 	})
 	// }
 
-	// `reload` helper function gives the web application means to hot reload its Redux reducers
-	if (on_store_created)
-	{
-		const reload_reducer = () => store.replaceReducer(overall_reducer())
-		
-		on_store_created
-		({
-			reload_reducer,
-			reloadReducer: reload_reducer
-		})
-	}
+	// `hot_reload` helper function gives the web application means to hot reload its Redux reducers
+	store.hot_reload = reducer => store.replaceReducer(overall_reducer(reducer))
+	store.hotReload = store.hot_reload
 
 	// return the created Redux store
 	return store

@@ -18,7 +18,16 @@ import
 	Preload_method_name,
 	PRELOAD_METHOD_NAME,
 	Preload_options_name,
-	PRELOAD_OPTIONS_NAME
+	PRELOAD_OPTIONS_NAME,
+	action,
+	create_handler,
+	createHandler,
+	state_connector,
+	stateConnector,
+	underscoredToCamelCase,
+	event_name,
+	eventName,
+	Link
 }
 from '../index.es6'
 
@@ -47,6 +56,18 @@ describe(`exports`, function()
 		PRELOAD_METHOD_NAME.should.be.a('string')
 		Preload_options_name.should.be.a('string')
 		PRELOAD_OPTIONS_NAME.should.be.a('string')
+
+		action.should.be.a('function')
+		create_handler.should.be.a('function')
+		createHandler.should.be.a('function')
+		state_connector.should.be.a('function')
+		stateConnector.should.be.a('function')
+
+		underscoredToCamelCase.should.be.a('function')
+		event_name.should.be.a('function')
+		eventName.should.be.a('function')
+
+		Link.should.be.a('function')
 	})
 
 	it(`should export ES5`, () =>
@@ -77,27 +98,17 @@ describe(`exports`, function()
 		_.Preload_options_name.should.be.a('string')
 		_.PRELOAD_OPTIONS_NAME.should.be.a('string')
 
-		// Backwards compatibility for `/redux` export
-		// (will be removed in version 9.0.0)
-		const redux = require('../redux')
+		_.action.should.be.a('function')
+		_.create_handler.should.be.a('function')
+		_.createHandler.should.be.a('function')
+		_.state_connector.should.be.a('function')
+		_.stateConnector.should.be.a('function')
 
-		redux.render.should.be.a('function')
-		redux.preload.should.be.a('function')
+		_.underscoredToCamelCase.should.be.a('function')
+		_.event_name.should.be.a('function')
+		_.eventName.should.be.a('function')
 
-		redux.goto.should.be.a('function')
-		redux.redirect.should.be.a('function')
-
-		redux.Preload_started.should.be.a('string')
-		redux.PRELOAD_STARTED.should.be.a('string')
-		redux.Preload_finished.should.be.a('string')
-		redux.PRELOAD_FINISHED.should.be.a('string')
-		redux.Preload_failed.should.be.a('string')
-		redux.PRELOAD_FAILED.should.be.a('string')
-
-		redux.Preload_method_name.should.be.a('string')
-		redux.PRELOAD_METHOD_NAME.should.be.a('string')
-		redux.Preload_options_name.should.be.a('string')
-		redux.PRELOAD_OPTIONS_NAME.should.be.a('string')
+		_.Link.should.be.a('function')
 	})
 
 	it(`should export rendering service`, () =>
