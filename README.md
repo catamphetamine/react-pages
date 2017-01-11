@@ -644,7 +644,7 @@ export default class BlogPostPage extends Component {
     } = this.props
 
     if (getCommentsError) {
-      return <div>Couldn't load comments</div>
+      return <div>Error while loading comments</div>
     }
 
     return (
@@ -671,7 +671,7 @@ export default class BlogPostPage extends Component {
     }
 
     if (postCommentError) {
-      return <div>Couldn't post comment</div>
+      return <div>Error while posting comment</div>
     }
 
     return (
