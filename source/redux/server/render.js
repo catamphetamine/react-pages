@@ -27,7 +27,12 @@ export default function render_on_server({ disable_server_side_rendering, create
 	// const routing_timer = timer()
 
 	// Perform routing for this `url`
-	return match_routes_against_location({ location: url, routes }).then(({ redirect, router_state }) =>
+	return match_routes_against_location
+	({
+		location: url,
+		routes: typeof routes === 'function' ? routes(store) : routes
+	})
+	.then(({ redirect, router_state }) =>
 	{
 		// routing_timer()
 

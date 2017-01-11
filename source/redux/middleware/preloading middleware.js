@@ -79,11 +79,9 @@ export default function preloading_middleware(server, error_handler, dispatch_ev
 		// used to reach deeper than simply `dispatch()`.
 		// Therefore passing it here.
 		// Maybe that info could be rechecked.
-		routes = typeof routes === 'function' ? routes({ dispatch: dispatch_event, getState }) : routes
-
 		return match_routes_against_location
 		({
-			routes,
+			routes: typeof routes === 'function' ? routes({ dispatch: dispatch_event, getState }) : routes
 			history,
 			location: action.location
 		})
