@@ -170,7 +170,7 @@ const server = webpageServer(settings, {...})
 https.createServer(options, server.callback()).listen(3001, error => ...)
 ```
 
-Now [disable javascript in Chrome DevTools](http://stackoverflow.com/questions/13405383/how-to-disable-javascript-in-chrome-developer-tools), go to `localhost:3000` and the server should respond with a rendered page.
+Now [disable javascript in Chrome DevTools](http://stackoverflow.com/questions/13405383/how-to-disable-javascript-in-chrome-developer-tools), go to `localhost:3000` and the server should respond with a fully rendered page.
 
 ## Proxying
 
