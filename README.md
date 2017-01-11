@@ -919,7 +919,7 @@ export default {
     main: [
       // This line is required for `react-hot-loader@3`
       'react-hot-loader/patch',
-      
+
       'webpack-hot-middleware/client?http://localhost:8080',
       'webpack/hot/only-dev-server',
       './src/application.js'
@@ -1077,11 +1077,12 @@ export default {
 }
 ```
 
-## Other webpage rendering server options
+## All webpage rendering server options
 
 ```javascript
 {
-  ...
+  // Already discussed above
+  application,
 
   // `assets` parameter is introduced for the cases
   // when the project is built with Webpack.
