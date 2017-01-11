@@ -84,7 +84,7 @@ And the `index.html` would look like this:
 </html>
 ```
 
-Notice the `/assets/main.css` and `/assets/main.js` paths: I suppose you're running [`webpack-dev-server`](https://webpack.github.io/docs/webpack-dev-server.html) and this `index.html` file is put into the `build` folder.
+Notice the `/assets/main.css` and `/assets/main.js` paths: in this example I assume that you're running [`webpack-dev-server`](https://webpack.github.io/docs/webpack-dev-server.html) and this `index.html` file is put into the `build` folder.
 
 Now open `localhost:8080` in a web browser. Client side rendering should work now.
 
