@@ -92,7 +92,7 @@ Now open `localhost:8080` in a web browser. Client side rendering should work no
 
 Now it's time to add Server Side Rendering, and also serving "static files" via HTTP for production mode, when `webpack-dev-server` is not running.
 
-`index.html` will be generated on-the-fly by page rendering server for each HTTP request, so the old `index.html` may be deleted as it's of no use now.
+`index.html` will be generated on-the-fly by page rendering server for each HTTP request, so the `index.html` file may be deleted as it's of no use now.
 
 Start the webpage rendering server (also serving assets):
 
