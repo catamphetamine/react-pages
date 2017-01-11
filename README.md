@@ -861,8 +861,6 @@ import settings from './react-isomorphic-render'
 
 render(settings).then(({ store, rerender }) => {
   if (module.hot) {
-    // This path must be equal to the path
-    // inside the `require()` call in the `routes` parameter
     module.hot.accept('./react-isomorphic-render', () => {
       rerender()
       // Update reducer (for Webpack 2 ES6)
@@ -877,26 +875,19 @@ render(settings).then(({ store, rerender }) => {
 #### wrapper.js
 
 ```js
-import React, { Component, PropTypes } from 'react'
+import React from 'react'
 import { Provider } from 'react-redux'
+// `react-hot-loader@3`'s `<AppContainer/>`
 import { AppContainer } from 'react-hot-loader'
 
-export default class Wrapper extends Component {
-  static propTypes = {
-    store: React.PropTypes.object.isRequired
-  }
-
-  render() {
-    const { store, children } = this.props;
-
-    return (
-      <AppContainer>
-        <Provider store={ store }>
-          { children }
-        </Provider>
-      </AppContainer>
-    )
-  }
+export default function Wrapper({ store, children }) {
+  return (
+    <AppContainer>
+      <Provider store={ store }>
+        { children }
+      </Provider>
+    </AppContainer>
+  )
 }
 ```
 
