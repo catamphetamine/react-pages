@@ -377,7 +377,7 @@ import { title, preload } from 'react-isomorphic-render'
 // fetches the list of users from the server
 function fetchUsers() {
   return {
-    promise: http => http.get('/api/users').then(ids => Promise.map(ids, id => http.get(`/api/users/${id}`))),
+    promise: http => http.get('/api/users'),
     events: ['GET_USERS_PENDING', 'GET_USERS_SUCCESS', 'GET_USERS_FAILURE']
   }
 }
