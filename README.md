@@ -286,7 +286,7 @@ function asynchronousAction() {
 
 This is a handy way of dealing with "asynchronous actions" in Redux, e.g. Ajax requests for HTTP REST API (see the "HTTP utility" section below).
 
-P.S.: When you find yourself copy-pasting those `_PENDING`, `_SUCCESS` and `_ERROR` event names from one action creator to another then take a look at `asynchronousActionEventNaming` setting described in the [All `react-isomorphic-render.js` settings](https://github.com/halt-hammerzeit/react-isomorphic-render#all-react-isomorphic-renderjs-settings) section of this document: it lets a developer just supply a "base" `event` name and then it generates the three lifecycle event names from that "base" `even` reducing boilerplate significantly.
+P.S.: When you find yourself copy-pasting those `_PENDING`, `_SUCCESS` and `_ERROR` event names from one action creator to another then take a look at `asynchronousActionEventNaming` setting described in the [All `react-isomorphic-render.js` settings](https://github.com/halt-hammerzeit/react-isomorphic-render#all-react-isomorphic-renderjs-settings) section of this document: it lets a developer just supply a "base" `event` name and then it generates the three lifecycle event names from that "base" `event` significantly reducing boilerplate.
 
 ### HTTP utility
 
