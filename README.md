@@ -450,7 +450,7 @@ npm install babel-plugin-transform-decorators-legacy --save
 
 P.S.: if `@preload()` decorator seems not working (though it definitely should) then try to place it on top of all other decorators. The possible reason is that it adds a static method to your `Route`'s `component` and some decorator on top of it may not retain that static method (though all proper decorators are agreed to retain static methods and variables).
 
-On the client side, when a user navigates a link, first it changes the URL in the address bar, then it waits for the next page to preload, and, when the next page is fully loaded, then it is displayed to the user. Sometimes preloading a page can take some time to finish so one may want to add a "spinner" to inform the user that the application isn't frozen and the navigation process needs some time to finish. This can be achieved by adding a Redux reducer listening to these three Redux events:
+On the client side, in order for `@preload` to work all `<Link/>`s imported from `react-router` **must** be instead imported from `react-isomorphic-render`. Upon a click on a `<Link/>` first it waits for the next page to preload, and, when the next page is fully loaded, then it is displayed to the user and the URL in the address bar is updated. Sometimes preloading a page can take some time to finish so one may want to add a "spinner" to inform the user that the application isn't frozen and the navigation process needs some time to finish. This can be achieved by adding a Redux reducer listening to these three Redux events:
 
 ```javascript
 import { PRELOAD_STARTED, PRELOAD_FINISHED, PRELOAD_FAILED } from 'react-isomorphic-render'
@@ -728,7 +728,7 @@ This library performs the following locale detection steps for each webpage rend
  
 The resulting locales array is passed as `preferredLocales` parameter into `localize()` function of the webpage rendering server which then returns `{ locale, messages }`.
 
-### Determining current location
+<!-- ### Determining current location
 
 ```javascript
 @connect(state => ({ location: state.router.location }))
@@ -737,7 +737,7 @@ class Component extends React.Component {
     return <span>{this.props.location}</span>
   }
 }
-```
+``` -->
 
 ### Changing current location
 
@@ -753,8 +753,9 @@ import { connect } from 'react-redux'
 @connect(state = {}, { goto, redirect })
 class Page extends Component {
   handleClick(event) {
-    return this.props.goto('/items/1?color=red')
-    // return this.props.redirect('/somewhere')
+    const { goto, redirect } = this.props
+    goto('/items/1?color=red')
+    // redirect('/somewhere')
   }
 }
 ```
@@ -1250,17 +1251,7 @@ Client-side `render` function returns a `Promise` resolving to an object
   rerender   // (Redux) rerender React application
 }
 ```
-<!-- 
-## `redux-router`
 
-Currently this library uses a fork of [`redux-router`](https://github.com/acdlite/redux-router) which seems to work fine. I could drop `redux-router` in favour of bare `react-router` any time, but it would also have a couple of side-effects:
-
-  * Router no more being controlled via Redux actions (`dispatch(goto())`, `dispatch(redirect())`) and instead being manipulated directly via `this.context.router` (`.push()`, `.replace()`). This seems to be a right way to go since there's really no reason for redirecting via dispatching a Redux action. Dispatching a Redux action seems more elegant but at the same time keeping `router` state inside Redux store seems weird and strained.
-
-  * Preloading would require an extra bit of verbosity: instead of just writing `<Route component={Page}/>` it would be written as `<Route component={Page} onEnter={Page.preload}/>` which is gonna get a bit more verbose and copy-pasty for an application having many routes. I currently see no other way to make preloading work with bare `react-router`.
-
-Having said all that, it's definitely possible to drop `redux-router` and rewrite this library with bare `react-router`, but currently I see no big reason for doing that as it's working fine as it is. Furthermore, `react-router` authors don't care at all about the users of their library and they constantly rewrite it from scratch dropping support for previous versions. Even the freshly released `react-router@3.0.0` which is used by this library is already considered "obsolete" by those authors which makes them incompetent and really bad mannered. They promote `react-router@4.0.0` now (which is aplha at the time of writing). Maybe they'd come up with whole new `react-router@5.0.0` tomorrow, who knows how high are they.
- -->
 ## Gotchas
 
 This library is build system agnostic: you can use your favourite Grunt, Gulp, Browserify, RequireJS, Webpack, etc.
