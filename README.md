@@ -436,7 +436,9 @@ npm install babel-plugin-transform-decorators-legacy --save
 
 P.S.: if `@preload()` decorator seems not working for no reason (though it definitely should) then try to place it on top of all other decorators. Internally it adds a special static method to your `Route`'s `component` and some decorators on top of it may not retain that static method (though all proper decorators nowaday do retain static methods and variables of wrapped components using [`hoist-non-react-statics`](https://github.com/mridgway/hoist-non-react-statics)).
 
-On the client side, in order for `@preload` to work all `<Link/>`s imported from `react-router` **must** be instead imported from `react-isomorphic-render`. Upon a click on a `<Link/>` first it waits for the next page to preload, and, when the next page is fully loaded, then it is displayed to the user and the URL in the address bar is updated. Sometimes preloading a page can take some time to finish so one may want to add a "spinner" to inform the user that the application isn't frozen and the navigation process needs some time to finish. This can be achieved by adding a Redux reducer listening to these three Redux events:
+On the client side, in order for `@preload` to work all `<Link/>`s imported from `react-router` **must** be instead imported from `react-isomorphic-render`. Upon a click on a `<Link/>` first it waits for the next page to preload, and then, when the next page is fully loaded, it is displayed to the user and the URL in the address bar is updated.
+
+Sometimes preloading a page can take some time to finish so one may want to (and actually should) add some kind of a "spinner" to inform the user that the application isn't frozen and the navigation process needs some more time to finish. This can be achieved by adding a Redux reducer listening to these three Redux events:
 
 ```javascript
 import { PRELOAD_STARTED, PRELOAD_FINISHED, PRELOAD_FAILED } from 'react-isomorphic-render'
@@ -451,11 +453,12 @@ export default function(state = {}, action = {}) {
 }
 ```
 
-And a "spinner" component
+And a "spinner" component would look like
 
 ```javascript
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
+import { ActivityIndicator } from 'react-responsive-ui'
 
 @connect(state => ({ pending: state.preload.pending }))
 export default class Preload extends Component {
@@ -463,7 +466,7 @@ export default class Preload extends Component {
     const { pending } = this.props
     return (
       <div className={ `preloading ${pending ? 'preloading--shown' : ''}` }>
-        <div className="preloading__spinner"/>
+        <ActivityIndicator className="preloading__spinner"/>
       </div>
     );
   }
@@ -493,8 +496,6 @@ export default class Preload extends Component {
   top: calc(50% - 2rem);
   width: 4rem;
   height: 4rem;
-  background-image: url(spinner.gif);
-  background-position: center center;
 }
 ```
 
