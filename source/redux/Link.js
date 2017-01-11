@@ -29,7 +29,7 @@ export default class Hyperlink extends Component
 
 	on_click(event)
 	{
-		const { onClick, target, to } = this.props
+		const { onClick, to } = this.props
 		const { router, store } = this.context
 		
 		if (!router)
@@ -47,41 +47,45 @@ export default class Hyperlink extends Component
 			onClick(event)
 		}
 
+		// `onClick` could call `event.preventDefault()`
+		// to intercept `react-router` navigation.
 		if (event.defaultPrevented)
 		{
 			return
 		}
-
-		event.preventDefault()
 
 		if (isModifiedEvent(event) || !isLeftClickEvent(event))
 		{
 			return
 		}
 
-		// If target prop is set (e.g. to "_blank"), let browser handle link.
-		if (target)
-		{
-			return
-		}
+		event.preventDefault()
 
-		const location = resolveToLocation(to, router)
-
-		// // Just perform a javascript redirect if a `location` is an absolute URL
-		// if (typeof location === 'string')
-		// {
-		// 	if (location.indexOf('//') === 0 || location.indexOf('://') !== -1)
-		// 	{
-		// 		return document.location = location
-		// 	}
-		// }
-
-		store.dispatch(preload_action(location))
+		store.dispatch(preload_action(resolveToLocation(to, router)))
 	}
 
 	render()
 	{
-		return <Link { ...this.props } onClick={ this.on_click }>{ this.props.children }</Link>
+		const { to, target, children, ...rest_props } = this.props
+		const { router } = this.context
+
+		if (!router)
+		{
+			throw new Error('<Link>s rendered outside of a router context cannot navigate.')
+		}
+		
+		const location = resolveToLocation(to, router)
+
+		// Is it a link to an absolute URL or to a relative (local) URL.
+		const is_local_website_link = (typeof location === 'object')
+			|| (typeof location === 'string' && location && location[0] === '/')
+
+		if (target || is_local_website_link)
+		{
+			return <Link { ...this.props } onClick={ this.on_click }>{ children }</Link>
+		}
+
+		return <a href={ to } target={ target } { ...rest_props }>{ children }</a>
 	}
 }
 
