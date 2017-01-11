@@ -4,14 +4,15 @@
   A couple of TODOs for `9.0.0`:
 
   * Clean up the new code - remove commented out pieces left from `8.0.0`
-  * Fix `onEnter` being called twice (both on server and client) - this is not considered a blocker for `9.0.0` release since `@preload()` supercedes `onEnter` and therefore `onEnter` may not be used at all. But I'll look into it.
+  * Fix `onEnter` being called twice (both on server and client) - this is not considered a blocker for `9.0.0` release since `@preload()` supercedes `onEnter` and therefore `onEnter` may not be used at all. But I'll look into it. (see `<RouterContext>`)
   * Maybe implement the minor `previous_route_components` optimization from `8.0.0` for preloading pages
 
   Changes:
 
   * Added "asynchronous action handlers" (see README)
   <!--* Since `redux-router` maintainers are incompetent and lazy, they don't want to merge my Pull Requests, I'm forking `redux-router` repo as part of this library (`./source/redux/redux-router`) and making the neccessary changes to the code.-->
-  * (breaking change) Removed `redux-router` out of this library. Use `import { Link } from 'react-isomorphic-render'` instead of `import { Link } from 'react-router'`
+  * (breaking change) Removed `redux-router` out of this library.
+  * (breaking change) In order for `@preload` to work on the client-side now use `import { Link } from 'react-isomorphic-render'` instead of `import { Link } from 'react-router'`
   * (breaking change) `import` everything from `react-isomorphic-render` now, not from `react-isomorphic-render/redux`
   * (breaking change) Changed the order of arguments for `render()` and `pageRenderingService()`: they both now take the common settings first, then the specific settings. Migration: `render({...}, settigs)` -> `render(settings, {...})`, `pageRenderingService({...}, settings)` -> `pageRenderingService(settings, {...})`
   * (breaking change) Removed `onStoreCreated` due to it not being used anymore (Redux reducers hot reload is now moved to `application.js` client-side main file)
