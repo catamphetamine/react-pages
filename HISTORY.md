@@ -12,7 +12,7 @@
   <!--* Since `redux-router` maintainers are incompetent and lazy, they don't want to merge my Pull Requests, I'm forking `redux-router` repo as part of this library (`./source/redux/redux-router`) and making the neccessary changes to the code.-->
   * (breaking change) Removed `redux-router` out of this library.
   * (breaking change) In order for `@preload` to work on the client-side now use `import { Link } from 'react-isomorphic-render'` instead of `import { Link } from 'react-router'`
-  * (breaking change) `import` everything from `react-isomorphic-render` now, not from `react-isomorphic-render/redux`
+  * (breaking change) `import` everything from `react-isomorphic-render` now instead of `react-isomorphic-render/redux`
   * (breaking change) Changed the order of arguments for `render()` and `pageRenderingService()`: they both now take the common settings first, then the specific settings. Migration: `render({...}, settigs)` -> `render(settings, {...})`, `pageRenderingService({...}, settings)` -> `pageRenderingService(settings, {...})`
   * (breaking change) Removed `onStoreCreated` due to it not being used anymore (Redux reducers hot reload is now moved to `application.js` client-side main file)
   * (breaking change) `@onEnter` workaround helper is no longer neccessary because I fixed the `redux-router` `onEnter` bug
