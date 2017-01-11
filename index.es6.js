@@ -8,8 +8,6 @@ export const meta  = webpage_meta
 
 // Redux
 
-// import { push, replace } from './es6/redux/redux-router'
-
 import client  from './es6/redux/client/client'
 import preload from './es6/redux/preload'
 
@@ -55,16 +53,21 @@ export
 }
 from './es6/redux/naming'
 
-// export const goto     = push
-// export const redirect = replace
-
-export const goto     = function(location) { return { type: '@@react-isomorphic-render/goto', location } }
-export const redirect = function(location) { return { type: '@@react-isomorphic-render/redirect', location } }
+export
+{
+	goto_action as goto,
+	redirect_action as redirect,
+	GoTo,
+	GoTo as GO_TO,
+	Redirect,
+	Redirect as REDIRECT,
+	Navigated,
+	Navigated as NAVIGATED
+}
+from './es6/redux/actions'
 
 export
 {
 	default as Link
 }
 from './es6/redux/Link'
-
-// export { default as onEnter } from './es6/redux/on enter'

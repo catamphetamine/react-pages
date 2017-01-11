@@ -46,7 +46,8 @@
     "react-dom": ">= 0.14.0",
     "react-router": "^2.3.0 || ^3.0.0",
     "history": ">= 2.0.0",
-    "redux": "^3.0.0"
+    "redux": "^3.0.0",
+    "react-redux": "*"
   },
   "scripts": {
     "test": "mocha --compilers js:babel-core/register --colors --bail --reporter spec test/ --recursive",

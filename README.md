@@ -48,20 +48,11 @@ Start by creating your `react-isomorphic-render.js` set up file (it configures b
 
 ```javascript
 export default {
-  // Redux reducer
-  // (either a reducer or a function returning a reducer)
-  reducer: require('./src/client/redux/reducer'),
+  // Redux reducers
+  reducer: require('./src/client/redux/reducers'),
 
   // React-router routes
-  // (either a `<Route/>` element or a
-  //  `function({ dispatch, getState })`
-  //  returning a `<Route/>` element)
-  routes: require('./src/client/routes'),
-  
-  // A React component.
-  // Wraps React page component with arbitrary elements
-  // (e.g. Redux <Provider/>, and other "context providers")
-  wrapper: require('./src/client/wrapper')
+  routes: require('./src/client/routes')
 }
 ```
 
@@ -952,10 +943,31 @@ export default {
 }
 ```
 
-## Other `react-isomorphic-render.js` settings
+## All `react-isomorphic-render.js` settings
 
 ```javascript
 {
+  // Redux reducers (an object of reducing functions).
+  // (either a reducers object or a function returning a reducers object)
+  reducer: require('./src/client/redux/reducers')
+
+  // React-router routes
+  // (either a `<Route/>` element or a
+  //  `function({ dispatch, getState })`
+  //  returning a `<Route/>` element)
+  routes: require('./src/client/routes')
+  
+  // A React component.
+  // Wraps React page component with arbitrary elements
+  //
+  // (e.g. Redux `<Provider/>`,
+  //  `react-hot-loader@3`'s `<AppContainer/>`
+  //  and other "context providers")
+  //
+  // By default it just wraps everything with Redux'es `<Provider/>`.
+  //
+  wrapper: require('./src/client/wrapper')
+
   // (optional)
   // User can add his own middleware to this `middleware` list
   reduxMiddleware: () => [...]

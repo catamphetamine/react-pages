@@ -1,12 +1,11 @@
 import React from 'react'
-// import { match } from '../redux-router/server'
-// import { ReduxRouter } from '../redux-router'
-import { Router, match } from 'react-router'
+import { Router } from 'react-router'
 
 import react_render_on_server from '../../render on server'
-
 import { location_url } from '../../location'
 import timer from '../../timer'
+import { preload_action } from '../actions'
+import match_routes_against_location from '../../react-router/match'
 
 function timed_react_render_on_server(named_arguments)
 {
@@ -27,28 +26,23 @@ export default function render_on_server({ disable_server_side_rendering, create
 	// Routing only takes a couple of milliseconds
 	// const routing_timer = timer()
 
-	// Page preload starts inside `match_url()` function
-	// (somewhere inside `redux-router`'s `store.dispatch(match(...))`)
-	const preload_timer = timer()
-
 	// Perform routing for this `url`
-	// return match_url(url, store).then(routing_result =>
-	return match_url(url, store, routes).then(routing_result =>
+	return match_routes_against_location({ location: url, routes }).then(({ redirect, router_state }) =>
 	{
 		// routing_timer()
 
 		// Return in case of an HTTP redirect
-		if (routing_result.redirect)
+		if (redirect)
 		{
-			return routing_result
+			return { redirect: location_url(redirect) }
 		}
 
 		// Http response status code
-		const http_status_code = get_http_response_status_code_for_the_route(routing_result.router_state.routes)
+		const http_status_code = get_http_response_status_code_for_the_route(router_state.routes)
 
 		// Concatenated `react-router` route string.
 		// E.g. "/user/:user_id/post/:post_id"
-		const route = routing_result.router_state.routes
+		const route = router_state.routes
 			.filter(route => route.path)
 			.map(route => route.path.replace(/^\//, '').replace(/\/$/, ''))
 			.join('/') || '/'
@@ -56,14 +50,10 @@ export default function render_on_server({ disable_server_side_rendering, create
 		// Profiling
 		const time = {}
 
-		// When `url` matching process finished,
-		// it immediately launched preloading process,
-		// so it's preloading the page now.
-		//
+		const preload_timer = timer()
+
 		// After the page has finished preloading, render it
-		//
-		// return wait_for_page_to_preload(store).then(() => 
-		return store.dispatch({ type: '@@react-isomorphic-render/preload', location: url }).then(() =>
+		return store.dispatch(preload_action(url)).then(() =>
 		{
 			time.preload = preload_timer()
 
@@ -77,10 +67,9 @@ export default function render_on_server({ disable_server_side_rendering, create
 				return { content: rendered.content, route, time }
 			}
 
-			// Renders the current page React component to a React element
-			// (`<ReduxRouter/>` is gonna get the matched route from the `store`)
-			const page_element = create_page_element(<Router {...routing_result.router_state}/>, { store })
-			// const page_element = create_page_element(<ReduxRouter/>, { store })
+			// Renders the current page React component to a React element.
+			// Passing `store` as part of `props` to the `wrapper`.
+			const page_element = create_page_element(<Router { ...router_state }/>, { store })
 
 			// Render the current page's React element to HTML markup
 			const rendered = timed_react_render_on_server({ render_webpage, page_element })
@@ -108,79 +97,9 @@ export default function render_on_server({ disable_server_side_rendering, create
 	})
 }
 
-// // Waits for all `@preload()` calls to finish.
-// function wait_for_page_to_preload(store)
-// {
-// 	// This promise was previously set by "preloading middleware"
-// 	// if there were any @preload() calls on the current route components
-// 	const promise = store.getState().router
-
-// 	// Validate the currently preloading promise
-// 	if (promise && typeof promise.then === 'function')
-// 	{
-// 		// If it's really a Promise then return it
-// 		return promise
-// 	}
-
-// 	// Otherwise, if nothing is being preloaded, just return a dummy Promise
-// 	return Promise.resolve()
-// }
-
 // One can set a `status` prop for a react-router `Route`
 // to be returned as an Http response status code (404, etc)
 function get_http_response_status_code_for_the_route(matched_routes)
 {
 	return matched_routes.reduce((previous, current) => (current && current.status) || (previous && current.status))
-}
-
-// Matches a `url` to a route
-// (to a hierarchy of React-router `<Route/>`s).
-//
-// Returns a Promise resolving to an object:
-//
-//   redirect    - in case of an HTTP redirect
-//
-//   matched_routes - the matched hierarchy of React-router `<Route/>`s
-//
-// function match_url(url, store)
-function match_url(url, store, routes)
-{
-	routes = typeof routes === 'function' ? routes(store) : routes
-
-	// (not using `promisify()` helper here 
-	//  to avoid introducing dependency on `bluebird` Promise library)
-	//
-	return new Promise((resolve, reject) =>
-	{
-		// Perform routing for this `url`
-		// store.dispatch(match(url, (error, redirect_location, router_state) =>
-		match({ routes, location: url }, (error, redirect_location, router_state) =>
-		{
-			// If a decision to perform a redirect was made 
-			// during the routing process,
-			// then redirect to another url
-			if (redirect_location)
-			{
-				return resolve
-				({
-					redirect: location_url(redirect_location)
-				})
-			}
-
-			// Routing process failed
-			if (error)
-			{
-				return reject(error)
-			}
-
-			// In case some weird stuff happened
-			if (!router_state)
-			{
-				return reject(new Error('No router state'))
-			}
-
-			// return resolve({ matched_routes: router_state.routes })
-			return resolve({ router_state })
-		})
-	})
 }

@@ -39,14 +39,14 @@ exports.underscoredToCamelCase = require('./build/redux/naming').underscoredToCa
 exports.event_name = require('./build/redux/naming').event_name
 exports.eventName  = exports.event_name
 
-// var redux_router = require('./build/redux/redux-router')
+exports.goto     = require('./build/redux/actions').goto_action
+exports.redirect = require('./build/redux/actions').redirect_action
 
-// exports.goto     = redux_router.push
-// exports.redirect = redux_router.replace
-
-exports.goto     = function(location) { return { type: '@@react-isomorphic-render/goto', location } }
-exports.redirect = function(location) { return { type: '@@react-isomorphic-render/redirect', location } }
+exports.GoTo      = require('./build/redux/actions').GoTo
+exports.GO_TO     = exports.GoTo  
+exports.Redirect  = require('./build/redux/actions').Redirect
+exports.REDIRECT  = exports.Redirect
+exports.Navigated = require('./build/redux/actions').Navigated
+exports.NAVIGATED = exports.Navigated
 
 exports.Link = require('./build/redux/link').default
-
-// exports.onEnter = require('./build/redux/on enter').default

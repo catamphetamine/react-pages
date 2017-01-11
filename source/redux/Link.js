@@ -2,6 +2,7 @@
 
 import React, { Component, PropTypes } from 'react'
 import { Link } from 'react-router'
+import { preload_action } from './actions'
 
 export default class Hyperlink extends Component
 {
@@ -75,8 +76,7 @@ export default class Hyperlink extends Component
 		// 	}
 		// }
 
-		store.dispatch({ type: '@@react-isomorphic-render/preload', location })
-			// .then(() => router.push(location))
+		store.dispatch(preload_action(location))
 	}
 
 	render()

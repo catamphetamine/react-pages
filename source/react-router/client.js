@@ -1,3 +1,6 @@
+// THIS MODULE IS CURRENTLY NOT USED.
+// IT'S JUST HERE AS AN EXAMPLE.
+
 import React from 'react'
 import ReactDOM from 'react-dom'
 
@@ -14,7 +17,9 @@ import normalize_common_settings from './normalize'
 // This function is what's gonna be called from the project's code on the client-side.
 //
 // The following code hasn't been tested.
-// Should work.
+// Should theoretically work.
+// This is not currently being used.
+// It's just an example of Redux-less usage.
 //
 export default function render({ translation }, common)
 {

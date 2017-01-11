@@ -3,7 +3,6 @@
 
   A couple of TODOs for `9.0.0`:
 
-  * Clean up the new code - remove commented out pieces left from `8.0.0`
   * Fix `onEnter` being called twice (both on server and client) - this is not considered a blocker for `9.0.0` release since `@preload()` supercedes `onEnter` and therefore `onEnter` may not be used at all. But I'll look into it. (see `<RouterContext>`)
   * Maybe implement the minor `previous_route_components` optimization from `8.0.0` for preloading pages
 

@@ -1,3 +1,6 @@
+import React from 'react'
+import { Provider } from 'react-redux'
+
 import { clone } from '../helpers'
 
 export default function normalize_common_settings(common, options = {})
@@ -27,6 +30,15 @@ export default function normalize_common_settings(common, options = {})
 		}
 	}
 
+	if (!common.wrapper)
+	{
+		// By default it wraps everything with Redux'es `<Provider/>`.
+		common.wrapper = function Wrapper({ store, children })
+		{
+			return <Provider store={ store }>{ children }</Provider>
+		}
+	}
+
 	// camelCase aliasing
 	if (common.asynchronousActionEventNaming)
 	{
@@ -46,13 +58,6 @@ export default function normalize_common_settings(common, options = {})
 	{
 		common.redux_middleware = common.reduxMiddleware
 		delete common.reduxMiddleware
-	}
-
-	// camelCase aliasing
-	if (common.onNavigate)
-	{
-		common.on_navigate = common.onNavigate
-		delete common.onNavigate
 	}
 
 	// camelCase aliasing

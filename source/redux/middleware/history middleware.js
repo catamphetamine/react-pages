@@ -1,18 +1,20 @@
+import { Redirect, GoTo, navigated_action } from '../actions'
+
 export default function history_middleware(history)
 {
 	return ({ getState, dispatch }) =>
 	{
 		return next => action =>
 		{
-			if (action.type === '@@react-isomorphic-render/redirect')
+			if (action.type === Redirect)
 			{
-				dispatch({ type: '@@react-isomorphic-render/navigated', location: action.location })
+				dispatch(navigated_action(action.location))
 				return history.replace(action.location)
 			}
 
-			if (action.type === '@@react-isomorphic-render/goto')
+			if (action.type === GoTo)
 			{
-				dispatch({ type: '@@react-isomorphic-render/navigated', location: action.location })
+				dispatch(navigated_action(action.location))
 				return history.push(action.location)
 			}
 
