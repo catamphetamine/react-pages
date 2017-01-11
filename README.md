@@ -174,7 +174,7 @@ Now [disable javascript in Chrome DevTools](http://stackoverflow.com/questions/1
 
 ## Proxying
 
-In the example above all HTTP requests to the server are served with HTML pages which is not the case in real-world applications: for example, a request to `/items` REST API should return a JSON response from the database.
+In the example above all HTTP requests to the server are served either with `/assets` "static files" or with HTML pages which is not the case in real-world applications: for example, a request to `/api/items` REST API should return a JSON response from the database.
 
 To accomplish that a proxy server is set up which routes all HTTP requests to their appropriate destination. For example, API requests go to the REST API server, requests for static files return static files, and HTTP requests for webpages are routed to the webpage rendering server. So the HTTP proxying plan would look like this:
 
