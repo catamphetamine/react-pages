@@ -99,6 +99,8 @@ Start the webpage rendering server (also serving assets):
 ```javascript
 import path from 'path'
 import webpageServer from 'react-isomorphic-render/server'
+
+// `npm install koa-static koa-mount --save`
 import statics from 'koa-static'
 import mount from 'koa-mount'
 
