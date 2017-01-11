@@ -290,7 +290,7 @@ P.S.: When you find yourself copy-pasting those `_PENDING`, `_SUCCESS` and `_ERR
 
 ### HTTP utility
 
-For convenience, the argument of the `promise` function is the built-in `http` utility having methods `get`, `head`, `post`, `put`, `patch`, `delete`, each returning a `Promise` and taking three arguments: the `url` of the HTTP request, `parameters` object, and an `options` object. It can be used to easily query HTTP REST API endpoints in Redux action creators.
+For convenience, the argument of the `promise` function parameter of "asynchronous actions" described above is the built-in `http` utility having methods `get`, `head`, `post`, `put`, `patch`, `delete`, each returning a `Promise` and taking three arguments: the `url` of the HTTP request, `parameters` object, and an `options` object. It can be used to easily query HTTP REST API endpoints in Redux action creators.
 
 ```js
 function fetchAdmins() {
