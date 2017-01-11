@@ -49,4 +49,5 @@ exports.REDIRECT  = exports.Redirect
 exports.Navigated = require('./build/redux/actions').Navigated
 exports.NAVIGATED = exports.Navigated
 
-exports.Link = require('./build/redux/link').default
+exports.Link = require('./build/redux/Link').default
+exports.IndexLink = require('./build/redux/IndexLink').default

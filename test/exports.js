@@ -27,7 +27,8 @@ import
 	underscoredToCamelCase,
 	event_name,
 	eventName,
-	Link
+	Link,
+	IndexLink
 }
 from '../index.es6'
 
@@ -68,6 +69,7 @@ describe(`exports`, function()
 		eventName.should.be.a('function')
 
 		Link.should.be.a('function')
+		IndexLink.should.be.a('function')
 	})
 
 	it(`should export ES5`, () =>
@@ -109,6 +111,7 @@ describe(`exports`, function()
 		_.eventName.should.be.a('function')
 
 		_.Link.should.be.a('function')
+		_.IndexLink.should.be.a('function')
 	})
 
 	it(`should export rendering service`, () =>

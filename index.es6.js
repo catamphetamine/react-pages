@@ -71,3 +71,9 @@ export
 	default as Link
 }
 from './es6/redux/Link'
+
+export
+{
+	default as IndexLink
+}
+from './es6/redux/IndexLink'
