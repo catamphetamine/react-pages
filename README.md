@@ -730,7 +730,7 @@ This library performs the following locale detection steps for each webpage rend
  * Checks the `locale` cookie
  * Checks the `Accept-Language` HTTP header
  
-The resulting locales array is passed as `preferredLocales` parameter into `localize()` function of the webpage rendering server which then returns `{ locale, messages }`.
+The resulting locales array is passed as `preferredLocales` parameter into `localize()` function of the webpage rendering server which then returns `{ locale, messages }` which are then accessible as part of the `props` of the `wrapper` component.
 
 <!-- ### Determining current location
 
