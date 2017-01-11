@@ -56,20 +56,6 @@ export default {
 }
 ```
 
-An example of a `wrapper` component:
-
-```javascript
-import React from 'react'
-import { Provider } from 'react-redux'
-
-export default class Wrapper extends React.Component {
-  render() {
-    const { store, children } = this.props
-    return <Provider store={ store }>{ children }</Provider>
-  }
-}
-```
-
 Then create your client-side main application file (`application.js`)
 
 ```javascript
@@ -958,13 +944,16 @@ export default {
   routes: require('./src/client/routes')
   
   // A React component.
-  // Wraps React page component with arbitrary elements
   //
+  // Wraps React page component (`children` property)
+  // with arbitrary React components.
   // (e.g. Redux `<Provider/>`,
   //  `react-hot-loader@3`'s `<AppContainer/>`
   //  and other "context providers")
   //
-  // By default it just wraps everything with Redux'es `<Provider/>`.
+  // By default it just wraps everything with Redux'es `<Provider/>`:
+  //
+  // export default ({ store, children }) => <Provider store={ store }>{ children }</Provider>
   //
   wrapper: require('./src/client/wrapper')
 
