@@ -905,6 +905,7 @@ export default function Wrapper({ store, children }) {
   ],
 
   "plugins": [
+    // `react-hot-loader@3` Babel plugin
     "react-hot-loader/babel"
   ]
 }
@@ -916,7 +917,9 @@ export default function Wrapper({ store, children }) {
 export default {
   entry: {
     main: [
+      // This line is required for `react-hot-loader@3`
       'react-hot-loader/patch',
+      
       'webpack-hot-middleware/client?http://localhost:8080',
       'webpack/hot/only-dev-server',
       './src/application.js'
