@@ -136,6 +136,8 @@ const server = webpageServer(settings, {
   // (optional)
   // Custom Koa middlewares.
   // Inserted before page rendering middleware.
+  // Serves "static files" by `/assets` path
+  // from the `../build` folder.
   // Adjust the path to the Webpack `build` folder.
   middleware: [mount('/assets', statics(path.join(__dirname, '../build'), { maxAge }))]
 })
