@@ -1215,7 +1215,7 @@ export default {
 }
 ```
 
-## Other client-side rendering options
+## All client side rendering options
 
 ```javascript
 {
