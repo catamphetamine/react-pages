@@ -477,7 +477,7 @@ export default class Preload extends Component {
     const { pending } = this.props
     return (
       <div className={ `preloading ${pending ? 'preloading--shown' : ''}` }>
-        <div className="spinner"/>
+        <div className="preloading__spinner"/>
       </div>
     );
   }
@@ -501,7 +501,7 @@ export default class Preload extends Component {
   cursor: wait;
 }
 
-.preloading--shown .spinner {
+.preloading__spinner {
   position: absolute;
   left: calc(50% - 2rem);
   top: calc(50% - 2rem);
