@@ -178,7 +178,7 @@ In the example above all HTTP requests to the server are served either with `/as
 
 To accomplish that a proxy server is set up which routes all HTTP requests to their appropriate destination. For example, API requests go to the REST API server, requests for static files return static files, and HTTP requests for webpages are routed to the webpage rendering server. So the HTTP proxying plan would look like this:
 
- * all HTTP GET requests starting with `/assets` return static files from your `assets` folder
+ * all HTTP GET requests starting with `/assets` return static files from your `build` folder
  * all HTTP requests starting with `/api` are proxied to the REST API service
  * all the other HTTP GET requests are proxied to `http://localhost:3000` for webpage rendering
 
@@ -194,7 +194,7 @@ const app = express()
 const proxy = httpProxy.createProxyServer({})
 
 // Serve static files
-app.use('/assets', express.static(path.join(__dirname, '../assets')))
+app.use('/assets', express.static(path.join(__dirname, '../build')))
 
 // Define the REST API
 app.get('/api', function(request, response) {
