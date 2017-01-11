@@ -933,6 +933,10 @@ export default {
 }
 ```
 
+## Bundlers
+
+If you're using Webpack then make sure you either build your server-side code with Webpack too (so that asset `require()` calls (images, styles, fonts, etc) inside React components work, see [universal-webpack](https://github.com/halt-hammerzeit/universal-webpack)) or use something like [webpack-isomorphic-tools](https://github.com/halt-hammerzeit/webpack-isomorphic-tools).
+
 ## All `react-isomorphic-render.js` settings
 
 ```javascript
@@ -1274,10 +1278,6 @@ Client-side `render` function returns a `Promise` resolving to an object
   rerender   // (Redux) rerender React application
 }
 ```
-
-## Bundlers
-
-If you're using Webpack then make sure you either build your server-side code with Webpack too (so that asset `require()` calls (images, styles, fonts, etc) inside React components work, see [universal-webpack](https://github.com/halt-hammerzeit/universal-webpack)) or use [webpack-isomorphic-tools](https://github.com/halt-hammerzeit/webpack-isomorphic-tools).
 
 ## Contributing
 
