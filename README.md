@@ -468,12 +468,19 @@ export default function(state = {}, action = {}) {
 And a "spinner" component
 
 ```javascript
-import React       from 'react'
+import React, { Component } from 'react'
 import { connect } from 'react-redux'
 
 @connect(state => ({ pending: state.preload.pending }))
-export default function Spinner(props) {
-  return <div className={ `preloading ${props.pending ? 'preloading--shown' : ''}` }/>
+export default class Preload extends Component {
+  render() {
+    const { pending } = this.props
+    return (
+      <div className={ `preloading ${pending ? 'preloading--shown' : ''}` }>
+        <div className="spinner"/>
+      </div>
+    );
+  }
 }
 ```
 
@@ -492,6 +499,16 @@ export default function Spinner(props) {
 .preloading--shown {
   display: block;
   cursor: wait;
+}
+
+.preloading--shown .spinner {
+  position: absolute;
+  left: calc(50% - 2rem);
+  top: calc(50% - 2rem);
+  width: 4rem;
+  height: 4rem;
+  background-image: url(spinner.gif);
+  background-position: center center;
 }
 ```
 
