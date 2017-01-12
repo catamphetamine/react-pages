@@ -734,16 +734,27 @@ This library performs the following locale detection steps for each webpage rend
  
 The resulting locales array is passed as `preferredLocales` parameter into `localize()` function of the webpage rendering server which then returns `{ locale, messages }` which are then accessible as part of the `props` of the `wrapper` component.
 
-<!-- ### Determining current location
+### Get current location
 
-```javascript
-@connect(state => ({ location: state.router.location }))
+```js
+import React from 'react'
+
+// `withRouter` is available in `react-router@3.0.0`.
+//
+// For `2.x` versions just use `this.context.router` property:
+// static contextTypes = { router: React.PropTypes.func.isRequired }
+//
+import { withRouter } from 'react-router'
+
 class Component extends React.Component {
   render() {
-    return <span>{this.props.location}</span>
+    const { router } = this.props
+    return <div>{ JSON.stringify(router.location) }</div>
   }
 }
-``` -->
+
+export default withRouter(Component)
+```
 
 ### Changing current location
 
