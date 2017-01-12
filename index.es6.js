@@ -1,14 +1,11 @@
-// Strict mode here is required for older browsers like Safari 9
-// because of using `const`.
-'use strict'
-
 // Helpers
 
 import { webpage_head, webpage_title, webpage_meta } from './es6/webpage head'
 
-export const head  = webpage_head
-export const title = webpage_title
-export const meta  = webpage_meta
+// `const` is not supported in Internet Explorer 10
+export var head  = webpage_head
+export var title = webpage_title
+export var meta  = webpage_meta
 
 // Redux
 
