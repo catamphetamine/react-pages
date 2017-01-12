@@ -1,3 +1,7 @@
+// Strict mode here is required for older browsers like Safari 9
+// because of using `const`.
+'use strict'
+
 // Helpers
 
 import { webpage_head, webpage_title, webpage_meta } from './es6/webpage head'
