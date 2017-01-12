@@ -39,18 +39,6 @@ export default class http_client
 		//
 		const format_url = options.format_url || this.format_url.bind(this)
 
-		// For those who don't wish to proxy API requests to API servers
-		// and prefer to query those API servers directly (for whatever reasons).
-		// Direct API calls will contain user's cookies and HTTP headers (e.g. JWT token).
-		//
-		// Therefore warn about authentication token leakage
-		// in case a developer supplies his own custom `format_url` function.
-		//
-		if (options.format_url)
-		{
-			console.warn('[react-isomorphic-render] The default `http.url` formatter only allows requesting local paths therefore protecting authentication token (and cookies) from leaking to a 3rd party. Since you supplied your own `http.url` formatting function, implementing such anti-leak guard is your responsibility now.')
-		}
-
 		// Clone HTTP request cookies on the server-side
 		// (to make authentication work)
 		if (clone_request)
