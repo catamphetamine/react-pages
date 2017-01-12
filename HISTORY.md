@@ -3,6 +3,7 @@
 
   A couple of TODOs for `9.0.0`:
 
+  * Fix `@preload()` with programmatic `redirect` and `goto` (almost done)
   * Fix `onEnter` being called twice (both on server and client, because `react-router`'s `match()` is called there twice) - this is not considered a blocker for `9.0.0` release since `@preload()` supercedes `onEnter` and therefore `onEnter` may not be used at all. I guess it can be fixed using `<RouterContext>`.
   * Maybe implement the minor `previous_route_components` optimization from `8.0.0` for preloading pages
 
@@ -10,23 +11,8 @@
 
   * Added "asynchronous action handlers" (see README)
   <!--* Since `redux-router` maintainers are incompetent and lazy, they don't want to merge my Pull Requests, I'm forking `redux-router` repo as part of this library (`./source/redux/redux-router`) and making the neccessary changes to the code.-->
-  * (breaking change) Removed `redux-router` out of this library. Therefore, **there's no more `router` property in Redux state** (e.g. `Cannot read property 'location' of undefined` on `state.router.location`). Instead use `react-router`'s `router` context property, or, equivalently, use `withRoutes()` component decorator starting from `react-router@3.0.0`:
-
-  ```js
-  import React from 'react'
-  import { withRouter } from 'react-router'
-
-  class Component extends React.Component {
-    render() {
-      const { router } = this.props
-      return <div>{ JSON.stringify(router.location) }</div>
-    }
-  }
-
-  export default withRouter(Component)
-  ```
-
-  * (breaking change) In order for `@preload` to work on the client-side now use `import { Link } from 'react-isomorphic-render'` instead of `import { Link } from 'react-router'`
+  * (breaking change) Removed `redux-router` out of this library. Therefore, **there's no more `router` property in Redux state** (e.g. `Cannot read property 'location' of undefined` on `state.router.location`). See the ["Get current location"](https://github.com/halt-hammerzeit/react-isomorphic-render#get-current-location) section of the README to find out how to get current location now.
+  * (breaking change) In order for `@preload()` to work on the client-side now use `import { Link } from 'react-isomorphic-render'` instead of `import { Link } from 'react-router'`
   * (breaking change) `import` everything from `react-isomorphic-render` now instead of `react-isomorphic-render/redux`
   * (breaking change) Changed the order of arguments for `render()` and `pageRenderingService()`: they both now take the common settings first, then the specific settings. Migration: `render({...}, settigs)` -> `render(settings, {...})`, `pageRenderingService({...}, settings)` -> `pageRenderingService(settings, {...})`
   * (breaking change) Removed `onStoreCreated` due to it not being used anymore (Redux reducers hot reload is now moved to `application.js` client-side main file)

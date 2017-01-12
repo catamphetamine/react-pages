@@ -739,7 +739,7 @@ The resulting locales array is passed as `preferredLocales` parameter into `loca
 ```js
 import React from 'react'
 
-// `withRouter` is available in `react-router@3.0.0`.
+// `withRouter` is available in `react-router@3.0`.
 //
 // For `2.x` versions just use `this.context.router` property:
 // static contextTypes = { router: React.PropTypes.func.isRequired }
