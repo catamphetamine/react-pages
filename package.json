@@ -1,6 +1,6 @@
 {
   "name": "react-isomorphic-render",
-  "version": "9.0.9",
+  "version": "9.0.10",
   "description": "Isomorphic rendering with React, Redux, React-router and Redux-router. Includes support for Webpack",
   "main": "index.common.js",
   "module": "index.es6.js",
