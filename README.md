@@ -563,7 +563,8 @@ const handler = createHandler(settings)
 export const postComment = action({
   namespace: 'BLOG_POST',
   event: 'POST_COMMENT',
-  promise(userId, blogPostId, commentText, http) {
+  // Must return a Promise
+  action(userId, blogPostId, commentText, http) {
     return http.post(`/blog/posts/${blogPostId}/comment`, {
       userId: userId,
       text: commentText
@@ -576,7 +577,8 @@ handler)
 export const getComments = action({
   namespace: 'BLOG_POST',
   event: 'GET_COMMENTS',
-  promise(blogPostId, http) {
+  // Must return a Promise
+  action(blogPostId, http) {
     return http.get(`/blog/posts/${blogPostId}/comments`)
   },
   // The fetched comments will be placed

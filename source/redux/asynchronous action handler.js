@@ -1,8 +1,10 @@
 import { event_name } from './naming'
 import normalize_common_settings from './normalize'
 
-// Returns Redux action creator
-export function action({ namespace, event, promise, result }, handler)
+// Returns Redux action creator.
+// `promise` is for backwards compatibility:
+// it has been renamed to `action` since `9.0.8`.
+export function action({ namespace, event, promise, action, result }, handler)
 {
 	// Add handlers for:
 	//
@@ -14,13 +16,13 @@ export function action({ namespace, event, promise, result }, handler)
 
 	return function action_creator(...parameters)
 	{
-		const action =
+		const redux_action =
 		{
 			event: event_name(namespace, event),
-			promise: http => promise.apply(this, parameters.concat(http))
+			promise: http => (action || promise).apply(this, parameters.concat(http))
 		}
 
-		return action
+		return redux_action
 	}
 }
 
