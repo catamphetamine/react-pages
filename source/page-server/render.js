@@ -4,32 +4,34 @@
 import React from 'react'
 import ReactDOM from 'react-dom/server'
 
+// https://github.com/ReactTraining/react-router/issues/4023
+// Also adds 'useBasename' and 'useQueries'
+import createHistory from 'react-router/lib/createMemoryHistory'
+
 import Html from './html'
-import redux_render from '../redux/server/render'
-import { render_on_server as react_router_render } from '../react-router/render'
-import create_store from '../redux/server/create store'
-import create_http_client from '../redux/server/create http client'
 import normalize_common_settings from '../redux/normalize'
 import timer from '../timer'
+import create_history from '../history'
+
+import redux_render, { initialize as redux_initialize } from '../redux/server/server'
+import { render_on_server as react_router_render } from '../react-router/render'
 
 // isomorphic (universal) rendering (middleware).
 // will be used in web_application.use(...)
-export default async function(common, { initialize, localize, assets, application, request, render, loading, html, authentication, cookies })
+export default async function(settings, { initialize, localize, assets, application, request, render, loading, html = {}, authentication, cookies })
 {
-	// Trims a question mark in the end (just in case)
-	const url = request.url.replace(/\?$/, '')
+	const path = get_path(request.url)
 
-	common = normalize_common_settings(common)
+	settings = normalize_common_settings(settings)
 
 	const
 	{
 		routes,
-		wrapper,
-		parse_dates
+		wrapper
 	}
-	= normalize_common_settings(common)
+	= settings
 
-	const error_handler = common.preload && common.preload.catch
+	const error_handler = settings.preload && settings.preload.catch
 
 	// Read authentication token from a cookie (if configured)
 	let authentication_token
@@ -38,53 +40,42 @@ export default async function(common, { initialize, localize, assets, applicatio
 		authentication_token = cookies.get(authentication.cookie)
 	}
 
-	// Create Redux store
+	// Create `history` (`true` indicates server-side usage)
+	const history = create_history(createHistory, request.url, settings.history, true)
 
-	// Create HTTP client (Redux action creator `http` utility)
-	const http_client = create_http_client(common, authentication_token, application, request)
+	const initialize_timer = timer()
 
-	// Initial store data
-	let store_data = {}
-
-	// Time to fetch initial store data
-	let initialize_time = 0
-
-	// Supports custom preloading before the page is rendered
-	// (for example to authenticate the user and retrieve user selected language)
-	if (initialize)
+	// These `parameters` are used for `assets`, `html` modifiers
+	// and also for `localize()` call.
+	const initialize_result = await redux_initialize(settings,
 	{
-		const initialize_timer = timer()
-		store_data = await initialize(http_client, { request })
-		initialize_time = initialize_timer()
-	}
+		authentication_token,
+		application,
+		request,
+		initialize,
+		history
+	})
 
-	// Create Redux store
-	const store = create_store(common, store_data, http_client)
+	const { extension_javascript, ...parameters } = initialize_result
+	
+	const initialize_time = initialize_timer()
 
-	// If `html` is not set then don't throw an error
-	html = html || {}
+	// `html` modifiers
 
-	let
-	{
-		head,
-		style
-	}
-	= html
+	let { head } = html
 
 	// camelCase support for those who prefer it
 	let body_start = html.body_start || html.bodyStart
 	let body_end   = html.body_end   || html.bodyEnd
 
-	const store_parameter = { store }
-
 	// Normalize `html` parameters
-	head       = normalize_markup(typeof head       === 'function' ? head      (url, store_parameter) : head)
-	body_start = normalize_markup(typeof body_start === 'function' ? body_start(url, store_parameter) : body_start)
-	body_end   = normalize_markup(typeof body_end   === 'function' ? body_end  (url, store_parameter) : body_end)
+	head       = normalize_markup(typeof head       === 'function' ? head      (path, parameters) : head)
+	body_start = normalize_markup(typeof body_start === 'function' ? body_start(path, parameters) : body_start)
+	body_end   = normalize_markup(typeof body_end   === 'function' ? body_end  (path, parameters) : body_end)
 
 	// Normalize assets
 
-	assets = typeof assets === 'function' ? assets(url, store_parameter) : assets
+	assets = typeof assets === 'function' ? assets(path, parameters) : assets
 
 	if (assets.styles)
 	{
@@ -99,7 +90,7 @@ export default async function(common, { initialize, localize, assets, applicatio
 
 	if (localize)
 	{
-		const result = localize(store)
+		const result = localize(parameters)
 
 		locale   = result.locale
 		messages = result.messages
@@ -111,16 +102,17 @@ export default async function(common, { initialize, localize, assets, applicatio
 
 	// If Redux is being used, then render for Redux.
 	// Else render for pure React.
-	const render_page = store ? redux_render : react_router_render
-	
+	const render_page = redux_render
+
 	try
 	{
 		// Render the web page
 		const result = await render_page
 		({
+			...parameters,
 			disable_server_side_rendering: render === false,
-			
-			url,
+			history,
+			routes,
 
 			create_page_element: (child_element, props) => 
 			{
@@ -133,28 +125,24 @@ export default async function(common, { initialize, localize, assets, applicatio
 				return React.createElement(wrapper, props, child_element)
 			},
 
-			render_webpage: content =>
+			render_webpage(content)
 			{
 				const markup = Html
 				({
+					...parameters,
+					extension_javascript: typeof extension_javascript === 'function' ? extension_javascript() : extension_javascript,
 					assets,
 					locale,
 					locale_messages_json: messagesJSON,
 					head,
 					body_start,
 					body_end,
-					style,
-					store,
-					parse_dates,
 					authentication_token,
 					content: render === false ? normalize_markup(loading) : (content && ReactDOM.renderToString(content))
 				})
 
 				return markup
-			},
-
-			store,
-			routes
+			}
 		})
 
 		if (result.time)
@@ -166,6 +154,13 @@ export default async function(common, { initialize, localize, assets, applicatio
 	}
 	catch (error)
 	{
+		// Redirection is done via an Error on server side.
+		// (e.g. if it happens in `onEnter()` during `match()`)
+		if (error._redirect)
+		{
+			return { redirect: error._redirect }
+		}
+
 		if (!error_handler)
 		{
 			throw error
@@ -173,18 +168,43 @@ export default async function(common, { initialize, localize, assets, applicatio
 
 		const result = {}
 
-		error_handler(error,
+		const error_handler_parameters =
 		{
-			url,
+			path,
+			url      : request.url,
 			redirect : to => result.redirect = to,
+			goto     : to => result.redirect = to
+		}
 
-			dispatch : store.dispatch,
-			getState : store.getState
-		})
+		// Special case for Redux
+		if (parameters.store)
+		{
+			error_handler_parameters.dispatch = parameters.store.dispatch,
+			error_handler_parameters.getState = parameters.store.getState
+		}
+
+		// Strictly speaking, `preload.catch` is meant for `@preload()` helper,
+		// but also using it here because in production it's better
+		// to at least get the error logged and maybe also
+		// handle it in a better way rather than just status 500 or status 403.
+		try
+		{
+			error_handler(error, error_handler_parameters)
+		}
+		catch (error)
+		{
+			// Redirection is done via an Error on server side
+			if (!error._redirect)
+			{
+				throw error
+			}
+
+			result.redirect = error._redirect
+		}
 
 		if (!result.redirect)
 		{
-			throw new Error('Preload error handler must either redirect to a URL or throw an error')
+			throw new Error(`Preload error handler must either redirect to another URL or throw an error. ${request.url}`)
 		}
 
 		return result
@@ -215,4 +235,24 @@ function normalize_markup(anything)
 	}
 
 	return ReactDOM.renderToString(anything)
+}
+
+// Get path from a URL
+function get_path(url)
+{
+	const search_start = url.indexOf('?')
+
+	if (search_start !== -1)
+	{
+		url = url.slice(0, search_start)
+	}
+
+	const hash_start = url.indexOf('#')
+
+	if (hash_start !== -1)
+	{
+		url = url.slice(0, hash_start)
+	}
+
+	return url
 }

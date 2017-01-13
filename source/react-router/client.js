@@ -1,15 +1,12 @@
 // THIS MODULE IS CURRENTLY NOT USED.
 // IT'S JUST HERE AS AN EXAMPLE.
 
-import React from 'react'
-import ReactDOM from 'react-dom'
+import { render_on_client as render } from './render'
+import { exists } from '../helpers'
 
-import { render_on_client } from './render'
-import { exists }           from '../helpers'
-
-import localize_and_render from '../client'
-
-import normalize_common_settings from './normalize'
+import client_side_render from '../client'
+import normalize_common_settings from '../redux/normalize'
+import create_history from '../history'
 
 // Performs client-side rendering
 // along with varios stuff like loading localized messages.
@@ -21,15 +18,27 @@ import normalize_common_settings from './normalize'
 // This is not currently being used.
 // It's just an example of Redux-less usage.
 //
-export default function render({ translation }, common)
+export default function set_up_and_render({ translation, on_navigate, onNavigate }, settings)
 {
-  common = normalize_common_settings(common)
+	settings = normalize_common_settings(settings)
 
-  return localize_and_render
-  ({
-    translation,
-    wrapper: common.wrapper,
-    render_on_client,
-    render_parameters: { routes: common.routes }
-  })
+	// camelCase aliasing
+	on_navigate = on_navigate || onNavigate
+
+	// Create `react-router` `history`
+	const history = create_history(document.location, settings)
+
+	// Render the page
+	return client_side_render
+	({
+		translation,
+		wrapper: common.wrapper,
+		render,
+		render_parameters:
+		{
+			history,
+			routes: common.routes,
+			on_navigate
+		}
+	})
 }

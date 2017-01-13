@@ -9,30 +9,32 @@ import match_routes_against_location from '../../react-router/match'
 
 // Renders the current page React element inside the `to` DOM element.
 //
-// Returns a Promise resolving to the rendered React component.
+// Returns a `Promise` resolving to `{ store, component }`,
+// where `component` is the rendered React component
+// and `store` is the Redux store.
 //
-export default function render_on_client({ devtools, create_page_element, routes, store, to, on_navigate })
+export default function render_on_client({ history, devtools, create_page_element, routes, store, to, on_navigate })
 {
 	// Performs `react-router` asynchronous match for current location
 	// (is required for asynchonous routes to work).
 	return match_routes_against_location
 	({
-		// `store.history` is set in `./store.js`
-		history : store.history,
-		routes  : typeof routes === 'function' ? routes(store) : routes
+		// `react-router` `match()` internally uses this `history` to get current location.
+		// Could have just used `document.location` here,
+		// but what if, for example, `basename` feature of `history` is being used.
+		history,
+		routes: typeof routes === 'function' ? routes(store) : routes
 	})
 	.then(({ redirect, router_state }) =>
 	{
-		// If a decision to perform a redirect was made 
-		// during the routing process,
-		// then redirect to another url
+		// In case of a `react-router` `<Redirect/>`
 		if (redirect)
 		{
 			return store.dispatch(redirect_action(redirect))
 		}
 
 		// No arrow function here,
-		// because it will be bound inside `react-router`.
+		// because it will be bound to `router` inside `react-router`.
 		const onUpdate = function()
 		{
 			if (on_navigate)
@@ -44,10 +46,10 @@ export default function render_on_client({ devtools, create_page_element, routes
 		const router_element = <Router
 			{ ...router_state }
 			onUpdate={ onUpdate }
-			history={ store.history }
+			history={ history }
 			render={ applyRouterMiddleware(useScroll()) }/>
 
-		// Wraps <ReduxRouter/> with arbitrary React components (e.g. Redux <Provider/>),
+		// Wraps <Router/> with arbitrary React components (e.g. Redux <Provider/>),
 		// loads internationalization messages,
 		// and then renders the wrapped React page element to DOM
 		return create_page_element(router_element, { store }).then(element =>
@@ -55,8 +57,8 @@ export default function render_on_client({ devtools, create_page_element, routes
 			// Render the wrapped React page element to DOM
 			const component = react_render_on_client
 			({
-				element,     // wrapped React page element
-				to           // DOM element containing React markup
+				element, // wrapped React page element
+				to // DOM element to which React markup will be rendered
 			})
 			.component
 
@@ -66,9 +68,9 @@ export default function render_on_client({ devtools, create_page_element, routes
 				store
 			}
 
-			// If Redux-devtools aren't enabled, then just return the Page element
+			// If Redux-devtools aren't enabled, then just return the rendered page component
 			// (if Redux-devtools are installed as a web browser extension
-			//  then no need to do the second render too)
+			//  then no need to do the second render pass too)
 			if (process.env.NODE_ENV === 'production' || !devtools || window.devToolsExtension)
 			{
 				return result
@@ -76,20 +78,21 @@ export default function render_on_client({ devtools, create_page_element, routes
 
 			// Dev tools should be rendered after initial client render to prevent warning
 			// "React attempted to reuse markup in a container but the checksum was invalid"
-			// https://github.com/erikras/react-redux-universal-hot-example/pull/210
-			//
-			// Therefore this function returns an array of two React elements
-			// to be rendered sequentially
 
 			// React JSX syntax can't detect lowercase elements
 			const DevTools = devtools.component
 
-			// This element will contain React page element and Redux-devtools
+			// This element will contain
+			// React page element and Redux-devtools.
+			//
+			// Since `DevTools` are inserted
+			// outside of the `<Provider/>`,
+			// provide the `store` manually.
+			//
 			element = 
 			(
 				<div>
 					{ element }
-					{/* Since `DevTools` are inserted outside of the `<Provider/>`, provide the `store` manually */}
 					<DevTools store={ store }/>
 				</div>
 			)
@@ -97,8 +100,8 @@ export default function render_on_client({ devtools, create_page_element, routes
 			// Render the wrapped React page element to DOM
 			result.component = react_render_on_client
 			({
-				element,     // wrapped React page element
-				to,          // DOM element containing React markup
+				element, // wrapped React page element
+				to, // DOM element to which React markup will be rendered
 				subsequent_render: true // Prevents "Server-side React render was discarded" warning
 			})
 			.component

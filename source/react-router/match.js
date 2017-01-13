@@ -36,8 +36,8 @@ export default function match_routes_against_location({ routes, location, histor
 			}
 
 			// If a decision to perform a redirect was made 
-			// during the routing process,
-			// then redirect to another url
+			// during the routing process (e.g. `<Redirect/>`),
+			// then redirect to another URL
 			if (redirect_location)
 			{
 				return resolve

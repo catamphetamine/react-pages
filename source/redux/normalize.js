@@ -3,74 +3,80 @@ import { Provider } from 'react-redux'
 
 import { clone } from '../helpers'
 
-export default function normalize_common_settings(common, options = {})
+// Normalizes common settings
+export default function normalize_common_settings(settings, options = {})
 {
-	if (common === undefined)
+	if (settings === undefined)
 	{
 		throw new Error(`Common settings weren't passed.`)
 	}
 
-	if (typeof common !== 'object')
+	if (typeof settings !== 'object')
 	{
-		throw new Error(`Expected a settings object, got ${typeof common}: ${common}`)
+		throw new Error(`Expected a settings object, got ${typeof settings}: ${settings}`)
 	}
 
-	common = clone(common)
+	settings = clone(settings)
 
 	if (options.full !== false)
 	{
-		if (!common.routes)
+		if (!settings.routes)
 		{
 			throw new Error(`"routes" parameter is required`)
 		}
 
-		if (!common.reducer)
+		if (!settings.reducer)
 		{
 			throw new Error(`"reducer" parameter is required`)
 		}
 	}
 
-	if (!common.wrapper)
+	if (!settings.wrapper)
 	{
 		// By default it wraps everything with Redux'es `<Provider/>`.
-		common.wrapper = function Wrapper({ store, children })
+		settings.wrapper = function Wrapper({ store, children })
 		{
 			return <Provider store={ store }>{ children }</Provider>
 		}
 	}
 
 	// camelCase aliasing
-	if (common.asynchronousActionEventNaming)
+	if (settings.asynchronousActionEventNaming)
 	{
-		common.asynchronous_action_event_naming = common.asynchronousActionEventNaming
-		delete common.asynchronousActionEventNaming
+		settings.asynchronous_action_event_naming = settings.asynchronousActionEventNaming
+		delete settings.asynchronousActionEventNaming
 	}
 
 	// camelCase aliasing
-	if (common.asynchronousActionHandlerStatePropertyNaming)
+	if (settings.asynchronousActionHandlerStatePropertyNaming)
 	{
-		common.asynchronous_action_handler_state_property_naming = common.asynchronousActionHandlerStatePropertyNaming
-		delete common.asynchronousActionHandlerStatePropertyNaming
+		settings.asynchronous_action_handler_state_property_naming = settings.asynchronousActionHandlerStatePropertyNaming
+		delete settings.asynchronousActionHandlerStatePropertyNaming
 	}
 
 	// camelCase aliasing
-	if (common.reduxMiddleware)
+	if (settings.reduxMiddleware)
 	{
-		common.redux_middleware = common.reduxMiddleware
-		delete common.reduxMiddleware
+		settings.redux_middleware = settings.reduxMiddleware
+		delete settings.reduxMiddleware
 	}
 
 	// camelCase aliasing
-	if (common.parseDates !== undefined)
+	if (settings.parseDates !== undefined)
 	{
-		common.parse_dates = common.parseDates
-		delete common.parseDates
+		settings.parse_dates = settings.parseDates
+		delete settings.parseDates
 	}
 
 	// Default value for `parse_dates` is `true`
-	if (common.parse_dates !== false)
+	if (settings.parse_dates !== false)
 	{
-		common.parse_dates = true
+		settings.parse_dates = true
+	}
+
+	if (!settings.history)
+	{
+		settings.history = {}
 	}
 
 	// This message was too noisy printing on each page render.
@@ -82,10 +88,10 @@ export default function normalize_common_settings(common, options = {})
 	// // Therefore warn about authentication token leakage
 	// // in case a developer supplies his own custom `format_url` function.
 	// //
-	// if (common.http && common.http.url)
+	// if (settings.http && settings.http.url)
 	// {
 	// 	console.log('[react-isomorphic-render] The default `http.url` formatter only allows requesting local paths therefore protecting authentication token (and cookies) from leaking to a 3rd party. Since you supplied your own `http.url` formatting function, implementing such anti-leak guard is your responsibility now.')
 	// }
 
-	return common
+	return settings
 }

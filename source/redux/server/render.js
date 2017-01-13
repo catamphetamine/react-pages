@@ -3,6 +3,7 @@ import { Router } from 'react-router'
 
 import react_render_on_server from '../../render on server'
 import { location_url } from '../../location'
+import { get_location } from '../../history'
 import timer from '../../timer'
 import { preload_action } from '../actions'
 import match_routes_against_location from '../../react-router/match'
@@ -21,22 +22,22 @@ function timed_react_render_on_server(named_arguments)
 
 // Returns a Promise resolving to { status, content, redirect }.
 //
-export default function render_on_server({ disable_server_side_rendering, create_page_element, render_webpage, url, store, routes })
+export default function render_on_server({ history, disable_server_side_rendering, create_page_element, render_webpage, store, routes })
 {
 	// Routing only takes a couple of milliseconds
 	// const routing_timer = timer()
 
-	// Perform routing for this `url`
+	// Perform routing for this URL
 	return match_routes_against_location
 	({
-		location: url,
-		routes: typeof routes === 'function' ? routes(store) : routes
+		history,
+		routes
 	})
 	.then(({ redirect, router_state }) =>
 	{
 		// routing_timer()
 
-		// Return in case of an HTTP redirect
+		// In case of a `react-router` `<Redirect/>`
 		if (redirect)
 		{
 			return { redirect: location_url(redirect) }
@@ -58,7 +59,7 @@ export default function render_on_server({ disable_server_side_rendering, create
 		const preload_timer = timer()
 
 		// After the page has finished preloading, render it
-		return store.dispatch(preload_action(url)).then(() =>
+		return store.dispatch(preload_action(get_location(history))).then(() =>
 		{
 			time.preload = preload_timer()
 

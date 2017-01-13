@@ -1,13 +1,19 @@
-9.0.0 / 10.01.2017
+9.1.0 / 13.01.2017
 ==================
 
-  A couple of TODOs for `9.0.0`:
+  * (small breaking change) server-side `localize()` function parameter now takes not just `store` argument but instead a wrapped `{ store }` argument.
+  * (small breaking change) server-side `assets`, `head`, `bodyStart` and `bodyEnd` now take not the old `url` argument but instead the new `path` argument (aka `pathname`), because query parameters should be irrelevant for code-splitting and customization.
+  * (small breaking change) `preload.catch` now doesn't receive `redirect` parameter: use `dispatch(goto(url))` instead.
+  * Added `path` to `preload.error` handler parameters.
+  * Added `goto` parameter function to `preload.catch`.
 
-  * Fix `@preload()` with programmatic `redirect` and `goto` (almost done)
+  A couple of TODOs for `9.x`:
+
   * Fix `onEnter` being called twice (both on server and client, because `react-router`'s `match()` is called there twice) - this is not considered a blocker for `9.0.0` release since `@preload()` supercedes `onEnter` and therefore `onEnter` may not be used at all. I guess it can be fixed using `<RouterContext>`.
   * Maybe implement the minor `previous_route_components` optimization from `8.0.0` for preloading pages
 
-  Changes:
+9.0.0 / 10.01.2017
+==================
 
   * Added "asynchronous action handlers" (see README)
   <!--* Since `redux-router` maintainers are incompetent and lazy, they don't want to merge my Pull Requests, I'm forking `redux-router` repo as part of this library (`./source/redux/redux-router`) and making the neccessary changes to the code.-->

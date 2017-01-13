@@ -6,7 +6,7 @@ import render_stack_trace from './html stack trace'
 
 import timer from '../timer'
 
-export default function start_webpage_rendering_server(common, options)
+export default function start_webpage_rendering_server(settings, options)
 {
 	const
 	{
@@ -91,12 +91,12 @@ export default function start_webpage_rendering_server(common, options)
 
 		const total_timer = timer()
 
-		const { status, content, redirect, route, time } = await render_page(common,
+		const { status, content, redirect, route, time } = await render_page(settings,
 		{
 			application,
 			assets,
 			initialize,
-			localize: localize ? (store) => localize(store, get_preferred_locales(ctx)) : undefined,
+			localize: localize ? parameters => localize(parameters, get_preferred_locales(ctx)) : undefined,
 			render,
 			loading,
 			html,

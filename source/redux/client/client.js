@@ -1,44 +1,49 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
 
-import localize_and_render from '../../client'
-import { authentication_token as get_authentication_token } from '../../client'
-import render_on_client from './render'
+import client_side_render, { create_history, authentication_token as get_authentication_token } from '../../client'
+import render from './render'
 import create_store from './create store'
 import create_http_client from './create http client'
 import normalize_common_settings from '../normalize'
 
-// Performs client-side rendering
-// along with varios stuff like loading localized messages.
-//
 // This function is what's gonna be called from the project's code on the client-side.
-//
-export default function render(common, specific = {})
+export default function set_up_and_render(settings, options = {})
 {
-	common = normalize_common_settings(common)
+	settings = normalize_common_settings(settings)
 
-	const { devtools, translation } = specific
+	const { devtools, translation } = options
 	
 	// camelCase aliasing
-	const on_navigate = specific.on_navigate || specific.onNavigate
+	const on_navigate = options.on_navigate || options.onNavigate
 
 	// Read authentication token from a global variable
 	// and also erase that global variable
 	const authentication_token = get_authentication_token()
 
 	// Create HTTP client (Redux action creator `http` utility)
-	const http_client = create_http_client(common, authentication_token)
+	const http_client = create_http_client(settings, authentication_token)
+
+	// Create `react-router` `history`
+	const history = create_history(document.location, settings)
 
 	// Create Redux store
-	const store = create_store(common, window._store_data, http_client, devtools)
-	delete window._store_data
+	const store = create_store(settings, window._redux_state, history, http_client, devtools)
+	delete window._redux_state
 
-	// Render page
-	return localize_and_render
+	// Render the page
+	return client_side_render
 	({
 		translation,
-		wrapper: common.wrapper,
-		render_on_client,
-		render_parameters: { devtools, routes: common.routes, store, on_navigate }
+		wrapper: settings.wrapper,
+		render,
+		render_parameters:
+		{
+			history,
+			routes: settings.routes,
+			store,
+			devtools,
+			on_navigate
+		}
 	})
 }

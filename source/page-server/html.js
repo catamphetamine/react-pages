@@ -1,27 +1,16 @@
 import nunjucks from 'nunjucks'
-import UglifyJS from 'uglify-js'
 
 import { server_generated_webpage_head } from '../webpage head'
 import { get_language_from_locale } from '../helpers'
-import { ISO_date_regexp } from '../date parser'
 
 nunjucks.configure({ autoescape: true })
 
 export default function Html(options)
 {
-	const
-	{
-		assets,
-		store
-	}
-	= options
+	const { assets } = options
 
 	const style_url      = assets.entry ? assets.style[assets.entry]      : assets.style
 	const javascript_url = assets.entry ? assets.javascript[assets.entry] : assets.javascript
-
-	const store_state = store.getState()
-	// Remove `redux-router` data from store
-	delete store_state.router
 
 	const webpage_head = server_generated_webpage_head()
 
@@ -31,36 +20,13 @@ export default function Html(options)
 		webpage_head,
 		style_url,
 		javascript_url,
-		store_state,
 		get_language_from_locale,
 		safe_json_stringify,
 		JSON
 	})
 }
 
-// JSON date deserializer
-// use as the second, 'reviver' argument to JSON.parse(json, JSON.date_parser);
-//
-// http://stackoverflow.com/questions/14488745/javascript-json-date-deserialization/23691273#23691273
-//
-const define_json_parser = UglifyJS.minify
-(`
-if (!JSON.date_parser)
-{
-	JSON.date_parser = function(key, value)
-	{
-		if (typeof value === 'string' && /^${ISO_date_regexp}$/.test(value))
-		{
-			return new Date(value)
-		}
-
-		return value
-	}
-}
-`,
-{ fromString: true }).code
-
-function safe_json_stringify(json)
+export function safe_json_stringify(json)
 {
 	// The default javascript JSON.stringify doesn't escape forward slashes,
 	// but it is allowed by the JSON specification, so we manually do it here.
@@ -149,19 +115,11 @@ const template = nunjucks.compile
 				</script>
 			{% endif %}
 
-			{# JSON Date deserializer #}
-			{% if parse_dates %}
-				<script>${define_json_parser}</script>
+			{# Custom javascript. Must be XSS-safe. #}
+			{# e.g. Redux stuff goes here (Redux state, Date parser) #}
+			{% if extension_javascript %}
+				{{ extension_javascript | safe }}
 			{% endif %}
-
-			{# 
-				Store data will be reloaded into the store on the client-side.
-				All forward slashes are escaped to prevent XSS attacks.
-				https://medium.com/node-security/the-most-common-xss-vulnerability-in-react-js-applications-2bdffbcc1fa0
-			#}
-			<script>
-				window._store_data = JSON.parse({{ JSON.stringify(safe_json_stringify(store_state)) | safe }} {% if parse_dates %}, JSON.date_parser{% endif %})
-			</script>
 
 			{# javascripts #}
 

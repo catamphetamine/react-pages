@@ -44,19 +44,32 @@ $ npm install react-isomorphic-render --save
 
 (see [webapp](https://github.com/halt-hammerzeit/webapp) and [webpack-react-redux-isomorphic-render-example](https://github.com/halt-hammerzeit/webpack-react-redux-isomorphic-render-example) as references)
 
-Start by creating your `react-isomorphic-render.js` set up file (it configures both client side and server side)
+Start by creating a settings file (it configures both client side and server side)
+
+#### react-isomorphic-render.js
 
 ```javascript
 export default {
-  // Redux reducers
-  reducer: require('./src/client/redux/reducers'),
+  // React-Router routes
+  routes: require('./src/client/routes'),
 
-  // React-router routes
-  routes: require('./src/client/routes')
+  // Redux reducers
+  // (they will be combined via `combineReducers()`)
+  reducer: require('./src/client/redux/reducers')
 }
 ```
 
-Then create your client-side main application file (`application.js`)
+#### ./src/client/redux/reducers/index.js
+
+```js
+export { default as reducer1 } from './reducer1'
+export { default as reducer2 } from './reducer2'
+...
+```
+
+Then call `render()` in the main client-side javascript file
+
+#### ./src/client/application.js
 
 ```javascript
 // Include CSS styles in the bundle
@@ -237,19 +250,15 @@ try {
   //
   const { status, content, redirect } = await render(settings, {
     // Takes the same parameters as webpage server
-    application: { host, port },
-    assets,
+    ...
 
     // Original HTTP request, which is used for
     // getting URL, cloning cookies, and inside `initialize`.
     request,
 
-    // Cookies object with `.get(name)` function
+    // Cookies object having `.get(name)` function
     // (only needed if using `authentication` cookie feature)
-    cookies,
-
-    // The rest optional parameters are the same
-    // as for webpage server and are all optional
+    cookies
   })
 
   if (redirect) {
@@ -954,15 +963,14 @@ If you're using Webpack then make sure you either build your server-side code wi
 
 ```javascript
 {
-  // Redux reducers (an object of reducing functions).
-  // (either a reducers object or a function returning a reducers object)
-  reducer: require('./src/client/redux/reducers')
-
   // React-router routes
   // (either a `<Route/>` element or a
   //  `function({ dispatch, getState })`
   //  returning a `<Route/>` element)
   routes: require('./src/client/routes')
+
+  // Redux reducers (an object)
+  reducer: require('./src/client/redux/reducers')
   
   // A React component.
   //
@@ -1031,7 +1039,7 @@ If you're using Webpack then make sure you either build your server-side code wi
     // then a redirect to "/unauthorized" page can be made here.
     // If this error handler is defined then it must handle
     // all errors it gets (or just re`throw` them).
-    catch: (error, { url, redirect, dispatch, getState }) => redirect(`/error?url=${encode(url)}&error=${error.status}`)
+    catch: (error, { path, url, dispatch, getState }) => dispatch(goto(`/error?url=${encode(url)}&error=${error.status}`))
   }
 
   // (optional)
@@ -1122,14 +1130,14 @@ If you're using Webpack then make sure you either build your server-side code wi
   //
   // Also a website "favicon" URL, if any.
   //
-  // Can be an `object` or a `function(url, { store })`.
+  // Can be an `object` or a function returning an object.
   //
   // `javascript` and `style` can be strings or objects.
   // If they are objects then one should also provide an `entry` parameter.
   // The objects may also contain `common` entry
   // which will also be included on the page.
   //
-  assets: (url, { store }) =>
+  assets: (path, { store }) =>
   {
     return {
       javascript: '/assets/main.js',
@@ -1161,18 +1169,18 @@ If you're using Webpack then make sure you either build your server-side code wi
     // (optional)
     // Markup inserted into server rendered webpage's <head/>.
     // Can be either a function returning a value or just a value.
-    head: (url, { store }) => String, or React.Element, or an array of React.Elements
+    head: (path, { store }) => String, or React.Element, or an array of React.Elements
 
     // (optional)
     // Markup inserted to the start of the server rendered webpage's <body/>.
     // Can be either a function returning a value or just a value.
-    bodyStart: (url, { store }) => String, or React.Element, or an array of React.Elements
+    bodyStart: (path, { store }) => String, or React.Element, or an array of React.Elements
     // (aka `body_start`)
 
     // (optional)
     // Markup inserted to the end of the server rendered webpage's <body/>.
     // Can be either a function returning a value or just a value.
-    bodyEnd: (url, { store }) => String, or React.Element, or an array of React.Elements
+    bodyEnd: (path, { store }) => String, or React.Element, or an array of React.Elements
     // (aka `body_end`)
   }
 
@@ -1291,6 +1299,10 @@ Client-side `render` function returns a `Promise` resolving to an object
   rerender   // (Redux) rerender React application
 }
 ```
+
+## For purists
+
+See [PHILOSOPHY](https://github.com/halt-hammerzeit/react-isomorphic-render/blob/master/PHILOSOPHY.md)
 
 ## Contributing
 

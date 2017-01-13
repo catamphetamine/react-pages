@@ -1,4 +1,8 @@
 import React from 'react'
+import createHistory from 'history/lib/createBrowserHistory'
+import { useRouterHistory } from 'react-router'
+
+import _create_history from './history'
 
 // Performs client-side rendering
 // along with varios stuff like loading localized messages.
@@ -6,7 +10,7 @@ import React from 'react'
 // This function is intended to be wrapped by another function
 // which (in turn) is gonna be called from the project's code on the client-side.
 //
-export default function localize_and_render({ render_parameters = {}, render_on_client, wrapper, translation })
+export default function client_side_render({ history, render, render_parameters = {}, wrapper, translation })
 {
 	// Make sure authentication token global variable is erased
 	// (in case it hasn't been read and erased before)
@@ -19,6 +23,7 @@ export default function localize_and_render({ render_parameters = {}, render_on_
 		delete window._locale
 	}
 
+	// Localized messages
 	let messages = window._locale_messages
 	if (messages)
 	{
@@ -31,9 +36,10 @@ export default function localize_and_render({ render_parameters = {}, render_on_
 	{
 		// returns a Promise for React component.
 		//
-		return render_on_client
+		return render
 		({
 			...render_parameters,
+			to: document.getElementById('react'),
 			create_page_element : async (element, props = {}) =>
 			{
 				// if no i18n is required, then simply create Page element
@@ -57,8 +63,7 @@ export default function localize_and_render({ render_parameters = {}, render_on_
 
 				// create React page element
 				return React.createElement(wrapper, props, element)
-			},
-			to: document.getElementById('react')
+			}
 		})
 	}
 
@@ -86,4 +91,11 @@ export function authentication_token()
 	}
 
 	return token
+}
+
+// Create `react-router` `history`
+export function create_history(location, settings)
+{
+	// Adds 'useBasename' and 'useQueries'
+	return _create_history(useRouterHistory(createHistory), location, settings.history)
 }
