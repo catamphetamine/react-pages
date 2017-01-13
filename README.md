@@ -955,6 +955,29 @@ export default {
 }
 ```
 
+P.S.: Currently it says `Warning: [react-router] You cannot change <Router routes>; it will be ignored` in the browser console. I'm just ignoring this for now, maybe I'll find a proper fix later. Currently I'm using this hacky workaround in `./src/client/application.js`:
+
+```js
+/**
+ * Warning from React Router, caused by react-hot-loader.
+ * The warning can be safely ignored, so filter it from the console.
+ * Otherwise you'll see it every time something changes.
+ * See https://github.com/gaearon/react-hot-loader/issues/298
+ */
+if (module.hot) {
+  const isString = a => typeof a === 'string';
+  const orgError = console.error; // eslint-disable-line no-console
+  console.error = (...args) => { // eslint-disable-line no-console
+    if (args && args.length === 1 && isString(args[0]) && args[0].indexOf('You cannot change <Router routes>;') > -1) {
+      // React route changed
+    } else {
+      // Log the error as normally
+      orgError.apply(console, args);
+    }
+  };
+}
+```
+
 ## Bundlers
 
 If you're using Webpack then make sure you either build your server-side code with Webpack too (so that asset `require()` calls (images, styles, fonts, etc) inside React components work, see [universal-webpack](https://github.com/halt-hammerzeit/universal-webpack)) or use something like [webpack-isomorphic-tools](https://github.com/halt-hammerzeit/webpack-isomorphic-tools).
