@@ -755,14 +755,15 @@ import React from 'react'
 //
 import { withRouter } from 'react-router'
 
-class Component extends React.Component {
+// Using `babel-plugin-transform-decorators-legacy`
+// https://babeljs.io/docs/plugins/transform-decorators/
+@withRouter
+export default class Component extends React.Component {
   render() {
     const { router } = this.props
     return <div>{ JSON.stringify(router.location) }</div>
   }
 }
-
-export default withRouter(Component)
 ```
 
 ### Changing current location
