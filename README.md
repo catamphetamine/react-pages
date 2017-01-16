@@ -42,7 +42,7 @@ $ npm install react-isomorphic-render --save
 
 ## Usage
 
-(see [webapp](https://github.com/halt-hammerzeit/webapp) and [webpack-react-redux-isomorphic-render-example](https://github.com/halt-hammerzeit/webpack-react-redux-isomorphic-render-example) as references)
+(see [webpack-react-redux-isomorphic-render-example](https://github.com/halt-hammerzeit/webpack-react-redux-isomorphic-render-example) or [webapp](https://github.com/halt-hammerzeit/webapp) as references)
 
 Start by creating a settings file (it configures both client side and server side)
 
