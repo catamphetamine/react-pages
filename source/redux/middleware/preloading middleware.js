@@ -49,6 +49,15 @@ export default function preloading_middleware(server, error_handler, preload_hel
 			preloading.pending = false
 			// preloading.time = time
 
+			// This preloading time will be longer then
+			// the server-side one, say, by 10 milliseconds, 
+			// probably because the web browser making
+			// an asynchronous HTTP request is slower
+			// than the Node.js server making a regular HTTP request.
+			// Also this includes network latency
+			// for a particular website user, etc.
+			// So this `preload` time doesn't actually describe
+			// the server-side performance.
 			if (report_stats)
 			{
 				report_stats
