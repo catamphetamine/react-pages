@@ -18,12 +18,14 @@ import create_history from '../history'
 // This is not currently being used.
 // It's just an example of Redux-less usage.
 //
-export default function set_up_and_render({ translation, on_navigate, onNavigate }, settings)
+export default function set_up_and_render(settings, options = {})
 {
 	settings = normalize_common_settings(settings)
 
+	const { translation } = options
+
 	// camelCase aliasing
-	on_navigate = on_navigate || onNavigate
+	const on_navigate = options.on_navigate || options.onNavigate
 
 	// Create `react-router` `history`
 	const history = create_history(document.location, settings)

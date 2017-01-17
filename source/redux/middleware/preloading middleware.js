@@ -5,6 +5,7 @@ import { location_url } from '../../location'
 import { server_redirect } from '../../history'
 import { Preload, Redirect, GoTo, redirect_action, goto_action, history_redirect_action, history_goto_action } from '../actions'
 import match_routes_against_location from '../../react-router/match'
+import get_route_path from '../../react-router/get route path'
 
 export const Preload_method_name  = '__preload__'
 export const Preload_options_name = '__preload_options__'
@@ -13,7 +14,7 @@ export const Preload_started  = '@@react-isomorphic-render/redux/preload started
 export const Preload_finished = '@@react-isomorphic-render/redux/preload finished'
 export const Preload_failed   = '@@react-isomorphic-render/redux/preload failed'
 
-export default function preloading_middleware(server, error_handler, preload_helpers, routes, history)
+export default function preloading_middleware(server, error_handler, preload_helpers, routes, history, report_stats)
 {
 	return ({ getState, dispatch }) => next => action =>
 	{
@@ -27,9 +28,177 @@ export default function preloading_middleware(server, error_handler, preload_hel
 		// A special flavour of `dispatch` which `throw`s for redirects on the server side.
 		dispatch = preloading_middleware_dispatch(dispatch, server)
 
-		// Promise error handler
-		const handle_error = error => 
+		// Preload status object.
+		// `preloading` holds the cancellation flag for this navigation process.
+		// (e.g. preloading `Promise` chain could be cancelled in case of a redirect)
+		let preloading =
 		{
+			pending : true
+		}
+
+		// Can cancel previous preloading (on the client side)
+		let previous_preloading
+		if (!server)
+		{
+			previous_preloading = window.__preloading_page
+			window.__preloading_page = preloading
+		}
+
+		function preload_finished(time, route)
+		{
+			preloading.pending = false
+			// preloading.time = time
+
+			if (report_stats)
+			{
+				report_stats
+				({
+					url : location_url(action.location),
+					route,
+					time:
+					{
+						preload: time
+					}
+				})
+			}
+		}
+
+		function preload_failed(error)
+		{
+			preloading.pending = false
+			// preloading.error = error
+		}
+
+		function preload_cancelled()
+		{
+			preloading.pending = false
+		}
+
+		return match_routes_against_location
+		({
+			routes: typeof routes === 'function' ? routes({ dispatch, getState }) : routes,
+			history,
+			location: action.location
+		})
+		.then(({ redirect, router_state }) =>
+		{
+			// In case of a `react-router` `<Redirect/>`
+			if (redirect)
+			{
+				// Shouldn't happen on the server-side in the current setup,
+				// but just in case.
+				if (server)
+				{
+					server_redirect(redirect)
+				}
+
+				// Perform client side redirect
+				return dispatch(redirect_action(redirect))
+			}
+
+			// Measures time taken (on the client side)
+			let started_at
+
+			if (!server)
+			{
+				// Measures time taken (on the client side)
+				started_at = Date.now()
+
+				// If on the client side, then store the current pending navigation,
+				// so that it can be cancelled when a new navigation process takes place
+				// before the current navigation process finishes.
+
+				// If there's preceeding navigation pending,
+				// then cancel that previous navigation.
+				if (previous_preloading && previous_preloading.pending)
+				{
+					previous_preloading.cancelled = true
+					// Page loading indicator could listen for this event
+					dispatch({ type: Preload_finished })
+				}
+			}
+
+			// Concatenated `react-router` route string.
+			// E.g. "/user/:user_id/post/:post_id"
+			const route = get_route_path(router_state)
+
+			// `react-router` matched route "state"
+			const { components, location, params } = router_state
+
+			// Preload all the required data for this route (page)
+			const preload = preloader
+			(
+				server,
+				components,
+				getState,
+				preloader_dispatch(dispatch, preloading),
+				location,
+				params,
+				preload_helpers,
+				preloading
+			)
+
+			// If nothing to preload, just move to the next middleware
+			if (!preload)
+			{
+				// Trigger `react-router` navigation on client side
+				// (and do nothing on server side)
+				return proceed_with_navigation(dispatch, action, server)
+			}
+
+			// Page loading indicator could listen for this event
+			dispatch({ type: Preload_started })
+			
+			// Preload the new page.
+			// (the Promise returned is only used in server-side rendering,
+			//  client-side rendering never uses this Promise)
+			return preload()
+				// Navigate to the new page
+				.then(() =>
+				{
+					// If this navigation process was cancelled
+					// before @preload() finished its work,
+					// then don't take any further steps on this cancelled navigation.
+					if (preloading.cancelled)
+					{
+						// Updates preloading status
+						return preload_cancelled()
+					}
+
+					// Page loading indicator could listen for this event
+					dispatch({ type: Preload_finished })
+
+					// Update preload status object
+					preload_finished(Date.now() - started_at, route)
+
+					// Trigger `react-router` navigation on client side
+					// (and do nothing on server side)
+					proceed_with_navigation(dispatch, action, server)
+				},
+				(error) =>
+				{
+					// If this navigation process was cancelled
+					// before @preload() finished its work,
+					// then don't take any further steps on this cancelled navigation.
+					if (!preloading.cancelled)
+					{
+						if (!server)
+						{
+							preloading.error = error
+						}
+
+						// Page loading indicator could listen for this event
+						dispatch({ type: Preload_failed, error })
+					}
+
+					throw error
+				})
+		})
+		.catch((error) =>
+		{
+			// Update preload status object
+			preload_failed(error)
+
 			// If the error was a redirection exception (not a error),
 			// then just exit and do nothing.
 			// (happens only on server side)
@@ -74,116 +243,7 @@ export default function preloading_middleware(server, error_handler, preload_hel
 			{
 				throw new Error(`"preload.catch" must either redirect or rethrow the error (on server side)`)
 			}
-		}
-
-		return match_routes_against_location
-		({
-			routes: typeof routes === 'function' ? routes({ dispatch, getState }) : routes,
-			history,
-			location: action.location
 		})
-		.then(({ redirect, router_state }) =>
-		{
-			// In case of a `react-router` `<Redirect/>`
-			if (redirect)
-			{
-				// Shouldn't happen on the server-side in the current setup,
-				// but just in case.
-				if (server)
-				{
-					server_redirect(redirect)
-				}
-
-				// Perform client side redirect
-				return dispatch(redirect_action(redirect))
-			}
-
-			// Holds the cancellation flag for this navigation process
-			const preloading = { cancelled: false }
-
-			// If on the client side, then store the current pending navigation,
-			// so that it can be cancelled when a new navigation process takes place
-			// before the current navigation process finishes.
-			if (!server)
-			{
-				// `window.__preloading_page` holds client side page preloading status.
-				// If there's preceeding navigation pending, then cancel that previous navigation.
-				if (window.__preloading_page)
-				{
-					// window.__preloading_page.promise.cancel()
-					window.__preloading_page.cancelled = true
-					// Page loading indicator could listen for this event
-					dispatch({ type: Preload_finished })
-				}
-
-				// preloading.promise = promise
-				window.__preloading_page = preloading
-			}
-
-			// `react-router` matched route "state"
-			const { components, location, params } = router_state
-
-			// Preload all the required data for this route (page)
-			const preload = preloader
-			(
-				server,
-				components,
-				getState,
-				preloader_dispatch(dispatch, preloading),
-				location,
-				params,
-				preload_helpers,
-				preloading
-			)
-
-			// If nothing to preload, just move to the next middleware
-			if (!preload)
-			{
-				// Trigger `react-router` navigation on client side
-				// (and do nothing on server side)
-				return proceed_with_navigation(dispatch, action, server)
-			}
-
-			// Page loading indicator could listen for this event
-			dispatch({ type: Preload_started })
-			
-			// Preload the new page.
-			// (the Promise returned is only used in server-side rendering,
-			//  client-side rendering never uses this Promise)
-			return preload()
-				// Navigate to the new page
-				.then(() =>
-				{
-					// If this navigation process was cancelled
-					// before @preload() finished its work,
-					// then don't take any further steps on this cancelled navigation.
-					if (preloading.cancelled)
-					{
-						return
-					}
-
-					// Page loading indicator could listen for this event
-					dispatch({ type: Preload_finished })
-
-					// Trigger `react-router` navigation on client side
-					// (and do nothing on server side)
-					proceed_with_navigation(dispatch, action, server)
-				})
-				.catch(error =>
-				{
-					// If this navigation process was cancelled
-					// before @preload() finished its work,
-					// then don't take any further steps on this cancelled navigation.
-					if (!preloading.cancelled)
-					{
-						// Page loading indicator could listen for this event
-						dispatch({ type: Preload_failed, error })
-					}
-
-					throw error
-				})
-		})
-		.catch(handle_error)
 	}
 }
 

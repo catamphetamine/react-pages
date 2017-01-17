@@ -34,7 +34,7 @@ export default function client_side_render({ history, render, render_parameters 
 	// returns the rendered React page component.
 	function render_page()
 	{
-		// returns a Promise for React component.
+		// Returns a Promise for React component.
 		//
 		return render
 		({
@@ -42,13 +42,13 @@ export default function client_side_render({ history, render, render_parameters 
 			to: document.getElementById('react'),
 			create_page_element : async (element, props = {}) =>
 			{
-				// if no i18n is required, then simply create Page element
+				// If no i18n is required, then simply create Page element
 				if (!locale)
 				{
 					return React.createElement(wrapper, props, element)
 				}
 
-				// translation loading function may be passed
+				// Translation loading function may be passed
 				// (its main purpose is to enable Webpack HMR
 				//  in dev mode for translated messages)
 				if (translation)
@@ -56,12 +56,12 @@ export default function client_side_render({ history, render, render_parameters 
 					messages = await translation(locale)
 				}
 
-				// load translations and then create page element
+				// Load translations and then create page element
 
 				props.locale   = locale
 				props.messages = messages
 
-				// create React page element
+				// Create React page element
 				return React.createElement(wrapper, props, element)
 			}
 		})

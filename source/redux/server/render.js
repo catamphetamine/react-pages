@@ -7,6 +7,7 @@ import { get_location } from '../../history'
 import timer from '../../timer'
 import { preload_action } from '../actions'
 import match_routes_against_location from '../../react-router/match'
+import get_route_path from '../../react-router/get route path'
 
 function timed_react_render_on_server(named_arguments)
 {
@@ -48,10 +49,7 @@ export default function render_on_server({ history, disable_server_side_renderin
 
 		// Concatenated `react-router` route string.
 		// E.g. "/user/:user_id/post/:post_id"
-		const route = router_state.routes
-			.filter(route => route.path)
-			.map(route => route.path.replace(/^\//, '').replace(/\/$/, ''))
-			.join('/') || '/'
+		const route = get_route_path(router_state)
 
 		// Profiling
 		const time = {}

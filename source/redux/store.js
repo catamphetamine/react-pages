@@ -4,33 +4,62 @@ import asynchronous_middleware from './middleware/asynchronous middleware'
 import preloading_middleware from './middleware/preloading middleware'
 import history_middleware from './middleware/history middleware'
 
-export default function create_store(reducer, history, { devtools, server, data, routes, http_client, asynchronous_action_event_naming, on_preload_error, middleware, on_store_created, preload_helpers })
+import { set_up_http_client } from './http client'
+
+export default function create_store(settings, data, history, http_client, options)
 {
-	// Redux middlewares
-	const middlewares =
+	const
+	{
+		reducer,
+		routes,
+		redux_middleware,
+		asynchronous_action_event_naming,
+		preload,
+		http
+	}
+	= settings
+
+	const
+	{
+		server,
+		devtools,
+		stats
+	}
+	= options
+
+	// Redux middleware
+	const middleware =
 	[
 		// Asynchronous middleware (e.g. for HTTP Ajax calls).
 		asynchronous_middleware(http_client, { asynchronous_action_event_naming }),
 
 		// Makes @preload() decorator work.
-		preloading_middleware(server, on_preload_error, preload_helpers, routes, history),
+		preloading_middleware
+		(
+			server,
+			preload && preload.catch,
+			preload && preload.helpers, 
+			routes,
+			history,
+			stats
+		),
 
 		// Performs `redirect` and `goto` actions on `history`
 		history_middleware(history)
 	]
 
 	// User may supply his own Redux middleware
-	if (middleware)
+	if (redux_middleware)
 	{
-		middlewares.push(...middleware())
+		middleware.push(...redux_middleware())
 	}
 
 	// Redux "store enhancers"
 	const store_enhancers =
 	[
-		// Redux middlewares are applied in reverse order
+		// Redux middleware are applied in reverse order
 		// (which is counter-intuitive)
-		applyMiddleware(...middlewares)
+		applyMiddleware(...middleware)
 	]
 
 	// Add Redux DevTools (if they're enabled)
@@ -57,6 +86,14 @@ export default function create_store(reducer, history, { devtools, server, data,
 		// Add camelCase alias
 		store.hotReload = store.hot_reload
 	}
+
+	// Customization of `http` utility
+	// which can be used inside Redux action creators
+	set_up_http_client(http_client,
+	{
+		store,
+		on_before_send : http && http.request
+	})
 
 	// Return the Redux store
 	return store

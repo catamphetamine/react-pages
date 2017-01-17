@@ -3,8 +3,8 @@ import UglifyJS from 'uglify-js'
 import { ISO_date_regexp } from '../../date parser'
 import { safe_json_stringify } from '../../page-server/html'
 import render from './render'
-import create_store from './create store'
-import create_http_client from './create http client'
+import create_store from '../store'
+import { create_http_client } from '../http client'
 
 export default function _render(options)
 {
@@ -18,7 +18,13 @@ export default function _render(options)
 export async function initialize(settings, { authentication_token, application, request, initialize, history })
 {
 	// Create HTTP client (Redux action creator `http` utility)
-	const http_client = create_http_client(settings, authentication_token, application, request)
+	const http_client = create_http_client(settings, authentication_token,
+	{
+		host          : application ? application.host : undefined,
+		port          : application ? application.port : undefined,
+		secure        : application ? application.secure : false,
+		clone_request : request
+	})
 
 	// Create Redux store
 
@@ -33,7 +39,10 @@ export async function initialize(settings, { authentication_token, application, 
 	}
 
 	// Create Redux store
-	const store = create_store(settings, store_data, history, http_client)
+	const store = create_store(settings, store_data, history, http_client,
+	{
+		server : true
+	})
 
 	function extension_javascript()
 	{

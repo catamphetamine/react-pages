@@ -1,6 +1,8 @@
+import Http_client from '../http client'
+
 // Customization of `http` utility
 // which can be used inside Redux action creators
-export default function set_up_http_client(http_client, { store, on_before_send })
+export function set_up_http_client(http_client, { store, on_before_send })
 {
 	if (on_before_send)
 	{
@@ -11,4 +13,16 @@ export default function set_up_http_client(http_client, { store, on_before_send 
 			on_before_send(request, { store })
 		})
 	}
+}
+
+export function create_http_client(settings, authentication_token, options = {})
+{
+	return new Http_client
+	({
+		format_url  : settings.http && settings.http.url,
+		parse_dates : settings.parse_dates,
+		authentication_token,
+		authentication_token_header: settings.authentication ? settings.authentication.header : undefined,
+		...options
+	})
 }

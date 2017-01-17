@@ -47,7 +47,7 @@ export default function render_on_client({ history, devtools, create_page_elemen
 			{ ...router_state }
 			onUpdate={ onUpdate }
 			history={ history }
-			render={ applyRouterMiddleware(useScroll()) }/>
+			render={ applyRouterMiddleware( useScroll() ) }/>
 
 		// Wraps <Router/> with arbitrary React components (e.g. Redux <Provider/>),
 		// loads internationalization messages,
