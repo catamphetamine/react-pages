@@ -1,9 +1,13 @@
+9.1.2 / 18.01.2017
+==================
+
+  * Added back the `redirect` and `goto` parameters to `preload.catch`
+
 9.1.0 / 13.01.2017
 ==================
 
   * (small breaking change) server-side `localize()` function parameter now takes not just `store` argument but instead a wrapped `{ store }` argument.
   * (small breaking change) server-side `assets`, `head`, `bodyStart` and `bodyEnd` now take not the old `url` argument but instead the new `path` argument (aka `pathname`), because query parameters should be irrelevant for code-splitting and customization.
-  * (small breaking change) `preload.catch` now doesn't receive `redirect` parameter: use `dispatch(goto(url))` instead.
   * Added `path` to `preload.error` handler parameters.
 
   A couple of TODOs for `9.x`:

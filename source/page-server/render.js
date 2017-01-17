@@ -12,9 +12,12 @@ import Html from './html'
 import normalize_common_settings from '../redux/normalize'
 import timer from '../timer'
 import create_history from '../history'
+import { location_url } from '../location'
 
 import redux_render, { initialize as redux_initialize } from '../redux/server/server'
 import { render_on_server as react_router_render } from '../react-router/render'
+
+import { Preload } from '../redux/actions'
 
 // isomorphic (universal) rendering (middleware).
 // will be used in web_application.use(...)
@@ -179,7 +182,7 @@ export default async function(settings, { initialize, localize, assets, applicat
 		// Special case for Redux
 		if (parameters.store)
 		{
-			error_handler_parameters.dispatch = parameters.store.dispatch,
+			error_handler_parameters.dispatch = redirecting_dispatch(parameters.store.dispatch, result)
 			error_handler_parameters.getState = parameters.store.getState
 		}
 
@@ -204,7 +207,7 @@ export default async function(settings, { initialize, localize, assets, applicat
 
 		if (!result.redirect)
 		{
-			throw new Error(`Preload error handler must either redirect to another URL or throw an error. ${request.url}`)
+			throw new Error(`"preload.catch" must either redirect to another URL or throw an error. ${request.url}`)
 		}
 
 		return result
@@ -255,4 +258,23 @@ function get_path(url)
 	}
 
 	return url
+}
+
+// A special flavour of `dispatch` which `throw`s for redirects on the server side.
+function redirecting_dispatch(dispatch, result)
+{
+	return (event) =>
+	{
+		switch (event.type)
+		{
+			// In case of navigation from @preload()
+			case Preload:
+				// `throw`s a special `Error` on server side
+				return result.redirect = location_url(event.location)
+		
+			default:
+				// Proceed with the original
+				return dispatch(event)
+		}
+	}
 }

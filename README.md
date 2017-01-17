@@ -1063,7 +1063,7 @@ If you're using Webpack then make sure you either build your server-side code wi
     // then a redirect to "/unauthorized" page can be made here.
     // If this error handler is defined then it must handle
     // all errors it gets (or just re`throw` them).
-    catch: (error, { path, url, dispatch, getState }) => dispatch(goto(`/error?url=${encode(url)}&error=${error.status}`))
+    catch: (error, { path, url, goto, redirect, dispatch, getState }) => goto(`/error?url=${encode(url)}&error=${error.status}`)
   }
 
   // (optional)
