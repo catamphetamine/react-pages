@@ -781,6 +781,8 @@ In order for `authorize` helper to work as intended `preload.catch` function par
 }
 ```
 
+Also make sure to authorize a user inside REST API endpoints as well, because, say, you set up `authorize` for a restricted page in `routes.js`, but a hacker still can send any REST API HTTP request to the server so if a REST API endpoint doesn't double-check the user's authorization then the whole authorization system is actually considered useless.
+
 ### Locale detection
 
 This library performs the following locale detection steps for each webpage rendering HTTP request:
