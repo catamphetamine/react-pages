@@ -1,3 +1,13 @@
+9.1.3 / 19.01.2017
+==================
+
+  * Added `authorize` helper (See `Authorized routes` section of the README)
+
+  A couple of TODOs for `9.x`:
+
+  * Fix `onEnter` being called twice (both on server and client, because `react-router`'s `match()` is called there twice) - this is not considered a blocker for `9.0.0` release since `@preload()` supercedes `onEnter` and therefore `onEnter` may not be used at all. I guess it can be fixed using `<RouterContext>`.
+  * Maybe implement the minor `previous_route_components` optimization from `8.0.0` for preloading pages (otherwise remove `server` argument from `preloader()` function)
+
 9.1.2 / 18.01.2017
 ==================
 
@@ -9,11 +19,6 @@
   * (small breaking change) server-side `localize()` function parameter now takes not just `store` argument but instead a wrapped `{ store }` argument.
   * (small breaking change) server-side `assets`, `head`, `bodyStart` and `bodyEnd` now take not the old `url` argument but instead the new `path` argument (aka `pathname`), because query parameters should be irrelevant for code-splitting and customization.
   * Added `path` to `preload.error` handler parameters.
-
-  A couple of TODOs for `9.x`:
-
-  * Fix `onEnter` being called twice (both on server and client, because `react-router`'s `match()` is called there twice) - this is not considered a blocker for `9.0.0` release since `@preload()` supercedes `onEnter` and therefore `onEnter` may not be used at all. I guess it can be fixed using `<RouterContext>`.
-  * Maybe implement the minor `previous_route_components` optimization from `8.0.0` for preloading pages
 
 9.0.0 / 10.01.2017
 ==================

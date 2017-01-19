@@ -415,7 +415,9 @@ In the example above `@preload()` helper is called to preload a web page before 
 `@preload()` decorator takes a function which must return a `Promise`:
 
 ```javascript
-@preload(function({ dispatch, getState, location, parameters }) { return Promise })
+@preload(function({ dispatch, getState, location, parameters, server }) {
+  return Promise
+})
 ```
 
 When `dispatch` is called with a special "asynchronous" action (having `promise` and `events` properties, as discussed above) then such a `dispatch()` call will return a `Promise`, that's why in the example above it's written simply as:
@@ -732,6 +734,52 @@ export default {
 ```
 
 Notice the extraction of these two configuration parameters into a separate file `react-isomorphic-render-async.js`: it is done to break circular dependency on `./react-isomorphic-render.js` file because `routes` `import` React page components which in turn `import` action creators which in turn import `./react-isomorphic-render.js` hence the circular (recursive) dependency (same goes for `reducer`).
+
+### Authorized routes
+
+For authorized routes use the `authorize` helper (kinda "decorator")
+
+```js
+import { authorize } from 'react-isomorphic-render'
+
+// Gets `user` from Redux state
+const getUser = state => state.authentication.user
+
+// Restricts a `<Route/>` to a certain part of users
+const restricted = (route, authorization) => authorize(getUser, authorization, route)
+
+const routes = (
+  <Route path="/" component={ Layout }>
+    <Route path="public" component={ Public }/>
+    <Route path="settings" component={ restricted(UserSettings) }/>
+    <Route path="admin" component={ restricted(AdminPanel, user => user.role === 'admin') }/>
+    <Route path="only-me" component={ restricted(OnlyMe, user => user.id === 1) }/>
+  </Route>
+)
+```
+
+In order for `authorize` helper to work as intended `preload.catch` function parameter **must be specified**. Something like this will do:
+
+```js
+{
+  ...
+  preload: {
+    catch(error, { path, url, goto }) {
+      // Not authenticated
+      if (error.status === 401) {
+        return goto(`/unauthenticated?url=${encodeURIComponent(url)}`)
+      }
+      // Not authorized
+      if (error.status === 403)
+      {
+        return goto(`/unauthorized?url=${encodeURIComponent(url)}`)
+      }
+      // Redirect to a generic error page
+      goto('/error')
+    }
+  }
+}
+```
 
 ### Locale detection
 

@@ -28,7 +28,8 @@ import
 	event_name,
 	eventName,
 	Link,
-	IndexLink
+	IndexLink,
+	authorize
 }
 from '../index.es6'
 
@@ -70,6 +71,8 @@ describe(`exports`, function()
 
 		Link.should.be.a('function')
 		IndexLink.should.be.a('function')
+
+		authorize(() => {}, () => {}, () => {}).should.be.a('function')
 	})
 
 	it(`should export ES5`, () =>
@@ -112,6 +115,8 @@ describe(`exports`, function()
 
 		_.Link.should.be.a('function')
 		_.IndexLink.should.be.a('function')
+
+		_.authorize(() => {}, () => {}, () => {}).should.be.a('function')
 	})
 
 	it(`should export rendering service`, () =>

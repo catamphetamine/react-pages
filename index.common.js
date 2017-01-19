@@ -51,3 +51,5 @@ exports.NAVIGATED = exports.Navigated
 
 exports.Link = require('./build/redux/Link').default
 exports.IndexLink = require('./build/redux/IndexLink').default
+
+exports.authorize = require('./build/redux/authorize').default

@@ -78,3 +78,9 @@ export
 	default as IndexLink
 }
 from './es6/redux/IndexLink'
+
+export
+{
+	default as authorize
+}
+from './es6/redux/authorize'
