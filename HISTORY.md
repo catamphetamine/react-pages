@@ -1,7 +1,8 @@
-9.1.3 / 19.01.2017
+9.1.4 / 19.01.2017
 ==================
 
   * Added `authorize` helper (See `Authorized routes` section of the README)
+  * (small breaking change) Removed `goto` from `preload.catch` parameters and now `redirect` does what `goto` did, because the older `redirect` made really no sense: on the client side it would rewrite the URL of the previous page and on the server side it was equal to `goto`. So just use `redirect` in `preload.catch` and if `goto` was used there then just replace it with `redirect` and it will work the same.
 
   A couple of TODOs for `9.x`:
 

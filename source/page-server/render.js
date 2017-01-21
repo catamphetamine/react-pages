@@ -175,8 +175,7 @@ export default async function(settings, { initialize, localize, assets, applicat
 		{
 			path,
 			url      : request.url,
-			redirect : to => result.redirect = to,
-			goto     : to => result.redirect = to
+			redirect : to => result.redirect = to
 		}
 
 		// Special case for Redux

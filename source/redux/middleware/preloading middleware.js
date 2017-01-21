@@ -238,8 +238,7 @@ export default function preloading_middleware(server, error_handler, preload_hel
 			{
 				path : action.location.pathname,
 				url  : location_url(action.location),
-				redirect : to => dispatch(redirect_action(to)),
-				goto     : to => dispatch(goto_action(to)),
+				redirect : to => dispatch(goto_action(to)),
 				dispatch,
 				getState
 			})
