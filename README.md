@@ -394,7 +394,8 @@ function fetchUsers() {
 @preload(({ dispatch }) => dispatch(fetchUsers))
 @connect(
   state => ({ users: state.users.users }),
-  { fetchUsers })
+  // `bindActionCreators()` for Redux action creators
+  { fetchUsers }
 )
 export default class Page extends Component {
   render() {
