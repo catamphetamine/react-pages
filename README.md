@@ -1324,10 +1324,14 @@ If you're using Webpack then make sure you either build your server-side code wi
   ...
 
   // (optional)
-  // Sets up a WebSocket connection.
-  // Automatically sends authentication token (if present)
-  // as part of messages, and also upon receiving
-  // a message having a `type` dispatches a Redux event.
+  // Sets up a WebSocket connection which
+  // automatically sends authentication token (if present)
+  // as part of every message, and also upon receiving
+  // a message having a `type` `dispatch()`es it as a Redux "action".
+  // The global `websocket` object's `.onXxx()` listeners
+  // (`onMessage`, `onOpen`, `onClose`, `onError`, `listen`)
+  // take `(event, store)` arguments so any Redux "action"
+  // can be `dispatch()`ed from within them.
   websocket: require('react-isomorphic-render').websocket
   ({
     host: 'localhost',

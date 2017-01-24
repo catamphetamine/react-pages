@@ -4,7 +4,7 @@ import CustomEvent from '../../custom event'
 // Sets up WebSocket connection
 export default function set_up_websocket_connection(settings)
 {
-	return function(authentication_token)
+	return function(authentication_token, store)
 	{
 		const websocket = new WebSocket(`${settings.secure ? 'wss' : 'ws'}://${settings.host}:${settings.port}`, undefined,
 		{
@@ -12,16 +12,6 @@ export default function set_up_websocket_connection(settings)
 			shouldReconnect(event, websocket)
 			{
 				return Math.min(Math.pow(1.5, websocket.attempts) * 500, 60 * 1000)
-			}
-		})
-
-		websocket.addEventListener('message', (event) =>
-		{
-			const message = JSON.parse(event.data)
-
-			if (message.type)
-			{
-				store.dispatch(message)
 			}
 		})
 
@@ -46,34 +36,47 @@ export default function set_up_websocket_connection(settings)
 				return websocket.close()
 			},
 
-			addEventListener(event_name, listener)
+			listen(event_name, listener)
 			{
-				return websocket.addEventListener(event_name, listener)
+				const enhanced_listener = (event) => listener(event, store)
+
+				websocket.addEventListener(event_name, enhanced_listener)
+
+				// Returns `unlisten()`
+				return () => websocket.removeEventListener(event_name, enhanced_listener)
 			},
 
 			onOpen(listener)
 			{
-				return websocket.addEventListener('open', listener)
+				return _websocket.listen('open', listener)
 			},
 
 			onClose(listener)
 			{
-				return websocket.addEventListener('close', listener)
+				return _websocket.listen('close', listener)
 			},
 
 			onError(listener)
 			{
-				return websocket.addEventListener('error', listener)
+				return _websocket.listen('error', listener)
 			},
 
 			onMessage(listener)
 			{
-				return websocket.addEventListener('message', (event) =>
+				return websocket.listen('message', (event, store) =>
 				{
-					listener(JSON.parse(event.data))
+					return listener(JSON.parse(event.data), store)
 				})
 			}
 		}
+
+		_websocket.onMessage((message, store) =>
+		{
+			if (message.type)
+			{
+				store.dispatch(message)
+			}
+		})
 
 		return _websocket
 	}

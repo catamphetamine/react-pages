@@ -38,7 +38,7 @@ export default function set_up_and_render(settings, options = {})
 	// Set up WebSocket connection
 	if (options.websocket)
 	{
-		window.websocket = options.websocket(authentication_token)
+		window.websocket = options.websocket(authentication_token, store)
 	}
 
 	// Render the page
