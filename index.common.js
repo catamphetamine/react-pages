@@ -53,3 +53,4 @@ exports.Link = require('./build/redux/Link').default
 exports.IndexLink = require('./build/redux/IndexLink').default
 
 exports.authorize = require('./build/redux/authorize').default
+exports.websocket = require('./build/redux/client/websocket').default

@@ -1,10 +1,8 @@
-import chai from 'chai'
-chai.should()
-
-import { head, title, meta } from '../index.es6'
-
 import
 {
+	head,
+	title,
+	meta,
 	render,
 	preload,
 	goto,
@@ -29,7 +27,8 @@ import
 	eventName,
 	Link,
 	IndexLink,
-	authorize
+	authorize,
+	websocket
 }
 from '../index.es6'
 
@@ -73,6 +72,7 @@ describe(`exports`, function()
 		IndexLink.should.be.a('function')
 
 		authorize(() => {}, () => {}, () => {}).should.be.a('function')
+		websocket.should.be.a('function')
 	})
 
 	it(`should export ES5`, () =>
@@ -117,6 +117,7 @@ describe(`exports`, function()
 		_.IndexLink.should.be.a('function')
 
 		_.authorize(() => {}, () => {}, () => {}).should.be.a('function')
+		_.websocket.should.be.a('function')
 	})
 
 	it(`should export rendering service`, () =>

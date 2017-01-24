@@ -35,6 +35,12 @@ export default function set_up_and_render(settings, options = {})
 	})
 	delete window._redux_state
 
+	// Set up WebSocket connection
+	if (options.websocket)
+	{
+		window.websocket = options.websocket(authentication_token)
+	}
+
 	// Render the page
 	return client_side_render
 	({

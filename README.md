@@ -1324,6 +1324,18 @@ If you're using Webpack then make sure you either build your server-side code wi
   ...
 
   // (optional)
+  // Sets up a WebSocket connection.
+  // Automatically sends authentication token (if present)
+  // as part of messages, and also upon receiving
+  // a message having a `type` dispatches a Redux event.
+  websocket: require('react-isomorphic-render').websocket
+  ({
+    host: 'localhost',
+    port: 80,
+    // secure: true
+  })
+
+  // (optional)
   // `react-router`s `onUpdate` handler
   // (is fired when a user performs navigation)
   // (can be used for Google Analytics, for example)

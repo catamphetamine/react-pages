@@ -1,5 +1,3 @@
-import { expect } from 'chai'
-
 import parse_dates from '../source/date parser'
 
 describe('date parser', function()

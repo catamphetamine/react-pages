@@ -84,3 +84,9 @@ export
 	default as authorize
 }
 from './es6/redux/authorize'
+
+export
+{
+	default as websocket
+}
+from './es6/redux/client/websocket'

@@ -1,3 +1,8 @@
+9.1.5 / 24.01.2017
+==================
+
+  * Added `websocket` client-side option which sets up a WebSocket connection which automatically sends authentication token (if present) as part of messages, and also upon receiving a message having a `type` dispatches a Redux event.
+
 9.1.4 / 19.01.2017
 ==================
 

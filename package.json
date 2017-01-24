@@ -1,6 +1,6 @@
 {
   "name": "react-isomorphic-render",
-  "version": "9.1.4",
+  "version": "9.1.5",
   "description": "Isomorphic rendering with React, Redux, React-router and Redux-router. Includes support for Webpack",
   "main": "index.common.js",
   "module": "index.es6.js",
@@ -12,6 +12,7 @@
     "print-error": "^0.1.3",
     "react-helmet": "^3.2.3",
     "react-router-scroll": "^0.4.1",
+    "robust-websocket": "^0.2.1",
     "superagent": "^2.1.0",
     "uglify-js": "^2.7.5"
   },
@@ -48,9 +49,9 @@
     "react-redux": "*"
   },
   "scripts": {
-    "test": "mocha --compilers js:babel-core/register --colors --bail --reporter spec test/ --recursive",
-    "test-coverage": "istanbul cover node_modules/mocha/bin/_mocha -- --compilers js:babel-core/register --colors --reporter dot test/ --recursive",
-    "test-travis": "istanbul cover node_modules/mocha/bin/_mocha --report lcovonly -- --compilers js:babel-core/register --colors --reporter spec test/ --recursive",
+    "test": "mocha --compilers js:babel-core/register --require test/setup.js --colors --bail --reporter spec test/ --recursive",
+    "test-coverage": "istanbul cover node_modules/mocha/bin/_mocha -- --compilers js:babel-core/register --require test/setup.js --colors --reporter dot test/ --recursive",
+    "test-travis": "istanbul cover node_modules/mocha/bin/_mocha --report lcovonly -- --compilers js:babel-core/register --require test/setup.js --colors --reporter spec test/ --recursive",
     "clean-for-build": "rimraf ./build/**/* ./es6/**/*",
     "build-commonjs-modules": "better-npm-run build-commonjs-modules",
     "build-es6-modules": "better-npm-run build-es6-modules",
