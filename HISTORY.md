@@ -1,4 +1,4 @@
-9.1.6 / 24.01.2017
+9.1.7 / 24.01.2017
 ==================
 
   * Added `websocket` client-side option which sets up a WebSocket connection which automatically sends authentication token (if present) as part of every message, and also upon receiving a message having a `type` dispatches a Redux event. The global `websocket` object's `.onXxx(listener)` listeners (`onMessage`, `onOpen`, `onClose`, `onError`, `listen`) take `(event, store)` arguments so any Redux "action" can be `dispatch()`ed from within them.

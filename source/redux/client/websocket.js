@@ -91,7 +91,7 @@ export default function set_up_websocket_connection(settings)
 
 			onMessage(listener)
 			{
-				return websocket.listen('message', (event, store) =>
+				return _websocket.listen('message', (event, store) =>
 				{
 					return listener(JSON.parse(event.data), store)
 				})
