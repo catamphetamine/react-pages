@@ -1034,7 +1034,7 @@ if (module.hot) {
 
 ## WebSocket
 
-`websocket` helper sets up a WebSocket connection. It automatically sends authentication token (if present) as part of every message (providing out-of-the-box user authentication), and also upon receiving a message having a `type` it `dispatch()`es that message as a Redux "action".
+`websocket` helper sets up a WebSocket connection. It automatically sends authentication token (if present) as part of every message (providing out-of-the-box user authentication), and also upon receiving a message having a `type` it `dispatch()`es that message as a Redux "action". WebSocket will autoreconnect (with ["exponential backoff"](https://en.wikipedia.org/wiki/Exponential_backoff)) emitting `open` event every time it does.
 
 ```js
 import { render, websocket } from 'react-isomorphic-render'

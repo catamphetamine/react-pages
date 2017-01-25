@@ -32,12 +32,12 @@ export default function websocket({ host, port, secure, store, token, autoDispat
 			//
 			if (event.code === 1008 || event.code === 1011)
 			{
-				// Retry in 15-30 minutes
-				return (15 + Math.random() * 15) * 60 * 1000
+				// Retry in 30 minutes
+				return jitter(30 * 60 * 1000)
 			}
 
-			// Exponential backoff, but no less that once in a minute
-			return Math.min(Math.pow(1.5, websocket.attempts) * (300 + 200 * Math.random()), 60 * 1000)
+			// Exponential backoff, but no less that once in a couple of minutes
+			return jitter(Math.min(Math.pow(1.5, websocket.attempts) * 500, 2 * 60 * 1000))
 		}
 	})
 
@@ -108,4 +108,10 @@ export default function websocket({ host, port, secure, store, token, autoDispat
 	}
 
 	return window.websocket = websocket
+}
+
+// Returns a value ranging from [value * (1 - amount)] to (value * (1 + amount))
+function jitter(value, amount = 0.2)
+{
+	return value * ((1 - amount) + amount * 2 * Math.random())
 }

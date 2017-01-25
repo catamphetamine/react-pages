@@ -1,4 +1,4 @@
-9.1.8 / 24.01.2017
+9.1.9 / 24.01.2017
 ==================
 
   * Added `websocket` client-side hepler (see `WebSocket` section of the README).
