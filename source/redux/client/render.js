@@ -47,7 +47,7 @@ export default function render_on_client({ history, devtools, create_page_elemen
 			{ ...router_state }
 			onUpdate={ onUpdate }
 			history={ history }
-			render={ applyRouterMiddleware( useScroll() ) }/>
+			render={ applyRouterMiddleware( useScroll(should_scroll) ) }/>
 
 		// Wraps <Router/> with arbitrary React components (e.g. Redux <Provider/>),
 		// loads internationalization messages,
@@ -109,4 +109,16 @@ export default function render_on_client({ history, devtools, create_page_elemen
 			return result
 		})
 	})
+}
+
+function should_scroll(previous_router_properties, new_router_properties)
+{
+	const { location } = new_router_properties
+
+	if (location.scroll === false)
+	{
+		return false
+	}
+
+	return true
 }

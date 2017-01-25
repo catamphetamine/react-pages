@@ -19,11 +19,12 @@ export const navigated_action = (location) =>
 // Starts `location` page preloading.
 // If `redirect` is `true` then will perform
 // `history.replace()` instead of `history.push()`.
-export const preload_action = (location, redirect) =>
+export const preload_action = (location, redirect, navigate) =>
 ({
 	type: Preload,
 	location,
-	redirect
+	redirect,
+	navigate
 })
 
 // After page preloading finished

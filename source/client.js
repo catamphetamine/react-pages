@@ -1,5 +1,7 @@
 import React from 'react'
 import createHistory from 'history/lib/createBrowserHistory'
+import { createLocation } from 'history/lib/LocationUtils'
+import { readState } from 'history/lib/DOMStateStorage'
 import { useRouterHistory } from 'react-router'
 
 import _create_history from './history'
@@ -93,4 +95,81 @@ export function create_history(location, settings)
 {
 	// Adds 'useBasename' and 'useQueries'
 	return _create_history(useRouterHistory(createHistory), location, settings.history)
+}
+
+export function always_instrument_history_pop_state_listeners(wrapper)
+{
+	const pop_state_listeners = []
+
+	const addEventListener = window.addEventListener
+	window.addEventListener = function(type, listener, flag)
+	{
+		if (type === 'popstate')
+		{
+			const istrumented_listener = istrument_history_pop_state_listener(listener, wrapper)
+
+			pop_state_listeners.push
+			({
+				original    : listener,
+				istrumented : istrumented_listener
+			})
+
+			listener = istrumented_listener
+		}
+
+		return addEventListener.call(this, type, listener, flag)
+	}
+
+	const removeEventListener = window.removeEventListener
+	window.removeEventListener = function(type, listener)
+	{
+		if (type === 'popstate')
+		{
+			for (let pop_state_listener of pop_state_listeners)
+			{
+				if (pop_state_listener.original === listener)
+				{
+					listener = pop_state_listener.istrumented
+
+					// Remove this pop state listener from the array
+					pop_state_listeners.splice(pop_state_listeners.indexOf(pop_state_listener), 1)
+					break
+				}
+			}
+		}
+
+		return removeEventListener.apply(this, arguments)
+	}
+}
+
+function istrument_history_pop_state_listener(listener, wrapper)
+{
+	return (event) =>
+	{
+		// "Ignore extraneous popstate events in WebKit"
+		if (!event.state)
+		{
+			return
+		}
+
+		const location = get_history_state_location(event.state)
+
+		return wrapper(event, listener, location)
+	}
+}
+
+// https://github.com/mjackson/history/blob/v3.x/modules/BrowserProtocol.js
+function get_history_state_location(history_state)
+{
+	const key = history_state && history_state.key
+
+	return createLocation
+	({
+		pathname : window.location.pathname,
+		search   : window.location.search,
+		hash     : window.location.hash,
+		state    : key ? readState(key) : undefined
+	},
+	undefined,
+	key)
 }

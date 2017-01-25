@@ -54,3 +54,9 @@ exports.IndexLink = require('./build/redux/IndexLink').default
 
 exports.authorize = require('./build/redux/authorize').default
 exports.websocket = require('./build/redux/client/websocket').default
+
+exports.replace_location = require('./build/react-router/set location').replace_location
+exports.replaceLocation  = exports.replace_location
+
+exports.push_location = require('./build/react-router/set location').push_location
+exports.pushLocation  = exports.push_location

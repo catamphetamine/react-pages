@@ -28,7 +28,11 @@ import
 	Link,
 	IndexLink,
 	authorize,
-	websocket
+	websocket,
+	replace_location,
+	replaceLocation,
+	push_location,
+	pushLocation
 }
 from '../index.es6'
 
@@ -73,6 +77,11 @@ describe(`exports`, function()
 
 		authorize(() => {}, () => {}, () => {}).should.be.a('function')
 		websocket.should.be.a('function')
+
+		replace_location.should.be.a('function')
+		replaceLocation.should.be.a('function')
+		push_location.should.be.a('function')
+		pushLocation.should.be.a('function')
 	})
 
 	it(`should export ES5`, () =>
@@ -118,6 +127,11 @@ describe(`exports`, function()
 
 		_.authorize(() => {}, () => {}, () => {}).should.be.a('function')
 		_.websocket.should.be.a('function')
+
+		_.replace_location.should.be.a('function')
+		_.replaceLocation.should.be.a('function')
+		_.push_location.should.be.a('function')
+		_.pushLocation.should.be.a('function')
 	})
 
 	it(`should export rendering service`, () =>

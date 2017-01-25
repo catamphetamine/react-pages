@@ -450,6 +450,8 @@ P.S.: if `@preload()` decorator seems not working for no reason (though it defin
 
 On the client side, in order for `@preload` to work all `<Link/>`s imported from `react-router` **must** be instead imported from `react-isomorphic-render`. Upon a click on a `<Link/>` first it waits for the next page to preload, and then, when the next page is fully loaded, it is displayed to the user and the URL in the address bar is updated.
 
+`@preload()` also works for Back/Forward web browser buttons navigation. If one `@preload()` is in progress and another `@preload()` starts (e.g. Back/Forward browser buttons) the first `@preload()` will be cancelled if `bluebird` `Promise`s are used in the project and also if `bluebird` is configured for [`Promise` cancellation](http://bluebirdjs.com/docs/api/cancellation.html) (this is an advanced feature and is not required for operation).
+
 Sometimes preloading a page can take some time to finish so one may want to (and actually should) add some kind of a "spinner" to inform the user that the application isn't frozen and the navigation process needs some more time to finish. This can be achieved by adding a Redux reducer listening to these three Redux events:
 
 ```javascript
@@ -839,6 +841,27 @@ class Page extends Component {
 ```
 
 A sidenote: these two functions aren't supposed to be used inside `onEnter` and `onChange` `react-router` hooks. Instead use the `replace` argument supplied to these functions by `react-router` when they are called (`replace` works the same way as `redirect`).
+
+Alternatively, if the current location needs to be changed while still staying at the same page (e.g. a checkbox has been ticked and the corresponding URL query parameter must be added), then use `pushLocation(location, history)` or `replaceLocation(location, history)`.
+
+```javascript
+import { pushLocation, replaceLocation } from 'react-isomorphic-render'
+import { useRouter } from 'react-router'
+
+@useRouter
+class Page extends Component {
+  onSearch(query) {
+    const { router } = this.props
+
+    pushLocation({
+      pathname: router.location.pathname,
+      query: {
+        query
+      }
+    }, router)
+  }
+}
+```
 
 ## Caching
 

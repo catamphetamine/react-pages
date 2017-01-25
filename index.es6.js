@@ -90,3 +90,12 @@ export
 	default as websocket
 }
 from './es6/redux/client/websocket'
+
+export
+{
+	replace_location,
+	replace_location as replaceLocation,
+	push_location,
+	push_location as pushLocation
+}
+from './es6/react-router/set location'

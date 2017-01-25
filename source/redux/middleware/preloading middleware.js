@@ -31,10 +31,7 @@ export default function preloading_middleware(server, error_handler, preload_hel
 		// Preload status object.
 		// `preloading` holds the cancellation flag for this navigation process.
 		// (e.g. preloading `Promise` chain could be cancelled in case of a redirect)
-		let preloading =
-		{
-			pending : true
-		}
+		const preloading = {}
 
 		// Can cancel previous preloading (on the client side)
 		let previous_preloading
@@ -102,6 +99,7 @@ export default function preloading_middleware(server, error_handler, preload_hel
 				}
 
 				// Perform client side redirect
+				// (with target page preloading)
 				return dispatch(redirect_action(redirect))
 			}
 
@@ -121,7 +119,7 @@ export default function preloading_middleware(server, error_handler, preload_hel
 				// then cancel that previous navigation.
 				if (previous_preloading && previous_preloading.pending)
 				{
-					previous_preloading.cancelled = true
+					previous_preloading.cancel()
 					// Page loading indicator could listen for this event
 					dispatch({ type: Preload_finished })
 				}
@@ -143,8 +141,7 @@ export default function preloading_middleware(server, error_handler, preload_hel
 				preloader_dispatch(dispatch, preloading),
 				location,
 				params,
-				preload_helpers,
-				preloading
+				preload_helpers
 			)
 
 			// If nothing to preload, just move to the next middleware
@@ -152,7 +149,10 @@ export default function preloading_middleware(server, error_handler, preload_hel
 			{
 				// Trigger `react-router` navigation on client side
 				// (and do nothing on server side)
-				return proceed_with_navigation(dispatch, action, server)
+				proceed_with_navigation(dispatch, action, server)
+				// Explicitly return `undefined`
+				// (not `false` by accident)
+				return
 			}
 
 			// Page loading indicator could listen for this event
@@ -161,7 +161,26 @@ export default function preloading_middleware(server, error_handler, preload_hel
 			// Preload the new page.
 			// (the Promise returned is only used in server-side rendering,
 			//  client-side rendering never uses this Promise)
-			return preload()
+			const promise = preload()
+
+			preloading.pending = true
+
+			// Preloading process cancellation
+			preloading.cancel = () =>
+			{
+				preloading.cancelled = true
+
+				// If `bluebird` is used,
+				// and promise cancellation has been set up,
+				// then cancel the `Promise`.
+				// http://bluebirdjs.com/docs/api/cancellation.html
+				if (promise.cancel)
+				{
+					promise.cancel()
+				}
+			}
+
+			return promise
 				// Navigate to the new page
 				.then(() =>
 				{
@@ -170,8 +189,11 @@ export default function preloading_middleware(server, error_handler, preload_hel
 					// then don't take any further steps on this cancelled navigation.
 					if (preloading.cancelled)
 					{
-						// Updates preloading status
-						return preload_cancelled()
+						// Update preloading status.
+						preload_cancelled()
+						// Return `false` out of the `Promise`
+						// indicating that the navigation was cancelled.
+						return false
 					}
 
 					// Page loading indicator could listen for this event
@@ -230,7 +252,9 @@ export default function preloading_middleware(server, error_handler, preload_hel
 				}
 
 				// On the client-side outputs errors to console by default
-				return console.error(error.stack || error)
+				console.error(error.stack || error)
+				// Return `false` indicating that page preload failed
+				return false
 			}
 
 			// Handle the error (for example, redirect to an error page)
@@ -253,6 +277,9 @@ export default function preloading_middleware(server, error_handler, preload_hel
 			{
 				throw new Error(`"preload.catch" must either redirect or rethrow the error (on server side)`)
 			}
+
+			// Return `false` indicating that page preload failed
+			return false
 		})
 	}
 }
@@ -262,6 +289,11 @@ export default function preloading_middleware(server, error_handler, preload_hel
 function proceed_with_navigation(dispatch, action, server)
 {
 	if (server)
+	{
+		return
+	}
+
+	if (action.navigate === false)
 	{
 		return
 	}
@@ -281,10 +313,8 @@ function proceed_with_navigation(dispatch, action, server)
 //
 // If no preloading is needed, then returns nothing.
 //
-const preloader = (server, components, getState, dispatch, location, parameters, preload_helpers, preloading) =>
+const preloader = (server, components, getState, dispatch, location, parameters, preload_helpers) =>
 {
-	// `preloading` argument may be used in future to check the `cancelled` flag
-
 	let preload_arguments = { dispatch, getState, location, parameters }
 
 	if (preload_helpers)
@@ -399,11 +429,10 @@ const preloader = (server, components, getState, dispatch, location, parameters,
 		}
 	}
 
-	// Copy-pasta
+	// Finalize trailing parallel `preload`s
 	if (parallel.length > 0)
 	{
 		chain.push(parallel.length > 1 ? parallel : parallel[0])
-		parallel = []
 	}
 
 	// Convert `preload` chain into `Promise` chain
@@ -460,7 +489,7 @@ function preloader_dispatch(dispatch, preloading)
 			// In case of navigation from @preload()
 			case Preload:
 				// Discard the currently ongoing preloading
-				preloading.cancelled = true
+				preloading.cancel()
 				// Page loading indicator could listen for this event
 				dispatch({ type: Preload_finished })
 		}
