@@ -1,18 +1,18 @@
-9.1.7 / 24.01.2017
+9.1.8 / 24.01.2017
 ==================
 
-  * Added `websocket` client-side option which sets up a WebSocket connection which automatically sends authentication token (if present) as part of every message, and also upon receiving a message having a `type` dispatches a Redux event. The global `websocket` object's `.onXxx(listener)` listeners (`onMessage`, `onOpen`, `onClose`, `onError`, `listen`) take `(event, store)` arguments so any Redux "action" can be `dispatch()`ed from within them.
+  * Added `websocket` client-side hepler (see `WebSocket` section of the README).
+
+  A couple of TODOs for `9.x`:
+
+  * Fix `onEnter` being called twice (both on server and client, because `react-router`'s `match()` is called there twice) - this is not considered a blocker for `9.0.0` release since `@preload()` supercedes `onEnter` and therefore `onEnter` may not be used at all. I guess it can be fixed using `<RouterContext>`.
+  * Maybe implement the minor `previous_route_components` optimization from `8.0.0` for preloading pages (otherwise remove `server` argument from `preloader()` function)
 
 9.1.4 / 19.01.2017
 ==================
 
   * Added `authorize` helper (See `Authorized routes` section of the README)
   * (small breaking change) Removed `goto` from `preload.catch` parameters and now `redirect` does what `goto` did, because the older `redirect` made really no sense: on the client side it would rewrite the URL of the previous page and on the server side it was equal to `goto`. So just use `redirect` in `preload.catch` and if `goto` was used there then just replace it with `redirect` and it will work the same.
-
-  A couple of TODOs for `9.x`:
-
-  * Fix `onEnter` being called twice (both on server and client, because `react-router`'s `match()` is called there twice) - this is not considered a blocker for `9.0.0` release since `@preload()` supercedes `onEnter` and therefore `onEnter` may not be used at all. I guess it can be fixed using `<RouterContext>`.
-  * Maybe implement the minor `previous_route_components` optimization from `8.0.0` for preloading pages (otherwise remove `server` argument from `preloader()` function)
 
 9.1.2 / 18.01.2017
 ==================

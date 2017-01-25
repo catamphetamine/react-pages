@@ -1032,6 +1032,36 @@ if (module.hot) {
 }
 ```
 
+## WebSocket
+
+`websocket` helper sets up a WebSocket connection. It automatically sends authentication token (if present) as part of every message (providing out-of-the-box user authentication), and also upon receiving a message having a `type` it `dispatch()`es that message as a Redux "action".
+
+```js
+import { render, websocket } from 'react-isomorphic-render'
+
+render(settings).then(({ store, token }) => {
+  websocket({
+    host: 'localhost',
+    port: 80,
+    // secure: true,
+    store,
+    token
+  })
+})
+```
+
+The global `websocket` object is created exposing the following methods:
+
+ * `listen(eventName, function(event, store))`
+ * `onOpen(function(event, store))`
+ * `onClose(function(event, store))`
+ * `onError(function(event, store))`
+ * `onMessage(function(message, store))`
+ * `send(message)`
+ * `close()`
+
+The `store` argument can be used to `dispatch()` Redux "actions".
+
 ## Bundlers
 
 If you're using Webpack then make sure you either build your server-side code with Webpack too (so that asset `require()` calls (images, styles, fonts, etc) inside React components work, see [universal-webpack](https://github.com/halt-hammerzeit/universal-webpack)) or use something like [webpack-isomorphic-tools](https://github.com/halt-hammerzeit/webpack-isomorphic-tools).
@@ -1322,22 +1352,6 @@ If you're using Webpack then make sure you either build your server-side code wi
 ```javascript
 {
   ...
-
-  // (optional)
-  // Sets up a WebSocket connection which
-  // automatically sends authentication token (if present)
-  // as part of every message, and also upon receiving
-  // a message having a `type` `dispatch()`es it as a Redux "action".
-  // The global `websocket` object's `.onXxx()` listeners
-  // (`onMessage`, `onOpen`, `onClose`, `onError`, `listen`)
-  // take `(event, store)` arguments so any Redux "action"
-  // can be `dispatch()`ed from within them.
-  websocket: require('react-isomorphic-render').websocket
-  ({
-    host: 'localhost',
-    port: 80,
-    // secure: true
-  })
 
   // (optional)
   // `react-router`s `onUpdate` handler

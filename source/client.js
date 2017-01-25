@@ -12,9 +12,10 @@ import _create_history from './history'
 //
 export default function client_side_render({ history, render, render_parameters = {}, wrapper, translation })
 {
-	// Make sure authentication token global variable is erased
-	// (in case it hasn't been read and erased before)
-	authentication_token()
+	const token = authentication_token()
+	// Erase the authentication token global variable
+	// (so that it's less likely to be stolen via an XSS attack)
+	delete window._authentication_token
 
 	// Initialize locale
 	const locale = window._locale
@@ -72,9 +73,10 @@ export default function client_side_render({ history, render, render_parameters 
 	// Client side code can then rerender the page any time
 	// through obtaining the `rerender()` function from the result object.
 	//
-	return render_page().then(result =>
+	return render_page().then((result) =>
 	{
 		result.rerender = render_page
+		result.token = token
 		return result
 	})
 }
@@ -83,14 +85,7 @@ export default function client_side_render({ history, render, render_parameters 
 // and then erases that global variable
 export function authentication_token()
 {
-	const token = window._authentication_token
-
-	if (token)
-	{
-		delete window._authentication_token
-	}
-
-	return token
+	return window._authentication_token
 }
 
 // Create `react-router` `history`
