@@ -1,3 +1,7 @@
+// 1. Run the website locally in production mode
+// 2. Run this script passing the `PORT` environment variable
+// 3. See the output folder (`../static` by default) for the statically generated website snapshot
+
 import path from 'path'
 import fs from 'fs-extra'
 import http from 'http'
