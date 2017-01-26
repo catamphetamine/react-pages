@@ -21,9 +21,15 @@ function set_location(location, history, method)
 {
 	// A little bit of a fight with `scroll-behavior` here
 	const key = history.createKey()
+	// Save the correct `scroll-behavior`'s scroll position
+	// in this new history entry `scroll-behavior` state.
 	saveState(`${SCROLL_STATE_KEY_PREFIX}${key}`, get_scroll())
+	// Set the new `location` `key`
 	location = history.createLocation(location, method, key)
+	// Prevent `scroll-behavior` from messing
+	// with scroll on this location transition
 	location.scroll = false
+	// Transition to the new location
 	history.transitionTo(location)
 }
 
