@@ -1430,6 +1430,10 @@ Client-side `render` function returns a `Promise` resolving to an object
 }
 ```
 
+## Static site generation
+
+In those rare cases when website's content doesn't change at all (or changes very rarely, e.g. a blog) it may be beneficial to host a statically generated version of such a website on a CDN as opposed to hosting a full-blown Node.js application just for the purpose of real-time webpage rendering. In such cases one may choose to generate a static version of the website using something like [this Node.js script](https://github.com/halt-hammerzeit/react-isomorphic-render/blob/master/tools/static-site-generator.js) and then host it in a cloud at virtually zero cost.
+
 ## For purists
 
 See [PHILOSOPHY](https://github.com/halt-hammerzeit/react-isomorphic-render/blob/master/PHILOSOPHY.md)
