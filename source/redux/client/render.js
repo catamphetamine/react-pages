@@ -46,6 +46,7 @@ export default function render_on_client({ history, devtools, create_page_elemen
 		const router_element = <Router
 			{ ...router_state }
 			onUpdate={ onUpdate }
+			createElement={ create_route_element }
 			history={ history }
 			render={ applyRouterMiddleware( useScroll(should_scroll) ) }/>
 
@@ -121,4 +122,25 @@ function should_scroll(previous_router_properties, new_router_properties)
 	}
 
 	return true
+}
+
+// Fixes `react-router` bug by forcing 
+// `<Route/>` `component` remount on any URL change.
+// https://github.com/ReactTraining/react-router/issues/1982
+function create_route_element(component, props)
+{
+	const { location, routes } = props
+
+	// Is this the last React component in the route components chain
+	const is_page_component = component === routes[routes.length - 1].component
+
+	// If it is then remount this page component
+	if (is_page_component)
+	{
+		// Force `<Route/>` `component` remount on any URL change via `key` property.
+		props = { ...props, key: `${location.pathname}${location.search}` }
+	}
+
+	// Default behaviour
+	return React.createElement(component, props)
 }
