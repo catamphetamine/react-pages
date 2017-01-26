@@ -134,37 +134,17 @@ function create_route_element(component, props)
 	// Is this the last React component in the route components chain
 	const is_page_component = component === routes[routes.length - 1].component
 
-	// If it is then remount this page component.
-	//
-	// If some kind of `location.mount = false` flag will be introduced
-	// then also note that (possibly) both the addition of the `key` property
-	// AND the removal of the `key` property cause page component remount,
-	// so it's likely gonna be something like:
-	//
-	// if (location.mount === false)
-	// {
-	// 	key = window._react_router_previous_page_component_key
-	// }
-	// else
-	// {
-	// 	key = `${location.pathname}${location.search}`
-	// 	window._react_router_previous_page_component_key = key
-	// }
-	//
-	// props = { ...props, key }
-	//
-	// Rather than simply:
-	//
-	// if (location.mount !== false)
-	// {
-	// 	const key = `${location.pathname}${location.search}`
-	// 	props = { ...props, key }
-	// }
-	//
+	// If it is then remount this page component
 	if (is_page_component)
 	{
+		// Unless explicitly told not to remount
+		if (location.remount !== false)
+		{
+			window._react_router_page_element_key = `${location.pathname}${location.search}`
+		}
+
 		// Force `<Route/>` `component` remount on any URL change via `key` property.
-		props = { ...props, key: `${location.pathname}${location.search}` }
+		props = { ...props, key: window._react_router_page_element_key }
 	}
 
 	// Default behaviour

@@ -29,6 +29,8 @@ function set_location(location, history, method)
 	// Prevent `scroll-behavior` from messing
 	// with scroll on this location transition
 	location.scroll = false
+	// Prevent `react-router` from remounting page component
+	location.remount = false
 	// Transition to the new location
 	history.transitionTo(location)
 }
