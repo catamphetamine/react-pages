@@ -4,26 +4,77 @@ import normalize_common_settings from './normalize'
 // Returns Redux action creator.
 // `promise` is for backwards compatibility:
 // it has been renamed to `action` since `9.0.8`.
-export function action({ namespace, event, promise, action, result }, handler)
+export function action(options, handler)
 {
-	// Add handlers for:
-	//
-	//   * pending
-	//   * success
-	//   * error
-	//
-	create_redux_handlers(handler, namespace, event, result)
+	let { type, namespace, event, promise, action, payload, result } = options
 
-	return function action_creator(...parameters)
+	// For those who still prefer `type` over `event`
+	if (!event && type)
 	{
-		const redux_action =
+		event = type
+	}
+
+	// If `result` is a property name,
+	// then add that property to the `connector`.
+	if (typeof result === 'string')
+	{
+		handler.add_state_properties(result)
+	}
+
+	// Asynchronous action
+	if (promise || action)
+	{
+		// Normalize `result` reducer into a function
+		if (typeof result === 'string')
 		{
-			event: event_name(namespace, event),
-			promise: http => (action || promise).apply(this, parameters.concat(http))
+			const property = result
+			result = (state, result) =>
+			({
+				...state,
+				[property]: result
+			})
 		}
 
-		return redux_action
+		// Adds Redux reducers handling events:
+		//
+		//   * pending
+		//   * success
+		//   * error
+		//
+		create_redux_handlers(handler, namespace, event, result)
+
+		// Redux "action creator"
+		return (...parameters) =>
+		({
+			event   : event_name(namespace, event),
+			promise : http => (action || promise).apply(this, parameters.concat(http))
+		})
 	}
+
+	// Synchronous action
+
+	// Normalize `result` reducer into a function
+	if (typeof result === 'string')
+	{
+		payload = parameter => ({ parameter })
+
+		const property = result
+		result = (state, action) =>
+		({
+			...state,
+			[property]: action.parameter
+		})
+	}
+
+	// Reducer
+	handler.handle(event_name(namespace, event), result)
+
+	// Redux "action creator"
+	return (...parameters) =>
+	({
+		type : event_name(namespace, event),
+		...(payload ? payload.apply(this, parameters) : undefined)
+	})
 }
 
 // Creates Redux handler object
@@ -122,13 +173,6 @@ function create_redux_handlers(handler, namespace, event, on_result)
 	// This info will be used in `storeConnector`
 	handler.add_state_properties(pending_property_name, error_property_name)
 
-	// If `on_result` is a property name,
-	// then just set that property to the value of `result`.
-	if (typeof on_result === 'string')
-	{
-		handler.add_state_properties(on_result)
-	}
-
 	// When Promise is created,
 	// clear `error`,
 	// set `pending` flag.
@@ -145,35 +189,7 @@ function create_redux_handlers(handler, namespace, event, on_result)
 	handler.handle(event_name(namespace, success_event_name), (state, result) =>
 	{
 		// This will be the new Redux state
-		let new_state
-
-		// If `on_result` is a reducer, then call it,
-		// and the returned object will be the new state.
-		if (typeof on_result === 'function')
-		{
-			new_state = on_result(state, result)
-
-			// If the reducer function didn't return
-			// the new state (which it should have done),
-			// then create the new state manually.
-			// (because `pending` property will be set later)
-			if (new_state === state)
-			{
-				new_state = { ...state }
-			}
-		}
-		// Else `on_result` is a property name, so populate it.
-		else
-		{
-			new_state = { ...state }
-
-			// If `on_result` is a property name,
-			// then just set that property to the value of `result`.
-			if (typeof on_result === 'string')
-			{
-				new_state[on_result] = result
-			}
-		}
+		const new_state = on_result(state, result)
 
 		// Clear `pending` flag
 		new_state[pending_property_name] = false

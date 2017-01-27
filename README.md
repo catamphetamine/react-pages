@@ -738,6 +738,63 @@ export default {
 
 Notice the extraction of these two configuration parameters into a separate file `react-isomorphic-render-async.js`: it is done to break circular dependency on `./react-isomorphic-render.js` file because `routes` `import` React page components which in turn `import` action creators which in turn import `./react-isomorphic-render.js` hence the circular (recursive) dependency (same goes for `reducer`).
 
+### Handling synchronous actions
+
+For synchronous actions it's the same as for asynchronous ones (as described above):
+
+```js
+import { action, createHandler, stateConnector } from 'react-isomorphic-render'
+// (`./react-isomorphic-render-async.js` settings file is described above)
+import settings from './react-isomorphic-render-async'
+
+const handler = createHandler(settings)
+
+// Displays a notification.
+//
+// The Redux "action" creator is gonna be:
+//
+// function(message) {
+//   return {
+//     type: 'NOTIFICATIONS:NOTIFY',
+//     message
+//   }
+// }
+//
+// And the corresponding reducer is gonna be:
+//
+// case 'NOTIFICATIONS:NOTIFY':
+//   return {
+//     ...state,
+//     message: action.message
+//   }
+//
+export const notify = action({
+  namespace : 'NOTIFICATIONS',
+  event     : 'NOTIFY',
+  payload   : message => ({ message }),
+  result    : (state, action) => ({ ...state, message: action.message })
+},
+handler)
+
+// Or, it could be simplified even further:
+//
+// export const notify = action({
+//   namespace : 'NOTIFICATIONS',
+//   event     : 'NOTIFY',
+//   result    : 'message'
+// },
+// handler)
+//
+// Much cleaner.
+
+// A little helper for Redux `@connect()`
+export const connector = stateConnector(handler)
+
+// This is the Redux reducer which now
+// handles the actions defined above.
+export default handler.reducer()
+```
+
 ### Authorized routes
 
 For authorized routes use the `authorize` helper (kinda "decorator")
