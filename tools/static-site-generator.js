@@ -1,6 +1,8 @@
 // 1. Run the website locally in production mode
 // 2. Run this script passing the `PORT` environment variable
 // 3. See the output folder (`../static` by default) for the statically generated website snapshot
+// 4. Copy webpack-built assets to the output folder too
+// 5. Host the output folder in the cloud at virtually no cost
 
 import path from 'path'
 import fs from 'fs-extra'
