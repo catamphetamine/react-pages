@@ -21,6 +21,9 @@ export function action(options, handler)
 		handler.add_state_properties(result)
 	}
 
+	// Default "on result" handler
+	result = result || (state => state)
+
 	// Asynchronous action
 	if (promise || action)
 	{
@@ -123,7 +126,17 @@ export function create_handler(settings)
 					handler_argument = {}
 				}
 
-				return handler(state, handler_argument)
+				// For some strange reason Redux didn't report
+				// these errors to the console, hence the manual `console.error`.
+				try
+				{
+					return handler(state, handler_argument)
+				}
+				catch (error)
+				{
+					console.error(error)
+					throw error
+				}
 			}
 		},
 
