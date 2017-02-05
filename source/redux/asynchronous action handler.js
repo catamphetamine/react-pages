@@ -6,6 +6,12 @@ import normalize_common_settings from './normalize'
 // it has been renamed to `action` since `9.0.8`.
 export function action(options, handler)
 {
+	// Sanity check
+	if (!handler)
+	{
+		throw new Error('You must pass "handler" as the second argument of "action()"')
+	}
+
 	let { type, namespace, event, promise, action, payload, result } = options
 
 	// For those who still prefer `type` over `event`

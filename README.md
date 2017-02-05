@@ -1133,14 +1133,18 @@ render(settings).then(({ store, token }) => {
 The global `websocket` object is created exposing the following methods:
 
  * `listen(eventName, function(event, store))`
- * `onOpen(function(event, store))`
- * `onClose(function(event, store))`
- * `onError(function(event, store))`
+ * `onOpen(function(event, store))` is called on `open` event
+ * `onClose(function(event, store))` is called on `close` event
+ * `onError(function(event, store))` is called on `error` event (`close` event follows the `error` event)
  * `onMessage(function(message, store))`
  * `send(message)`
  * `close()`
 
 The `store` argument can be used to `dispatch()` Redux "actions".
+
+The global `websocket` object also exposes the `socket` property which is the underlying [`robust-websocket`](https://github.com/appuri/robust-websocket) object.
+
+For the server side I can recommend using [`uWebSockets`](https://github.com/uWebSockets/uWebSockets).
 
 ## Bundlers
 
@@ -1226,7 +1230,7 @@ If you're using Webpack then make sure you either build your server-side code wi
     // then a redirect to "/unauthorized" page can be made here.
     // If this error handler is defined then it must handle
     // all errors it gets (or just re`throw` them).
-    catch: (error, { path, url, redirect, dispatch, getState }) => redirect(`/error?url=${encodeURIComponent(url)}&error=${error.status}`)
+    catch: (error, { path, url, redirect, dispatch, getState, server }) => redirect(`/error?url=${encodeURIComponent(url)}&error=${error.status}`)
   }
 
   // (optional)

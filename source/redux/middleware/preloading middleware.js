@@ -264,7 +264,8 @@ export default function preloading_middleware(server, error_handler, preload_hel
 				url  : location_url(action.location),
 				redirect : to => dispatch(goto_action(to)),
 				dispatch,
-				getState
+				getState,
+				server
 			})
 
 			// On the server side the page rendering process

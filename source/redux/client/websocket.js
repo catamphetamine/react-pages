@@ -1,10 +1,10 @@
-import WebSocket from '../../robust-websocket'
+import RobustWebSocket from '../../robust-websocket'
 import CustomEvent from '../../custom event'
 
 // Sets up WebSocket connection
 export default function websocket({ host, port, secure, store, token, autoDispatch })
 {
-	const _websocket = new WebSocket(`${secure ? 'wss' : 'ws'}://${host}:${port}`, undefined,
+	const _websocket = new RobustWebSocket(`${secure ? 'wss' : 'ws'}://${host}:${port}`, undefined,
 	{
 		// If a number returned then it's gonna be a delay
 		// before reconnect is attempted.
@@ -93,7 +93,10 @@ export default function websocket({ host, port, secure, store, token, autoDispat
 			{
 				return listener(JSON.parse(event.data), store)
 			})
-		}
+		},
+
+		// For advanced use cases
+		socket : _websocket
 	}
 
 	if (autoDispatch !== false)
