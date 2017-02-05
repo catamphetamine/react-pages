@@ -1006,7 +1006,7 @@ So, **javascript is required** on the client side in order for this CSRF attacks
 
 ## Webpack HMR
 
-Webpack's [Hot Module Replacement](https://webpack.github.io/docs/hot-module-replacement.html) (aka Hot Reload) works for React components and Redux reducers and Redux action creators.
+Webpack's [Hot Module Replacement](https://webpack.github.io/docs/hot-module-replacement.html) (aka Hot Reload) works for React components and Redux reducers and Redux action creators (it just doesn't work for page `@preload()`s).
 
 HMR setup for Redux reducers is as simple as adding `store.hotReload()` (as shown below). For enabling [HMR on React Components](https://webpack.js.org/guides/hmr-react/) (and Redux action creators) I would suggest the new [react-hot-loader 3](https://github.com/gaearon/react-hot-loader) (which is still in beta, so install it like `npm install react-hot-loader@3.0.0-beta.6 --save`):
 
@@ -1474,7 +1474,7 @@ If you're using Webpack then make sure you either build your server-side code wi
   // (optional)
   // Loads localized messages (asynchronously).
   // The main purpose for introducting this function
-  // is to enable Webpack Hot Module Replacement (aka "hot reload)
+  // is to enable Webpack Hot Module Replacement (aka "hot reload")
   // for translation files in development mode.
   translation: async locale => messages
   // (or same without `async`: locale => Promise.resolve(messages))
