@@ -101,12 +101,16 @@ export function always_instrument_history_pop_state_listeners(wrapper)
 {
 	const pop_state_listeners = []
 
+	// The initial page URL won't have any `event.state` on `popstate`
+	// therefore keep it in case the user decides to go "Back" to the very start.
+	const initial_location = window.location
+
 	const addEventListener = window.addEventListener
 	window.addEventListener = function(type, listener, flag)
 	{
 		if (type === 'popstate')
 		{
-			const istrumented_listener = istrument_history_pop_state_listener(listener, wrapper)
+			const istrumented_listener = istrument_history_pop_state_listener(listener, wrapper, initial_location)
 
 			pop_state_listeners.push
 			({
@@ -117,7 +121,7 @@ export function always_instrument_history_pop_state_listeners(wrapper)
 			listener = istrumented_listener
 		}
 
-		return addEventListener.call(this, type, listener, flag)
+		return addEventListener(type, listener, flag)
 	}
 
 	const removeEventListener = window.removeEventListener
@@ -142,17 +146,22 @@ export function always_instrument_history_pop_state_listeners(wrapper)
 	}
 }
 
-function istrument_history_pop_state_listener(listener, wrapper)
+function istrument_history_pop_state_listener(listener, wrapper, initial_location)
 {
 	return (event) =>
 	{
-		// "Ignore extraneous popstate events in WebKit"
-		if (!event.state)
-		{
-			return
-		}
+		let location
 
-		const location = get_history_state_location(event.state)
+		// `event.state` is empty when the user
+		// decides to go "Back" up to the initial page.
+		if (event.state)
+		{
+			location = get_history_state_location(event.state)
+		}
+		else
+		{
+			location = initial_location
+		}
 
 		return wrapper(event, listener, location)
 	}

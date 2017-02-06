@@ -3,6 +3,11 @@ A couple of TODOs for `9.x`:
   * Fix `onEnter` being called twice (both on server and client, because `react-router`'s `match()` is called there twice) - this is not considered a blocker for `9.0.0` release since `@preload()` supercedes `onEnter` and therefore `onEnter` may not be used at all. I guess it can be fixed using `<RouterContext>`.
   * Maybe implement the minor `previous_route_components` optimization from `8.0.0` for preloading pages (otherwise remove `server` argument from `preloader()` function)
 
+9.1.17 / 06.02.2017
+===================
+
+  * Fixed the initial page not preloading when the user navigated "Back" up to it (the initial page happened to require a special treatment)
+
 9.1.16 / 05.02.2017
 ===================
 
