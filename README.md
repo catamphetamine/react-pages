@@ -903,9 +903,9 @@ Alternatively, if the current location needs to be changed while still staying a
 
 ```javascript
 import { pushLocation, replaceLocation } from 'react-isomorphic-render'
-import { useRouter } from 'react-router'
+import { withRouter } from 'react-router'
 
-@useRouter
+@withRouter
 class Page extends Component {
   onSearch(query) {
     const { router } = this.props
