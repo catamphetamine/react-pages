@@ -13,7 +13,7 @@ import match_routes_against_location from '../../react-router/match'
 // where `component` is the rendered React component
 // and `store` is the Redux store.
 //
-export default function render_on_client({ history, devtools, create_page_element, routes, store, to, on_navigate })
+export default function render_on_client({ history, devtools, create_page_element, routes, store, to })
 {
 	// Performs `react-router` asynchronous match for current location
 	// (is required for asynchonous routes to work).
@@ -33,19 +33,8 @@ export default function render_on_client({ history, devtools, create_page_elemen
 			return store.dispatch(redirect_action(redirect))
 		}
 
-		// No arrow function here,
-		// because it will be bound to `router` inside `react-router`.
-		const onUpdate = function()
-		{
-			if (on_navigate)
-			{
-				on_navigate(this.state.location)
-			}
-		}
-
 		const router_element = <Router
 			{ ...router_state }
-			onUpdate={ onUpdate }
 			createElement={ create_route_element }
 			history={ history }
 			render={ applyRouterMiddleware( useScroll(should_scroll) ) }/>

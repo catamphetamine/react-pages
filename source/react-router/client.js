@@ -24,9 +24,6 @@ export default function set_up_and_render(settings, options = {})
 
 	const { translation } = options
 
-	// camelCase aliasing
-	const on_navigate = options.on_navigate || options.onNavigate
-
 	// Create `react-router` `history`
 	const history = create_history(document.location, settings)
 
@@ -39,8 +36,7 @@ export default function set_up_and_render(settings, options = {})
 		render_parameters:
 		{
 			history,
-			routes: common.routes,
-			on_navigate
+			routes: common.routes
 		}
 	})
 }

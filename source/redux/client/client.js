@@ -47,7 +47,8 @@ export default function set_up_and_render(settings, options = {})
 	store = create_store(settings, window._redux_state, history, http_client,
 	{
 		devtools,
-		stats
+		stats,
+		on_navigate
 	})
 	delete window._redux_state
 

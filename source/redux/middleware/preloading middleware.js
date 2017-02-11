@@ -14,7 +14,7 @@ export const Preload_started  = '@@react-isomorphic-render/redux/preload started
 export const Preload_finished = '@@react-isomorphic-render/redux/preload finished'
 export const Preload_failed   = '@@react-isomorphic-render/redux/preload failed'
 
-export default function preloading_middleware(server, error_handler, preload_helpers, routes, history, report_stats)
+export default function preloading_middleware(server, error_handler, preload_helpers, routes, history, report_stats, on_navigate)
 {
 	return ({ getState, dispatch }) => next => action =>
 	{
@@ -27,6 +27,12 @@ export default function preloading_middleware(server, error_handler, preload_hel
 
 		// A special flavour of `dispatch` which `throw`s for redirects on the server side.
 		dispatch = preloading_middleware_dispatch(dispatch, server)
+
+		// Navigation event triggered
+		if (on_navigate)
+		{
+			on_navigate(action.location)
+		}
 
 		// Preload status object.
 		// `preloading` holds the cancellation flag for this navigation process.

@@ -66,7 +66,7 @@ export function render_on_server({ disable_server_side_rendering, create_page_el
 		}
 
 		// Renders the current page React component to a React element
-		const page_element = create_page_element(<RouterContext { ...router_state }/>)
+		const page_element = create_page_element(<Router { ...router_state }/>)
 
 		// Render the current page's React element to HTML markup
 		const content = react_render_on_server({ render_webpage_as_react_element, page_element })

@@ -4,7 +4,12 @@ import { location_url } from './location'
 export default function create_history(createHistory, location, history_options, server)
 {
 	// Create `history`.
+	//
 	// https://github.com/ReactTraining/react-router/blob/master/docs/guides/Histories.md#customize-your-history-further
+	//
+	// `entries` is used in `MemoryHistory` only (i.e. on server side)
+	// https://github.com/ReactTraining/history/blob/v3.x/modules/createMemoryHistory.js
+	//
 	const history = createHistory({ ...history_options, entries: [ location ] })
 
 	// Because History API won't work on the server side for navigation,

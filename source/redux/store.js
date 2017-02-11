@@ -23,7 +23,8 @@ export default function create_store(settings, data, history, http_client, optio
 	{
 		server,
 		devtools,
-		stats
+		stats,
+		on_navigate
 	}
 	= options
 
@@ -41,7 +42,8 @@ export default function create_store(settings, data, history, http_client, optio
 			preload && preload.helpers, 
 			routes,
 			history,
-			stats
+			stats,
+			on_navigate
 		),
 
 		// Performs `redirect` and `goto` actions on `history`
