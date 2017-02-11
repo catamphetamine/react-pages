@@ -41,8 +41,8 @@ describe(`exports`, function()
 {
 	it(`should export ES6`, () =>
 	{
-		const title = <Title>title</Title>
-		const meta = <Meta>{[]}</Meta>
+		Title.should.be.a('function')
+		Meta.should.be.a('function')
 
 		render.should.be.a('function')
 		preload.should.be.a('function')
@@ -88,11 +88,8 @@ describe(`exports`, function()
 	{
 		const _ = require('../index.common')
 
-		const Title = _.Title
-		const Meta  = _.Meta
-
-		const title = <Title>title</Title>
-		const meta = <Meta>{[]}</Meta>
+		_.Title.should.be.a('function')
+		_.Meta.should.be.a('function')
 
 		// Combined Redux exports
 
