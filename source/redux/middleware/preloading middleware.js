@@ -357,10 +357,11 @@ const preloader = (server, components, getState, dispatch, location, parameters,
 	//
 	// (also, GET query parameters would also need to be compared in that case)
 	//
-	// if (!server)
+	// if (!server && window._previous_route_components)
 	// {
-	// 	let previous_route_components = getState().router.components
-
+	// 	let previous_route_components = window._previous_route_components
+	// 	window._previous_route_components = components
+	//
 	// 	while (components.length > 1 && previous_route_components[0] === components[0])
 	// 	{
 	// 		previous_route_components = previous_route_components.slice(1)
