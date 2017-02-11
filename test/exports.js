@@ -1,8 +1,9 @@
+import React from 'react'
+
 import
 {
-	head,
-	title,
-	meta,
+	Title,
+	Meta,
 	render,
 	preload,
 	goto,
@@ -40,9 +41,8 @@ describe(`exports`, function()
 {
 	it(`should export ES6`, () =>
 	{
-		head.should.be.a('function')
-		title.should.be.a('function')
-		meta.should.be.a('function')
+		const title = <Title>title</Title>
+		const meta = <Meta>{[]}</Meta>
 
 		render.should.be.a('function')
 		preload.should.be.a('function')
@@ -88,9 +88,11 @@ describe(`exports`, function()
 	{
 		const _ = require('../index.common')
 
-		_.head.should.be.a('function')
-		_.title.should.be.a('function')
-		_.meta.should.be.a('function')
+		const Title = _.Title
+		const Meta  = _.Meta
+
+		const title = <Title>title</Title>
+		const meta = <Meta>{[]}</Meta>
 
 		// Combined Redux exports
 

@@ -1,6 +1,6 @@
 import nunjucks from 'nunjucks'
 
-import { server_generated_webpage_head } from '../webpage head'
+import { server_side_generated_webpage_head } from '../webpage head'
 import { get_language_from_locale } from '../helpers'
 
 nunjucks.configure({ autoescape: true })
@@ -12,7 +12,7 @@ export default function Html(options)
 	const style_url      = assets.entry ? assets.style[assets.entry]      : assets.style
 	const javascript_url = assets.entry ? assets.javascript[assets.entry] : assets.javascript
 
-	const webpage_head = server_generated_webpage_head()
+	const webpage_head = server_side_generated_webpage_head()
 
 	return template.render
 	({

@@ -1,3 +1,10 @@
+10.0.0 / 11.02.2017
+===================
+
+  * (breaking change) `title` and `meta` are now React components (`<Title/>` and `<Meta/>`). rather than functions. `head` is no more exported (combine `<Title/>` and `<Meta/>` instead).
+  * (breaking change) React >= `15` is enforced (because it's time to update if anyone still is on `0.14`)
+  * (breaking change) `react-router@3` is enforced (because it's time to update if anyone still is on `2.x`)
+
 9.1.17 / 06.02.2017
 ===================
 

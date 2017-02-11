@@ -1,47 +1,48 @@
 // uses 'react-document-meta'.
 // 'react-helmet' can be used interchangeably.
 // import DocumentMeta from 'react-document-meta'
+import Helmet from 'react-helmet'
+import React, { PropTypes } from 'react'
 
-import React from 'react'
-
-// A temporary workaround for broken Webpack import.
-// https://github.com/nfl/react-helmet/issues/190
-import _Helmet from 'react-helmet'
-var Helmet = _Helmet
-if (typeof Helmet === 'object')
+// Sets webpage title
+export function Title({ children })
 {
-	Helmet = Helmet.default
+	// // Replaces only webpage title
+	// return <DocumentMeta title={ children } extend/>
+
+	return <Helmet title={ children }/>
 }
 
-// sets webpage title
-export function webpage_title(title)
+Title.propTypes =
 {
-	// // replaces only webpage title
-	// return <DocumentMeta title={title} extend/>
-
-	return <Helmet title={title}/>
+	children: PropTypes.string.isRequired
 }
 
-// sets webpage title, description and meta
-// (resets title, description and meta prior to doing that)
-export function webpage_head(title, meta)
-{
-	// // doesn't `extend`, rewrites all these three completely
-	// return <DocumentMeta title={title} description={description} meta={meta}/>
-
-	return <Helmet title={title} meta={meta}/>
-}
+// // Sets webpage title, description and meta
+// // (resets title, description and meta prior to doing that)
+// export function webpage_head({ title, meta })
+// {
+// 	// // doesn't `extend`, rewrites all these three completely
+// 	// return <DocumentMeta title={ title } description={ description } meta={ meta }/>
+//
+// 	return <Helmet title={ title } meta={ meta }/>
+// }
 
 // adds webpage meta tags
-export function webpage_meta(meta)
+export function Meta({ children })
 {
-	// return <DocumentMeta meta={meta} extend/>
+	// return <DocumentMeta meta={ children } extend/>
 
-	return <Helmet meta={meta}/>
+	return <Helmet meta={ children }/>
+}
+
+Meta.propTypes =
+{
+	children: PropTypes.arrayOf(PropTypes.object).isRequired
 }
 
 // server-side rendering
-export function server_generated_webpage_head()
+export function server_side_generated_webpage_head()
 {
 	// return DocumentMeta.renderAsReact()
 

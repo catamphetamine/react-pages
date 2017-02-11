@@ -1,11 +1,6 @@
 // Helpers
 
-import { webpage_head, webpage_title, webpage_meta } from './es6/webpage head'
-
-// `const` is not supported in Internet Explorer 10
-export var head  = webpage_head
-export var title = webpage_title
-export var meta  = webpage_meta
+export { Title, Meta } from './es6/webpage head'
 
 // Redux
 

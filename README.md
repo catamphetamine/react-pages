@@ -381,7 +381,7 @@ For page preloading consider using `@preload()` helper to load the neccessary da
 
 ```javascript
 import { connect } from 'react-redux'
-import { title, preload } from 'react-isomorphic-render'
+import { Title, preload } from 'react-isomorphic-render'
 
 // fetches the list of users from the server
 function fetchUsers() {
@@ -402,7 +402,7 @@ export default class Page extends Component {
     const { users, fetchUsers } = this.props
     return (
       <div>
-        { title("Users") }
+        <Title>Users</Title>
         <ul>{ users.map(user => <li>{ user.name }</li>) }</ul>
         <button onClick={ fetchUsers }>Refresh</button>
       </div>
@@ -535,7 +535,7 @@ export default (
 Uses [react-helmet](https://github.com/nfl/react-helmet) under the hood.
 
 ```javascript
-import { head, title, meta } from 'react-isomorphic-render'
+import { Title, Meta } from 'react-isomorphic-render'
 
 const meta = [
   // <meta charset="utf-8"/>
@@ -550,14 +550,11 @@ const meta = [
   { property: 'og:locale',      content: 'ru-RU' }
 ]
 
-// sets specific webpage <head/> tags
-{ head('WebApp', meta) }
+// Webpage title will be replaced with this one
+<Title>Home</Title>
 
-// webpage title will be replaced with this one
-{ title('New webpage title') }
-
-// will add additional <meta/> tags to the webpage <head/>
-{ meta({ ... same `meta` as above ... }) }
+// Adds additional <meta/> tags to the webpage <head/>
+<Meta>{ meta }</Meta>
 ```
 
 ### Handling asynchronous actions
