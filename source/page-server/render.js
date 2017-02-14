@@ -80,9 +80,10 @@ export default async function(settings, { initialize, localize, assets, applicat
 
 	assets = typeof assets === 'function' ? assets(path, parameters) : assets
 
-	if (assets.styles)
+	// Sanity check
+	if (!assets.entries)
 	{
-		assets.style = assets.styles
+		throw new Error(`"assets.entries" array parameter is required as of version 10.1.0. E.g. "{ ... entries: ['main'] ... }"`)
 	}
 
 	// Internationalization

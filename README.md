@@ -1328,18 +1328,22 @@ If you're using Webpack then make sure you either build your server-side code wi
   assets: (path, { store }) =>
   {
     return {
-      javascript: '/assets/main.js',
+      javascript: {
+        main: '/assets/main.js'
+      },
 
       // (optional)
-      style: '/assets/main.css',
+      styles: {
+        main: '/assets/main.css'
+      },
 
       // (optional)
       // URL of your "favicon".
       // If you're using Webpack then the URL is the result of a require() call.
       icon: '/assets/icon.png',
 
-      // (only required when `javascript` and `style` are objects)
-      entry: 'webpack entry key' // e.g. 'main'
+      // Webpack "entry points" to be included for this URL
+      entries: ['main']
     }
   },
 

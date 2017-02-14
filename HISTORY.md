@@ -1,3 +1,10 @@
+10.1.0 / 14.02.2017
+===================
+
+  * (breaking change) `assets.entries` array parameter is now required (e.g. `['main']`)
+  * (breaking change) `assets.style` is no longer being renamed to `assets.styles` automatically (but there's a very little possibility that someone using `assets.style` migrated in these 3 days of the new major release)
+  * (breaking change) No more including `common` entry point by default. Should explicitly name all entry points in `assets.entries` if using multiple entry points in a Webpack build. Not incrementing the major semver version for this because only 3 days passed since the major release and there's a very little possibility that someone used both this new major version and multiple entry points feature.
+
 10.0.0 / 11.02.2017
 ===================
 

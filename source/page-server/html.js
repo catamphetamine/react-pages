@@ -9,8 +9,21 @@ export default function Html(options)
 {
 	const { assets } = options
 
-	const style_url      = assets.entry ? assets.style[assets.entry]      : assets.style
-	const javascript_url = assets.entry ? assets.javascript[assets.entry] : assets.javascript
+	const style_urls = []
+	const javascript_urls = []
+
+	for (const entry of assets.entries)
+	{
+		if (assets.styles && assets.styles[entry])
+		{
+			style_urls.push(assets.styles[entry])
+		}
+
+		if (assets.javascript && assets.javascript[entry])
+		{
+			javascript_urls.push(assets.javascript[entry])
+		}
+	}
 
 	const webpage_head = server_side_generated_webpage_head()
 
@@ -18,8 +31,8 @@ export default function Html(options)
 	({
 		...options,
 		webpage_head,
-		style_url,
-		javascript_url,
+		style_urls,
+		javascript_urls,
 		get_language_from_locale,
 		safe_json_stringify,
 		JSON
@@ -48,28 +61,15 @@ const template = nunjucks.compile
 			{#
 				(will be done only in production mode
 				 with webpack extract text plugin) 
-
-				Mount CSS stylesheets for all entry points
-				(should have been "for the current entry point only")
-
-				(currently there is only one entry point: "main";
-				 and also the "common" chunk)
+				Mount CSS stylesheets for all entry points (e.g. "main")
 			#}
-			{% if assets.entry and assets.style and assets.style.common %}
-				<link
-					href="{{ assets.style.common | safe }}"
-					rel="stylesheet"
-					type="text/css"
-					charset="UTF-8"/>
-			{% endif %}
-
-			{% if style_url %}
+			{% for style_url in style_urls %}
 				<link
 					href="{{ style_url | safe }}"
 					rel="stylesheet"
 					type="text/css"
 					charset="UTF-8"/>
-			{% endif %}
+			{% endfor %}
 
 			{# Custom <head/> markup #}
 			{{ head | safe }}
@@ -147,18 +147,12 @@ const template = nunjucks.compile
 			{% endif %}
 
 			{#
-				The "common.js" chunk (see webpack extract commons plugin)
-				(needs to be included first (by design))
+				Include all required "entry" points javascript
+				(e.g. "common", "main")
 			#}
-			{% if assets.entry and assets.javascript and assets.javascript.common %}
-				<script src="{{ assets.javascript.common | safe }}" charset="UTF-8"></script>
-			{% endif %}
-
-			{#
-				Current application "entry" point javascript
-				(currently there is only one entry point: "main")
-			#}
-			<script src="{{ javascript_url | safe }}" charset="UTF-8"></script>
+			{% for javascript_url in javascript_urls %}
+				<script src="{{ javascript_url | safe }}" charset="UTF-8"></script>
+			{% endfor %}
 
 			{# Supports adding arbitrary markup to <body/> end #}
 			{{ body_end | safe }}
