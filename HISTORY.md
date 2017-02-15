@@ -1,3 +1,9 @@
+10.1.1 / 15.02.2017
+===================
+
+  * (could be a breaking change, but not likely) `http` utility now only sends cookies (on the server side) for "local" URLs, and doesn't do so for absolute URLs anymore.
+  * `http` utility methods now have an `authentication` option which dictates whether it should send the authentication header (e.g. `Authorization: Bearer ${token}`) or not. This is done to prevent leaking the authentication header to a 3rd party.
+
 10.1.0 / 14.02.2017
 ===================
 

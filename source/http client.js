@@ -104,14 +104,14 @@ export default class http_client
 					}
 
 					// Set JWT token in HTTP request header (if the token is passed)
-					if (authentication_token)
+					if (authentication_token && options.authentication !== false)
 					{
 						request.set(authentication_token_header || 'Authorization', `Bearer ${authentication_token}`)
 					}
 
 					// Server side only
 					// (copies user authentication cookies to retain session specific data)
-					if (this.cookies)
+					if (this.cookies && is_relative_url(path))
 					{
 						request.set('cookie', this.cookies)
 					}
@@ -269,9 +269,9 @@ export default class http_client
 		// Rejects URLs of form "//www.google.ru/search",
 		// and verifies that the `path` is an internal URL.
 		// This check is performed to avoid leaking cookies to a third party.
-		if (starts_with(path, '//') || !starts_with(path, '/'))
+		if (!is_relative_url(path))
 		{
-			throw new Error(`Only internal URLs (e.g. "/api/item?id=1") are allowed for the "http" utility. Got an external url "${path}"`)
+			throw new Error(`Only internal URLs (e.g. "/api/item?id=1") are allowed for the "http" utility. Got an external url "${path}". A developer can allow absolute URLs by supplying a custom (looser) "http.url" parameter function (see the README).`)
 		}
 
 		// Prepend host and port on the server side
@@ -290,6 +290,11 @@ export default class http_client
 	{
 		this.on_before_send_listeners.push(listener)
 	}
+}
+
+function is_relative_url(path)
+{
+	return starts_with(path, '/') && !starts_with(path, '//')
 }
 
 function has_binary_data(data)

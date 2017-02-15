@@ -1193,14 +1193,22 @@ If you're using Webpack then make sure you either build your server-side code wi
 
     // (optional)
     // Custom control over `http` utility HTTP requests URL.
-    // E.g. for those who don't want to proxy API calls (for whatever reasons),
-    // and prefer to query REST API server directly from the web browser.
-    // The default `url` formatter only allows local paths
+    // E.g. for those who don't want to proxy their API calls
+    // and instead prefer to query REST API server directly
+    // from the web browser (using Cross-Origin Requests).
+    // (e.g. when using AWS Lambda).
+    // The default `url` formatter only allows "local" URLs
     // to be requested therefore guarding against
-    // leaking cookies and authentication token headers to a 3rd party.
+    // leaking the authentication token header
+    // (e.g. `Authorization: Bearer ${token}`) to a 3rd party.
     // Therefore by supplying a custom `url` formatter
     // a developer takes full responsibility for guarding
-    // cookies and authentication token headers from being leaked to a 3rd party.
+    // the authentication token header from being leaked to a 3rd party:
+    // when using `http` utility for querying 3rd party API
+    // a developer must supply an explicit option `{ authentication: false }`
+    // to prevent the authentication token header
+    // (e.g. `Authorization: Bearer ${token}`)
+    // to be sent to that 3rd party API endpoint.
     url: (path, isServerSide) =>
     {
       // In this case `.application` configuration parameter may be removed
