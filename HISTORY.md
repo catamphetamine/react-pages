@@ -36,7 +36,7 @@
 9.1.12 / 26.01.2017
 ===================
 
-  * Fixed [`react-router` bug](https://github.com/ReactTraining/react-router/issues/1982) when it didn't remount a `<Route/>` `component` (therefore, if, say, a user navigated `/users/1` page and then clicked a `<Link to="/users/2"/>` page then the page didn't refresh because `react-router` didn't remount the `<Route/>` component for this page, and now it's fixed)
+  * Fixed [`react-router` bug](https://github.com/ReactTraining/react-router/issues/1982) when it didn't remount a `<Route/>` `component` (therefore, if, say, a user navigated `/users/1` page and then clicked a `<Link to="/users/2"/>` then the page didn't refresh because `react-router` didn't remount the `<Route/>` component for this page, and now it's fixed)
 
 9.1.10 / 25.01.2017
 ===================
