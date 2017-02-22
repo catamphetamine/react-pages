@@ -1512,6 +1512,10 @@ See [PHILOSOPHY](https://github.com/halt-hammerzeit/react-isomorphic-render/blob
 
 `react-router`'s `onEnter` hook is being called twice both on server and client because `react-router`'s `match()` is called before preloading and then the actual navigation happens which triggers the second `match()` call (internally inside `react-router`). This is not considered a blocker because in this library `@preload()` substitutes `onEnter` hooks so just use `@preload()` instead. Double `onEnter` can be fixed using `<RouterContext/>` instead of `<Router/>` but I see no reason to implement such a fix since `onEnter` is simply not used.
 
+## To do
+
+* (minor) Server-side `@preload()` redirection could be rewritten from `throw`ing special "redirection" `Error`s into `.listen()`ing the server-side `MemoryHistory` but since the current "special redirection errors" approach works and has no operational downsides I think that there's no need in such a rewrite.
+
 ## Contributing
 
 After cloning this repo, ensure dependencies are installed by running:

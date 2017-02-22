@@ -25,7 +25,7 @@ export default function set_up_and_render(settings, options = {})
 	let store
 
 	// Intercept `popstate` DOM event to preload pages before showing them
-	always_instrument_history_pop_state_listeners((event, listener, location) =>
+	always_instrument_history_pop_state_listeners((listener, event, location) =>
 	{
 		// Preload the page but don't navigate to it
 		store.dispatch(preload_action(location, undefined, false)).then((result) =>
