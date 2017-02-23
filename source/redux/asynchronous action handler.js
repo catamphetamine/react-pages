@@ -242,7 +242,7 @@ export function reset_error({ namespace, event }, handler)
 	// Redux "action creator"
 	return () =>
 	({
-		event : event_name(namespace, error_event_name)
+		type : event_name(namespace, error_event_name)
 		// `error` is `undefined`
 	})
 }
