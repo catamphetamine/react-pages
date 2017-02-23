@@ -128,7 +128,7 @@ export function create_handler(settings)
 					handler_argument = action_data.error
 				}
 				// When only `type` of a Redux "action" is set
-				else if (Object.keys(action_data) === 1)
+				else if (Object.keys(action_data).length === 1)
 				{
 					handler_argument = {}
 				}
