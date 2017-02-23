@@ -127,6 +127,7 @@ export function create_handler(settings)
 				{
 					handler_argument = action_data.error
 				}
+				// When only `type` of a Redux "action" is set
 				else if (Object.keys(action_data) === 1)
 				{
 					handler_argument = {}
@@ -225,6 +226,25 @@ function create_redux_handlers(handler, namespace, event, on_result)
 		[pending_property_name] : false,
 		[error_property_name] : error
 	}))
+}
+
+// Returns Redux action creator for resetting error.
+export function reset_error({ namespace, event }, handler)
+{
+	const
+	[
+		pending_event_name,
+		success_event_name,
+		error_event_name
+	]
+	= handler.settings.asynchronous_action_event_naming(event)
+
+	// Redux "action creator"
+	return () =>
+	({
+		event : event_name(namespace, error_event_name)
+		// `error` is `undefined`
+	})
 }
 
 // A little helper for Redux `@connect()`

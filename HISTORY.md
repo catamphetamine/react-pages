@@ -1,3 +1,8 @@
+10.1.2 / 23.02.2017
+===================
+
+  * Added `resetError({ event, namespace }, handler)` helper for asynchronous action handler
+
 10.1.1 / 15.02.2017
 ===================
 

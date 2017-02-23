@@ -19,6 +19,8 @@ import
 	Preload_options_name,
 	PRELOAD_OPTIONS_NAME,
 	action,
+	reset_error,
+	resetError,
 	create_handler,
 	createHandler,
 	state_connector,
@@ -63,6 +65,8 @@ describe(`exports`, function()
 		PRELOAD_OPTIONS_NAME.should.be.a('string')
 
 		action.should.be.a('function')
+		reset_error.should.be.a('function')
+		resetError.should.be.a('function')
 		create_handler.should.be.a('function')
 		createHandler.should.be.a('function')
 		state_connector.should.be.a('function')
@@ -112,6 +116,8 @@ describe(`exports`, function()
 		_.PRELOAD_OPTIONS_NAME.should.be.a('string')
 
 		_.action.should.be.a('function')
+		_.reset_error.should.be.a('function')
+		_.resetError.should.be.a('function')
 		_.create_handler.should.be.a('function')
 		_.createHandler.should.be.a('function')
 		_.state_connector.should.be.a('function')

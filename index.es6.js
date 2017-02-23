@@ -27,6 +27,8 @@ from './es6/redux/middleware/preloading middleware'
 export
 {
 	action,
+	reset_error,
+	reset_error as resetError,
 	create_handler,
 	create_handler as createHandler,
 	state_connector,

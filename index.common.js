@@ -24,6 +24,8 @@ exports.Preload_options_name = preloading_middleware.Preload_options_name
 exports.PRELOAD_OPTIONS_NAME = exports.Preload_options_name
 
 exports.action = require('./build/redux/asynchronous action handler').action
+exports.reset_error = require('./build/redux/asynchronous action handler').reset_error
+exports.resetError = exports.reset_error
 exports.create_handler = require('./build/redux/asynchronous action handler').create_handler
 exports.createHandler = exports.create_handler
 exports.state_connector = require('./build/redux/asynchronous action handler').state_connector
