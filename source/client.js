@@ -115,18 +115,18 @@ export function always_instrument_history_pop_state_listeners(call_listener)
 		// after the `popstate`d page finishes `@preload()`ing.
 		if (type === 'popstate')
 		{
-			const istrumented_listener = (event) =>
+			const original_listener = listener
+
+			listener = (event) =>
 			{
-				call_listener(listener, event, get_history_pop_state_location(event, initial_location))
+				call_listener(original_listener, event, get_history_pop_state_location(event, initial_location))
 			}
 
 			pop_state_listeners.push
 			({
-				original    : listener,
-				istrumented : istrumented_listener
+				original    : original_listener,
+				istrumented : listener
 			})
-
-			listener = istrumented_listener
 		}
 
 		// Proceed normally
