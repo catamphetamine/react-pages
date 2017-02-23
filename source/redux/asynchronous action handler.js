@@ -130,7 +130,7 @@ export function create_handler(settings)
 				// When only `type` of a Redux "action" is set
 				else if (Object.keys(action_data).length === 1)
 				{
-					handler_argument = {}
+					handler_argument = undefined
 				}
 
 				// For some strange reason Redux didn't report
