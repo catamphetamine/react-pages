@@ -127,11 +127,12 @@ export function create_handler(settings)
 				{
 					handler_argument = action_data.error
 				}
-				// When only `type` of a Redux "action" is set
-				else if (Object.keys(action_data).length === 1)
-				{
-					handler_argument = undefined
-				}
+				// This proved to be not that convenient
+				// // When only `type` of a Redux "action" is set
+				// else if (Object.keys(action_data).length === 1)
+				// {
+				// 	handler_argument = undefined
+				// }
 
 				// For some strange reason Redux didn't report
 				// these errors to the console, hence the manual `console.error`.
@@ -242,8 +243,8 @@ export function reset_error({ namespace, event }, handler)
 	// Redux "action creator"
 	return () =>
 	({
-		type : event_name(namespace, error_event_name)
-		// `error` is `undefined`
+		type  : event_name(namespace, error_event_name),
+		error : null
 	})
 }
 
