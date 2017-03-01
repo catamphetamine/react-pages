@@ -9,6 +9,7 @@ exports.Meta  = head.Meta
 
 exports.preload = require('./build/redux/preload').default
 exports.render = require('./build/redux/client/client').default
+exports.getState = require('./build/redux/client/client').getState
 
 var preloading_middleware = require('./build/redux/middleware/preloading middleware')
 

@@ -4,10 +4,18 @@ export { Title, Meta } from './es6/webpage head'
 
 // Redux
 
-import client  from './es6/redux/client/client'
-import preload from './es6/redux/preload'
+export
+{
+	default as preload
+}
+from './es6/redux/preload'
 
-export { client as render, preload }
+export
+{
+	default as render,
+	getState
+}
+from './es6/redux/client/client'
 
 export
 {

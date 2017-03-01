@@ -44,7 +44,7 @@ export default function set_up_and_render(settings, options = {})
 	const history = create_history(document.location, settings)
 
 	// Create Redux store
-	store = create_store(settings, window._redux_state, history, http_client,
+	store = create_store(settings, getState(), history, http_client,
 	{
 		devtools,
 		stats,
@@ -72,4 +72,12 @@ export default function set_up_and_render(settings, options = {})
 		// Execute all client-side-only `@preload()`s.
 		return store.dispatch(preload_action(window.location, undefined, false, true)).then(() => result)
 	})
+}
+
+// In case someone needs to somehow modify
+// Redux state before client-side render.
+// (because the variable could be potentially renamed in future)
+export function getState()
+{
+	return window._redux_state
 }

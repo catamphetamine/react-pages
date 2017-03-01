@@ -119,7 +119,8 @@ export function create_handler(settings)
 
 				let handler_argument = action_data
 
-				if (action_data.result !== undefined)
+				// if (action_data.result !== undefined)
+				if (Object.prototype.hasOwnProperty.call(action_data, 'result'))
 				{
 					handler_argument = action_data.result
 				}

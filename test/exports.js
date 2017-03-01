@@ -5,6 +5,7 @@ import
 	Title,
 	Meta,
 	render,
+	getState,
 	preload,
 	goto,
 	redirect,
@@ -47,6 +48,7 @@ describe(`exports`, function()
 		Meta.should.be.a('function')
 
 		render.should.be.a('function')
+		getState.should.be.a('function')
 		preload.should.be.a('function')
 
 		goto.should.be.a('function')
@@ -98,6 +100,7 @@ describe(`exports`, function()
 		// Combined Redux exports
 
 		_.render.should.be.a('function')
+		_.getState.should.be.a('function')
 		_.preload.should.be.a('function')
 
 		_.goto.should.be.a('function')
