@@ -1,6 +1,9 @@
 // Makes @preload() decorator work.
 // (preloads data required for displaying a page before actually navigating to it)
 
+import deep_equal from 'deep-equal'
+import getRouteParams from 'react-router/lib/getRouteParams'
+
 import { location_url } from '../../location'
 import { server_redirect } from '../../history'
 import { Preload, Redirect, GoTo, redirect_action, goto_action, history_redirect_action, history_goto_action } from '../actions'
@@ -136,12 +139,14 @@ export default function preloading_middleware(server, error_handler, preload_hel
 			const route = get_route_path(router_state)
 
 			// `react-router` matched route "state"
-			const { components, location, params } = router_state
+			const { routes, components, location, params } = router_state
 
 			// Preload all the required data for this route (page)
 			const preload = preloader
 			(
+				action.initial,
 				server,
+				routes,
 				components,
 				getState,
 				preloader_dispatch(dispatch, preloading),
@@ -320,7 +325,7 @@ function proceed_with_navigation(dispatch, action, server)
 //
 // If no preloading is needed, then returns nothing.
 //
-const preloader = (server, components, getState, dispatch, location, parameters, preload_helpers) =>
+const preloader = (initial_client_side_preload, server, routes, components, getState, dispatch, location, parameters, preload_helpers) =>
 {
 	let preload_arguments = { dispatch, getState, location, parameters }
 
@@ -329,45 +334,65 @@ const preloader = (server, components, getState, dispatch, location, parameters,
 		preload_arguments = { ...preload_arguments, ...preload_helpers }
 	}
 
-	// on the client side:
+	// A minor optimization for skipping `@preload()`s
+	// for those parent `<Route/>`s which haven't changed
+	// as a result of a client-side navigation.
 	//
-	// take the previous route components 
-	// and the next route components,
+	// On the client side:
+	//
+	// Take the previous route components
+	// (along with their parameters) 
+	// and the next route components
+	// (along with their parameters),
 	// and compare them side-by-side
-	// filtering out the same top level components.
+	// filtering out the same top level components
+	// (both having the same component classes
+	//  and having the same parameters).
 	//
-	// therefore @preload() methods won't be called
-	// for those top level components which remain the same.
+	// Therefore @preload() methods could be skipped
+	// for those top level components which remain
+	// the same (and in the same state).
+	// This would be an optimization.
 	//
-	// (e.g. the main <Route/> will be @preload()ed only once - on the server side)
+	// (e.g. the main <Route/> could be @preload()ed only once - on the server side)
 	//
-	// at the same time, at least one component should be preloaded,
-	// because a route might have a form of "/users/xxx",
-	// and therefore after navigating from "/users/xxx" to "/users/yyy"
-	// the last component in the chain still needs to be reloaded
-	// even though it has remained the same.
+	// At the same time, at least one component should be preloaded:
+	// even if navigating to the same page it still kinda makes sense to reload it.
+	// (assuming it's not an "anchor" hyperlink navigation)
 	//
-	// `params` comparison could render the above workaround obsolete,
-	// but `react-router` doesn't provide per-route params
-	// instead providing page-wide `params`
-	// (i.e. combined `params` from all routes of the routed path),
-	// and there's no way of simply doing `if (previous_params !== new_params) { preload() }`
-	// because that would re-@preload() all parent components every time
-	// even if they stayed the same (e.g. the root `<App/>` route component).
+	// Parameters for each `<Route/>` component can be found using this helper method:
+	// https://github.com/ReactTraining/react-router/blob/master/modules/getRouteParams.js
 	//
-	// (also, GET query parameters would also need to be compared in that case)
+	// Also, GET query parameters would also need to be compared, I guess.
+	// But, I guess, it would make sense to assume that GET parameters
+	// only affect the last <Route/> component in the chain.
+	// And, in general, GET query parameters should be avoided,
+	// but that's not the case for example with search forms.
+	// So here we assume that GET query parameters only
+	// influence the last <Route/> component in the chain
+	// which is gonna be reloaded anyway.
 	//
-	// if (!server && window._previous_route_components)
-	// {
-	// 	let previous_route_components = window._previous_route_components
-	// 	window._previous_route_components = components
-	//
-	// 	while (components.length > 1 && previous_route_components[0] === components[0])
-	// 	{
-	// 		previous_route_components = previous_route_components.slice(1)
-	// 		components                = components.slice(1)
-	// 	}
-	// }
+	if (!server)
+	{
+		if (window._previous_routes)
+		{
+			const previous_routes     = window._previous_routes
+			const previous_parameters = window._previous_route_parameters
+		
+			let i = 0
+			while (i < routes.length - 1 && 
+				previous_routes[i].component === routes[i].component &&
+				deep_equal(getRouteParams(previous_routes[i], previous_parameters), getRouteParams(routes[i], parameters)))
+			{
+				i++
+			}
+		
+			components = components.slice(i)
+		}
+		
+		window._previous_routes           = routes
+		window._previous_route_parameters = parameters
+	}
 
 	// finds all `preload` (or `preload_deferred`) methods 
 	// (they will be executed in parallel)
@@ -418,6 +443,19 @@ const preloader = (server, components, getState, dispatch, location, parameters,
 
 	for (let preloader of get_preloaders())
 	{
+		// Don't execute client-side-only `@preload()`s on server side
+		if (preloader.options.client && server)
+		{
+			continue
+		}
+
+		// If it's initial client side preload (after the page has been loaded),
+		// then only execute those `@preload()`s marked as "client-side-only".
+		if (initial_client_side_preload && !preloader.options.client)
+		{
+			continue
+		}
+
 		if (preloader.options.blocking === false)
 		{
 			parallel.push(preloader.preload)

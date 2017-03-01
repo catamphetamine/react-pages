@@ -413,10 +413,10 @@ export default class Page extends Component {
 
 In the example above `@preload()` helper is called to preload a web page before it is displayed, i.e. before the page is rendered (both on server side and on client side).
 
-`@preload()` decorator takes a function which must return a `Promise`:
+[`@preload()` decorator](https://github.com/halt-hammerzeit/react-isomorphic-render/blob/master/source/redux/preload.js) takes a function which must return a `Promise`:
 
 ```javascript
-@preload(function({ dispatch, getState, location, parameters, server }) {
+@preload(function({ dispatch, getState, location, parameters }) {
   return Promise
 })
 ```

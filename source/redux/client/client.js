@@ -67,4 +67,9 @@ export default function set_up_and_render(settings, options = {})
 			on_navigate
 		}
 	})
+	.then((result) =>
+	{
+		// Execute all client-side-only `@preload()`s.
+		return store.dispatch(preload_action(window.location, undefined, false, true)).then(() => result)
+	})
 }

@@ -1,3 +1,9 @@
+10.1.8 / 28.02.2017
+===================
+
+  * Added `client: true` option for "client-side-only" `@preload()`s
+  * Added a minor optimization for skipping `@preload()`s for those parent `<Route/>`s which haven't changed as a result of a client-side navigation
+
 10.1.7 / 23.02.2017
 ===================
 

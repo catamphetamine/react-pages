@@ -17,14 +17,23 @@ export const navigated_action = (location) =>
 })
 
 // Starts `location` page preloading.
+//
 // If `redirect` is `true` then will perform
 // `history.replace()` instead of `history.push()`.
-export const preload_action = (location, redirect, navigate) =>
+//
+// If `navigate` is `false` then the actual navigation won't take place.
+// This is used for the server side.
+//
+// If `initial_client_side_preload` is `true`
+// then just client-side-only `@preload()`s will be executed.
+//
+export const preload_action = (location, redirect, navigate, initial_client_side_preload) =>
 ({
 	type: Preload,
 	location,
 	redirect,
-	navigate
+	navigate,
+	initial: initial_client_side_preload
 })
 
 // After page preloading finished
