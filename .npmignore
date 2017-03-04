@@ -1,6 +1,9 @@
 # git
 .gitignore
 
+# Babel
+.babelrc
+
 # testing package
 /react-isomorphic-render-*.tgz
 
