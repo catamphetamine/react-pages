@@ -34,6 +34,8 @@ This is a good example of highload architecture, and it would work in React too,
 
 There is however an interesting project out of Walmart Labs worth checking out: [`react-ssr-optimization`](https://github.com/walmartlabs/react-ssr-optimization). It takes another approach from `react-dom-stream` and istead of forking and patching React library itself it injects some bootstrapping code inside it via a Node.js `require()` hook. This might turn out to be a good solution (I haven't tried it myself).
 
+And of course there are a handful of other independent efforts to fix React server side rendering, like [Rapscallion](http://formidable.com/blog/2017/introducing-rapscallion/) and [`fast-react-server`](https://github.com/alt-j/fast-react-server).
+
 ## Caching the whole page
 
 Theorectially, some kind of SEO-friendly generic prerender of a page could be cached (say, the text of an article), and then, on the client side, inside `componentDidMount` it could be further customized for this particular point in time and space: say, a user bar could be dynamically loaded and added at the top of the page, or a comments section could be fetched and rendered at the bottom of the page.
