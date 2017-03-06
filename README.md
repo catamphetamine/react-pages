@@ -917,9 +917,9 @@ class Page extends Component {
 }
 ```
 
-## Caching
+## Performance and Caching
 
-[Some thoughts on caching rendered pages](https://github.com/halt-hammerzeit/react-isomorphic-render/blob/master/CACHING.md)
+[Some thoughts on React Server Side Rendering performance and caching](https://github.com/halt-hammerzeit/react-isomorphic-render/blob/master/PERFORMANCE.md)
 
 ## Monitoring
 

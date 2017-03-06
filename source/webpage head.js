@@ -41,7 +41,10 @@ Meta.propTypes =
 	children: PropTypes.arrayOf(PropTypes.object).isRequired
 }
 
-// server-side rendering
+// Server-side rendering.
+// Will only work with the standard single-threaded React renderer.
+// Will not work with ansynchronous (e.g. streamed) alternative React renderers.
+// https://github.com/gaearon/react-document-title/issues/7
 export function server_side_generated_webpage_head()
 {
 	// return DocumentMeta.renderAsReact()
