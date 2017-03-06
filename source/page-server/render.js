@@ -63,29 +63,6 @@ export default async function(settings, { initialize, localize, assets, applicat
 	
 	const initialize_time = initialize_timer()
 
-	// `html` modifiers
-
-	let { head } = html
-
-	// camelCase support for those who prefer it
-	let body_start = html.body_start || html.bodyStart
-	let body_end   = html.body_end   || html.bodyEnd
-
-	// Normalize `html` parameters
-	head       = normalize_markup(typeof head       === 'function' ? head      (path, parameters) : head)
-	body_start = normalize_markup(typeof body_start === 'function' ? body_start(path, parameters) : body_start)
-	body_end   = normalize_markup(typeof body_end   === 'function' ? body_end  (path, parameters) : body_end)
-
-	// Normalize assets
-
-	assets = typeof assets === 'function' ? assets(path, parameters) : assets
-
-	// Sanity check
-	if (!assets.entries)
-	{
-		throw new Error(`"assets.entries" array parameter is required as of version 10.1.0. E.g. "{ ... entries: ['main'] ... }"`)
-	}
-
 	// Internationalization
 
 	let locale
@@ -131,7 +108,29 @@ export default async function(settings, { initialize, localize, assets, applicat
 
 			render_webpage(content)
 			{
-				const markup = Html
+				// `html` modifiers
+
+				let { head } = html
+				// camelCase support for those who prefer it
+				let body_start = html.body_start || html.bodyStart
+				let body_end   = html.body_end   || html.bodyEnd
+
+				// Normalize `html` parameters
+				head       = normalize_markup(typeof head       === 'function' ? head      (path, parameters) : head)
+				body_start = normalize_markup(typeof body_start === 'function' ? body_start(path, parameters) : body_start)
+				body_end   = normalize_markup(typeof body_end   === 'function' ? body_end  (path, parameters) : body_end)
+
+				// Normalize assets
+				assets = typeof assets === 'function' ? assets(path, parameters) : assets
+
+				// Sanity check
+				if (!assets.entries)
+				{
+					throw new Error(`"assets.entries" array parameter is required as of version 10.1.0. E.g. "{ ... entries: ['main'] ... }"`)
+				}
+
+				// Render the HTML
+				return Html
 				({
 					...parameters,
 					extension_javascript: typeof extension_javascript === 'function' ? extension_javascript() : extension_javascript,
@@ -144,8 +143,6 @@ export default async function(settings, { initialize, localize, assets, applicat
 					authentication_token,
 					content: render === false ? normalize_markup(loading) : (content && ReactDOM.renderToString(content))
 				})
-
-				return markup
 			}
 		})
 
