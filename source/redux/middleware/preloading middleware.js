@@ -34,7 +34,7 @@ export default function preloading_middleware(server, error_handler, preload_hel
 		// Navigation event triggered
 		if (on_navigate)
 		{
-			on_navigate(action.location)
+			on_navigate(location_url(action.location))
 		}
 
 		// Preload status object.

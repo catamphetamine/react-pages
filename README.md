@@ -1455,9 +1455,9 @@ If you're using Webpack then make sure you either build your server-side code wi
   ...
 
   // (optional)
-  // `react-router`s `onUpdate` handler
-  // (is fired when a user performs navigation)
-  // (can be used for Google Analytics, for example)
+  // Is fired when a user performs navigation.
+  // Can be used for Google Analytics, for example.
+  // `location` is a string (`path` + "search" (?...) + "hash" (#...)).
   onNavigate: (location) => {}
 
   // (optional)
