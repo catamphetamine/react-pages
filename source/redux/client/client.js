@@ -40,17 +40,24 @@ export default function set_up_and_render(settings, options = {})
 		})
 	})
 
-	// Create `react-router` `history`
-	const history = create_history(document.location, settings)
+	// `history` is created after the `store`.
+	// At the same time, `store` needs the `history` later during navigation.
+	// And `history` might need store for things like `react-router-redux`.
+	// Hence the getter instead of a simple variable
+	let history
+	const get_history = () => history
 
 	// Create Redux store
-	store = create_store(settings, getState(), history, http_client,
+	store = create_store(settings, getState(), get_history, http_client,
 	{
 		devtools,
 		stats,
 		on_navigate
 	})
 	delete window._redux_state
+
+	// Create `react-router` `history`
+	history = create_history(document.location, settings.history, { store })
 
 	// Render the page
 	return client_side_render

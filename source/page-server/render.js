@@ -5,7 +5,7 @@ import React from 'react'
 import ReactDOM from 'react-dom/server'
 
 // https://github.com/ReactTraining/react-router/issues/4023
-// Also adds 'useBasename' and 'useQueries'
+// Also adds `useBasename` and `useQueries`
 import createHistory from 'react-router/lib/createMemoryHistory'
 
 import Html from './html'
@@ -43,8 +43,12 @@ export default async function(settings, { initialize, localize, assets, applicat
 		authentication_token = cookies.get(authentication.cookie)
 	}
 
-	// Create `history` (`true` indicates server-side usage)
-	const history = create_history(createHistory, request.url, settings.history, true)
+	// `history` is created after the `store`.
+	// At the same time, `store` needs the `history` later during navigation.
+	// And `history` might need store for things like `react-router-redux`.
+	// Hence the getter instead of a simple variable
+	let history
+	const get_history = () => history
 
 	const initialize_timer = timer()
 
@@ -56,11 +60,14 @@ export default async function(settings, { initialize, localize, assets, applicat
 		application,
 		request,
 		initialize,
-		history
+		get_history
 	})
 
 	const { extension_javascript, ...parameters } = initialize_result
 	
+	// Create `history` (`true` indicates server-side usage)
+	history = create_history(createHistory, request.url, settings.history, parameters, true)
+
 	const initialize_time = initialize_timer()
 
 	// Internationalization

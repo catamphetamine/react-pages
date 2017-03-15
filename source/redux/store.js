@@ -6,7 +6,7 @@ import history_middleware from './middleware/history middleware'
 
 import { set_up_http_client } from './http client'
 
-export default function create_store(settings, data, history, http_client, options)
+export default function create_store(settings, data, get_history, http_client, options)
 {
 	const
 	{
@@ -41,13 +41,13 @@ export default function create_store(settings, data, history, http_client, optio
 			preload && preload.catch,
 			preload && preload.helpers, 
 			routes,
-			history,
+			get_history,
 			stats,
 			on_navigate
 		),
 
 		// Performs `redirect` and `goto` actions on `history`
-		history_middleware(history)
+		history_middleware(get_history)
 	]
 
 	// User may supply his own Redux middleware

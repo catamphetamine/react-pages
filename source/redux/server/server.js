@@ -15,7 +15,7 @@ export default function _render(options)
 	})
 }
 
-export async function initialize(settings, { authentication_token, application, request, initialize, history })
+export async function initialize(settings, { authentication_token, application, request, initialize, get_history })
 {
 	// Create HTTP client (Redux action creator `http` utility)
 	const http_client = create_http_client(settings, authentication_token,
@@ -39,7 +39,7 @@ export async function initialize(settings, { authentication_token, application, 
 	}
 
 	// Create Redux store
-	const store = create_store(settings, store_data, history, http_client,
+	const store = create_store(settings, store_data, get_history, http_client,
 	{
 		server : true
 	})

@@ -1,7 +1,7 @@
 import { location_url } from './location'
 
 // Creates `history`
-export default function create_history(createHistory, location, history_options, server)
+export default function create_history(createHistory, location, history_options, parameters, server)
 {
 	// Create `history`.
 	//
@@ -10,7 +10,7 @@ export default function create_history(createHistory, location, history_options,
 	// `entries` is used in `MemoryHistory` only (i.e. on server side)
 	// https://github.com/ReactTraining/history/blob/v3.x/modules/createMemoryHistory.js
 	//
-	const history = createHistory({ ...history_options, entries: [ location ] })
+	let history = createHistory({ ...history_options, entries: [ location ] })
 
 	// Because History API won't work on the server side for navigation,
 	// instrument it with custom redirection handlers.
@@ -20,6 +20,13 @@ export default function create_history(createHistory, location, history_options,
 		// (which was earlier passed to `preloading_middleware`)
 		history.replace = server_side_redirect(history_options && history_options.basename)
 		history.push    = history.replace
+	}
+
+	// For custom `history` wrappers, like `syncHistoryWithStore` from `react-router-redux`.
+	if (history_options.wrap)
+	{
+		// `parameters` is `{ store }` for Redux use case
+		history = history_options.wrap(history, parameters)
 	}
 
 	// Return `history`

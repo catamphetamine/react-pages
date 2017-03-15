@@ -79,6 +79,26 @@ export default function normalize_common_settings(settings, options = {})
 		settings.history = {}
 	}
 
+	// `10.x` legacy `history` setting support
+	const unexpected_history_keys = Object.keys(settings.history).filter(key => key !== 'options' && key !== 'wrap')
+
+	if (unexpected_history_keys.length > 0)
+	{
+		console.log('Unexpected `history` setting keys found:', unexpected_history_keys)
+		console.log('Transforming legacy `history` setting into a new one: `history: { options }`')
+		
+		settings.history =
+		{
+			options : settings.history
+		}
+	}
+
+	// Default history options (non-empty)
+	if (!settings.history.options)
+	{
+		settings.history.options = {}
+	}
+
 	// This message was too noisy printing on each page render.
 	//
 	// // For those who don't wish to proxy API requests to API servers

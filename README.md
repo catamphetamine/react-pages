@@ -1258,8 +1258,16 @@ If you're using Webpack then make sure you either build your server-side code wi
   }
 
   // (optional)
-  // `history` options (like `basename`)
-  history: {}
+  history:
+  {
+    // (optional)
+    // `history` options (like `basename`)
+    options: {}
+
+    // (optional)
+    // Custom `history` wrapper, like `syncHistoryWithStore` from `react-router-redux`
+    wrap: (history, { store }) => history
+  }
 
   // (optional)
   // Controls automatic `Date` parsing

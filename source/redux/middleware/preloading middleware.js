@@ -17,7 +17,7 @@ export const Preload_started  = '@@react-isomorphic-render/redux/preload started
 export const Preload_finished = '@@react-isomorphic-render/redux/preload finished'
 export const Preload_failed   = '@@react-isomorphic-render/redux/preload failed'
 
-export default function preloading_middleware(server, error_handler, preload_helpers, routes, history, report_stats, on_navigate)
+export default function preloading_middleware(server, error_handler, preload_helpers, routes, get_history, report_stats, on_navigate)
 {
 	return ({ getState, dispatch }) => next => action =>
 	{
@@ -91,9 +91,9 @@ export default function preloading_middleware(server, error_handler, preload_hel
 
 		return match_routes_against_location
 		({
-			routes: typeof routes === 'function' ? routes({ dispatch, getState }) : routes,
-			history,
-			location: action.location
+			routes   : typeof routes === 'function' ? routes({ dispatch, getState }) : routes,
+			history  : get_history(),
+			location : action.location
 		})
 		.then(({ redirect, router_state }) =>
 		{

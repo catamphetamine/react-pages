@@ -91,10 +91,10 @@ export function authentication_token()
 }
 
 // Create `react-router` `history`
-export function create_history(location, settings)
+export function create_history(location, settings, parameters)
 {
 	// Adds `useBasename` and `useQueries`
-	return _create_history(useRouterHistory(createHistory), location, settings.history)
+	return _create_history(useRouterHistory(createHistory), location, settings, parameters)
 }
 
 // When a `popstate` event occurs (e.g. via "Back" browser button)
