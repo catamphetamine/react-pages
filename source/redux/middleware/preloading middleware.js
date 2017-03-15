@@ -32,7 +32,7 @@ export default function preloading_middleware(server, error_handler, preload_hel
 		dispatch = preloading_middleware_dispatch(dispatch, server)
 
 		// Navigation event triggered
-		if (on_navigate)
+		if (on_navigate && !action.initial)
 		{
 			on_navigate(location_url(action.location))
 		}
