@@ -48,13 +48,12 @@ export default function set_up_and_render(settings, options = {})
 	const get_history = () => history
 
 	// Create Redux store
-	store = create_store(settings, getState(), get_history, http_client,
+	store = create_store(settings, getState(true), get_history, http_client,
 	{
 		devtools,
 		stats,
 		on_navigate
 	})
-	delete window._redux_state
 
 	// Create `react-router` `history`
 	history = create_history(document.location, settings.history, { store })
@@ -81,10 +80,18 @@ export default function set_up_and_render(settings, options = {})
 	})
 }
 
+// Gets Redux store state before "rehydration".
 // In case someone needs to somehow modify
 // Redux state before client-side render.
 // (because the variable could be potentially renamed in future)
-export function getState()
+export function getState(erase)
 {
-	return window._redux_state
+	const state = window._redux_state
+
+	if (erase)
+	{
+		delete window._redux_state
+	}
+
+	return state
 }
