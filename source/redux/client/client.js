@@ -58,6 +58,12 @@ export default function set_up_and_render(settings, options = {})
 	// Create `react-router` `history`
 	history = create_history(document.location, settings.history, { store })
 
+	// Call `onNavigate` on initial page load
+	if (on_navigate)
+	{
+		on_navigate(window.location.pathname + (window.location.search ? window.location.search : ''))
+	}
+
 	// Render the page
 	return client_side_render
 	({
@@ -69,8 +75,7 @@ export default function set_up_and_render(settings, options = {})
 			history,
 			routes: settings.routes,
 			store,
-			devtools,
-			on_navigate
+			devtools
 		}
 	})
 	.then((result) =>

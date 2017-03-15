@@ -1,7 +1,8 @@
-10.2.0 / 15.03.2017
+10.2.3 / 15.03.2017
 ===================
 
   * Added support for wrapping `history` with custom things (like `syncHistoryWithStore` from `react-router-redux`) and therefore `history: options` parameter has been extended to `history: { options, wrap }` (see the README for more info). Legacy `history` setting is transformed into a new one automatically.
+  * `onNavigate` is now also called on initial page load (for consistency with Google Analytics).
 
 10.1.8 / 28.02.2017
 ===================
