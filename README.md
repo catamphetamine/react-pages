@@ -1458,6 +1458,12 @@ If you're using Webpack then make sure you either build your server-side code wi
   // Is fired when a user performs navigation.
   // Can be used for Google Analytics, for example.
   // `location` is a string (`path` + "search" (?...) + "hash" (#...)).
+  // "search" query parameters can be stripped in Google Analytics itself.
+  // They aren't stripped out-of-the-box because they might contain
+  // meaningful data like "/search?query=dogs".
+  // http://www.lunametrics.com/blog/2015/04/17/strip-query-parameters-google-analytics/
+  // The "hash" part should also be stripped manually inside `onNavigate` function
+  // because someone somewhere someday might make use of those "hashes".
   onNavigate: (location) => {}
 
   // (optional)
