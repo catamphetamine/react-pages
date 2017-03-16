@@ -29,8 +29,17 @@ export default function create_store(settings, data, get_history, http_client, o
 	= options
 
 	// Redux middleware
-	const middleware =
-	[
+	const middleware = []
+
+	// User may supply his own Redux middleware
+	if (redux_middleware)
+	{
+		middleware.push(...redux_middleware())
+	}
+
+	// Built-in middleware
+	middleware.push
+	(
 		// Asynchronous middleware (e.g. for HTTP Ajax calls).
 		asynchronous_middleware(http_client, { asynchronous_action_event_naming }),
 
@@ -48,13 +57,7 @@ export default function create_store(settings, data, get_history, http_client, o
 
 		// Performs `redirect` and `goto` actions on `history`
 		history_middleware(get_history)
-	]
-
-	// User may supply his own Redux middleware
-	if (redux_middleware)
-	{
-		middleware.push(...redux_middleware())
-	}
+	)
 
 	// Redux "store enhancers"
 	const store_enhancers =

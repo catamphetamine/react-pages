@@ -1,3 +1,8 @@
+10.2.5 / 16.03.2017
+===================
+
+  * Fixed a small bug: `reduxMiddleware` was previously placed after the built-in middleware and therefore couldn't intercept, say, preload actions. Not it's placed before the built-in middleware and can intercept preload actions.
+
 10.2.3 / 15.03.2017
 ===================
 
