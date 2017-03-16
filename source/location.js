@@ -31,8 +31,8 @@ export function parse_location(location)
 	}
 
 	let pathname = location
-	let search
-	let hash
+	let search = ''
+	let hash = ''
 
 	const search_index = pathname.indexOf('?')
 	if (search_index >= 0)
