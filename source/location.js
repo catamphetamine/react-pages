@@ -2,6 +2,8 @@
 // import querystring from 'query-string'
 // import deep_equal from 'deep-equal'
 
+import { parsePath } from 'history/lib/PathUtils'
+
 export function location_url(location)
 {
 	if (typeof location === 'string')
@@ -20,4 +22,14 @@ export function location_url(location)
 	// }
 
 	return `${location.pathname}${search}${hash}`
+}
+
+export function parse_location(location)
+{
+	if (typeof location === 'string')
+	{
+		return parsePath(location)
+	}
+
+	return location
 }
