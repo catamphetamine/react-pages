@@ -63,6 +63,7 @@ export
 {
 	goto_action as goto,
 	redirect_action as redirect,
+	Preload as PRELOAD,
 	GoTo,
 	GoTo as GO_TO,
 	Redirect,

@@ -40,6 +40,7 @@ exports.eventName  = exports.event_name
 exports.goto     = require('./build/redux/actions').goto_action
 exports.redirect = require('./build/redux/actions').redirect_action
 
+exports.PRELOAD   = require('./build/redux/actions').Preload
 exports.GoTo      = require('./build/redux/actions').GoTo
 exports.GO_TO     = exports.GoTo  
 exports.Redirect  = require('./build/redux/actions').Redirect

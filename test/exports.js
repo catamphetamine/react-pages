@@ -19,6 +19,10 @@ import
 	PRELOAD_METHOD_NAME,
 	Preload_options_name,
 	PRELOAD_OPTIONS_NAME,
+	PRELOAD,
+	REDIRECT,
+	GO_TO,
+	NAVIGATED,
 	action,
 	reset_error,
 	resetError,
@@ -65,6 +69,11 @@ describe(`exports`, function()
 		PRELOAD_METHOD_NAME.should.be.a('string')
 		Preload_options_name.should.be.a('string')
 		PRELOAD_OPTIONS_NAME.should.be.a('string')
+
+		PRELOAD.should.be.a('string')
+		REDIRECT.should.be.a('string')
+		GO_TO.should.be.a('string')
+		NAVIGATED.should.be.a('string')
 
 		action.should.be.a('function')
 		reset_error.should.be.a('function')
@@ -117,6 +126,11 @@ describe(`exports`, function()
 		_.PRELOAD_METHOD_NAME.should.be.a('string')
 		_.Preload_options_name.should.be.a('string')
 		_.PRELOAD_OPTIONS_NAME.should.be.a('string')
+
+		_.PRELOAD.should.be.a('string')
+		_.REDIRECT.should.be.a('string')
+		_.GO_TO.should.be.a('string')
+		_.NAVIGATED.should.be.a('string')
 
 		_.action.should.be.a('function')
 		_.reset_error.should.be.a('function')
