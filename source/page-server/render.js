@@ -115,6 +115,9 @@ export default async function(settings, { initialize, localize, assets, applicat
 
 			render_webpage(content)
 			{
+				// Render page content
+				content = render === false ? normalize_markup(loading) : (content && ReactDOM.renderToString(content))
+
 				// `html` modifiers
 
 				let { head } = html
@@ -148,7 +151,7 @@ export default async function(settings, { initialize, localize, assets, applicat
 					body_start,
 					body_end,
 					authentication_token,
-					content: render === false ? normalize_markup(loading) : (content && ReactDOM.renderToString(content))
+					content
 				})
 			}
 		})
