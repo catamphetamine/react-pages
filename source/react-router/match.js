@@ -51,7 +51,7 @@ export default function match_routes_against_location({ routes, location, histor
 			// In case some weird stuff happened
 			if (!router_state)
 			{
-				return reject(new Error(`No <Route/> matches URL "${location_url(location)}"`))
+				return reject(new Error(`No <Route/> matches URL "${location_url(location || history.getCurrentLocation())}"`))
 			}
 
 			return resolve({ router_state })
