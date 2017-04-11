@@ -2,7 +2,8 @@
 // 'react-helmet' can be used interchangeably.
 // import DocumentMeta from 'react-document-meta'
 import Helmet from 'react-helmet'
-import React, { PropTypes } from 'react'
+import React from 'react'
+import PropTypes from 'prop-types'
 
 // Sets webpage title
 export function Title({ children })
