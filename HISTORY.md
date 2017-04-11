@@ -1,3 +1,9 @@
+10.3.0 / 11.04.2017
+===================
+
+  * Migrated `React.PropTypes` to `prop-types`.
+  * Updated `react-helmet` to version `5` which added a new syntax for the `<Meta/>` tag (see README) (the old way still works)
+
 10.2.5 / 16.03.2017
 ===================
 

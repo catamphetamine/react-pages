@@ -11,7 +11,7 @@ export function Title({ children })
 	// // Replaces only webpage title
 	// return <DocumentMeta title={ children } extend/>
 
-	return <Helmet title={ children }/>
+	return <Helmet><title>{ children }</title></Helmet>
 }
 
 Title.propTypes =
@@ -34,7 +34,14 @@ export function Meta({ children })
 {
 	// return <DocumentMeta meta={ children } extend/>
 
-	return <Helmet meta={ children }/>
+	// The old way (deprecated)
+	if (Array.isArray(children))
+	{
+		return <Helmet meta={ children }/>
+	}
+
+	// The new way
+	return <Helmet>{ children }</Helmet>
 }
 
 Meta.propTypes =
@@ -50,5 +57,5 @@ export function server_side_generated_webpage_head()
 {
 	// return DocumentMeta.renderAsReact()
 
-	return Helmet.rewind()
+	return Helmet.renderStatic()
 }

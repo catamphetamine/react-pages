@@ -532,29 +532,22 @@ export default (
 
 ### Setting webpage title, description, <meta/> tags
 
-Uses [react-helmet](https://github.com/nfl/react-helmet) under the hood.
+This package uses [react-helmet](https://github.com/nfl/react-helmet) under the hood.
 
 ```javascript
 import { Title, Meta } from 'react-isomorphic-render'
-
-const meta = [
-  // <meta charset="utf-8"/>
-  { charset: 'utf-8' },
-
-  // <meta name="..." content="..."/>
-  { name: 'viewport', content: 'width=device-width, initial-scale=1.0, user-scalable=no' },
-
-  // <meta property="..." content="..."/>
-  { property: 'og:title',       content: 'International Bodybuilders Club' },
-  { property: 'og:description', content: 'Do some push ups' },
-  { property: 'og:locale',      content: 'ru-RU' }
-]
 
 // Webpage title will be replaced with this one
 <Title>Home</Title>
 
 // Adds additional <meta/> tags to the webpage <head/>
-<Meta>{ meta }</Meta>
+<Meta>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"/>
+  <meta property="og:title" content="International Bodybuilders Club"/>
+  <meta property="og:description" content="Do some push ups"/>
+  <meta property="og:locale" content="ru-RU"/>
+</Meta>
 ```
 
 ### Handling asynchronous actions
