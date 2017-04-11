@@ -1181,7 +1181,10 @@ If you're using Webpack then make sure you either build your server-side code wi
     // (`request` is a `superagent` request)
     request: (request, { store }) =>
     {
-      request.set('X-Something', store.getState().something.value)
+      if (request.url.indexOf('https://my.domain.com') === 0)
+      {
+        request.set('X-Secret-Token', store.getState().secretToken)
+      }
     }
 
     // (optional)
