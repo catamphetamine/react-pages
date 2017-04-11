@@ -34,8 +34,18 @@ export function Meta({ children })
 {
 	// return <DocumentMeta meta={ children } extend/>
 
+	let the_old_way = true
+
+	React.Children.forEach(children, (child) =>
+	{
+		if (child && child.props)
+		{
+			the_old_way = false
+		}
+	})
+
 	// The old way (deprecated)
-	if (Array.isArray(children))
+	if (the_old_way)
 	{
 		return <Helmet meta={ children }/>
 	}
