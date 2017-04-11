@@ -34,15 +34,22 @@ export function Meta({ children })
 {
 	// return <DocumentMeta meta={ children } extend/>
 
-	let the_old_way = true
-
-	React.Children.forEach(children, (child) =>
+	if (!children)
 	{
-		if (child && child.props)
+		return null
+	}
+
+	let the_old_way = false
+
+	if (Array.isArray(children))
+	{
+		const not_empty_children = children.filter(child => child)
+		
+		if (not_empty_children.length > 0 && !not_empty_children[0].props)
 		{
-			the_old_way = false
+			the_old_way = true
 		}
-	})
+	}
 
 	// The old way (deprecated)
 	if (the_old_way)
