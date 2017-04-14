@@ -200,6 +200,8 @@ export default class http_client
 								{
 									// Set error `data` from response body,
 									case 'application/json':
+									// http://jsonapi.org/
+									case 'application/vnd.api+json':
 										// if (!is_object(error.data))
 										error.data = get_response_body(response, parse_json_dates)
 
