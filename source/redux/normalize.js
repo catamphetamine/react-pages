@@ -40,6 +40,14 @@ export default function normalize_common_settings(settings, options = {})
 		}
 	}
 
+	if (settings.preload && settings.preload.catch)
+	{
+		console.log('`settings.preload.catch` has been moved to `settings.catch`. The older way is deprecated but still works in 10.x.x')
+
+		settings.catch = settings.preload.catch
+		delete settings.preload.catch
+	}
+
 	// camelCase aliasing
 	if (settings.asynchronousActionEventNaming)
 	{

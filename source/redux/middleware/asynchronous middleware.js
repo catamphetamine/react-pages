@@ -1,4 +1,5 @@
 import { exists, is_object } from '../../helpers'
+import { goto_action } from '../actions'
 
 // Asynchronous middleware (e.g. for HTTP Ajax calls).
 //
@@ -7,7 +8,7 @@ import { exists, is_object } from '../../helpers'
 //
 // `dispatch()` call will return a `Promise`.
 //
-export default function asynchronous_middleware(http_client, { asynchronous_action_event_naming })
+export default function asynchronous_middleware(http_client, asynchronous_action_event_naming, server, error_handler)
 {
 	return ({ dispatch, getState }) =>
 	{
@@ -15,16 +16,9 @@ export default function asynchronous_middleware(http_client, { asynchronous_acti
 		{
 			let { promise, event, events, ...rest } = action
 
-			// If the dispatched action doesn't have a `promise` field then do nothing
-			if (!promise)
-			{
-				return next(action)
-			}
-
-			// Validate `promise` parameter
+			// If the dispatched action doesn't have a `promise` function property then do nothing
 			if (typeof promise !== 'function')
 			{
-				// throw new Error(`"promise" property must be a function returning a promise`)
 				return next(action)
 			}
 
@@ -119,6 +113,30 @@ export default function asynchronous_middleware(http_client, { asynchronous_acti
 					// {
 					// 	error[key] = error_data[key]
 					// }
+
+					// Only checks `http` calls which are not part of `@preload()`
+					// so that they don't get "error handled" twice
+					// (doesn't affect anything, just a minor optimization).
+					// Also only checks `http` calls on client side
+					// because on server side `http` calls can be
+					// either part of `@preload` of part of `initialize`
+					// which are already "error handled".
+					// On the client side though, an `http` call
+					// may be performed via some user input,
+					// so it needs this separate case "error handler".
+					if (!server && error_handler && !event.preloading)
+					{
+						// Handle the error (for example, redirect to an error page)
+						return error_handler(error,
+						{
+							path : window.location.pathname,
+							url  : window.location.href,
+							redirect : to => dispatch(goto_action(to)),
+							dispatch,
+							getState,
+							server
+						})
+					}
 
 					throw error
 				}

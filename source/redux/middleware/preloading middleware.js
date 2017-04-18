@@ -273,6 +273,8 @@ export default function preloading_middleware(server, error_handler, preload_hel
 			{
 				path : action.location.pathname,
 				url  : location_url(action.location),
+				// Using `goto_action` instead of `redirect_action` here
+				// for better user experience (not loosing the initial URL)
 				redirect : to => dispatch(goto_action(to)),
 				dispatch,
 				getState,
@@ -287,7 +289,7 @@ export default function preloading_middleware(server, error_handler, preload_hel
 			// (on the server side)
 			if (server)
 			{
-				throw new Error(`"preload.catch" must either redirect or rethrow the error (on server side)`)
+				throw new Error(`"settings.catch" handler parameter must either redirect or rethrow the error (on server side)`)
 			}
 
 			// Return `false` indicating that page preload failed
@@ -538,6 +540,13 @@ function preloader_dispatch(dispatch, preloading)
 				preloading.cancel()
 				// Page loading indicator could listen for this event
 				dispatch({ type: Preload_finished })
+		}
+
+		// Mark `http` calls so that they don't get "error handled" twice
+		// (doesn't affect anything, just a minor optimization)
+		if (typeof event.promise === 'function')
+		{
+			event.preloading = true
 		}
 
 		// Proceed with the original

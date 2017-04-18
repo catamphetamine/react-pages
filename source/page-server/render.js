@@ -34,7 +34,11 @@ export default async function(settings, { initialize, localize, assets, applicat
 	}
 	= settings
 
-	const error_handler = settings.preload && settings.preload.catch
+	const error_handler = settings.catch
+
+	// If Redux is being used, then render for Redux.
+	// Else render for pure React.
+	const render_page = redux_render
 
 	// Read authentication token from a cookie (if configured)
 	let authentication_token
@@ -62,38 +66,44 @@ export default async function(settings, { initialize, localize, assets, applicat
 		initialize,
 		get_history
 	})
-
-	const { extension_javascript, ...parameters } = initialize_result
 	
-	// Create `history` (`true` indicates server-side usage)
-	history = create_history(createHistory, request.url, settings.history, parameters, true)
+	const { extension_javascript, ...parameters } = initialize_result	
 
-	const initialize_time = initialize_timer()
-
-	// Internationalization
-
-	let locale
-	let messages
-	let messagesJSON
-
-	if (localize)
-	{
-		const result = localize(parameters)
-
-		locale   = result.locale
-		messages = result.messages
-
-		// A tiny optimization to avoid calculating
-		// `JSON.stringify(messages)` for each rendered page.
-		messagesJSON = result.messagesJSON || JSON.stringify(messages)
-	}
-
-	// If Redux is being used, then render for Redux.
-	// Else render for pure React.
-	const render_page = redux_render
-
+	// The above code (server-side `initialize()` method call) is not included
+	// in this `try/catch` block because:
+	//
+	//  * `parameters` are used inside `catch`
+	//
+	//  * even if an error was caught inside `initialize()`
+	//    and a redirection was performed, say, to an `/error` page
+	//    then it would fail again because `initialize()` would get called again,
+	//    so wrapping `initialize()` with `try/catch` wouldn't help anyway.
+	//
 	try
 	{
+		// Create `history` (`true` indicates server-side usage)
+		history = create_history(createHistory, request.url, settings.history, parameters, true)
+
+		const initialize_time = initialize_timer()
+
+		// Internationalization
+
+		let locale
+		let messages
+		let messagesJSON
+
+		if (localize)
+		{
+			const result = localize(parameters)
+
+			locale   = result.locale
+			messages = result.messages
+
+			// A tiny optimization to avoid calculating
+			// `JSON.stringify(messages)` for each rendered page.
+			messagesJSON = result.messagesJSON || JSON.stringify(messages)
+		}
+
 		// Render the web page
 		const result = await render_page
 		({
@@ -194,10 +204,6 @@ export default async function(settings, { initialize, localize, assets, applicat
 			error_handler_parameters.getState = parameters.store.getState
 		}
 
-		// Strictly speaking, `preload.catch` is meant for `@preload()` helper,
-		// but also using it here because in production it's better
-		// to at least get the error logged and maybe also
-		// handle it in a better way rather than just status 500 or status 403.
 		try
 		{
 			error_handler(error, error_handler_parameters)
@@ -215,7 +221,7 @@ export default async function(settings, { initialize, localize, assets, applicat
 
 		if (!result.redirect)
 		{
-			throw new Error(`"preload.catch" must either redirect to another URL or throw an error. ${request.url}`)
+			throw new Error(`"settings.catch" handler parameter must either redirect to another URL or throw an error. ${request.url}`)
 		}
 
 		return result

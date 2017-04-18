@@ -808,25 +808,29 @@ const routes = (
 )
 ```
 
-In order for `authorize` helper to work as intended `preload.catch` function parameter **must be specified**. Something like this will do:
+In order for `authorize` helper to work as intended `settings.catch` handler function parameter **must be specified**. Something like this will do:
 
 ```js
 {
   ...
-  preload: {
-    catch(error, { path, url, goto }) {
-      // Not authenticated
-      if (error.status === 401) {
-        return goto(`/unauthenticated?url=${encodeURIComponent(url)}`)
-      }
-      // Not authorized
-      if (error.status === 403)
-      {
-        return goto(`/unauthorized?url=${encodeURIComponent(url)}`)
-      }
-      // Redirect to a generic error page
-      goto('/error')
+  catch(error, { path, url, redirect }) {
+    // Not authenticated
+    if (error.status === 401) {
+      return redirect(`/unauthenticated?url=${encodeURIComponent(url)}`)
     }
+    // Not authorized
+    if (error.status === 403)
+    {
+      return redirect(`/unauthorized?url=${encodeURIComponent(url)}`)
+    }
+    // Redirect to a generic error page
+    // (also prevents infinite recursion in case of bugs)
+    if (path !== '/error')
+    {
+      redirect('/error')
+    }
+    // Some kind of a bug
+    throw error
   }
 }
 ```
@@ -1223,16 +1227,17 @@ If you're using Webpack then make sure you either build your server-side code wi
     helpers:
     {
       helper: require('./helper')
-    },
-
-    // (optional)
-    // Handles errors occurring inside `@preload()`.
-    // For example, if `@preload()` throws a `new Error("Unauthorized")`,
-    // then a redirect to "/unauthorized" page can be made here.
-    // If this error handler is defined then it must handle
-    // all errors it gets (or just re`throw` them).
-    catch: (error, { path, url, redirect, dispatch, getState, server }) => redirect(`/error?url=${encodeURIComponent(url)}&error=${error.status}`)
+    }
   }
+
+  // (optional)
+  // Handles errors occurring inside `@preload()` and during
+  // `http` utility calls inside Redux actions.
+  // For example, if `@preload()` throws a `new Error("Unauthorized")`,
+  // then a redirect to "/unauthorized" page can be made here.
+  // If this error handler is defined then it must handle
+  // all errors it gets (either redirect or just re`throw` them).
+  catch: (error, { path, url, redirect, dispatch, getState, server }) => redirect(`/error?url=${encodeURIComponent(url)}&error=${error.status}`)
 
   // (optional)
   authentication:

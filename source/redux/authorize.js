@@ -3,10 +3,10 @@ import hoist_statics  from 'hoist-non-react-statics'
 
 import { Preload_method_name } from './middleware/preloading middleware'
 
-// This decorator is supposed to be used in conjunction with `preload.catch`,
+// This decorator is supposed to be used in conjunction with `settings.catch`,
 // because this component will emit either Status 401 Unauthenticated
 // or Status 403 Unauthorized if the authorization fails
-// which is supposed to be then caught in `preload.catch`
+// which is supposed to be then caught in `settings.catch`
 // for further redirection to a corresponding error page.
 //
 // `get_user(state)` gets a `user` object from Redux state.

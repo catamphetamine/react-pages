@@ -1,3 +1,8 @@
+10.4.0 / 18.04.2017
+===================
+
+  * Renamed `settings.preload.catch` to `settings.catch` (the old way still works but is deprecated an will be removed in some future major version)
+
 10.3.0 / 11.04.2017
 ===================
 

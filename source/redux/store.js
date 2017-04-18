@@ -41,13 +41,19 @@ export default function create_store(settings, data, get_history, http_client, o
 	middleware.push
 	(
 		// Asynchronous middleware (e.g. for HTTP Ajax calls).
-		asynchronous_middleware(http_client, { asynchronous_action_event_naming }),
+		asynchronous_middleware
+		(
+			http_client,
+			asynchronous_action_event_naming,
+			server,
+			settings.catch
+		),
 
 		// Makes @preload() decorator work.
 		preloading_middleware
 		(
 			server,
-			preload && preload.catch,
+			settings.catch,
 			preload && preload.helpers, 
 			routes,
 			get_history,
