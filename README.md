@@ -1172,8 +1172,12 @@ If you're using Webpack then make sure you either build your server-side code wi
   wrapper: require('./src/client/wrapper')
 
   // (optional)
-  // User can add his own middleware to this `middleware` list
+  // User can add custom Redux middleware
   reduxMiddleware: () => [...]
+
+  // (optional)
+  // User can add custom Redux store enhancers
+  reduxStoreEnhancers: () => [...]
 
   // (optional)
   // `http` utility settings

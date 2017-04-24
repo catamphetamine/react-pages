@@ -13,6 +13,7 @@ export default function create_store(settings, data, get_history, http_client, o
 		reducer,
 		routes,
 		redux_middleware,
+		redux_store_enhancers,
 		asynchronous_action_event_naming,
 		preload,
 		http
@@ -72,6 +73,12 @@ export default function create_store(settings, data, get_history, http_client, o
 		// (which is counter-intuitive)
 		applyMiddleware(...middleware)
 	]
+
+	// User may supply his own Redux store enhancers
+	if (redux_store_enhancers)
+	{
+		store_enhancers.push(...redux_store_enhancers())
+	}
 
 	// Add Redux DevTools (if they're enabled)
 	if (process.env.NODE_ENV !== 'production' && !server && devtools)

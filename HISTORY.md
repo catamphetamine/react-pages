@@ -1,3 +1,8 @@
+10.4.2 / 25.04.2017
+===================
+
+  * Added support for adding custom Redux store enhancers (`settings.reduxStoreEnhancers`)
+
 10.4.0 / 18.04.2017
 ===================
 

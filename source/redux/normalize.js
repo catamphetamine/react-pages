@@ -70,6 +70,13 @@ export default function normalize_common_settings(settings, options = {})
 	}
 
 	// camelCase aliasing
+	if (settings.reduxStoreEnhancers)
+	{
+		settings.redux_store_enhancers = settings.reduxStoreEnhancers
+		delete settings.reduxStoreEnhancers
+	}
+
+	// camelCase aliasing
 	if (settings.parseDates !== undefined)
 	{
 		settings.parse_dates = settings.parseDates
