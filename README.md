@@ -1521,7 +1521,64 @@ Client-side `render` function returns a `Promise` resolving to an object
 
 ## Static site generation
 
-In those rare cases when website's content doesn't change at all (or changes very rarely, e.g. a blog) it may be beneficial to host a statically generated version of such a website on a CDN as opposed to hosting a full-blown Node.js application just for the purpose of real-time webpage rendering. In such cases one may choose to generate a static version of the website using something like [this Node.js script](https://github.com/halt-hammerzeit/react-isomorphic-render/blob/master/tools/static-site-generator.js) and then host it in a cloud at virtually zero cost.
+In those rare cases when website's content doesn't change at all (or changes very rarely, e.g. a blog) it may be beneficial to host a statically generated version of such a website on a CDN as opposed to hosting a full-blown Node.js application just for the purpose of real-time webpage rendering. In such cases one may choose to generate a static version of the website by snapshotting it on a local machine and then host it in a cloud at virtually zero cost.
+
+```sh
+# If the website will be hosted on Amazon S3
+npm install s3 --save
+```
+
+```js
+import path from 'path'
+import { snapshot, upload, S3Uploader, copy, download } from 'react-isomorphic-render/static-site-generator'
+
+import configuration from '../configuration'
+
+let pages =
+[
+  '/about',
+  '/error',
+  '/unauthenticated',
+  '/unauthorized',
+  '/not-found'
+]
+
+async function run()
+{
+  const items = JSON.parse(await download(`https://example.com/api/items`))
+
+  pages = pages.concat(items.map(item => `/items/${item.id}`))
+
+  const output = path.resolve(__dirname, '../static-site')
+
+  // Snapshot the website
+  await snapshot
+  ({
+    host: configuration.host,
+    port: configuration.port,
+    pages,
+    output
+  })
+
+  // Copy assets (built by Webpack)
+  await copy(path.resolve(__dirname, '../build/assets'), path.resolve(output, 'assets'))
+
+  // Upload the website to Amazon S3
+  await upload(output, S3Uploader
+  ({
+    bucket,
+    accessKeyId,
+    secretAccessKey,
+    region
+  }))
+}
+
+run().catch((error) =>
+{
+  console.error(error)
+  process.exit(1)
+})
+```
 
 ## For purists
 
