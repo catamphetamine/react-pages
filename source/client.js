@@ -3,6 +3,7 @@ import createHistory from 'history/lib/createBrowserHistory'
 import { createLocation } from 'history/lib/LocationUtils'
 import { readState } from 'history/lib/DOMStateStorage'
 import { useRouterHistory } from 'react-router'
+import useBeforeUnload from 'history/lib/useBeforeUnload'
 
 import _create_history from './history'
 
@@ -94,7 +95,7 @@ export function authentication_token()
 export function create_history(location, settings, parameters)
 {
 	// Adds `useBasename` and `useQueries`
-	return _create_history(useRouterHistory(createHistory), location, settings, parameters)
+	return _create_history(useRouterHistory(useBeforeUnload(createHistory)), location, settings, parameters)
 }
 
 // When a `popstate` event occurs (e.g. via "Back" browser button)
