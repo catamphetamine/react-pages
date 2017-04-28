@@ -1,3 +1,9 @@
+10.4.5 / 28.04.2017
+===================
+
+  * (experimental) Added `instantBack` property to `<Link/>`s for disabling `@preload()` on certain "Back" navigation cases
+  * (experimental) Added `loadState()` action for replacing Redux state (if someone ever needs that)
+
 10.4.2 / 25.04.2017
 ===================
 

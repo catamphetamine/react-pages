@@ -63,7 +63,12 @@ export
 {
 	goto_action as goto,
 	redirect_action as redirect,
+	load_state_action as load_state,
+	load_state_action as loadState,
+	
 	Preload as PRELOAD,
+	LoadState,
+	LoadState as LOAD_STATE,
 	GoTo,
 	GoTo as GO_TO,
 	Redirect,

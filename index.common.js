@@ -37,16 +37,20 @@ exports.underscoredToCamelCase = require('./build/redux/naming').underscoredToCa
 exports.event_name = require('./build/redux/naming').event_name
 exports.eventName  = exports.event_name
 
-exports.goto     = require('./build/redux/actions').goto_action
-exports.redirect = require('./build/redux/actions').redirect_action
+exports.goto       = require('./build/redux/actions').goto_action
+exports.redirect   = require('./build/redux/actions').redirect_action
+exports.load_state = require('./build/redux/actions').load_state_action
+exports.loadState  = exports.load_state
 
-exports.PRELOAD   = require('./build/redux/actions').Preload
-exports.GoTo      = require('./build/redux/actions').GoTo
-exports.GO_TO     = exports.GoTo  
-exports.Redirect  = require('./build/redux/actions').Redirect
-exports.REDIRECT  = exports.Redirect
-exports.Navigated = require('./build/redux/actions').Navigated
-exports.NAVIGATED = exports.Navigated
+exports.PRELOAD    = require('./build/redux/actions').Preload
+exports.LoadState  = require('./build/redux/actions').LoadState
+exports.LOAD_STATE = exports.LoadState  
+exports.GoTo       = require('./build/redux/actions').GoTo
+exports.GO_TO      = exports.GoTo  
+exports.Redirect   = require('./build/redux/actions').Redirect
+exports.REDIRECT   = exports.Redirect
+exports.Navigated  = require('./build/redux/actions').Navigated
+exports.NAVIGATED  = exports.Navigated
 
 exports.Link = require('./build/redux/Link').default
 exports.IndexLink = require('./build/redux/IndexLink').default

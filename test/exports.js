@@ -9,6 +9,8 @@ import
 	preload,
 	goto,
 	redirect,
+	load_state,
+	loadState,
 	Preload_started,
 	PRELOAD_STARTED,
 	Preload_finished,
@@ -21,6 +23,7 @@ import
 	PRELOAD_OPTIONS_NAME,
 	PRELOAD,
 	REDIRECT,
+	LOAD_STATE,
 	GO_TO,
 	NAVIGATED,
 	action,
@@ -57,6 +60,8 @@ describe(`exports`, function()
 
 		goto.should.be.a('function')
 		redirect.should.be.a('function')
+		load_state.should.be.a('function')
+		loadState.should.be.a('function')
 
 		Preload_started.should.be.a('string')
 		PRELOAD_STARTED.should.be.a('string')
@@ -71,6 +76,7 @@ describe(`exports`, function()
 		PRELOAD_OPTIONS_NAME.should.be.a('string')
 
 		PRELOAD.should.be.a('string')
+		LOAD_STATE.should.be.a('string')
 		REDIRECT.should.be.a('string')
 		GO_TO.should.be.a('string')
 		NAVIGATED.should.be.a('string')
@@ -114,6 +120,8 @@ describe(`exports`, function()
 
 		_.goto.should.be.a('function')
 		_.redirect.should.be.a('function')
+		_.load_state.should.be.a('function')
+		_.loadState.should.be.a('function')
 
 		_.Preload_started.should.be.a('string')
 		_.PRELOAD_STARTED.should.be.a('string')
@@ -128,6 +136,7 @@ describe(`exports`, function()
 		_.PRELOAD_OPTIONS_NAME.should.be.a('string')
 
 		_.PRELOAD.should.be.a('string')
+		_.LOAD_STATE.should.be.a('string')
 		_.REDIRECT.should.be.a('string')
 		_.GO_TO.should.be.a('string')
 		_.NAVIGATED.should.be.a('string')

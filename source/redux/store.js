@@ -5,6 +5,7 @@ import preloading_middleware from './middleware/preloading middleware'
 import history_middleware from './middleware/history middleware'
 
 import { set_up_http_client } from './http client'
+import { LoadState } from './actions'
 
 export default function create_store(settings, data, get_history, http_client, options)
 {
@@ -93,14 +94,14 @@ export default function create_store(settings, data, get_history, http_client, o
 	}
 
 	// Create Redux store
-	const store = compose(...store_enhancers)(createStore)(combineReducers(reducer), data)
+	const store = compose(...store_enhancers)(createStore)(create_reducer(reducer), data)
 
 	// On the client side, add `hotReload()` function to the `store`.
 	// (could just add this function to `window` but adding it to the `store` fits more)
 	if (!server)
 	{
 		// `hot_reload` helper function gives the web application means to hot reload its Redux reducers
-		store.hot_reload = reducer => store.replaceReducer(combineReducers(reducer))
+		store.hot_reload = reducer => store.replaceReducer(create_reducer(reducer))
 		// Add camelCase alias
 		store.hotReload = store.hot_reload
 	}
@@ -115,4 +116,23 @@ export default function create_store(settings, data, get_history, http_client, o
 
 	// Return the Redux store
 	return store
+}
+
+function create_reducer(reducers)
+{
+	return replaceable_state(combineReducers(reducers), LoadState)
+}
+
+function replaceable_state(reducer, event)
+{
+	return function(state, action)
+	{
+		switch (action.type)
+		{
+			case event:
+				return reducer(action.state, action)
+			default:
+				return reducer(state, action)
+		}
+	}
 }

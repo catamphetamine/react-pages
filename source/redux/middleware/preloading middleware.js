@@ -9,6 +9,7 @@ import { server_redirect } from '../../history'
 import { Preload, Redirect, GoTo, redirect_action, goto_action, history_redirect_action, history_goto_action } from '../actions'
 import match_routes_against_location from '../../react-router/match'
 import get_route_path from '../../react-router/get route path'
+import { store_in_history } from '../client/history store'
 
 export const Preload_method_name  = '__preload__'
 export const Preload_options_name = '__preload_options__'
@@ -27,6 +28,17 @@ export default function preloading_middleware(server, error_handler, preload_hel
 			// Do nothing
 			return next(action)
 		}
+
+		// Is used for `instantBack`
+		const previous_location = get_history().getCurrentLocation()
+
+		// This idea was discarded because state JSON could be very large.
+		// // If navigation to a new page is taking place
+		// // then store the current Redux state in history.
+		// if (!server && action.navigate)
+		// {
+		// 	store_in_history('redux/state', get_history().getCurrentLocation().key, getState())
+		// }
 
 		// A special flavour of `dispatch` which `throw`s for redirects on the server side.
 		dispatch = preloading_middleware_dispatch(dispatch, server)
@@ -160,7 +172,7 @@ export default function preloading_middleware(server, error_handler, preload_hel
 			{
 				// Trigger `react-router` navigation on client side
 				// (and do nothing on server side)
-				proceed_with_navigation(dispatch, action, server)
+				proceed_with_navigation(dispatch, action, server, get_history, previous_location)
 				// Explicitly return `undefined`
 				// (not `false` by accident)
 				return
@@ -215,7 +227,7 @@ export default function preloading_middleware(server, error_handler, preload_hel
 
 					// Trigger `react-router` navigation on client side
 					// (and do nothing on server side)
-					proceed_with_navigation(dispatch, action, server)
+					proceed_with_navigation(dispatch, action, server, get_history, previous_location)
 				},
 				(error) =>
 				{
@@ -273,9 +285,11 @@ export default function preloading_middleware(server, error_handler, preload_hel
 			{
 				path : action.location.pathname,
 				url  : location_url(action.location),
-				// Using `goto_action` instead of `redirect_action` here
-				// for better user experience (not loosing the initial URL)
-				redirect : to => dispatch(goto_action(to)),
+				// Using `redirect_action` instead of `goto_action` here
+				// so that the user can't go "Back" to the page being preloaded
+				// in case of an error because it would be in inconsistent state
+				// due to `@preload()` being interrupted.
+				redirect : to => dispatch(redirect_action(to)),
 				dispatch,
 				getState,
 				server
@@ -300,14 +314,14 @@ export default function preloading_middleware(server, error_handler, preload_hel
 
 // Trigger `react-router` navigation on client side
 // (and do nothing on server side)
-function proceed_with_navigation(dispatch, action, server)
+function proceed_with_navigation(dispatch, action, server, get_history, previous_location)
 {
 	if (server)
 	{
 		return
 	}
 
-	if (action.navigate === false)
+	if (!action.navigate)
 	{
 		return
 	}
@@ -319,6 +333,12 @@ function proceed_with_navigation(dispatch, action, server)
 	else
 	{
 		dispatch(history_goto_action(action.location))
+	}
+
+	if (!server && action.navigate && action.instant_back)
+	{
+		const location_key = previous_location.key || 'initial'
+		store_in_history('instant-back', location_key, get_history().getCurrentLocation().key)
 	}
 }
 

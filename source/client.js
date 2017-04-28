@@ -100,7 +100,7 @@ export function create_history(location, settings, parameters)
 
 // When a `popstate` event occurs (e.g. via "Back" browser button)
 // it `@preload()`s the page first and only then renders the page.
-export function always_instrument_history_pop_state_listeners(call_listener)
+export function should_instrument_history_pop_state_listeners(call_listener)
 {
 	// A list of tracked instrumented `popstate` listeners
 	const pop_state_listeners = []

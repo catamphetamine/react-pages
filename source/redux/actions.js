@@ -4,6 +4,7 @@ export const Redirect  = '@@react-isomorphic-render/redirect'
 export const GoTo      = '@@react-isomorphic-render/goto'
 export const Navigated = '@@react-isomorphic-render/navigated'
 export const Preload   = '@@react-isomorphic-render/preload'
+export const LoadState = '@@react-isomorphic-render/redux/state/replace'
 
 // Before page preloading started
 export const redirect_action = location => preload_action(location, true)
@@ -29,13 +30,14 @@ export const navigated_action = (location) =>
 // If `initial_client_side_preload` is `true`
 // then just client-side-only `@preload()`s will be executed.
 //
-export const preload_action = (location, redirect, navigate, initial_client_side_preload) =>
+export const preload_action = (location, redirect, navigate = true, initial_client_side_preload, instant_back) =>
 ({
 	type: Preload,
 	location: parse_location(location),
 	redirect,
 	navigate,
-	initial: initial_client_side_preload
+	initial: initial_client_side_preload,
+	instant_back
 })
 
 // After page preloading finished
@@ -50,4 +52,11 @@ export const history_goto_action = (location) =>
 ({
 	type: GoTo,
 	location: parse_location(location)
+})
+
+// Replaces Redux state (e.g. for instant "Back" button feature)
+export const load_state_action = (state) =>
+({
+	type: LoadState,
+	state
 })

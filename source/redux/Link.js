@@ -25,8 +25,17 @@ export default class Hyperlink extends Component
 			PropTypes.func
 		]),
 
+		// Set to `true` to disable page `@preload()`ing
+		// when navigating "Back"
+		instantBack : PropTypes.bool.isRequired,
+
 		// Wrapped components
 		children : PropTypes.node
+	}
+
+	static defaultProps =
+	{
+		instantBack : false
 	}
 
 	static contextTypes =
@@ -47,7 +56,7 @@ export default class Hyperlink extends Component
 
 	on_click(event)
 	{
-		const { onClick, to } = this.props
+		const { onClick, to, instantBack } = this.props
 		const { router, store } = this.context
 		
 		// Sanity check
@@ -86,12 +95,13 @@ export default class Hyperlink extends Component
 
 		// Firt preload the new page, then `history.push()` will be called,
 		// and `react-router` will detect that performing the route transition.
-		store.dispatch(preload_action(resolveToLocation(to, router)))
+		store.dispatch(preload_action(resolveToLocation(to, router), undefined, undefined, undefined, instantBack))
 	}
 
 	render()
 	{
-		const { to, target, children, ...rest_props } = this.props
+		const { instantBack, ...link_props } = this.props
+		const { to, target, children, ...rest_props } = link_props
 		const { router } = this.context
 
 		// Sanity check
@@ -109,7 +119,7 @@ export default class Hyperlink extends Component
 
 		if (is_local_website_link && !target)
 		{
-			return <Link { ...this.props } onClick={ this.on_click }>{ children }</Link>
+			return <Link { ...link_props } onClick={ this.on_click }>{ children }</Link>
 		}
 
 		// External links (or links with `target` specified, like "open in a new tab")

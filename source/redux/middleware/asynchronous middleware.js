@@ -131,6 +131,12 @@ export default function asynchronous_middleware(http_client, asynchronous_action
 						{
 							path : window.location.pathname,
 							url  : window.location.href,
+							// Using `goto` instead of `redirect` here
+							// because it's not part of `@preload()`
+							// and is therefore part of some kind of an HTTP request
+							// triggered by user input (e.g. form submission)
+							// which means it is convenient to be able to
+							// go "Back" to the page on which the error originated.
 							redirect : to => dispatch(goto_action(to)),
 							dispatch,
 							getState,
