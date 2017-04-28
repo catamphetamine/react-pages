@@ -88,7 +88,7 @@ export default function set_up_and_render(settings, options = {})
 	})
 
 	// Create `react-router` `history`
-	history = create_history(document.location, settings.history, { store })
+	history = create_history(document.location, settings.history.options, { store })
 
 	// When `popstate` event listener is fired,
 	// `history.getCurrentLocation()` is already

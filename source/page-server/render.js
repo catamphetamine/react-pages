@@ -82,7 +82,7 @@ export default async function(settings, { initialize, localize, assets, applicat
 	try
 	{
 		// Create `history` (`true` indicates server-side usage)
-		history = create_history(createHistory, request.url, settings.history, parameters, true)
+		history = create_history(createHistory, request.url, settings.history.options, parameters, true)
 
 		const initialize_time = initialize_timer()
 
