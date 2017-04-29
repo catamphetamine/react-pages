@@ -5,7 +5,7 @@ import deep_equal from 'deep-equal'
 import getRouteParams from 'react-router/lib/getRouteParams'
 
 import { location_url } from '../../location'
-import { server_redirect } from '../../history'
+import { server_redirect, strip_basename } from '../../history'
 import { Preload, Redirect, GoTo, redirect_action, goto_action, history_redirect_action, history_goto_action } from '../actions'
 import match_routes_against_location from '../../react-router/match'
 import get_route_path from '../../react-router/get route path'
@@ -18,7 +18,7 @@ export const Preload_started  = '@@react-isomorphic-render/redux/preload started
 export const Preload_finished = '@@react-isomorphic-render/redux/preload finished'
 export const Preload_failed   = '@@react-isomorphic-render/redux/preload failed'
 
-export default function preloading_middleware(server, error_handler, preload_helpers, routes, get_history, report_stats, on_navigate)
+export default function preloading_middleware(server, error_handler, preload_helpers, routes, get_history, basename, report_stats, on_navigate)
 {
 	return ({ getState, dispatch }) => next => action =>
 	{
@@ -105,7 +105,7 @@ export default function preloading_middleware(server, error_handler, preload_hel
 		({
 			routes   : typeof routes === 'function' ? routes({ dispatch, getState }) : routes,
 			history  : get_history(),
-			location : action.location
+			location : strip_basename(action.location, basename)
 		})
 		.then(({ redirect, router_state }) =>
 		{
