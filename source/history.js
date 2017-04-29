@@ -1,4 +1,4 @@
-import { location_url } from './location'
+import { location_url, add_basename } from './location'
 
 // Creates `history`
 export default function create_history(createHistory, location, history_options, parameters, server)
@@ -46,18 +46,8 @@ function server_side_redirect(basename)
 			throw new Error(`location parameter is required for redirect() or goto()`)
 		}
 
-		// Convert an object to a textual URL
-		let url = location_url(location)
-
-		// If it's a relative URL, then prepend `basename` to it.
-		// (imulates `history` `basename` functionality)
-		if (url[0] === '/' && basename)
-		{
-			url = `${basename}${url}`
-		}
-
 		// Construct a special "Error" used for aborting and redirecting
-		server_redirect(url)
+		server_redirect(location_url(add_basename(location, basename)))
 	}
 }
 
@@ -88,29 +78,4 @@ export function server_redirect(location)
 	const error = new Error(`Redirecting to ${url} (this is not an error)`)
 	error._redirect = url
 	throw error
-}
-
-// Copy-pasted `addBasename()` (wrong name) function from `history`:
-// https://github.com/ReactTraining/history/blob/v3/modules/useBasename.js
-export function strip_basename(location, basename)
-{
-	if (!location)
-	{
-		return location
-	}
-
-	if (basename && typeof location.basename !== 'string')
-	{
-		const starts_with_basename = location.pathname.toLowerCase().indexOf(basename.toLowerCase()) === 0
-
-		location =
-		{
-			...location,
-			basename,
-			// If `location.pathname` starts with `basename` then strip it
-			pathname: starts_with_basename ? (location.pathname.substring(basename.length) || '/') : location.pathname
-		}
-	}
-
-	return location
 }

@@ -9,17 +9,12 @@ export function location_url(location)
 		return location
 	}
 
+	const origin   = location.origin   ? location.origin : ''
+	const basename = location.basename ? location.basename : ''
 	const search = location.search ? location.search : ''
 	const hash   = location.hash   ? location.hash   : ''
 
-	// Should be fixed since using `react-router/lib/createMemoryHistory` on the server side now.
-	// // https://github.com/ReactTraining/react-router/issues/4023
-	// if (!search && location.query && Object.keys(location.query).length > 0)
-	// {
-	// 	search = `?${querystring.stringify(location.query)}`
-	// }
-
-	return `${location.pathname}${search}${hash}`
+	return `${origin}${basename}${location.pathname}${search}${hash}`
 }
 
 // Doesn't construct `query` though
@@ -30,7 +25,33 @@ export function parse_location(location)
 		return location
 	}
 
-	let pathname = location
+	let origin
+	let pathname
+
+	if (location === '')
+	{
+		pathname = '/'
+	}
+	else if (location[0] === '/')
+	{
+		pathname = location
+	}
+	else
+	{
+		const pathname_starts_at = location.indexOf('/', location.indexOf('//') + '//'.length)
+
+		if (pathname_starts_at > 0)
+		{
+			origin   = location.slice(0, pathname_starts_at)
+			pathname = location.slice(pathname_starts_at)
+		}
+		else
+		{
+			origin   = location
+			pathname = '/'
+		}
+	}
+
 	let search = ''
 	let hash = ''
 
@@ -48,5 +69,50 @@ export function parse_location(location)
 		search = search.slice(0, hash_index)
 	}
 
-	return { pathname, search, hash }
+	return { origin, pathname, search, hash }
+}
+
+// Copy-pasted `addBasename()` (wrong name) function from `history`:
+// https://github.com/ReactTraining/history/blob/v3/modules/useBasename.js
+export function strip_basename(location, basename)
+{
+	if (!location)
+	{
+		return location
+	}
+
+	if (basename && typeof location.basename !== 'string')
+	{
+		const starts_with_basename = location.pathname.toLowerCase().indexOf(basename.toLowerCase()) === 0
+
+		location =
+		{
+			...location,
+			basename,
+			// If `location.pathname` starts with `basename` then strip it
+			pathname: starts_with_basename ? (location.pathname.substring(basename.length) || '/') : location.pathname
+		}
+	}
+
+	return location
+}
+
+export function add_basename(location, basename)
+{
+	if (!location)
+	{
+		return location
+	}
+
+	// If it's a relative URL then add `basename` to it
+	if (!location.origin && basename)
+	{
+		location =
+		{
+			...location,
+			basename
+		}
+	}
+
+	return location
 }

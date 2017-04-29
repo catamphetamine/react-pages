@@ -4,12 +4,12 @@
 import deep_equal from 'deep-equal'
 import getRouteParams from 'react-router/lib/getRouteParams'
 
-import { location_url } from '../../location'
-import { server_redirect, strip_basename } from '../../history'
+import { location_url, strip_basename, add_basename } from '../../location'
+import { server_redirect } from '../../history'
 import { Preload, Redirect, GoTo, redirect_action, goto_action, history_redirect_action, history_goto_action } from '../actions'
 import match_routes_against_location from '../../react-router/match'
 import get_route_path from '../../react-router/get route path'
-import { store_in_history } from '../client/history store'
+import { add_instant_back, reset_instant_back } from '../client/instant back'
 
 export const Preload_method_name  = '__preload__'
 export const Preload_options_name = '__preload_options__'
@@ -29,7 +29,8 @@ export default function preloading_middleware(server, error_handler, preload_hel
 			return next(action)
 		}
 
-		// Is used for `instantBack`
+		// `previous_location` is the location before the transition.
+		// Is used for `instantBack`.
 		const previous_location = get_history().getCurrentLocation()
 
 		// This idea was discarded because state JSON could be very large.
@@ -41,7 +42,7 @@ export default function preloading_middleware(server, error_handler, preload_hel
 		// }
 
 		// A special flavour of `dispatch` which `throw`s for redirects on the server side.
-		dispatch = preloading_middleware_dispatch(dispatch, server)
+		dispatch = preloading_middleware_dispatch(dispatch, server, basename)
 
 		// Navigation event triggered
 		if (on_navigate && !action.initial)
@@ -116,12 +117,15 @@ export default function preloading_middleware(server, error_handler, preload_hel
 				// but just in case.
 				if (server)
 				{
-					server_redirect(redirect)
+					server_redirect(add_basename(redirect, basename))
 				}
 
 				// Perform client side redirect
 				// (with target page preloading)
-				return dispatch(redirect_action(redirect))
+				dispatch(redirect_action(redirect))
+				// Explicitly return `undefined`
+				// (not `false` by accident)
+				return
 			}
 
 			// Measures time taken (on the client side)
@@ -199,7 +203,8 @@ export default function preloading_middleware(server, error_handler, preload_hel
 				// http://bluebirdjs.com/docs/api/cancellation.html
 				if (promise.cancel)
 				{
-					promise.cancel()
+					// `.catch()` is to suppress "Uncaught promise rejection" errors
+					promise.catch(() => ({})).cancel()
 				}
 			}
 
@@ -313,7 +318,8 @@ export default function preloading_middleware(server, error_handler, preload_hel
 }
 
 // Trigger `react-router` navigation on client side
-// (and do nothing on server side)
+// (and do nothing on server side).
+// `previous_location` is the location before the transition.
 function proceed_with_navigation(dispatch, action, server, get_history, previous_location)
 {
 	if (server)
@@ -321,24 +327,29 @@ function proceed_with_navigation(dispatch, action, server, get_history, previous
 		return
 	}
 
-	if (!action.navigate)
+	if (action.navigate)
 	{
-		return
+		if (action.redirect)
+		{
+			dispatch(history_redirect_action(action.location))
+		}
+		else
+		{
+			dispatch(history_goto_action(action.location))
+		}
 	}
 
-	if (action.redirect)
+	if (action.instant_back)
 	{
-		dispatch(history_redirect_action(action.location))
+		add_instant_back(get_history().getCurrentLocation(), previous_location)
 	}
+	// Deactivate "instant back" for the current page
+	// if this new transition is not "instant back" too.
+	// Only "instant back" chain navigation preserves
+	// the ability to instantly navigate "Back".
 	else
 	{
-		dispatch(history_goto_action(action.location))
-	}
-
-	if (!server && action.navigate && action.instant_back)
-	{
-		const location_key = previous_location.key || 'initial'
-		store_in_history('instant-back', location_key, get_history().getCurrentLocation().key)
+		reset_instant_back()
 	}
 }
 
@@ -526,7 +537,7 @@ const preloader = (initial_client_side_preload, server, routes, components, getS
 }
 
 // A special flavour of `dispatch` which `throw`s for redirects on the server side.
-function preloading_middleware_dispatch(dispatch, server)
+function preloading_middleware_dispatch(dispatch, server, basename)
 {
 	return (event) =>
 	{
@@ -537,7 +548,7 @@ function preloading_middleware_dispatch(dispatch, server)
 				// `throw`s a special `Error` on server side
 				if (server)
 				{
-					server_redirect(event.location)
+					server_redirect(add_basename(event.location, basename))
 				}
 		}
 
