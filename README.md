@@ -922,7 +922,7 @@ class Page extends Component {
 
 ## Performance and Caching
 
-[Some thoughts on React Server Side Rendering performance and caching](https://github.com/halt-hammerzeit/react-isomorphic-render/blob/master/PERFORMANCE.md)
+React Server Side Rendering is quite slow, so I prefer setting `render: false` flag to move all React rendering to the web browser. This approach has virtually no complications. There are still numerous (effective) approaches to speeding up React Server Side Rendering like leveraging component markup caching and swapping the default React renderer with a much faster stripped down custom one. [Read more](https://github.com/halt-hammerzeit/react-isomorphic-render/blob/master/PERFORMANCE.md).
 
 ## Monitoring
 
