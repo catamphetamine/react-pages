@@ -10,10 +10,12 @@ export function location_url(location, options = {})
 	}
 
 	const origin   = location.origin   || ''
-	const basename = (!origin && options.basename === true) ? (location.basename || '') : ''
 	const pathname = location.pathname
 	const search   = location.search   || ''
 	const hash     = location.hash     || ''
+	
+	// Append `basename` only to relative URLs
+	const basename = (!origin && options.basename) ? options.basename : ''
 
 	return `${origin}${basename}${pathname}${search}${hash}`
 }

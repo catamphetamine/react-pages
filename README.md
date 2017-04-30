@@ -446,11 +446,17 @@ npm install babel-plugin-transform-decorators-legacy --save
 }
 ```
 
-P.S.: if `@preload()` decorator seems not working for no reason (though it definitely should) then try to place it on top of all other decorators. Internally it adds a special static method to your `Route`'s `component` and some decorators on top of it may not retain that static method (though all proper decorators nowaday do retain static methods and variables of wrapped components using [`hoist-non-react-statics`](https://github.com/mridgway/hoist-non-react-statics)).
+P.S.: if `@preload()` decorator seems not working for no reason (though it definitely should) then try to place it on top of all other decorators. Internally it adds a special static method to your `Route`'s `component` and some decorators on top of it may not retain that static method (though all proper decorators nowadays do retain static methods and variables of wrapped components using [`hoist-non-react-statics`](https://github.com/mridgway/hoist-non-react-statics)).
 
 On the client side, in order for `@preload` to work all `<Link/>`s imported from `react-router` **must** be instead imported from `react-isomorphic-render`. Upon a click on a `<Link/>` first it waits for the next page to preload, and then, when the next page is fully loaded, it is displayed to the user and the URL in the address bar is updated.
 
-`@preload()` also works for Back/Forward web browser buttons navigation. If one `@preload()` is in progress and another `@preload()` starts (e.g. Back/Forward browser buttons) the first `@preload()` will be cancelled if `bluebird` `Promise`s are used in the project and also if `bluebird` is configured for [`Promise` cancellation](http://bluebirdjs.com/docs/api/cancellation.html) (this is an advanced feature and is not required for operation). `@preload()` can be disabled for certain "Back" navigation cases by passing `instantBack` property to a `<Link/>` (e.g. for search results pages).
+`@preload()` also works for Back/Forward web browser buttons navigation. If one `@preload()` is in progress and another `@preload()` starts (e.g. Back/Forward browser buttons) the first `@preload()` will be cancelled if `bluebird` `Promise`s are used in the project and also if `bluebird` is configured for [`Promise` cancellation](http://bluebirdjs.com/docs/api/cancellation.html) (this is an advanced feature and is not required for operation). `@preload()` can be disabled for certain "Back" navigation cases by passing `instantBack` property to a `<Link/>` (e.g. for links on search results pages).
+
+To run `@preload()` only on client side (e.g. when hosting websites statically in the cloud like Amazon S3 and using a separately hosted API like Amazon Lambda) pass the second `{ client: true }` options argument to it
+
+```js
+@preload(({ dispatch }) => dispatch(loadContent()), { client: true })
+```
 
 Sometimes preloading a page can take some time to finish so one may want to (and actually should) add some kind of a "spinner" to inform the user that the application isn't frozen and the navigation process needs some more time to finish. This can be achieved by adding a Redux reducer listening to these three Redux events:
 

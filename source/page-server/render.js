@@ -267,10 +267,7 @@ function stringify_redirect(result, settings)
 	if (result.redirect)
 	{
 		// Prepend `basename` to relative URLs for server-side redirect.
-		// Setting `basename` for absolute URLs will take no effect in this particular case
-		// due to `result.redirect` location object being immediately discarded after `location_url`.
-		result.redirect.basename = settings.history.options.basename
-		result.redirect = location_url(result.redirect, { basename: true })
+		result.redirect = location_url(result.redirect, { basename: settings.history.options.basename })
 	}
 
 	return result
