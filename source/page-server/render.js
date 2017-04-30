@@ -12,7 +12,7 @@ import Html from './html'
 import normalize_common_settings from '../redux/normalize'
 import timer from '../timer'
 import create_history from '../history'
-import { location_url } from '../location'
+import { location_url, parse_location } from '../location'
 
 import redux_render, { initialize as redux_initialize } from '../redux/server/server'
 import { render_on_server as react_router_render } from '../react-router/render'
@@ -23,8 +23,6 @@ import { Preload } from '../redux/actions'
 // will be used in web_application.use(...)
 export default async function(settings, { initialize, localize, assets, application, request, render, loading, html = {}, authentication, cookies })
 {
-	const path = get_path(request.url)
-
 	settings = normalize_common_settings(settings)
 
 	const
@@ -34,7 +32,7 @@ export default async function(settings, { initialize, localize, assets, applicat
 	}
 	= settings
 
-	const error_handler = settings.catch
+	const error_handler = settings.error
 
 	// If Redux is being used, then render for Redux.
 	// Else render for pure React.
@@ -69,10 +67,18 @@ export default async function(settings, { initialize, localize, assets, applicat
 	
 	const { extension_javascript, ...parameters } = initialize_result	
 
+	// Create `history` (`true` indicates server-side usage).
+	// Koa `request.url` is not really a URL,
+	// it's a URL without the `origin` (scheme, host, port).
+	history = create_history(createHistory, request.url, settings.history.options, parameters, true)
+
+	const location = history.getCurrentLocation()
+	const path     = location.pathname
+
 	// The above code (server-side `initialize()` method call) is not included
 	// in this `try/catch` block because:
 	//
-	//  * `parameters` are used inside `catch`
+	//  * `parameters` are used inside `.error()`
 	//
 	//  * even if an error was caught inside `initialize()`
 	//    and a redirection was performed, say, to an `/error` page
@@ -81,9 +87,6 @@ export default async function(settings, { initialize, localize, assets, applicat
 	//
 	try
 	{
-		// Create `history` (`true` indicates server-side usage)
-		history = create_history(createHistory, request.url, settings.history.options, parameters, true)
-
 		const initialize_time = initialize_timer()
 
 		// Internationalization
@@ -171,60 +174,52 @@ export default async function(settings, { initialize, localize, assets, applicat
 			result.time.initialize = initialize_time
 		}
 
-		return result
+		return stringify_redirect(result, settings)
 	}
 	catch (error)
 	{
-		// Redirection is done via an Error on server side.
-		// (e.g. if it happens in `onEnter()` during `match()`)
+		// Redirection is sometimes done via an Error on server side.
+		// (e.g. it can happen in `react-router`'s `onEnter()` during `match()`)
 		if (error._redirect)
 		{
-			return { redirect: error._redirect }
+			return stringify_redirect({ redirect: error._redirect }, settings)
 		}
 
-		if (!error_handler)
+		if (error_handler)
 		{
-			throw error
-		}
+			const result = {}
 
-		const result = {}
-
-		const error_handler_parameters =
-		{
-			path,
-			url      : request.url,
-			redirect : to => result.redirect = to,
-			server   : true
-		}
-
-		// Special case for Redux
-		if (parameters.store)
-		{
-			error_handler_parameters.dispatch = redirecting_dispatch(parameters.store.dispatch, result)
-			error_handler_parameters.getState = parameters.store.getState
-		}
-
-		try
-		{
-			error_handler(error, error_handler_parameters)
-		}
-		catch (error)
-		{
-			// Redirection is done via an Error on server side
-			if (!error._redirect)
+			const error_handler_parameters =
 			{
-				throw error
+				path,
+				url : location_url(location),
+				redirect(to)
+				{
+					const location = parse_location(to)
+					// Add `basename` to `location`
+					location.basename = settings.history.options.basename
+					result.redirect = location
+				},
+				server : true
 			}
 
-			result.redirect = error._redirect
+			// Special case for Redux
+			if (parameters.store)
+			{
+				error_handler_parameters.dispatch = redirecting_dispatch(parameters.store.dispatch, error_handler_parameters.redirect)
+				error_handler_parameters.getState = parameters.store.getState
+			}
+
+			error_handler(error, error_handler_parameters)
+		
+			// Either redirects or throws the error
+			if (result.redirect)
+			{
+				return stringify_redirect(result, settings)
+			}
 		}
 
-		if (!result.redirect)
-		{
-			throw new Error(`"settings.catch" handler parameter must either redirect to another URL or throw an error. ${request.url}`)
-		}
-
-		return result
+		throw error
 	}
 }
 
@@ -254,28 +249,8 @@ function normalize_markup(anything)
 	return ReactDOM.renderToString(anything)
 }
 
-// Get path from a URL
-function get_path(url)
-{
-	const search_start = url.indexOf('?')
-
-	if (search_start !== -1)
-	{
-		url = url.slice(0, search_start)
-	}
-
-	const hash_start = url.indexOf('#')
-
-	if (hash_start !== -1)
-	{
-		url = url.slice(0, hash_start)
-	}
-
-	return url
-}
-
 // A special flavour of `dispatch` which `throw`s for redirects on the server side.
-function redirecting_dispatch(dispatch, result)
+function redirecting_dispatch(dispatch, redirect)
 {
 	return (event) =>
 	{
@@ -284,11 +259,25 @@ function redirecting_dispatch(dispatch, result)
 			// In case of navigation from @preload()
 			case Preload:
 				// `throw`s a special `Error` on server side
-				return result.redirect = location_url(event.location)
+				return redirect(event.location)
 		
 			default:
 				// Proceed with the original
 				return dispatch(event)
 		}
 	}
+}
+
+function stringify_redirect(result, settings)
+{
+	if (result.redirect)
+	{
+		// Prepend `basename` to relative URLs for server-side redirect.
+		// Setting `basename` for absolute URLs will take no effect in this particular case
+		// due to `result.redirect` location object being immediately discarded after `location_url`.
+		result.redirect.basename = settings.history.options.basename
+		result.redirect = location_url(result.redirect, { basename: true })
+	}
+
+	return result
 }

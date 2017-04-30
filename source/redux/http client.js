@@ -19,7 +19,7 @@ export function create_http_client(settings, authentication_token, options = {})
 {
 	return new Http_client
 	({
-		format_url  : settings.http && settings.http.url,
+		format_url  : settings.http.url,
 		parse_dates : settings.parse_dates,
 		authentication_token,
 		authentication_token_header: settings.authentication ? settings.authentication.header : undefined,

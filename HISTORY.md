@@ -1,3 +1,8 @@
+11.0.0 / 30.04.2017
+===================
+
+  * (breaking change) in `10.x` release `catch()` function parameter was also called during HTTP Ajax request errors. It no longer is, use `http.error()` function parameter instead. `catch()` is also now renamed to `error()` to reflect the fact that it's now not required to re`throw` the error as it will be rethrown automatically.
+
 10.4.5 / 28.04.2017
 ===================
 

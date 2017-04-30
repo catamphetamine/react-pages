@@ -2,11 +2,23 @@ import { store_in_history, get_from_history } from './history store'
 
 export function add_instant_back(next_location, previous_location)
 {
-	const instant_back = get_from_history('instant-back', '') || [get_location_key(previous_location)]
+	let instant_back = get_from_history('instant-back', '')
 
-	if (instant_back[instant_back.length - 1] !== get_location_key(previous_location))
+	if (instant_back)
 	{
-		return console.error('[react-isomorphic-render] Error: previous location not found in an already existing instant back navigation chain')
+		const previous_location_index = instant_back.indexOf(get_location_key(previous_location))
+
+		if (previous_location_index < 0)
+		{
+			console.error('[react-isomorphic-render] Error: previous location not found in an already existing instant back navigation chain', get_location_key(previous_location), instant_back)
+			return reset_instant_back()
+		}
+
+		instant_back = instant_back.slice(0, previous_location_index + 1)
+	}
+	else
+	{
+		instant_back = [get_location_key(previous_location)]
 	}
 
 	instant_back.push(get_location_key(next_location))

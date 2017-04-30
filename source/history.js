@@ -1,4 +1,4 @@
-import { location_url, add_basename } from './location'
+import { location_url } from './location'
 
 // Creates `history`
 export default function create_history(createHistory, location, history_options, parameters, server)
@@ -36,7 +36,7 @@ export default function create_history(createHistory, location, history_options,
 // A hacky way but it should work
 // for calling `redirect` from anywhere
 // inside `@preload()` function argument.
-function server_side_redirect(basename)
+function server_side_redirect()
 {
 	return (location) =>
 	{
@@ -47,7 +47,7 @@ function server_side_redirect(basename)
 		}
 
 		// Construct a special "Error" used for aborting and redirecting
-		server_redirect(location_url(add_basename(location, basename)))
+		server_redirect(location)
 	}
 }
 
@@ -72,10 +72,24 @@ export function get_location(history)
 	return location
 }
 
+// `location` does not include `basename`.
+// `basename` will be prepended when this error is caught
+// as part of server-side rendering.
 export function server_redirect(location)
 {
-	const url = location_url(location)
-	const error = new Error(`Redirecting to ${url} (this is not an error)`)
-	error._redirect = url
+	// Just in case
+	// (though I don't know if it is even possible,
+	//  I didn't check <Redirect/> pseudo route case)
+	if (location.basename)
+	{
+		location = 
+		{
+			...location,
+			basename: undefined
+		}
+	}
+
+	const error = new Error(`Redirecting to ${location.pathname} (this is not an error)`)
+	error._redirect = location
 	throw error
 }

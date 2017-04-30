@@ -41,7 +41,7 @@ export default function render_on_server({ history, disable_server_side_renderin
 		// In case of a `react-router` `<Redirect/>`
 		if (redirect)
 		{
-			return { redirect: location_url(redirect) }
+			return { redirect }
 		}
 
 		// Http response status code

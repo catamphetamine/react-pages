@@ -1218,6 +1218,15 @@ If you're using Webpack then make sure you either build your server-side code wi
       // In this case `.application` configuration parameter may be removed
       return `https://api-server.com${path}`
     }
+
+    // (optional)
+    // Is called when `http` calls either fail or return an error.
+    // Is not called during `@preload()`s and therefore
+    // can only be called as part of an HTTP call
+    // triggered by some user interaction in a web browser.
+    // For example, Auth0 users may listen for JWT token expiration here
+    // and either refresh it or redirect to a login page.
+    error: (error, { url, path, redirect, dispatch, getState }) => console.error(error)
   }
 
   // (optional)
@@ -1235,13 +1244,10 @@ If you're using Webpack then make sure you either build your server-side code wi
   }
 
   // (optional)
-  // Handles errors occurring inside `@preload()` and during
-  // `http` utility calls inside Redux actions.
-  // For example, if `@preload()` throws a `new Error("Unauthorized")`,
+  // Can handle errors occurring inside `@preload()`.
+  // For example, if `@preload()` throws a `new Error("Unauthorized")`
   // then a redirect to "/unauthorized" page can be made here.
-  // If this error handler is defined then it must handle
-  // all errors it gets (either redirect or just re`throw` them).
-  catch: (error, { path, url, redirect, dispatch, getState, server }) => redirect(`/error?url=${encodeURIComponent(url)}&error=${error.status}`)
+  error: (error, { path, url, redirect, dispatch, getState, server }) => redirect(`/error?url=${encodeURIComponent(url)}&error=${error.status}`)
 
   // (optional)
   authentication:

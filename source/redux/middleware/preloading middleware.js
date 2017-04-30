@@ -4,7 +4,7 @@
 import deep_equal from 'deep-equal'
 import getRouteParams from 'react-router/lib/getRouteParams'
 
-import { location_url, strip_basename, add_basename } from '../../location'
+import { location_url, strip_basename } from '../../location'
 import { server_redirect } from '../../history'
 import { Preload, Redirect, GoTo, redirect_action, goto_action, history_redirect_action, history_goto_action } from '../actions'
 import match_routes_against_location from '../../react-router/match'
@@ -29,6 +29,13 @@ export default function preloading_middleware(server, error_handler, preload_hel
 			return next(action)
 		}
 
+		// If `dispatch(redirect(...))` is called, for example,
+		// then the location doesn't contain `basename`,
+		// so set `basename` here.
+		// And, say, when a `<Link to="..."/>` is clicked
+		// then `basename` is not set too, so setting it here too.
+		action.location = strip_basename(action.location, basename)
+
 		// `previous_location` is the location before the transition.
 		// Is used for `instantBack`.
 		const previous_location = get_history().getCurrentLocation()
@@ -42,12 +49,12 @@ export default function preloading_middleware(server, error_handler, preload_hel
 		// }
 
 		// A special flavour of `dispatch` which `throw`s for redirects on the server side.
-		dispatch = preloading_middleware_dispatch(dispatch, server, basename)
+		dispatch = preloading_middleware_dispatch(dispatch, server)
 
 		// Navigation event triggered
 		if (on_navigate && !action.initial)
 		{
-			on_navigate(location_url(action.location))
+			on_navigate(location_url())
 		}
 
 		// Preload status object.
@@ -106,7 +113,7 @@ export default function preloading_middleware(server, error_handler, preload_hel
 		({
 			routes   : typeof routes === 'function' ? routes({ dispatch, getState }) : routes,
 			history  : get_history(),
-			location : strip_basename(action.location, basename)
+			location : action.location
 		})
 		.then(({ redirect, router_state }) =>
 		{
@@ -117,7 +124,7 @@ export default function preloading_middleware(server, error_handler, preload_hel
 				// but just in case.
 				if (server)
 				{
-					server_redirect(add_basename(redirect, basename))
+					server_redirect(redirect)
 				}
 
 				// Perform client side redirect
@@ -268,24 +275,7 @@ export default function preloading_middleware(server, error_handler, preload_hel
 				throw error
 			}
 
-			// If no `on_preload_error` handler was set,
-			// then use default behaviour.
-			if (!error_handler)
-			{
-				// This error will be handled in `web server` `catch` clause
-				// if this code is being run on the server side.
-				if (server)
-				{
-					throw error
-				}
-
-				// On the client-side outputs errors to console by default
-				console.error(error.stack || error)
-				// Return `false` indicating that page preload failed
-				return false
-			}
-
-			// Handle the error (for example, redirect to an error page)
+			// Possibly handle the error (for example, redirect to an error page)
 			error_handler(error,
 			{
 				path : action.location.pathname,
@@ -300,19 +290,16 @@ export default function preloading_middleware(server, error_handler, preload_hel
 				server
 			})
 
-			// On the server side the page rendering process
-			// still needs to be aborted, therefore the need to rethrow the error.
-			// which means `preload.error` either `redirect`s or re`throw`s,
-			// which are both `throw`s, so with a proper
-			// `preload.error` handler this code wouldn't be reached.
-			// (on the server side)
-			if (server)
-			{
-				throw new Error(`"settings.catch" handler parameter must either redirect or rethrow the error (on server side)`)
-			}
-
-			// Return `false` indicating that page preload failed
-			return false
+			// If redirect happened on the server side
+			// then a special redirection error was thrown.
+			// Otherwise just rethrow the error
+			// (always the case on the client side).
+			//
+			// This error will be handled in `web server` `catch` clause
+			// if this code is being run on the server side.
+			// On the client side it just outputs errors to console.
+			//
+			throw error
 		})
 	}
 }
@@ -537,7 +524,7 @@ const preloader = (initial_client_side_preload, server, routes, components, getS
 }
 
 // A special flavour of `dispatch` which `throw`s for redirects on the server side.
-function preloading_middleware_dispatch(dispatch, server, basename)
+function preloading_middleware_dispatch(dispatch, server)
 {
 	return (event) =>
 	{
@@ -548,7 +535,7 @@ function preloading_middleware_dispatch(dispatch, server, basename)
 				// `throw`s a special `Error` on server side
 				if (server)
 				{
-					server_redirect(add_basename(event.location, basename))
+					server_redirect(event.location)
 				}
 		}
 

@@ -8,7 +8,6 @@ import { Router, RouterContext } from 'react-router'
 
 import react_render_on_client from '../render on client'
 import react_render_on_server from '../render on server'
-import { location_url } from '../location'
 
 // Renders `element` React element inside the `to` DOM element.
 //
@@ -62,7 +61,7 @@ export function render_on_server({ disable_server_side_rendering, create_page_el
 		// In case of a `react-router` `<Redirect/>`
 		if (redirect)
 		{
-			return { redirect: location_url(redirect) }
+			return { redirect }
 		}
 
 		// Renders the current page React component to a React element

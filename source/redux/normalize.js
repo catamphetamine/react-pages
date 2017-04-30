@@ -40,12 +40,16 @@ export default function normalize_common_settings(settings, options = {})
 		}
 	}
 
+	// For legacy 10.x version upgrades
 	if (settings.preload && settings.preload.catch)
 	{
-		console.log('`settings.preload.catch` has been moved to `settings.catch`. The older way is deprecated but still works in 10.x.x')
+		throw new Error('`settings.preload.catch` has been moved to `settings.error` and it is no longer required to rethrow the error in the end because it is now being rethrown automatically internally.')
+	}
 
-		settings.catch = settings.preload.catch
-		delete settings.preload.catch
+	// For legacy 10.x version upgrades
+	if (settings.catch)
+	{
+		throw new Error('`settings.catch` has been moved to `settings.error` and it is no longer required to rethrow the error in the end because it is now being rethrown automatically internally.')
 	}
 
 	// camelCase aliasing
@@ -114,6 +118,11 @@ export default function normalize_common_settings(settings, options = {})
 		settings.history.options = {}
 	}
 
+	if (!settings.http)
+	{
+		settings.http = {}
+	}
+
 	// This message was too noisy printing on each page render.
 	//
 	// // For those who don't wish to proxy API requests to API servers
@@ -123,7 +132,7 @@ export default function normalize_common_settings(settings, options = {})
 	// // Therefore warn about authentication token leakage
 	// // in case a developer supplies his own custom `format_url` function.
 	// //
-	// if (settings.http && settings.http.url)
+	// if (settings.http.url)
 	// {
 	// 	console.log('[react-isomorphic-render] The default `http.url` formatter only allows requesting local paths therefore protecting authentication token (and cookies) from leaking to a 3rd party. Since you supplied your own `http.url` formatting function, implementing such anti-leak guard is your responsibility now.')
 	// }

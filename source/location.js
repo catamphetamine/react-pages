@@ -2,19 +2,20 @@
 // import querystring from 'query-string'
 // import deep_equal from 'deep-equal'
 
-export function location_url(location)
+export function location_url(location, options = {})
 {
 	if (typeof location === 'string')
 	{
 		return location
 	}
 
-	const origin   = location.origin   ? location.origin : ''
-	const basename = location.basename ? location.basename : ''
-	const search = location.search ? location.search : ''
-	const hash   = location.hash   ? location.hash   : ''
+	const origin   = location.origin   || ''
+	const basename = (!origin && options.basename === true) ? (location.basename || '') : ''
+	const pathname = location.pathname
+	const search   = location.search   || ''
+	const hash     = location.hash     || ''
 
-	return `${origin}${basename}${location.pathname}${search}${hash}`
+	return `${origin}${basename}${pathname}${search}${hash}`
 }
 
 // Doesn't construct `query` though
@@ -91,26 +92,6 @@ export function strip_basename(location, basename)
 			basename,
 			// If `location.pathname` starts with `basename` then strip it
 			pathname: starts_with_basename ? (location.pathname.substring(basename.length) || '/') : location.pathname
-		}
-	}
-
-	return location
-}
-
-export function add_basename(location, basename)
-{
-	if (!location)
-	{
-		return location
-	}
-
-	// If it's a relative URL then add `basename` to it
-	if (!location.origin && basename)
-	{
-		location =
-		{
-			...location,
-			basename
 		}
 	}
 

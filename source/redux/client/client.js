@@ -67,14 +67,13 @@ export default function set_up_and_render(settings, options = {})
 		// Preload the page but don't navigate to it just yet
 		store.dispatch(preload_action(location, undefined, false)).then((result) =>
 		{
-			// If preload was cancelled, then don't call the wrapped listener
-			if (result === false)
-			{
-				return
-			}
-		
 			// Navigate to the page
 			listener(event)
+		},
+		(error) =>
+		{
+			// Log the error
+			console.error(error)
 		})
 	})
 
@@ -133,7 +132,7 @@ export default function set_up_and_render(settings, options = {})
 	.then((result) =>
 	{
 		// Execute all client-side-only `@preload()`s.
-		return store.dispatch(preload_action(window.location, undefined, false, true)).then(() => result)
+		return store.dispatch(preload_action(current_location, undefined, false, true)).then(() => result)
 	})
 }
 

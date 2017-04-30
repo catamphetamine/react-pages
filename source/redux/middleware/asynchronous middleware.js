@@ -8,7 +8,7 @@ import { goto_action } from '../actions'
 //
 // `dispatch()` call will return a `Promise`.
 //
-export default function asynchronous_middleware(http_client, asynchronous_action_event_naming, server, error_handler)
+export default function asynchronous_middleware(http_client, asynchronous_action_event_naming, server, on_error)
 {
 	return ({ dispatch, getState }) =>
 	{
@@ -124,10 +124,12 @@ export default function asynchronous_middleware(http_client, asynchronous_action
 					// On the client side though, an `http` call
 					// may be performed via some user input,
 					// so it needs this separate case "error handler".
-					if (!server && error_handler && !event.preloading)
+					if (!server && on_error && !event.preloading)
 					{
-						// Handle the error (for example, redirect to an error page)
-						return error_handler(error,
+						// Report the error
+						// (for example, redirect to a login page
+						//  if an Auth0 JWT token expired)
+						on_error(error,
 						{
 							path : window.location.pathname,
 							url  : window.location.href,
