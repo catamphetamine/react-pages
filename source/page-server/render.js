@@ -192,15 +192,9 @@ export default async function(settings, { initialize, localize, assets, applicat
 			const error_handler_parameters =
 			{
 				path,
-				url : location_url(location),
-				redirect(to)
-				{
-					const location = parse_location(to)
-					// Add `basename` to `location`
-					location.basename = settings.history.options.basename
-					result.redirect = location
-				},
-				server : true
+				url      : location_url(location),
+				redirect : to => result.redirect = parse_location(to),
+				server   : true
 			}
 
 			// Special case for Redux
