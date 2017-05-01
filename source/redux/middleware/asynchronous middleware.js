@@ -1,5 +1,6 @@
 import { exists, is_object } from '../../helpers'
 import { goto_action } from '../actions'
+import { location_url } from '../../location'
 
 // Asynchronous middleware (e.g. for HTTP Ajax calls).
 //
@@ -8,7 +9,7 @@ import { goto_action } from '../actions'
 //
 // `dispatch()` call will return a `Promise`.
 //
-export default function asynchronous_middleware(http_client, asynchronous_action_event_naming, server, on_error)
+export default function asynchronous_middleware(http_client, asynchronous_action_event_naming, server, on_error, get_history)
 {
 	return ({ dispatch, getState }) =>
 	{
@@ -124,15 +125,17 @@ export default function asynchronous_middleware(http_client, asynchronous_action
 					// On the client side though, an `http` call
 					// may be performed via some user input,
 					// so it needs this separate case "error handler".
-					if (!server && on_error && !event.preloading)
+					if (!server && on_error && !action.preloading)
 					{
+						const location = get_history().getCurrentLocation()
+
 						// Report the error
 						// (for example, redirect to a login page
 						//  if an Auth0 JWT token expired)
 						on_error(error,
 						{
-							path : window.location.pathname,
-							url  : window.location.href,
+							path : location.pathname,
+							url  : location_url(location),
 							// Using `goto` instead of `redirect` here
 							// because it's not part of `@preload()`
 							// and is therefore part of some kind of an HTTP request

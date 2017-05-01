@@ -9,6 +9,7 @@ import create_store from '../store'
 import { preload_action } from '../actions'
 // import { load_state_action } from '../actions'
 import { is_instant_transition, reset_instant_back } from './instant back'
+import { location_url } from '../../location'
 
 // This function is what's gonna be called from the project's code on the client-side.
 export default function set_up_and_render(settings, options = {})
@@ -30,7 +31,8 @@ export default function set_up_and_render(settings, options = {})
 	// since Redux state is cleared.
 	reset_instant_back()
 
-	// Intercept `popstate` DOM event to preload pages before showing them
+	// Will intercept `popstate` DOM event to preload pages before showing them.
+	// This hook is placed before `history` is initialized because it taps on `popstate`.
 	should_instrument_history_pop_state_listeners((listener, event, location) =>
 	{
 		// This idea was discarded because state JSON could be very large.
@@ -112,7 +114,7 @@ export default function set_up_and_render(settings, options = {})
 	// Call `onNavigate` on initial page load
 	if (on_navigate)
 	{
-		on_navigate(window.location.pathname + (window.location.search ? window.location.search : ''))
+		on_navigate(location_url(current_location))
 	}
 
 	// Render the page

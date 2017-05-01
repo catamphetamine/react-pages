@@ -48,7 +48,8 @@ export default function create_store(settings, data, get_history, http_client, o
 			http_client,
 			asynchronous_action_event_naming,
 			server,
-			settings.http.error
+			settings.http.error,
+			get_history
 		),
 
 		// Makes @preload() decorator work.
