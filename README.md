@@ -321,6 +321,12 @@ function fetchAdmins() {
 }
 ```
 
+The possible `options` are
+
+  * `headers` — HTTP Headers JSON object
+  * `authentication` — set to `false` to disable sending the authentication token as part of the HTTP request, set to a String to pass it as an `Authorization: Bearer` token
+  * `progress(percent, event)` — for tracking HTTP request progress (e.g. file upload)
+
 ### File upload
 
 The `http` utility will also upload files if they're passed as part of `parameters` (example below). Any of these types of file `parameters` are accepted:

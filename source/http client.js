@@ -104,9 +104,12 @@ export default class http_client
 					}
 
 					// Set JWT token in HTTP request header (if the token is passed)
-					if (authentication_token && options.authentication !== false)
+					
+					const token = typeof options.authentication === 'string' ? options.authentication : authentication_token
+
+					if (token && options.authentication !== false)
 					{
-						request.set(authentication_token_header || 'Authorization', `Bearer ${authentication_token}`)
+						request.set(authentication_token_header || 'Authorization', `Bearer ${token}`)
 					}
 
 					// Server side only
