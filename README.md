@@ -569,7 +569,7 @@ Once one starts writing a lot of Ajax calls in Redux it becomes obvious that the
 #### redux/blogPost.js
 
 ```js
-import { action, createHandler, stateConnector } from 'react-isomorphic-render'
+import { action, createHandler, stateConnector, eventName } from 'react-isomorphic-render'
 // (`./react-isomorphic-render-async.js` settings file is described below)
 import settings from './react-isomorphic-render-async'
 
@@ -605,34 +605,47 @@ export const getComments = action({
 },
 handler)
 
-// This is for the Redux `@connect()` helper below
-handler.addStateProperties('comments')
-
 // A developer can additionally handle any other custom events
 handler.handle(eventName('BLOG_POST', 'CUSTOM_EVENT'), (state, action) => ({
   ...state,
   customProperty: action.result
 }))
 
-// This is for the Redux `@connect()` helper below
+// This is for the Redux `@connect()` helper below.
+// Each property name specified here or
+// as a `result` parameter of an `action()` definition
+// will be made available inside Redux'es
+// `@connect(state => ({ ...connector(state.reducerName) }))`.
+// This is just to reduce boilerplate when `@connect()`ing
+// React Components to Redux state.
+// Alternatively, each required property from Redux state
+// can be specified manually inside `@connect()` mapper.
 handler.addStateProperties('customProperty')
 
 // A little helper for Redux `@connect()`
+// which reduces boilerplate when `@connect()`ing
+// React Components to Redux state.
+// `@connect(state => ({ ...connector(state.reducerName) }))`
+// Will add all (known) state properties from
+// Redux state to the React Component `props`.
 export const connector = stateConnector(handler)
 
 // This is the Redux reducer which now
-// handles the asynchronous actions defined above.
+// handles the asynchronous actions defined above
+// (and also the `handler.handle()` events).
+// Export it as part of the "root" reducer.
 export default handler.reducer()
 ```
 
 #### redux/reducer.js
 
 ```js
+// The "root" reducer composed of various reducers.
 export { default as blogPost } from './blogPost'
 ...
 ```
 
-And a React component would look like this
+The React Component would look like this
 
 ```js
 import React, { Component } from 'react'
@@ -643,12 +656,21 @@ import { connector, getComments, postComment } from './redux/blogPost'
 // Preload comments before showing the page
 // (see "Page preloading" section of this document)
 @preload(({ dispatch, getState, parameters }) => {
+  // `parameters` are the URL parameters populated by `react-router`:
+  // `<Route path="/blog/:blogPostId"/>`.
   return dispatch(getComments(parameters.blogPostId))
 })
 // See `react-redux` documentation on `@connect()` decorator
 @connect((state) => ({
   userId: state.user.id,
-  // `connector` will populate the Redux `props`
+  // `...connector()` will populate the Redux `props`
+  // with the (known) `state.blogPost` properties:
+  //  * `postCommentPending`
+  //  * `postCommentError`
+  //  * `getCommentsPending`
+  //  * `getCommentsError`
+  //  * `comments`
+  //  * `customProperty`
   ...connector(state.blogPost)
 }), {
   postComment
@@ -676,6 +698,8 @@ export default class BlogPostPage extends Component {
   }
 
   renderPostCommentForm() {
+    // `params` are the URL parameters populated by `react-router`:
+    // `<Route path="/blog/:blogPostId"/>`.
     const {
       userId,
       params,
@@ -738,7 +762,7 @@ export default {
 }
 ```
 
-Notice the extraction of these two configuration parameters into a separate file `react-isomorphic-render-async.js`: it is done to break circular dependency on `./react-isomorphic-render.js` file because `routes` `import` React page components which in turn `import` action creators which in turn import `./react-isomorphic-render.js` hence the circular (recursive) dependency (same goes for `reducer`).
+Notice the extraction of these two configuration parameters (`asynchronousActionEventNaming` and `asynchronousActionHandlerStatePropertyNaming`) into a separate file `react-isomorphic-render-async.js`: this is done to break circular dependency on `./react-isomorphic-render.js` file because the `routes` parameter inside `./react-isomorphic-render.js` is the `react-router` `./routes.js` file which `import`s React page components which in turn `import` action creators which in turn would import `./react-isomorphic-render.js` hence the circular (recursive) dependency (same goes for the `reducer` parameter inside `./react-isomorphic-render.js`).
 
 ### Handling synchronous actions
 
