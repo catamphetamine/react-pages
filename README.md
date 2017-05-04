@@ -579,7 +579,12 @@ const handler = createHandler(settings)
 export const postComment = action({
   namespace: 'BLOG_POST',
   event: 'POST_COMMENT',
-  // Must return a Promise
+  // `action()` must return a `Promise`.
+  // Can be an `async` function
+  // (`async` functions always return a `Promise`).
+  // `http` argument is automatically appended by this library
+  // while the `userId`, `blogPostId` and `commentText` arguments
+  // must be passed to this action when calling it.
   action(userId, blogPostId, commentText, http) {
     return http.post(`/blog/posts/${blogPostId}/comment`, {
       userId: userId,
@@ -593,7 +598,12 @@ handler)
 export const getComments = action({
   namespace: 'BLOG_POST',
   event: 'GET_COMMENTS',
-  // Must return a Promise
+  // `action()` must return a `Promise`.
+  // Can be an `async` function
+  // (`async` functions always return a `Promise`).
+  // `http` argument is automatically appended by this library
+  // while the `blogPostId` argument
+  // must be passed to this action when calling it.
   action(blogPostId, http) {
     return http.get(`/blog/posts/${blogPostId}/comments`)
   },
