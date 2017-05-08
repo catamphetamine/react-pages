@@ -97,13 +97,35 @@ export default async function(settings, { initialize, localize, assets, applicat
 
 		if (localize)
 		{
-			const result = localize(parameters)
+			// `localize()` should normally be a synchronous function.
+			// It could be asynchronous though for cases when it's taking
+			// messages not from a JSON file but rather from an
+			// "admin" user editable database.
+			// If the rountrip time (ping) from the rendering service
+			// to the database is small enough then it theoretically
+			// won't introduce any major page rendering latency
+			// (the database will surely cache such a hot query).
+			// On the other hand, if a developer fights for each millisecond
+			// then `localize()` should just return `messages` from memory.
+
+			let result = localize(parameters)
+
+			// If `localize()` returned a `Promise` then wait for it
+			if (typeof result.then === 'function')
+			{
+				result = await result
+			}
 
 			locale   = result.locale
 			messages = result.messages
 
 			// A tiny optimization to avoid calculating
-			// `JSON.stringify(messages)` for each rendered page.
+			// `JSON.stringify(messages)` for each rendered page:
+			// `localize()` can return a cached `messagesJSON` string
+			// instead of `messages` JSON object
+			// to further reduce internationalization-induced latency
+			// by an extra millisecond or so (benchmark if interested)
+			// by not stringifying `messages` JSON object for each page rendered.
 			messagesJSON = result.messagesJSON || JSON.stringify(messages)
 		}
 

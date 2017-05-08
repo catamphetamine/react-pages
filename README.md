@@ -1491,13 +1491,24 @@ If you're using Webpack then make sure you either build your server-side code wi
   // (an object of shape `{ "message.key": "Message value", ... }`).
   //
   // The returned object may optionally have
-  // the third property `messagesJSON`
+  // the third property `messagesJSON` (stringified `messages`)
   // to avoid calculating `JSON.stringify(messages)`
   // for each rendered page (a tiny optimization).
   //
   // `preferredLocales` argument is an array
   // of the preferred locales for this user
   // (from the most preferred to the least preferred)
+  //
+  // `localize()` should normally be a synchronous function.
+  // It could be asynchronous though for cases when it's taking
+  // messages not from a JSON file but rather from an
+  // "admin" user editable database.
+  // If the rountrip time (ping) from the rendering service
+  // to the database is small enough then it theoretically
+  // won't introduce any major page rendering latency
+  // (the database will surely cache such a hot query).
+  // On the other hand, if a developer fights for each millisecond
+  // then `localize()` should just return `messages` from memory.
   //
   localize: (store, preferredLocales) => ({ locale: preferredLocales[0], messages: { 'page.heading': 'Test' } })
 
