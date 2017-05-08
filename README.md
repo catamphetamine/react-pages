@@ -891,7 +891,27 @@ This library performs the following locale detection steps for each webpage rend
  * Checks the `locale` cookie
  * Checks the `Accept-Language` HTTP header
  
-The resulting locales array is passed as `preferredLocales` parameter into `localize()` function of the webpage rendering server which then returns `{ locale, messages }` which are then accessible as part of the `props` of the `wrapper` component.
+The resulting locales array is passed as `preferredLocales` argument into `localize()` function parameter of the webpage rendering server which then should return `{ locale, messages }` object in order for `locale` and `messages` to be available as part of the `props` passed to the `wrapper` component which can then pass those to `<IntlProvider/>` in case of using [`react-intl`](https://github.com/yahoo/react-intl) for internationalization.
+
+```js
+import React, { Component } from 'react'
+import { Provider }         from 'react-redux'
+import { IntlProvider }     from 'react-intl'
+import { AppContainer }     from 'react-hot-loader'
+
+export default function Wrapper(props) {
+  const { store, locale, messages, children } = props
+  return (
+    <AppContainer>
+      <Provider store={store}>
+        <IntlProvider locale={locale ? get_language_from_locale(locale) : 'en'} messages={messages}>
+          {children}
+        </IntlProvider>
+      </Provider>
+    </AppContainer>
+  )
+}
+```
 
 ### Get current location
 
