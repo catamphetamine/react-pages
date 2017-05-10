@@ -114,7 +114,7 @@ export default function set_up_and_render(settings, options = {})
 	// Call `onNavigate` on initial page load
 	if (on_navigate)
 	{
-		on_navigate(location_url(current_location))
+		on_navigate(location_url(current_location), current_location)
 	}
 
 	// Render the page

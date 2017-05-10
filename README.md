@@ -1552,7 +1552,7 @@ If you're using Webpack then make sure you either build your server-side code wi
   // http://www.lunametrics.com/blog/2015/04/17/strip-query-parameters-google-analytics/
   // The "hash" part should also be stripped manually inside `onNavigate` function
   // because someone somewhere someday might make use of those "hashes".
-  onNavigate: (url) => {}
+  onNavigate: (url, location) => {}
 
   // (optional)
   // Enables/disables Redux development tools.
