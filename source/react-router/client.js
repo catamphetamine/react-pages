@@ -25,7 +25,7 @@ export default function set_up_and_render(settings, options = {})
 	const { translation } = options
 
 	// Create `react-router` `history`
-	const history = create_history(document.location, settings)
+	const history = create_history(document.location, settings.history)
 
 	// Render the page
 	return client_side_render

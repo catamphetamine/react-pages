@@ -1,8 +1,10 @@
 import { location_url } from './location'
 
 // Creates `history`
-export default function create_history(createHistory, location, history_options, parameters, server)
+export default function create_history(createHistory, location, history_settings, parameters, server)
 {
+	const history_options = history_settings.options
+
 	// Create `history`.
 	//
 	// https://github.com/ReactTraining/react-router/blob/master/docs/guides/Histories.md#customize-your-history-further
@@ -23,10 +25,10 @@ export default function create_history(createHistory, location, history_options,
 	}
 
 	// For custom `history` wrappers, like `syncHistoryWithStore` from `react-router-redux`.
-	if (history_options.wrap)
+	if (history_settings.wrap)
 	{
 		// `parameters` is `{ store }` for Redux use case
-		history = history_options.wrap(history, parameters)
+		history = history_settings.wrap(history, parameters)
 	}
 
 	// Return `history`

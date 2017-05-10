@@ -70,7 +70,7 @@ export default async function(settings, { initialize, localize, assets, applicat
 	// Create `history` (`true` indicates server-side usage).
 	// Koa `request.url` is not really a URL,
 	// it's a URL without the `origin` (scheme, host, port).
-	history = create_history(createHistory, request.url, settings.history.options, parameters, true)
+	history = create_history(createHistory, request.url, settings.history, parameters, true)
 
 	const location = history.getCurrentLocation()
 	const path     = location.pathname
