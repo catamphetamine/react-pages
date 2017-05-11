@@ -99,15 +99,17 @@ And the `index.html` would look like this:
 
 Notice the `/assets/main.css` and `/assets/main.js` paths: in this example I assume that you're running [`webpack-dev-server`](https://webpack.github.io/docs/webpack-dev-server.html) and this `index.html` file is put into the `build` folder.
 
-Now open `localhost:8080` in a web browser. Client side rendering should work now.
+Now open `localhost:8080` in a web browser. Client-side rendering should work now. The whole setup can be deployed as-is being uploaded to a cloud and served statically (which is very cheap) – everything would work and adding server-side rendering is not required (though it might be required for search engine indexing).
 
 ## Server side
 
-Now it's time to add Server Side Rendering, and also serving "static files" via HTTP for production mode, when `webpack-dev-server` is not running.
+Adding Server Side Rendering to the setup is quite simple though requiring a running Node.js process therefore the website is no longer just statics served from the cloud but is both statics and a Node.js application running somewhere (say, in a Docker container).
+
+Node.js would perform server-side page rendering and also serving "static files" via HTTP for production mode when `webpack-dev-server` is not running.
 
 `index.html` will be generated on-the-fly by page rendering server for each HTTP request, so the `index.html` file may be deleted as it's of no use now.
 
-Start the webpage rendering server (also serving assets):
+Here's how the webpage rendering server is started (also serving assets):
 
 ```javascript
 import path from 'path'
