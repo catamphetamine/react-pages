@@ -99,7 +99,7 @@ And the `index.html` would look like this:
 
 Notice the `/assets/main.css` and `/assets/main.js` paths: in this example I assume that you're running [`webpack-dev-server`](https://webpack.github.io/docs/webpack-dev-server.html) and this `index.html` file is put into the `build` folder.
 
-Now open `localhost:8080` in a web browser. Client-side rendering should work now. The whole setup can be deployed as-is being uploaded to a cloud and served statically (which is very cheap) – everything would work and adding server-side rendering is not required (though it might be required for search engine indexing).
+Now open `localhost:8080` in a web browser. Client-side rendering should work now. The whole setup can be deployed as-is being uploaded to a cloud and served statically (which is very cheap) – everything would work and adding server-side rendering is not required (though it might be required for better search engine indexing).
 
 ## Server side
 
@@ -1555,6 +1555,22 @@ If you're using Webpack then make sure you either build your server-side code wi
   // The "hash" part should also be stripped manually inside `onNavigate` function
   // because someone somewhere someday might make use of those "hashes".
   onNavigate: (url, location) => {}
+
+  // (optional)
+  // Is called as soon as Redux store is created.
+  //
+  // For example, client-side-only applications
+  // may capture this `store` as `window.store`
+  // to call `bindActionCreators()` for all actions (globally).
+  //
+  // onStoreCreated: store => window.store = store
+  //
+  // import { bindActionCreators } from 'redux'
+  // import actionCreators from './actions'
+  // const boundActionCreators = bindActionCreators(actionCreators, window.store.dispatch)
+  // export default boundActionCreators
+  //
+  onStoreCreated: (store) => {}
 
   // (optional)
   // Enables/disables Redux development tools.

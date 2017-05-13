@@ -94,6 +94,22 @@ export default function set_up_and_render(settings, options = {})
 		on_navigate
 	})
 
+	// For example, client-side-only applications
+	// may capture this `store` as `window.store`
+	// to call `bindActionCreators()` for all actions (globally).
+	//
+	// onStoreCreated: store => window.store = store
+	//
+	// import { bindActionCreators } from 'redux'
+	// import actionCreators from './actions'
+	// const boundActionCreators = bindActionCreators(actionCreators, window.store.dispatch)
+	// export default boundActionCreators
+	//
+	if (options.onStoreCreated)
+	{
+		options.onStoreCreated(store)
+	}
+
 	// Create `react-router` `history`
 	history = create_history(document.location, settings.history, { store })
 
