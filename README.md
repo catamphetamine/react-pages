@@ -1194,8 +1194,6 @@ render(settings).then(({ store, protectedCookie }) => {
 
 If `token` parameter is specified then it will be sent as part of every message (providing support for user authentication).
 
-The socket starts listening and upon receiving a `message` having a `type` property such a `message` is `dispatch()`ed as a Redux "action" (e.g. `{ type: 'PRIVATE_MESSAGE', content: 'Testing', from: 123 }`).
-
 WebSocket will autoreconnect (with ["exponential backoff"](https://en.wikipedia.org/wiki/Exponential_backoff)) emitting `open` event every time it does.
 
 After the `websocket()` call a global `websocket` variable is created exposing the following methods:
@@ -1212,14 +1210,16 @@ The `store` argument can be used to `dispatch()` Redux "actions".
 
 ```js
 websocket.onMessage((message, store) => {
-  switch (message.command) {
-    case 'initialized':
-      store.dispatch(connected())
-      return console.log('Realtime service connected', message)
-    case 'notification':
-      return alert(message.text)
-    default:
-      return console.log('Unknown message type', message)
+  if (message.command) {
+    switch (message.command) {
+      case 'initialized':
+        store.dispatch(connected())
+        return console.log('Realtime service connected', message)
+      case 'notification':
+        return alert(message.text)
+      default:
+        return console.log('Unknown message type', message)
+    }
   }
 })
 
@@ -1264,6 +1264,7 @@ server.on('connection', (socket) => {
     try {
       switch (message.command) {
         case 'initialize':
+          // (make sure `message.userId` is a `String`)
 
           if (!userConnections[message.userId]) {
             userConnections[message.userId] = []
@@ -1292,9 +1293,9 @@ server.on('error', (error) => {
   console.error(error)
 })
 
-// REST API endpoint exposed for pushing
-// notifications via WebSocket.
-http.post('/notification', async ({ to, text }) => {
+// Also an HTTP server is started and a REST API endpoint is exposed
+// which can be used for pushing notifications to clients via WebSocket.
+httpServer().handle('POST', '/notification', ({ to, text }) => {
   if (userConnections[to]) {
     for (const socket of userConnections[to]) {
       socket.send(JSON.stringify({
@@ -1304,6 +1305,29 @@ http.post('/notification', async ({ to, text }) => {
     }
   }
 })
+```
+
+Feature: upon receiving a `message` (on the client side) having a `type` property defined such a `message` is `dispatch()`ed as a Redux "action" (this can be disabled via `autoDispatch` option). For example, if `{ type: 'PRIVATE_MESSAGE', content: 'Testing', from: 123 }` is received on a websocket connection then it is automatically `dispatch()`ed as a Redux "action". Therefore, the above example could be rewritten as
+
+```js
+// Server side (REST API endpoint)
+socket.send(JSON.stringify({
+  type: 'DISPLAY_NOTIFICATION',
+  text
+}))
+
+// Client side (Redux reducer)
+function reducer(state, action) {
+  switch (action.type) {
+    case 'DISPLAY_NOTIFICATION':
+      return {
+        ...state,
+        text: action.text
+      }
+    default:
+      return state
+  }
+}
 ```
 
 ## Bundlers
