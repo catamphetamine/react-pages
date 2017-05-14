@@ -1176,37 +1176,135 @@ if (module.hot) {
 
 ## WebSocket
 
-`websocket` helper sets up a WebSocket connection. It automatically sends authentication token (if present) as part of every message (providing out-of-the-box user authentication), and also upon receiving a message having a `type` it `dispatch()`es that message as a Redux "action". WebSocket will autoreconnect (with ["exponential backoff"](https://en.wikipedia.org/wiki/Exponential_backoff)) emitting `open` event every time it does.
+`websocket()` helper sets up a WebSocket connection. 
 
 ```js
 import { render, websocket } from 'react-isomorphic-render'
 
-render(settings).then(({ store, token }) => {
+render(settings).then(({ store, protectedCookie }) => {
   websocket({
     host: 'localhost',
     port: 80,
     // secure: true,
     store,
-    token
+    token: protectedCookie
   })
 })
 ```
 
-The global `websocket` object is created exposing the following methods:
+If `token` parameter is specified then it will be sent as part of every message (providing support for user authentication).
+
+The socket starts listening and upon receiving a `message` having a `type` property such a `message` is `dispatch()`ed as a Redux "action" (e.g. `{ type: 'PRIVATE_MESSAGE', content: 'Testing', from: 123 }`).
+
+WebSocket will autoreconnect (with ["exponential backoff"](https://en.wikipedia.org/wiki/Exponential_backoff)) emitting `open` event every time it does.
+
+After the `websocket()` call a global `websocket` variable is created exposing the following methods:
 
  * `listen(eventName, function(event, store))`
- * `onOpen(function(event, store))` is called on `open` event
- * `onClose(function(event, store))` is called on `close` event
- * `onError(function(event, store))` is called on `error` event (`close` event follows the `error` event)
+ * `onOpen(function(event, store))` – is called on `open` event
+ * `onClose(function(event, store))` – is called on `close` event
+ * `onError(function(event, store))` – is called on `error` event (`close` event always follows the corresponding `error` event)
  * `onMessage(function(message, store))`
  * `send(message)`
  * `close()`
 
 The `store` argument can be used to `dispatch()` Redux "actions".
 
-The global `websocket` object also exposes the `socket` property which is the underlying [`robust-websocket`](https://github.com/appuri/robust-websocket) object.
+```js
+websocket.onMessage((message, store) => {
+  switch (message.command) {
+    case 'initialized':
+      store.dispatch(connected())
+      return console.log('Realtime service connected', message)
+    case 'notification':
+      return alert(message.text)
+    default:
+      return console.log('Unknown message type', message)
+  }
+})
 
-For the server side I can recommend using [`uWebSockets`](https://github.com/uWebSockets/uWebSockets).
+websocket.onOpen((event, store) => {
+  websocket.send({ command: 'initialize' })
+})
+
+websocket.onClose((event, store) => {
+  store.dispatch(disconnected())
+})
+```
+
+The global `websocket` object also exposes the `socket` property which is the underlying [`robust-websocket`](https://github.com/appuri/robust-websocket) object (for advanced use cases).
+
+As for the server-side counterpart I can recommend using [`uWebSockets`](https://github.com/uWebSockets/uWebSockets)
+
+```js
+import WebSocket from 'uws'
+
+const server = new WebSocket.Server({ port: 8888 })
+
+const userConnections = {}
+
+server.on('connection', (socket) => {
+  console.log('Incoming WebSocket connection')
+
+  socket.on('close', async () => {
+    console.log('Client disconnected')
+
+    if (userConnections[message.userId]) {
+      userConnections[message.userId].remove(socket)
+    }
+  })
+
+  socket.on('message', async (message) => {
+    try {
+      message = JSON.parse(message)
+    } catch (error) {
+      return console.error(error)
+    }
+
+    try {
+      switch (message.command) {
+        case 'initialize':
+
+          if (!userConnections[message.userId]) {
+            userConnections[message.userId] = []
+          }
+
+          userConnections[message.userId].push(socket)
+
+          return socket.send(JSON.stringify({
+            command: 'initialized',
+            data: ...
+          }))
+
+        default:
+          return socket.send(JSON.stringify({
+            status: 404,
+            error: `Unknown command: ${message.command}`
+          }))
+      }
+    } catch (error) {
+      console.error(error)
+    }
+  })
+})
+
+server.on('error', (error) => {
+  console.error(error)
+})
+
+// REST API endpoint exposed for pushing
+// notifications via WebSocket.
+http.post('/notification', async ({ to, text }) => {
+  if (userConnections[to]) {
+    for (const socket of userConnections[to]) {
+      socket.send(JSON.stringify({
+        command: 'notification',
+        text
+      }))
+    }
+  }
+})
+```
 
 ## Bundlers
 
