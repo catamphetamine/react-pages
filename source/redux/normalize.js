@@ -123,6 +123,11 @@ export default function normalize_common_settings(settings, options = {})
 		settings.http = {}
 	}
 
+	if (!settings.authentication)
+	{
+		settings.authentication = {}
+	}
+
 	// This message was too noisy printing on each page render.
 	//
 	// // For those who don't wish to proxy API requests to API servers

@@ -15,10 +15,10 @@ import _create_history from './history'
 //
 export default function client_side_render({ history, render, render_parameters = {}, wrapper, translation })
 {
-	const token = authentication_token()
-	// Erase the authentication token global variable
+	const protected_cookie_value = get_protected_cookie_value()
+	// Erase the protected cookie value global variable
 	// (so that it's less likely to be stolen via an XSS attack)
-	delete window._authentication_token
+	delete window._protected_cookie_value
 
 	// Initialize locale
 	const locale = window._locale
@@ -79,16 +79,16 @@ export default function client_side_render({ history, render, render_parameters 
 	return render_page().then((result) =>
 	{
 		result.rerender = render_page
-		result.token = token
+		result.protectedCookie = protected_cookie_value
 		return result
 	})
 }
 
-// Reads authentication token from a global variable
+// Reads protected cookie value from a global variable
 // and then erases that global variable
-export function authentication_token()
+export function get_protected_cookie_value()
 {
-	return window._authentication_token
+	return window._protected_cookie_value
 }
 
 // Create `react-router` `history`

@@ -87,7 +87,7 @@ const template = nunjucks.compile
 			{# 
 				React page content.
 				(most of the possible XSS attack scripts are executed here,
-				 before the global authentication token variable is set,
+				 before the global protected cookie value variable is set,
 				 so they're unlikely to even be able to hijack it)
 			#}
 			<div id="react">
@@ -124,25 +124,25 @@ const template = nunjucks.compile
 			{# javascripts #}
 
 			{#
-				Make JWT authentication token visible to the client-side code
+				Make protected cookie value visible to the client-side code
 				to set up the "http" utility used inside Redux actions.
 				(the client-side React initialization code will
-				 automatically erase this authenticaiton token global variable
+				 automatically erase this protected cookie value global variable
 				 to protect the user from session hijacking via an XSS attack)
 			#}
-			{% if authentication_token %}
-				<script data-authentication-token>
-					window._authentication_token={{ safe_json_stringify(authentication_token) | safe }}
+			{% if protected_cookie_value %}
+				<script data-protected-cookie>
+					window._protected_cookie_value={{ safe_json_stringify(protected_cookie_value) | safe }}
 				</script>
 			{% endif %}
 
 			{#
 				Remove the <script/> tag above as soon as it executes
-				to prevent potentially exposing authentication token during an XSS attack.
+				to prevent potentially exposing protected cookie value during an XSS attack.
 			#}
-			{% if authentication_token %}
+			{% if protected_cookie_value %}
 				<script>
-					document.body.removeChild(document.querySelector('script[data-authentication-token]'))
+					document.body.removeChild(document.querySelector('script[data-protected-cookie]'))
 				</script>
 			{% endif %}
 

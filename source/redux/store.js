@@ -4,7 +4,6 @@ import asynchronous_middleware from './middleware/asynchronous middleware'
 import preloading_middleware from './middleware/preloading middleware'
 import history_middleware from './middleware/history middleware'
 
-import { set_up_http_client } from './http client'
 import { LoadState } from './actions'
 
 export default function create_store(settings, data, get_history, http_client, options)
@@ -48,7 +47,7 @@ export default function create_store(settings, data, get_history, http_client, o
 			http_client,
 			asynchronous_action_event_naming,
 			server,
-			settings.http.error,
+			http.error,
 			get_history
 		),
 
@@ -107,14 +106,6 @@ export default function create_store(settings, data, get_history, http_client, o
 		// Add camelCase alias
 		store.hotReload = store.hot_reload
 	}
-
-	// Customization of `http` utility
-	// which can be used inside Redux action creators
-	set_up_http_client(http_client,
-	{
-		store,
-		on_before_send : http && http.request
-	})
 
 	// Return the Redux store
 	return store

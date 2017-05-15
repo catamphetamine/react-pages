@@ -91,7 +91,7 @@ export default function start_webpage_rendering_server(settings, options)
 
 		const total_timer = timer()
 
-		const { status, content, redirect, route, time } = await render_page(settings,
+		const { status, content, redirect, route, time, afterwards } = await render_page(settings,
 		{
 			application,
 			assets,
@@ -106,9 +106,15 @@ export default function start_webpage_rendering_server(settings, options)
 			// for inspecting cookies in `preload` function
 			request: ctx.req,
 
-			// Cookies for authentication token retrieval
+			// Cookies for protected cookie value retrieval
 			cookies: ctx.cookies
 		})
+
+		// Can add `Set-Cookie` headers, for example.
+		if (afterwards)
+		{
+			afterwards(ctx)
+		}
 
 		if (redirect)
 		{

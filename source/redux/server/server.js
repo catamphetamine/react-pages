@@ -4,7 +4,7 @@ import { ISO_date_regexp } from '../../date parser'
 import { safe_json_stringify } from '../../page-server/html'
 import render from './render'
 import create_store from '../store'
-import { create_http_client } from '../http client'
+import create_http_client from '../http client'
 
 export default function _render(options)
 {
@@ -15,15 +15,19 @@ export default function _render(options)
 	})
 }
 
-export async function initialize(settings, { authentication_token, application, request, initialize, get_history })
+export async function initialize(settings, { protected_cookie_value, application, request, cookies, initialize, get_history })
 {
+	// Redux store
+	let store
+
 	// Create HTTP client (Redux action creator `http` utility)
-	const http_client = create_http_client(settings, authentication_token,
+	const http_client = create_http_client(settings, () => store, protected_cookie_value,
 	{
 		host          : application ? application.host : undefined,
 		port          : application ? application.port : undefined,
 		secure        : application ? application.secure : false,
-		clone_request : request
+		clone_request : request,
+		cookies
 	})
 
 	// Create Redux store
@@ -39,7 +43,7 @@ export async function initialize(settings, { authentication_token, application, 
 	}
 
 	// Create Redux store
-	const store = create_store(settings, store_data, get_history, http_client,
+	store = create_store(settings, store_data, get_history, http_client,
 	{
 		server : true
 	})
@@ -69,7 +73,15 @@ export async function initialize(settings, { authentication_token, application, 
 		return extension_javascript
 	}
 
-	return { store, extension_javascript }
+	function afterwards(ctx)
+	{
+		for (const cookie of http_client.set_cookies)
+		{
+			ctx.set('Set-Cookie', cookie)
+		}
+	}
+
+	return { store, extension_javascript, afterwards }
 }
 
 // JSON date deserializer

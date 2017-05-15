@@ -1,9 +1,9 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
 
-import client_side_render, { should_instrument_history_pop_state_listeners, create_history, authentication_token } from '../../client'
+import client_side_render, { should_instrument_history_pop_state_listeners, create_history, get_protected_cookie_value } from '../../client'
 import render from './render'
-import { create_http_client } from '../http client'
+import create_http_client from '../http client'
 import normalize_common_settings from '../normalize'
 import create_store from '../store'
 import { preload_action } from '../actions'
@@ -21,11 +21,11 @@ export default function set_up_and_render(settings, options = {})
 	// camelCase aliasing
 	const on_navigate = options.on_navigate || options.onNavigate
 
-	// Create HTTP client (Redux action creator `http` utility)
-	const http_client = create_http_client(settings, authentication_token())
-
 	// Redux store (is used in history `popstate` listener)
 	let store
+
+	// Create HTTP client (Redux action creator `http` utility)
+	const http_client = create_http_client(settings, () => store, get_protected_cookie_value())
 
 	// Reset "instant back" on page reload
 	// since Redux state is cleared.

@@ -8,12 +8,31 @@ import parse_dates from './date parser'
 // and therefore can be used in Redux actions (for HTTP requests)
 export default class http_client
 {
+	// `Set-Cookie` HTTP headers
+	// (in case any cookies are set)
+	set_cookies = new Set()
+
 	// Constructs a new instance of Http client.
 	// Optionally takes an Http Request as a reference to mimic
 	// (in this case, cookies, to make authentication work on the server-side).
 	constructor(options = {})
 	{
-		const { secure, host, port, headers, clone_request, authentication_token, authentication_token_header } = options
+		const
+		{
+			secure,
+			host,
+			port,
+			headers,
+			clone_request,
+			cookies,
+			protected_cookie,
+			protected_cookie_value,
+			authentication_token_header,
+			on_before_send,
+			catch_to_retry,
+			get_access_token
+		}
+		= options
 
 		const parse_json_dates = options.parse_dates !== false
 
@@ -26,16 +45,16 @@ export default class http_client
 		// `options.format_url` because the rendered page content
 		// is placed before the `options` are even defined (inside webpack bundle).
 		//
-		// Once `http_client` instance is created, the `authentication_token` variable
+		// Once `http_client` instance is created, the `protected_cookie_value` variable
 		// is erased from everywhere except the closures of HTTP methods defined below,
-		// and the token is therefore unable to be read directly by an attacker.
+		// and the protected cookie value is therefore unable to be read directly by an attacker.
 		//
 		// The `format_url` function also resided in the closures of HTTP methods defined below,
 		// so it's also unable to be changed by an attacker.
 		//
 		// The only thing an attacker is left to do is to send malicious requests
 		// to the server on behalf of the user, and those requests would be executed,
-		// but the attacker won't be able to hijack the authentication token.
+		// but the attacker won't be able to hijack the protected cookie value.
 		//
 		const format_url = options.format_url || this.format_url.bind(this)
 
@@ -44,14 +63,12 @@ export default class http_client
 		if (clone_request)
 		{
 			this.server = true
-			this.cookies = clone_request.headers.cookie
+			this.cookies_raw = clone_request.headers.cookie
 		}
 		
 		this.host = host
 		this.port = port || 80
 		this.secure = secure
-
-		this.on_before_send_listeners = []
 
 		const http_methods =
 		[
@@ -64,6 +81,40 @@ export default class http_client
 			'options'
 		]
 
+		// "Get cookie value by name" helper (works both on client and server)
+		const getCookie = this.server
+		?
+		((name) =>
+		{
+			// If this cookie was set dynamically then return it
+			for (const cookie_raw of this.set_cookies)
+			{
+				if (cookie_raw.indexOf(`${name}=`) === 0)
+				{
+					const key_value = cookie_raw_key_value(cookie_raw).split('=')
+					return key_value[1]
+				}
+			}
+
+			// Return the original request cookie
+			return cookies.get(name)
+		})
+		:
+		((name) =>
+		{
+			// "httpOnly" cookies can't be read by a web browser
+			if (name === protected_cookie)
+			{
+				return protected_cookie_value
+			}
+
+			return get_cookie_in_a_browser(name)
+		})
+
+		// `superagent` doesn't save cookies by default on the server side.
+		// Therefore calling `.agent()` explicitly to enable setting cookies.
+		const agent = this.server ? superagent.agent() : superagent
+
 		// Define HTTP methods on this instance
 		for (let method of http_methods)
 		{
@@ -72,197 +123,115 @@ export default class http_client
 				// `url` will be absolute for server-side
 				const url = format_url(path, this.server)
 
-				return new Promise((resolve, reject) =>
+				// Is incremented on each retry
+				let retry_count = -1
+
+				// Performs an HTTP request to the given `url`.
+				// Can retry itself.
+				const perform_http_request = () =>
 				{
 					// Create Http request
-					const agent = this.server ? superagent.agent() : superagent
-					const request = agent[method](url)
-
-					// Attach data to the outgoing HTTP request
-					if (data)
+					const request = new Http_request(method, url, data,
 					{
-						switch (method)
+						agent,
+						parse_json_dates,
+						headers : { ...headers, ...options.headers },
+						new_cookies : (new_cookies) =>
 						{
-							case 'get':
-								request.query(data)
-								break
-
-							case 'post':
-							case 'put':
-							case 'patch':
-							case 'head':
-							case 'options':
-								request.send(has_binary_data(data) ? construct_form_data(data) : data)
-								break
-
-							case 'delete':
-								throw new Error(`"data" supplied for HTTP DELETE request: ${JSON.stringify(data)}`)
-
-							default:
-								throw new Error(`Unknown HTTP method: ${method}`)
+							if (this.server)
+							{
+								// Cookies will be duplicated here
+								// because `superagent.agent()` persists
+								// `Set-Cookie`s between subsequent requests
+								// (i.e. for the same `http_client` instance).
+								// Therefore using a `Set` instead of an array.
+								for (const cookie of new_cookies)
+								{
+									this.set_cookies.add(cookie)
+								}
+							}
 						}
-					}
+					})
 
-					// Set JWT token in HTTP request header (if the token is passed)
-					
-					const token = typeof options.authentication === 'string' ? options.authentication : authentication_token
-
-					if (token && options.authentication !== false)
-					{
-						request.set(authentication_token_header || 'Authorization', `Bearer ${token}`)
-					}
+					// Sets `Authorization: Bearer ${token}` in HTTP request header
+					request.add_authentication
+					(
+						authentication_token_header,
+						options.authentication,
+						get_access_token,
+						getCookie
+					)
 
 					// Server side only
 					// (copies user authentication cookies to retain session specific data)
-					if (this.cookies && is_relative_url(path))
+					if (this.server && is_relative_url(path))
 					{
-						request.set('cookie', this.cookies)
+						request.add_cookies(this.cookies_raw, this.set_cookies)
 					}
 
-					// Apply default HTTP headers
-					if (headers)
+					// Allows customizing HTTP requests
+					// (for example, setting some HTTP headers)
+					if (on_before_send)
 					{
-						request.set(headers)
-					}
-
-					// Apply this HTTP request specific HTTP headers
-					if (options.headers)
-					{
-						request.set(options.headers)
-					}
-
-					// // Set HTTP locale header
-					// // (for example, for getting localized response)
-					// if (options.locale)
-					// {
-					// 	request.set('accept-language', options.locale)
-					// }
-
-					// Apply custom adjustments to HTTP request
-					for (let listener of this.on_before_send_listeners)
-					{
-						listener(request)
+						on_before_send(request.request)
 					}
 
 					// File upload progress metering
 					// https://developer.mozilla.org/en/docs/Web/API/XMLHttpRequest/Using_XMLHttpRequest
 					if (options.progress)
 					{
-						request.on('progress', function(event)
-						{
-							if (event.direction !== 'upload')
-							{
-								// Only interested in file upload progress metering
-								return
-							}
-
-							if (!event.lengthComputable)
-							{
-								// Unable to compute progress information since the total size is unknown
-								return
-							}
-
-							options.progress(event.percent, event)
-						})
+						request.progress(options.progress)
 					}
 
 					// Send HTTP request
-					request.end((error, response) => 
-					{
-						// this turned out to be a lame way of handling cookies,
-						// because cookies are sent in request 
-						// with no additional parameters
-						// such as `path`, `httpOnly` and `expires`,
-						// so there were cookie duplication issues.
-						//
-						// now superagent.agent() handles cookies correctly.
-						//
-						// if (response)
-						// {
-						// 	if (response.get('set-cookie'))
-						// 	{
-						// 		this.cookies = response.get('set-cookie')
-						// 	}
-						// }
-
-						// If there was an error, then reject the Promise
-						if (error)
+					return request.send().then
+					(
+						(response) => response,
+						(error) =>
 						{
 							// `superagent` would have already output the error to console
 							// console.error(error.stack)
 
-							// console.log('[react-isomorphic-render] (http request error)')
+							// (legacy)
+							//
+							// this turned out to be a lame way of handling cookies,
+							// because cookies are sent in request 
+							// with no additional parameters
+							// such as `path`, `httpOnly` and `expires`,
+							// so there were cookie duplication issues.
+							//
+							// now superagent.agent() handles cookies correctly.
+							//
+							// if (response)
+							// {
+							// 	if (response.get('set-cookie'))
+							// 	{
+							// 		this.cookies_raw = response.get('set-cookie')
+							// 	}
+							// }
 
-							// Infer additional `error` properties from the HTTP response
-							if (response)
+							// Can optionally retry an HTTP request in case of an error
+							// (e.g. if an Auth0 access token expired and has to be refreshed).
+							// https://auth0.com/blog/refresh-tokens-what-are-they-and-when-to-use-them/
+							if (catch_to_retry)
 							{
-								// Set `error.status` to HTTP response status code
-								error.status = response.statusCode
+								retry_count++
 
-								switch (response.type)
+								return catch_to_retry(error, retry_count,
 								{
-									// Set error `data` from response body,
-									case 'application/json':
-									// http://jsonapi.org/
-									case 'application/vnd.api+json':
-										// if (!is_object(error.data))
-										error.data = get_response_body(response, parse_json_dates)
-
-										// Set the more meaningful message for the error (if available)
-										if (error.data.message)
-										{
-											error.message = error.data.message
-										}
-
-										break
-
-									// If the HTTP response was not a JSON object,
-									// but rather a text or an HTML page,
-									// then include that information in the `error`
-									// for future reference (e.g. easier debugging).
-
-									case 'text/plain':
-										error.message = response.text
-										break
-
-									case 'text/html':
-										error.html = response.text
-
-										// Recover the original error message (if any)
-										if (response.headers['x-error-message'])
-										{
-											error.message = response.headers['x-error-message']
-										}
-
-										// Recover the original error stack trace (if any)
-										if (response.headers['x-error-stack-trace'])
-										{
-											error.stack = JSON.parse(response.headers['x-error-stack-trace'])
-										}
-
-										break
-								}
+									getCookie,
+									this
+								})
+								.then(perform_http_request)
 							}
 
 							// HTTP request failed with an `error`
-							return reject(error)
+							return Promise.reject(error)
 						}
+					)
+				}
 
-						// HTTP request completed without errors,
-						// so return the HTTP response data.
-
-						// If HTTP response status is "204 - No content"
-						// (e.g. PUT, DELETE)
-						// then resolve with an empty result
-						if (response.statusCode === 204)
-						{
-							return resolve()
-						}
-
-						// Else, the result is HTTP response body
-						resolve(get_response_body(response, parse_json_dates))
-					})
-				})
+				return perform_http_request()
 			}
 		}
 	}
@@ -287,13 +256,6 @@ export default class http_client
 		}
 
 		return path
-	}
-
-	// Allows hooking into HTTP request sending routine
-	// (for example, to set some HTTP headers)
-	on_before_send(listener)
-	{
-		this.on_before_send_listeners.push(listener)
 	}
 }
 
@@ -368,14 +330,246 @@ function construct_form_data(data)
 	return form_data
 }
 
-function get_response_body(response, parse_json_dates)
+class Http_request
 {
-	let response_body = response.body
-	
-	if (response.type === 'application/json' && parse_json_dates)
+	constructor(method, url, data, options)
 	{
-		response_body = parse_dates(response_body)
+		const { agent, headers, parse_json_dates, new_cookies } = options
+
+		this.new_cookies = new_cookies
+
+		// Create Http request.
+		this.request = agent[method](url)
+
+		// Attach data to the outgoing HTTP request
+		if (data)
+		{
+			switch (method)
+			{
+				case 'get':
+					this.request.query(data)
+					break
+
+				case 'post':
+				case 'put':
+				case 'patch':
+				case 'head':
+				case 'options':
+					this.request.send(has_binary_data(data) ? construct_form_data(data) : data)
+					break
+
+				case 'delete':
+					throw new Error(`"data" supplied for HTTP DELETE request: ${JSON.stringify(data)}`)
+
+				default:
+					throw new Error(`Unknown HTTP method: ${method}`)
+			}
+		}
+
+		// Apply HTTP headers
+		this.request.set(headers)
+
+		// `true`/`false`
+		this.parse_json_dates = parse_json_dates
 	}
 
-	return response_body
+	// Sets `Authorization: Bearer ${token}` in HTTP request header
+	add_authentication(authentication_token_header, authentication, get_access_token, getCookie)
+	{
+		let token
+
+		if (typeof authentication === 'string')
+		{
+			token = authentication
+		}
+		else if (get_access_token)
+		{
+			token = get_access_token(getCookie)
+		}
+
+		if (token && authentication !== false)
+		{
+			this.request.set(authentication_token_header || 'Authorization', `Bearer ${token}`)
+		}
+	}
+
+	// Server side only
+	// (copies user authentication cookies to retain session specific data)
+	add_cookies(cookies_raw, set_cookies)
+	{
+		// Merge `cookies_raw` and `set_cookies` (a `Set`)
+		if (set_cookies.size > 0)
+		{
+			const cookies = {}
+
+			for (let key_value of cookies_raw.split(';'))
+			{
+				key_value = key_value.trim().split('=')
+				cookies[key_value[0]] = key_value[1]
+			}
+
+			for (const cookie_raw of set_cookies)
+			{
+				const key_value = cookie_raw_key_value(cookie_raw).split('=')
+				cookies[key_value[0]] = key_value[1]
+			}
+
+			cookies_raw = Object.keys(cookies).map(key => `${key}=${cookies[key]}`).join(';')
+		}
+
+		this.request.set('cookie', cookies_raw)
+	}
+
+	// File upload progress metering
+	// https://developer.mozilla.org/en/docs/Web/API/XMLHttpRequest/Using_XMLHttpRequest
+	progress(progress)
+	{
+		this.request.on('progress', function(event)
+		{
+			if (event.direction !== 'upload')
+			{
+				// Only interested in file upload progress metering
+				return
+			}
+
+			if (!event.lengthComputable)
+			{
+				// Unable to compute progress information since the total size is unknown
+				return
+			}
+
+			progress(event.percent, event)
+		})
+	}
+
+	send()
+	{
+		return new Promise((resolve, reject) =>
+		{
+			this.request.end((error, response) =>
+			{
+				// If any cookies were set then track them (for later)
+				if (response && response.headers['set-cookie'])
+				{
+					this.new_cookies(response.headers['set-cookie'])
+				}
+
+				if (error)
+				{
+					// Infer additional `error` properties from the HTTP response
+					this.populate_error_data(error, response)
+
+					return reject(error)
+				}
+
+				// If HTTP response status is "204 - No content"
+				// (e.g. PUT, DELETE)
+				// then resolve with an empty result.
+				if (response.statusCode === 204)
+				{
+					return resolve()
+				}
+
+				resolve(this.get_response_data(response))
+			})
+		})
+	}
+
+	populate_error_data(error, response)
+	{
+		// Set `error.status` to HTTP response status code
+		error.status = response.statusCode
+
+		const response_data = this.get_response_data(response)
+
+		switch (response.type)
+		{
+			// Set error `data` from response body,
+			case 'application/json':
+			// http://jsonapi.org/
+			case 'application/vnd.api+json':
+				error.data = response_data
+
+				// Set the more meaningful message for the error (if available)
+				if (error.data.message)
+				{
+					error.message = error.data.message
+				}
+
+				break
+
+			// If the HTTP response was not a JSON object,
+			// but rather a text or an HTML page,
+			// then include that information in the `error`
+			// for future reference (e.g. easier debugging).
+
+			case 'text/plain':
+				error.message = response_data
+				break
+
+			case 'text/html':
+				error.html = response_data
+
+				// Recover the original error message (if any)
+				if (response.headers['x-error-message'])
+				{
+					error.message = response.headers['x-error-message']
+				}
+
+				// Recover the original error stack trace (if any)
+				if (response.headers['x-error-stack-trace'])
+				{
+					error.stack = JSON.parse(response.headers['x-error-stack-trace'])
+				}
+
+				break
+		}
+	}
+
+	get_response_data(response)
+	{
+		switch (response.type)
+		{
+			case 'application/json':
+			// http://jsonapi.org/
+			case 'application/vnd.api+json':
+				if (this.parse_json_dates)
+				{
+					return parse_dates(response.body)
+				}
+				return response.body
+
+			// case 'text/plain':
+			// case 'text/html':
+			default:
+				return response.text
+		}
+	}
+}
+
+// https://learn.javascript.ru/cookie
+function get_cookie_in_a_browser(name)
+{
+	const matches = document.cookie.match(new RegExp
+	(
+		'(?:^|; )' + name.replace(/([\.$?*|{}\(\)\[\]\\\/\+^])/g, '\\$1') + '=([^;]*)'
+	))
+
+	if (matches)
+	{
+		return decodeURIComponent(matches[1])
+	}
+}
+
+// Leaves just `key=value` from the cookie string
+function cookie_raw_key_value(cookie_raw)
+{
+	const semicolon_index = cookie_raw.indexOf(';')
+
+	if (semicolon_index >= 0)
+	{
+		cookie_raw = cookie_raw.slice(0, semicolon_index)
+	}
+
+	return cookie_raw.trim()
 }

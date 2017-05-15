@@ -54,7 +54,7 @@ export default function asynchronous_middleware(http_client, asynchronous_action
 			(
 				// If the Promise resolved
 				// (e.g. an HTTP request succeeded)
-				result =>
+				(result) =>
 				{
 					// Dispatch the `success` event to the Redux store
 					dispatch
@@ -72,7 +72,7 @@ export default function asynchronous_middleware(http_client, asynchronous_action
 				//
 				// (Http status !== 20x
 				//  or the Http response JSON object has an `error` field)
-				error =>
+				(error) =>
 				{
 					// Transform Javascript `Error` instance into a plain JSON object
 					// because the meaning of the `error` action is different
@@ -131,7 +131,7 @@ export default function asynchronous_middleware(http_client, asynchronous_action
 
 						// Report the error
 						// (for example, redirect to a login page
-						//  if an Auth0 JWT token expired)
+						//  if a JWT "access token" expired)
 						on_error(error,
 						{
 							path : location.pathname,

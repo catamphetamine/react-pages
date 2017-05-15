@@ -1,28 +1,61 @@
 import Http_client from '../http client'
 
-// Customization of `http` utility
-// which can be used inside Redux action creators
-export function set_up_http_client(http_client, { store, on_before_send })
+export default function create_http_client(settings, get_store, protected_cookie_value, options = {})
 {
-	if (on_before_send)
+	let on_before_send
+	let catch_to_retry
+	let get_access_token
+
+	// Add `store` helper to `http.request`
+	if (settings.http.request)
 	{
-		http_client.on_before_send(function(request)
+		on_before_send = (request) =>
 		{
 			// If using Redux, then add `store` as a parameter 
 			// for `http_client` customization function
-			on_before_send(request, { store })
-		})
+			settings.http.request(request,
+			{
+				store: get_store()
+			})
+		}
 	}
-}
 
-export function create_http_client(settings, authentication_token, options = {})
-{
+	// Add `store` and `http` helpers to `http.catch`
+	if (settings.http.catch)
+	{
+		catch_to_retry = (error, retryCount, helpers) =>
+		{
+			return settings.http.catch(error, retryCount,
+			{
+				...helpers,
+				store: get_store()
+			})
+		}
+	}
+
+	// Add `store` helper to `authentication.accessToken`
+	if (settings.authentication.accessToken)
+	{
+		get_access_token = (getCookie, helpers) =>
+		{
+			return settings.authentication.accessToken(getCookie,
+			{
+				...helpers,
+				store: get_store()
+			})
+		}
+	}
+
 	return new Http_client
 	({
-		format_url  : settings.http.url,
-		parse_dates : settings.parse_dates,
-		authentication_token,
-		authentication_token_header: settings.authentication ? settings.authentication.header : undefined,
+		on_before_send,
+		catch_to_retry,
+		get_access_token,
+		format_url                  : settings.http.url,
+		parse_dates                 : settings.parse_dates,
+		authentication_token_header : settings.authentication.header,
+		protected_cookie            : settings.authentication.protectedCookie,
+		protected_cookie_value,
 		...options
 	})
 }

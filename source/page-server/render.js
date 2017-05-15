@@ -21,14 +21,15 @@ import { Preload } from '../redux/actions'
 
 // isomorphic (universal) rendering (middleware).
 // will be used in web_application.use(...)
-export default async function(settings, { initialize, localize, assets, application, request, render, loading, html = {}, authentication, cookies })
+export default async function(settings, { initialize, localize, assets, application, request, render, loading, html = {}, cookies })
 {
 	settings = normalize_common_settings(settings)
 
 	const
 	{
 		routes,
-		wrapper
+		wrapper,
+		authentication
 	}
 	= settings
 
@@ -38,11 +39,11 @@ export default async function(settings, { initialize, localize, assets, applicat
 	// Else render for pure React.
 	const render_page = redux_render
 
-	// Read authentication token from a cookie (if configured)
-	let authentication_token
-	if (authentication && authentication.cookie)
+	// Read protected cookie value (if configured)
+	let protected_cookie_value
+	if (authentication && authentication.protectedCookie)
 	{
-		authentication_token = cookies.get(authentication.cookie)
+		protected_cookie_value = cookies.get(authentication.protectedCookie)
 	}
 
 	// `history` is created after the `store`.
@@ -58,14 +59,17 @@ export default async function(settings, { initialize, localize, assets, applicat
 	// and also for `localize()` call.
 	const initialize_result = await redux_initialize(settings,
 	{
-		authentication_token,
+		protected_cookie_value,
 		application,
 		request,
+		cookies,
 		initialize,
 		get_history
 	})
 	
-	const { extension_javascript, ...parameters } = initialize_result	
+	const { extension_javascript, afterwards, ...parameters } = initialize_result	
+
+	const normalize_result = result => _normalize_result(result, afterwards, settings)
 
 	// Create `history` (`true` indicates server-side usage).
 	// Koa `request.url` is not really a URL,
@@ -185,7 +189,7 @@ export default async function(settings, { initialize, localize, assets, applicat
 					head,
 					body_start,
 					body_end,
-					authentication_token,
+					protected_cookie_value,
 					content
 				})
 			}
@@ -196,7 +200,7 @@ export default async function(settings, { initialize, localize, assets, applicat
 			result.time.initialize = initialize_time
 		}
 
-		return stringify_redirect(result, settings)
+		return normalize_result(result)
 	}
 	catch (error)
 	{
@@ -204,7 +208,7 @@ export default async function(settings, { initialize, localize, assets, applicat
 		// (e.g. it can happen in `react-router`'s `onEnter()` during `match()`)
 		if (error._redirect)
 		{
-			return stringify_redirect({ redirect: error._redirect }, settings)
+			return normalize_result({ redirect: error._redirect })
 		}
 
 		if (error_handler)
@@ -231,7 +235,7 @@ export default async function(settings, { initialize, localize, assets, applicat
 			// Either redirects or throws the error
 			if (result.redirect)
 			{
-				return stringify_redirect(result, settings)
+				return normalize_result(result)
 			}
 		}
 
@@ -284,13 +288,17 @@ function redirecting_dispatch(dispatch, redirect)
 	}
 }
 
-function stringify_redirect(result, settings)
+function _normalize_result(result, afterwards, settings)
 {
+	// Stringify `redirect` location
 	if (result.redirect)
 	{
 		// Prepend `basename` to relative URLs for server-side redirect.
 		result.redirect = location_url(result.redirect, { basename: settings.history.options.basename })
 	}
+
+	// Add `afterwards`
+	result.afterwards = afterwards
 
 	return result
 }

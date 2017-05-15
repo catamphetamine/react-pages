@@ -326,7 +326,7 @@ function fetchAdmins() {
 The possible `options` are
 
   * `headers` — HTTP Headers JSON object
-  * `authentication` — set to `false` to disable sending the authentication token as part of the HTTP request, set to a String to pass it as an `Authorization: Bearer` token
+  * `authentication` — set to `false` to disable sending the authentication token as part of the HTTP request, set to a String to pass it as an `Authorization: Bearer ${token}` token
   * `progress(percent, event)` — for tracking HTTP request progress (e.g. file upload)
 
 ### File upload
@@ -1058,13 +1058,13 @@ telegraf -config telegraf.conf
 
 ## CSRF protection
 
-[Cross-Site Request Forgery attacks](http://docs.spring.io/spring-security/site/docs/current/reference/html/csrf.html) are the kind of attacks when a legitimate user is tricked into navigating a malicious website which, upon loading, sends a forged HTTP request (GET, POST) to the legitimate website therefore performing an action on behalf of the legitimate user (because the "remember me" cookie, or the "session id" cookie, is also sent along).
+[Cross-Site Request Forgery attacks](http://docs.spring.io/spring-security/site/docs/current/reference/html/csrf.html) are the kind of attacks when a legitimate user is tricked into navigating a malicious website which, upon loading, sends a forged HTTP request (GET, POST) to the legitimate website therefore performing an action on behalf of the legitimate user (because the "remember me" cookie is also sent along).
 
-How can a legitimate website guard its users from such attacks? One solution is to ignore the "remember me" ("session id") cookie and force reading its value from an HTTP header. Because CSRF attacks can't send custom headers (at least using bare HTML/Javascript, without exploiting Adobe Flash plugin bugs, etc), this renders such hacking attempts useless. But how is the legitimate webpage supposed to obtain this "remember me" ("session id") token to send it as an HTTP header? The cookie still needs to be used for user's session tracking. It's just that this cookie should only be read by the webpage rendering service (to be injected into the resulting webpage) and never by any of the API services. This way the only thing a CSRF attacker could do is to request a webpage (without being able to analyse its content) which is never an action. And so the user is completely protected against CSRF attacks. The "remember me" ("session id") cookie is also "HttpOnly" to make it only readable on the server-side (to protect the user from session hijacking via XSS attacks).
+How can a legitimate website guard its users from such attacks? One solution is to ignore the "remember me" cookie and force reading its value from an HTTP header. Because CSRF attacks can't send custom headers (at least using bare HTML/Javascript, without exploiting Adobe Flash plugin bugs, etc), this renders such hacking attempts useless.
 
-This library attempts to read authentication token from a cookie named `settings.authentication.cookie` (if this setting is configured). If authentication cookie is present then its value will be sent as part of `Authorization: Bearer {token}` HTTP header when using `http` utility in Redux actions.
+Therefore the API should only read "remember me" token from an HTTP header. The client-side application will read "remember me" cookie value and send it as part of an HTTP header for each HTTP request. Alternatively "remember me" token can be stored in a web browser's `localStorage`.
 
-So, **javascript is required** on the client side in order for this CSRF attacks protection to work (because only javascript can set HTTP headers). If a developer instead prefers to run a website for javascript-disabled users (like [Tor](https://www.deepdotweb.com/)) then no additional set up is needed and just authenticate users in REST API endpoints by "remember me" cookie rather than `Authorization` HTTP header. This will open the website users to various possible javascriptless CSRF attacks.
+So, **javascript is required** on the client side in order for this CSRF attacks protection to work (because only javascript can set HTTP headers). If a developer instead prefers to run a website for javascript-disabled users (like [Tor](https://www.deepdotweb.com/)) then the only way is to authenticate users in REST API endpoints by a "remember me" cookie rather than `Authorization` HTTP header. This will open the website users to various possible javascriptless CSRF attacks.
 
 ## Webpack HMR
 
@@ -1408,15 +1408,63 @@ If you're using Webpack then make sure you either build your server-side code wi
       // In this case `.application` configuration parameter may be removed
       return `https://api-server.com${path}`
     }
-
+    <!--
     // (optional)
+    error: (error, { url, path, redirect, dispatch, getState }) => console.error(error)
+    //
     // Is called when `http` calls either fail or return an error.
     // Is not called during `@preload()`s and therefore
     // can only be called as part of an HTTP call
     // triggered by some user interaction in a web browser.
-    // For example, Auth0 users may listen for JWT token expiration here
-    // and either refresh it or redirect to a login page.
-    error: (error, { url, path, redirect, dispatch, getState }) => console.error(error)
+    //
+    // For example, Auth0 users may listen for
+    // JWT token expiration here and redirect to a login page.
+    // But a better solution for handling access token expiration
+    // is using `http.catch()` function parameter (see below).
+    //
+    // Due to the introduction of `http.catch()` function parameter
+    // I don't see a reason for `http.error()` function parameter existence.
+    // It's likely to be removed in a future major release.
+    -->
+
+    // (optional)
+    // (experimental: didn't test this function parameter but it's likely to work)
+    //
+    catch: async (error, retryCount, helpers) => {}
+    //
+    // Can optionally retry an HTTP request in case of an error
+    // (e.g. if an Auth0 access token expired and has to be refreshed).
+    // https://auth0.com/blog/refresh-tokens-what-are-they-and-when-to-use-them/
+    //
+    // If an error happens then the logic is (concept):
+    //
+    // httpRequest().catch((error) => {
+    //   return catch(error, 0, helpers).then(httpRequest).catch((error) => {
+    //     return catch(error, 1, helpers).then(httpRequest).catch((error) => {
+    //       ...
+    //     ))
+    //   ))
+    // ))
+    //
+    // Auth0 `catch` example:
+    //
+    // catch(error, retryCount, helpers) {
+    //   if (retryCount === 0) {
+    //     if (error.status === 401 && error.data && error.data.name === 'TokenExpiredError') {
+    //       return requestNewAccessToken(localStorage.refreshToken)
+    //     }
+    //   }
+    //   throw error
+    // }
+    //
+    // The `helpers` argument object holds:
+    //
+    // * `getCookie(name)` – a helper function which works both on client and server.
+    //   This function can be used to obtain a "refresh token" stored in a non-"httpOnly" cookie.
+    //
+    // * `store` – Redux store.
+    //
+    // * `http` – `http` utility.
   }
 
   // (optional)
@@ -1442,20 +1490,58 @@ If you're using Webpack then make sure you either build your server-side code wi
   // (optional)
   authentication:
   {
-    // If this parameter is set,
-    // then the page rendering server
-    // will try to extract JWT authentication token
-    // from this cookie (if present),
-    // and then it will always pass the token as part of the
-    // "Authorization: Bearer {token}" HTTP header
+    // (optional)
+    protectedCookie: 'cookie-name'
+    //
+    // The "remember me" cookie can be further protected
+    // by making it non-readable in a web browser (the so called "httpOnly" cookies).
+    // But how a web browser is gonna get the cookie value to send it as part of an HTTP header?
+    // The answer is: the cookie can be read on the server side when the page is being rendered,
+    // and then be inserted on a page as a javascript variable which is captured by
+    // `http` utility HTTP request methods and immediately removed from the global scope.
+    // Therefore this variable will only be accessible inside `http` utility methods
+    // and an attacker won't be able neither to read the cookie value nor to read the variable value.
+    // This way the only thing a CSRF attacker could do is to request a webpage
+    // (without being able to analyse its content) which is never an action so it's always safe.
+    // And so the user is completely protected against CSRF attacks.
+    //
+    // This can be an Auth0 "refresh token", for example.
+    // https://auth0.com/blog/refresh-tokens-what-are-they-and-when-to-use-them/
+    // If it is, then it's gonna be available in `http.catch()` function
+    // and can be used there to refresh expired (short lived) access tokens.
+    // If it's the case and `authentication.protectedCookie` is a "refresh token",
+    // then also set `authentication.accessToken()` function parameter
+    // to return the currently used "access token":
+    // this "access token" will always be set automatically
+    // in the "Authorization" HTTP header
     // when using `http` utility inside Redux actions.
-    cookie: 'jwt-cookie-name'
 
     // (optional)
+    accessToken: (getCookie, helpers) => String
+    //
+    // If specified, this "access token" will always be set
+    // automatically in the "Authorization" HTTP header
+    // when using `http` utility inside Redux actions.
+    // "Access tokens" are supposed to be short-lived
+    // and their storage requirements are less strict
+    // than those for the "refresh token".
+    // For example, an "access token" may be stored
+    // in a regular non-"httpOnly" cookie.
+    // Since this method is run both on client and server
+    // the provided `getCookie(name)` function works in both cases.
+    //
+    // `helpers` object holds:
+    //
+    // * `store` - Redux store
+
+    // (optional)
+    header: 'Authorization'
     // The HTTP header containing authentication token
     // (e.g. "Authorization: Bearer {token}").
     // Is "Authorization" by default.
-    header: 'Authorization'
+    // (some people requested this setting for
+    //  some projects using 'X-Authorization' header
+    //  due to the 'Authorization' header being blocked)
   }
 
   // (optional)
