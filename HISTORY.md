@@ -4,6 +4,7 @@
   * Added `http.catch` option for supporting use cases like refreshing an expired Auth0 access token. Experimental: didn't test it but it's likely to work. `http.catch` is likely to supercede `http.error` which is likely to be removed in some future major release.
   * `authentication` rewrite: found out that `authentication` setting was being read from the page rendering service configuration which is not what the README said. Therefore, I assume, no one actually used that `authentication` setting and the redesign of its inner workings I made won't break anyone's app: previously if `authentication.cookie` was set then the cookie value was always sent as part of the `Authorization` HTTP header – now it isn't and an explicit `authentication.accessToken()` setting is required for that, and also `authentication.cookie` was renamed to `authentication.protectedCookie`. Also added `authentication.validateToken` and `authentication.refreshAccessToken`.
   * Added an optional `authentication.accessToken(getCookie, { store })` parameter function which sets the `Authorization` HTTP header to `Bearer ${token}` for each `http` utility request. This function is called both on client and server.
+  * Added `beforeRender : async function({ dispatch, getState })` hook, e.g. for `redux-saga` users (that was a feature request).
 
 11.0.0 / 30.04.2017
 ===================

@@ -23,7 +23,7 @@ function timed_react_render_on_server(named_arguments)
 
 // Returns a Promise resolving to { status, content, redirect }.
 //
-export default function render_on_server({ history, disable_server_side_rendering, create_page_element, render_webpage, store, routes })
+export default function render_on_server({ history, disable_server_side_rendering, create_page_element, render_webpage, store, routes, before_render })
 {
 	// Routing only takes a couple of milliseconds
 	// const routing_timer = timer()
@@ -61,6 +61,13 @@ export default function render_on_server({ history, disable_server_side_renderin
 		{
 			time.preload = preload_timer()
 
+			if (before_render)
+			{
+				return before_render(store)
+			}
+		})
+		.then(() =>
+		{
 			if (disable_server_side_rendering)
 			{
 				// Render the empty <Html/> component into Html markup string

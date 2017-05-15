@@ -21,7 +21,7 @@ import { Preload } from '../redux/actions'
 
 // isomorphic (universal) rendering (middleware).
 // will be used in web_application.use(...)
-export default async function(settings, { initialize, localize, assets, application, request, render, loading, html = {}, cookies })
+export default async function(settings, { initialize, localize, assets, application, request, render, loading, html = {}, cookies, beforeRender })
 {
 	settings = normalize_common_settings(settings)
 
@@ -140,6 +140,7 @@ export default async function(settings, { initialize, localize, assets, applicat
 			disable_server_side_rendering: render === false,
 			history,
 			routes,
+			before_render: beforeRender,
 
 			create_page_element: (child_element, props) => 
 			{

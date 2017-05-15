@@ -1735,6 +1735,10 @@ If you're using Webpack then make sure you either build your server-side code wi
   render: `true`/`false`
 
   // (optional)
+  // Is called after all `@preload()`s finish and before React renders.
+  beforeRender: async ({ dispatch, getState }) => {}
+
+  // (optional)
   // Markup for "loading" screen
   // (when server-side rendering is disabled).
   // Can be a String, or a React.Element, or an array of React.Elements
