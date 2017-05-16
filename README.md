@@ -1249,8 +1249,8 @@ server.on('connection', (socket) => {
   socket.on('close', async () => {
     console.log('Client disconnected')
 
-    if (userConnections[message.userId]) {
-      userConnections[message.userId].remove(socket)
+    if (socket.userId && userConnections[socket.userId]) {
+      userConnections[socket.userId].remove(socket)
     }
   })
 
@@ -1265,12 +1265,13 @@ server.on('connection', (socket) => {
       switch (message.command) {
         case 'initialize':
           // (make sure `message.userId` is a `String`)
+          socket.userId = message.userId
 
-          if (!userConnections[message.userId]) {
-            userConnections[message.userId] = []
+          if (!userConnections[socket.userId]) {
+            userConnections[socket.userId] = []
           }
 
-          userConnections[message.userId].push(socket)
+          userConnections[socket.userId].push(socket)
 
           return socket.send(JSON.stringify({
             command: 'initialized',
