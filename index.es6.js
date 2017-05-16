@@ -13,7 +13,8 @@ from './es6/redux/preload'
 export
 {
 	default as render,
-	getState
+	getState,
+	getHttpClient
 }
 from './es6/redux/client/client'
 

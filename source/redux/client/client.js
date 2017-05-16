@@ -26,6 +26,8 @@ export default function set_up_and_render(settings, options = {})
 
 	// Create HTTP client (Redux action creator `http` utility)
 	const http_client = create_http_client(settings, () => store, get_protected_cookie_value())
+	// E.g. for WebSocket message handlers, since they only run on the client side.
+	window._react_isomorphic_render_http_client = http_client
 
 	// Reset "instant back" on page reload
 	// since Redux state is cleared.
@@ -168,4 +170,12 @@ export function getState(erase)
 	}
 
 	return state
+}
+
+// Returns `http` utility on the client side.
+// Can be used in WebSocket message handlers,
+// since they only run on the client side.
+export function getHttpClient()
+{
+	return window._react_isomorphic_render_http_client
 }
