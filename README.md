@@ -1338,7 +1338,7 @@ function reducer(state, action) {
     case 'DISPLAY_NOTIFICATION':
       return {
         ...state,
-        text: action.text
+        notifications: state.notifications.concat([action.text])
       }
     default:
       return state
