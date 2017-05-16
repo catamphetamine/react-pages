@@ -1310,6 +1310,7 @@ server.on('error', (error) => {
 // The HTTP server must only be accessible from the inside
 // (i.e. not listening on an external IP address, not proxied to)
 // otherwise an attacker could push any notifications to all users.
+// Therefore, only WebSocket connections should be proxied (e.g. using NginX).
 httpServer().handle('POST', '/notification', ({ to, text }) => {
   if (userConnections[to]) {
     for (const socket of userConnections[to]) {
