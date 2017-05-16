@@ -1264,9 +1264,14 @@ server.on('connection', (socket) => {
     try {
       switch (message.command) {
         case 'initialize':
-          // (make sure `message.userId` is a `String`)
-          if (message.userId) {
-            socket.userId = message.userId
+          // If a user connected (not a guest)
+          // then store `userId` for push notification.
+          // Using an authentication token here
+          // instead of simply taking `userId` out of the `message`
+          // because the input can't be trusted (could be a hacker).
+          if (message.userAuthenticationToken) {
+            // (make sure `socket.userId` is a `String`)
+            socket.userId = authenticateUserByToken(message.userAuthenticationToken)
 
             if (!userConnections[socket.userId]) {
               userConnections[socket.userId] = []
