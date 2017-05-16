@@ -1271,6 +1271,10 @@ server.on('connection', (socket) => {
           // because the input can't be trusted (could be a hacker).
           if (message.userAuthenticationToken) {
             // (make sure `socket.userId` is a `String`)
+            // The token could be a JWT token (jwt.io)
+            // and `authenticateUserByToken` function could
+            // check the token's authenticity (by verifying its signature)
+            // and then extract `userId` out of the token payload.
             socket.userId = authenticateUserByToken(message.userAuthenticationToken)
 
             if (!userConnections[socket.userId]) {
