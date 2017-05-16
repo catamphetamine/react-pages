@@ -104,6 +104,13 @@ from './es6/redux/client/websocket'
 
 export
 {
+	get_cookie_in_a_browser as get_cookie,
+	get_cookie_in_a_browser as getCookie
+}
+from './es6/cookies'
+
+export
+{
 	replace_location,
 	replace_location as replaceLocation,
 	push_location,

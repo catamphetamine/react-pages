@@ -40,6 +40,8 @@ import
 	IndexLink,
 	authorize,
 	websocket,
+	get_cookie,
+	getCookie,
 	replace_location,
 	replaceLocation,
 	push_location,
@@ -98,6 +100,9 @@ describe(`exports`, function()
 
 		authorize(() => {}, () => {}, () => {}).should.be.a('function')
 		websocket.should.be.a('function')
+
+		get_cookie.should.be.a('function')
+		getCookie.should.be.a('function')
 
 		replace_location.should.be.a('function')
 		replaceLocation.should.be.a('function')
@@ -158,6 +163,9 @@ describe(`exports`, function()
 
 		_.authorize(() => {}, () => {}, () => {}).should.be.a('function')
 		_.websocket.should.be.a('function')
+
+		_.get_cookie.should.be.a('function')
+		_.getCookie.should.be.a('function')
 
 		_.replace_location.should.be.a('function')
 		_.replaceLocation.should.be.a('function')

@@ -2,6 +2,7 @@ import superagent from 'superagent'
 
 import { is_object, starts_with } from './helpers'
 import parse_dates from './date parser'
+import { get_cookie_in_a_browser } from './cookies'
 
 // This is an isomorphic (universal) HTTP client
 // which works both on Node.js and in the web browser,
@@ -544,20 +545,6 @@ class Http_request
 			default:
 				return response.text
 		}
-	}
-}
-
-// https://learn.javascript.ru/cookie
-function get_cookie_in_a_browser(name)
-{
-	const matches = document.cookie.match(new RegExp
-	(
-		'(?:^|; )' + name.replace(/([\.$?*|{}\(\)\[\]\\\/\+^])/g, '\\$1') + '=([^;]*)'
-	))
-
-	if (matches)
-	{
-		return decodeURIComponent(matches[1])
 	}
 }
 

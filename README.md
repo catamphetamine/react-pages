@@ -1307,6 +1307,9 @@ server.on('error', (error) => {
 
 // Also an HTTP server is started and a REST API endpoint is exposed
 // which can be used for pushing notifications to clients via WebSocket.
+// The HTTP server must only be accessible from the inside
+// (i.e. not listening on an external IP address, not proxied to)
+// otherwise an attacker could push any notifications to all users.
 httpServer().handle('POST', '/notification', ({ to, text }) => {
   if (userConnections[to]) {
     for (const socket of userConnections[to]) {

@@ -1,7 +1,10 @@
 import RobustWebSocket from '../../robust-websocket'
 import CustomEvent from '../../custom event'
 
-// Sets up WebSocket connection
+// Sets up WebSocket connection.
+//
+// Legacy `token` option is deprecated and will be removed in any future major release.
+//
 export default function websocket({ host, port, secure, store, token, autoDispatch })
 {
 	const _websocket = new RobustWebSocket(`${secure ? 'wss' : 'ws'}://${host}:${port}`, undefined,
@@ -45,6 +48,7 @@ export default function websocket({ host, port, secure, store, token, autoDispat
 	{
 		send(message)
 		{
+			// Legacy `token` option is deprecated and will be removed in any future major release.
 			if (token)
 			{
 				message =
