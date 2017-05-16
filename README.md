@@ -1265,7 +1265,7 @@ server.on('connection', (socket) => {
       switch (message.command) {
         case 'initialize':
           // If a user connected (not a guest)
-          // then store `userId` for push notification.
+          // then store `userId` for push notifications.
           // Using an authentication token here
           // instead of simply taking `userId` out of the `message`
           // because the input can't be trusted (could be a hacker).
