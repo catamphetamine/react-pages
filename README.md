@@ -1248,6 +1248,8 @@ const userConnections = {}
 server.on('connection', (socket) => {
   console.log('Incoming WebSocket connection')
 
+  socket.sendMessage = (message) => socket.send(JSON.stringify(message))
+
   socket.on('close', async () => {
     console.log('Client disconnected')
 
@@ -1286,16 +1288,16 @@ server.on('connection', (socket) => {
             userConnections[socket.userId].push(socket)
           }
 
-          return socket.send(JSON.stringify({
+          return socket.sendMessage({
             command: 'initialized',
             data: ...
-          }))
+          })
 
         default:
-          return socket.send(JSON.stringify({
+          return socket.sendMessage({
             status: 404,
             error: `Unknown command: ${message.command}`
-          }))
+          })
       }
     } catch (error) {
       console.error(error)
@@ -1316,10 +1318,10 @@ server.on('error', (error) => {
 httpServer().handle('POST', '/notification', ({ to, text }) => {
   if (userConnections[to]) {
     for (const socket of userConnections[to]) {
-      socket.send(JSON.stringify({
+      socket.sendMessage({
         command: 'notification',
         text
-      }))
+      })
     }
   }
 })
@@ -1329,10 +1331,10 @@ Feature: upon receiving a `message` (on the client side) having a `type` propert
 
 ```js
 // Server side (REST API endpoint)
-socket.send(JSON.stringify({
+socket.sendMessage({
   type: 'DISPLAY_NOTIFICATION',
   text
-}))
+})
 
 // Client side (Redux reducer)
 function reducer(state, action) {
