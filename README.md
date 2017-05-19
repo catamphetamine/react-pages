@@ -1741,7 +1741,7 @@ error: (error, { url, path, redirect, dispatch, getState }) => console.error(err
   // On the other hand, if a developer fights for each millisecond
   // then `localize()` should just return `messages` from memory.
   //
-  localize: (store, preferredLocales) => ({ locale: preferredLocales[0], messages: { 'page.heading': 'Test' } })
+  localize: ({ store }, preferredLocales) => ({ locale: preferredLocales[0], messages: { 'page.heading': 'Test' } })
 
   // Is React Server Side Rendering enabled?
   // (is `true` by default)
