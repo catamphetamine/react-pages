@@ -109,6 +109,7 @@ export default class http_client
 				return protected_cookie_value
 			}
 
+			// A regular cookie which can be read by a web browser
 			return get_cookie_in_a_browser(name)
 		})
 
@@ -116,7 +117,7 @@ export default class http_client
 		// Therefore calling `.agent()` explicitly to enable setting cookies.
 		const agent = this.server ? superagent.agent() : superagent
 
-		// Define HTTP methods on this instance
+		// Define HTTP methods on this `http` utility instance
 		for (let method of http_methods)
 		{
 			this[method] = (path, data, options = {}) =>
@@ -184,8 +185,29 @@ export default class http_client
 						request.progress(options.progress)
 					}
 
-					// Send HTTP request
-					return request.send().then
+					// If using `bluebird` and `Promise` cancellation is configured
+					// http://bluebirdjs.com/docs/api/cancellation.html
+					return new Promise((resolve, reject, onCancel) =>
+					{
+						// Send HTTP request
+						request.send().then(resolve, reject)
+
+						// If using `bluebird` and `Promise` cancellation is configured
+						// http://bluebirdjs.com/docs/api/cancellation.html
+						// https://github.com/petkaantonov/bluebird/issues/1323
+						if (Promise.version && onCancel)
+						{
+							onCancel(() => request.request.abort())
+						}
+
+						// One could store the `request` to later `.abort()` it.
+						// https://github.com/halt-hammerzeit/react-isomorphic-render/issues/46
+						if (options.onRequest)
+						{
+							options.onRequest(request.request)
+						}
+					})
+					.then
 					(
 						(response) => response,
 						(error) =>
@@ -200,8 +222,6 @@ export default class http_client
 							// with no additional parameters
 							// such as `path`, `httpOnly` and `expires`,
 							// so there were cookie duplication issues.
-							//
-							// now superagent.agent() handles cookies correctly.
 							//
 							// if (response)
 							// {

@@ -328,6 +328,7 @@ The possible `options` are
   * `headers` — HTTP Headers JSON object
   * `authentication` — set to `false` to disable sending the authentication token as part of the HTTP request, set to a String to pass it as an `Authorization: Bearer ${token}` token
   * `progress(percent, event)` — for tracking HTTP request progress (e.g. file upload)
+  * `onRequest(request)` – for capturing `superagent` request (there was [a feature request](https://github.com/halt-hammerzeit/react-isomorphic-render/issues/46) to provide a way for aborting running HTTP requests via `request.abort()`)
 
 `http` utility is also available from anywhere on the client side via an exported `getHttpClient()` function.
 
