@@ -200,12 +200,12 @@ export default class http_client
 							onCancel(() => request.request.abort())
 						}
 
-						// One could store the `request` to later `.abort()` it.
-						// https://github.com/halt-hammerzeit/react-isomorphic-render/issues/46
-						if (options.onRequest)
-						{
-							options.onRequest(request.request)
-						}
+						// // One could store the `request` to later `.abort()` it.
+						// // https://github.com/halt-hammerzeit/react-isomorphic-render/issues/46
+						// if (options.onRequest)
+						// {
+						// 	options.onRequest(request.request)
+						// }
 					})
 					.then
 					(

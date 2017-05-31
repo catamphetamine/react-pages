@@ -12,7 +12,23 @@ export function action(options, handler)
 		throw new Error('You must pass "handler" as the second argument of "action()"')
 	}
 
-	let { type, namespace, event, promise, action, payload, result } = options
+	const
+	{
+		type,
+		namespace,
+		promise,
+		action,
+		cancelPrevious
+	}
+	= options
+
+	let
+	{
+		event,
+		payload,
+		result
+	}
+	= options
 
 	// For those who still prefer `type` over `event`
 	if (!event && type)
@@ -56,7 +72,8 @@ export function action(options, handler)
 		return (...parameters) =>
 		({
 			event   : event_name(namespace, event),
-			promise : http => (action || promise).apply(this, parameters.concat(http))
+			promise : http => (action || promise).apply(this, parameters.concat(http)),
+			cancelPrevious
 		})
 	}
 

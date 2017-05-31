@@ -13,9 +13,13 @@ export default function asynchronous_middleware(http_client, asynchronous_action
 {
 	return ({ dispatch, getState }) =>
 	{
+		// Can cancel previous actions of the same `type` (if configured).
+		// E.g. for an AJAX autocomplete.
+		const cancellable_promises = new Map()
+
 		return next => action =>
 		{
-			let { promise, event, events, ...rest } = action
+			let { promise, event, events, cancelPrevious, ...rest } = action
 
 			// If the dispatched action doesn't have a `promise` function property then do nothing
 			if (typeof promise !== 'function')
@@ -50,12 +54,33 @@ export default function asynchronous_middleware(http_client, asynchronous_action
 				throw new Error(`"promise" function must return a Promise. Got:`, promised)
 			}
 
+			// Is the action promise cancellable
+			const cancellable = !server && cancelPrevious && typeof promised.cancel === 'function'
+
+			// Cancel previous action of the same `type` (if configured).
+			// E.g. for an AJAX autocomplete.
+			if (cancellable)
+			{
+				if (cancellable_promises.has(Request))
+				{
+					cancellable_promises.get(Request).cancel()
+				}
+
+				cancellable_promises.set(Request, promised)
+			}
+
 			return promised.then
 			(
 				// If the Promise resolved
 				// (e.g. an HTTP request succeeded)
 				(result) =>
 				{
+					// The default `Promise` implementation has no `.finally()`
+					if (cancellable)
+					{
+						cancellable_promises.delete(Request)
+					}
+
 					// Dispatch the `success` event to the Redux store
 					dispatch
 					({
@@ -74,6 +99,12 @@ export default function asynchronous_middleware(http_client, asynchronous_action
 				//  or the Http response JSON object has an `error` field)
 				(error) =>
 				{
+					// The default `Promise` implementation has no `.finally()`
+					if (cancellable)
+					{
+						cancellable_promises.delete(Request)
+					}
+
 					// Transform Javascript `Error` instance into a plain JSON object
 					// because the meaning of the `error` action is different
 					// from what `Error` class is: it should only carry info like

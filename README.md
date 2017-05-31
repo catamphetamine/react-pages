@@ -297,7 +297,9 @@ function asynchronousAction() {
 
 This is a handy way of dealing with "asynchronous actions" in Redux, e.g. Ajax requests for HTTP REST API (see the "HTTP utility" section below).
 
-P.S.: When you find yourself copy-pasting those `_PENDING`, `_SUCCESS` and `_ERROR` event names from one action creator to another then take a look at `asynchronousActionEventNaming` setting described in the [All `react-isomorphic-render.js` settings](https://github.com/halt-hammerzeit/react-isomorphic-render#all-react-isomorphic-renderjs-settings) section of this document: it lets a developer just supply a "base" `event` name and then it generates the three lifecycle event names from that "base" `event` significantly reducing boilerplate.
+### Autogenerate event names
+
+When you find yourself copy-pasting those `_PENDING`, `_SUCCESS` and `_ERROR` event names from one action creator to another then take a look at `asynchronousActionEventNaming` setting described in the [All `react-isomorphic-render.js` settings](https://github.com/halt-hammerzeit/react-isomorphic-render#all-react-isomorphic-renderjs-settings) section of this document: it lets a developer just supply a "base" `event` name and then it generates the three lifecycle event names from that "base" `event` significantly reducing boilerplate.
 
 ### HTTP utility
 
@@ -328,7 +330,10 @@ The possible `options` are
   * `headers` — HTTP Headers JSON object
   * `authentication` — set to `false` to disable sending the authentication token as part of the HTTP request, set to a String to pass it as an `Authorization: Bearer ${token}` token
   * `progress(percent, event)` — for tracking HTTP request progress (e.g. file upload)
+
+<!--
   * `onRequest(request)` – for capturing `superagent` request (there was [a feature request](https://github.com/halt-hammerzeit/react-isomorphic-render/issues/46) to provide a way for aborting running HTTP requests via `request.abort()`)
+-->
 
 `http` utility is also available from anywhere on the client side via an exported `getHttpClient()` function.
 
@@ -385,6 +390,35 @@ function uploadItemPhoto(itemId, file) {
 ### JSON Date parsing
 
 By default, when using `http` utility all JSON responses get parsed for javascript `Date`s which are then automatically converted from `String`s to `Date`s. This is convenient, and also safe because such date `String`s have to be in a very specific ISO format in order to get parsed (`year-month-dayThours:minutes:seconds[timezone]`), but if someone still prefers to disable this feature and have his `String`ified `Date`s back then there's the `parseDates: false` flag in the configuration to opt-out of this feature.
+
+### Cancelling previous action
+
+(advanced feature; skip this freely)
+
+E.g. for an autocomplete component querying backend for matches it can be useful to be able to abort the previous search for matches when the user enters additional characters. In this case `Promise` cancellation feature can be employed which requires using `bluebird` `Promise` implementation being configured for `Promise` cancellation and passing `cancelPrevious: true` flag in an asynchronous Redux "action".
+
+```js
+function autocompleteMatch() {
+  return {
+    promise: (inputValue, http) => http.get(`/search?query=${inputValue}`),
+    events: ['AUTOCOMPLETE_MATCH_PENDING', 'AUTOCOMPLETE_MATCH_SUCCESS', 'AUTOCOMPLETE_MATCH_ERROR'],
+    cancelPrevious: true
+  }
+}
+```
+
+Gotcha: when relying on `bluebird` `Promise` cancellation don't use `async/await` syntax which is transpiled by Babel using [Facebook's `regenerator`](https://github.com/facebook/regenerator) (as of 2017) which doesn't use `Promise`s internally meaning that the following `async/await` rewrite won't actually cancel the previous action:
+
+```js
+// Action cancellation won't work
+function autocompleteMatch() {
+  return {
+    promise: async (inputValue, http) => await http.get(`/search?query=${inputValue}`),
+    events: ['AUTOCOMPLETE_MATCH_PENDING', 'AUTOCOMPLETE_MATCH_SUCCESS', 'AUTOCOMPLETE_MATCH_ERROR'],
+    cancelPrevious: true
+  }
+}
+```
 
 ## Page preloading
 
