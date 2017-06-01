@@ -395,7 +395,7 @@ By default, when using `http` utility all JSON responses get parsed for javascri
 
 (advanced feature; skip this freely)
 
-E.g. for an autocomplete component querying backend for matches it can be useful to be able to abort the previous search for matches when the user enters additional characters. In this case `Promise` cancellation feature can be employed which requires using `bluebird` `Promise` implementation being configured for `Promise` cancellation and passing `cancelPrevious: true` flag in an asynchronous Redux "action".
+E.g. for an autocomplete component querying backend for matches it can be useful to be able to abort the previous search for matches when the user enters additional characters. In this case `Promise` cancellation feature can be employed which requires using `bluebird` `Promise` implementation being [configured](http://bluebirdjs.com/docs/api/cancellation.html) for `Promise` cancellation and passing `cancelPrevious: true` flag in an asynchronous Redux "action".
 
 ```js
 function autocompleteMatch() {
