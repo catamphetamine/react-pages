@@ -461,7 +461,7 @@ In the example above `@preload()` helper is called to preload a web page before 
 [`@preload()` decorator](https://github.com/halt-hammerzeit/react-isomorphic-render/blob/master/source/redux/preload.js) takes a function which must return a `Promise`:
 
 ```javascript
-@preload(function({ dispatch, getState, location, parameters }) {
+@preload(function({ dispatch, getState, history, location, parameters }) {
   return Promise
 })
 ```

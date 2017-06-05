@@ -173,6 +173,7 @@ export default function preloading_middleware(server, error_handler, preload_hel
 				components,
 				getState,
 				preloader_dispatch(dispatch, preloading),
+				get_history(),
 				location,
 				params,
 				preload_helpers
@@ -345,9 +346,9 @@ function proceed_with_navigation(dispatch, action, server, get_history, previous
 //
 // If no preloading is needed, then returns nothing.
 //
-const preloader = (initial_client_side_preload, server, routes, components, getState, dispatch, location, parameters, preload_helpers) =>
+const preloader = (initial_client_side_preload, server, routes, components, getState, dispatch, history, location, parameters, preload_helpers) =>
 {
-	let preload_arguments = { dispatch, getState, location, parameters }
+	let preload_arguments = { dispatch, getState, history, location, parameters }
 
 	if (preload_helpers)
 	{
