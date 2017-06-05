@@ -438,7 +438,10 @@ class Http_request
 			cookies_raw = Object.keys(cookies).map(key => `${key}=${cookies[key]}`).join(';')
 		}
 
-		this.request.set('cookie', cookies_raw)
+		if (cookies_raw)
+		{
+			this.request.set('cookie', cookies_raw)
+		}
 	}
 
 	// File upload progress metering
