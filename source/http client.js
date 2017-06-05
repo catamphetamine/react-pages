@@ -416,7 +416,7 @@ class Http_request
 
 	// Server side only
 	// (copies user authentication cookies to retain session specific data)
-	add_cookies(cookies_raw, set_cookies)
+	add_cookies(cookies_raw = '', set_cookies)
 	{
 		// Merge `cookies_raw` and `set_cookies` (a `Set`)
 		if (set_cookies.size > 0)
