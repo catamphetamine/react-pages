@@ -50,7 +50,7 @@ export default function create_store(settings, data, get_history, http_client, o
 			server,
 			http.error,
 			get_history,
-			http.errorData || (error) => is_object(error.data) ? error.data : undefined
+			http.errorData || ((error) => is_object(error.data) ? error.data : undefined)
 		),
 
 		// Makes @preload() decorator work.
