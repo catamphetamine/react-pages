@@ -1521,6 +1521,12 @@ error: (error, { url, path, redirect, dispatch, getState }) => console.error(err
     // * `store` – Redux store.
     //
     // * `http` – `http` utility.
+
+    // Transforms an `Error` instance, thrown by `http`
+    // in case of an HTTP request error, to a JSON object.
+    // Looks for the `.data` property by default.
+    // May return `undefined` for an empty JSON object.
+    errorData: (error) => ...
   }
 
   // (optional)
