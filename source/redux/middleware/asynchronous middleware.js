@@ -1,4 +1,4 @@
-import { exists } from '../../helpers'
+import { exists, is_object } from '../../helpers'
 import { goto_action } from '../actions'
 import { location_url } from '../../location'
 
@@ -9,7 +9,7 @@ import { location_url } from '../../location'
 //
 // `dispatch()` call will return a `Promise`.
 //
-export default function asynchronous_middleware(http_client, asynchronous_action_event_naming, server, on_error, get_history, get_error_data)
+export default function asynchronous_middleware(http_client, asynchronous_action_event_naming, server, on_error, get_history)
 {
 	return ({ dispatch, getState }) =>
 	{
@@ -113,7 +113,10 @@ export default function asynchronous_middleware(http_client, asynchronous_action
 					// I.e. the `error` action should be a plain javascript object,
 					// not an instance of an `Error` class, because it's Redux (stateless).
 
-					const error_data = get_error_data(error) || {}
+					// `error` is an `Error` instance thrown by `http client.js`.
+					// It has `.data` JSON object set to HTTP response data
+					// in case of an `application/json` response.
+					const error_data = is_object(error.data) ? error.data : {}
 
 					if (!exists(error_data.message))
 					{

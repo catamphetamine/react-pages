@@ -5,7 +5,6 @@ import preloading_middleware from './middleware/preloading middleware'
 import history_middleware from './middleware/history middleware'
 
 import { LoadState } from './actions'
-import { is_object } from '../helpers'
 
 export default function create_store(settings, data, get_history, http_client, options)
 {
@@ -49,8 +48,7 @@ export default function create_store(settings, data, get_history, http_client, o
 			asynchronous_action_event_naming,
 			server,
 			http.error,
-			get_history,
-			http.errorData || ((error) => is_object(error.data) ? error.data : undefined)
+			get_history
 		),
 
 		// Makes @preload() decorator work.
