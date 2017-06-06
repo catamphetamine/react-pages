@@ -1391,25 +1391,6 @@ If you're using Webpack then make sure you either build your server-side code wi
 
 ## All `react-isomorphic-render.js` settings
 
-<!--
-// (optional)
-error: (error, { url, path, redirect, dispatch, getState }) => console.error(error)
-//
-// Is called when `http` calls either fail or return an error.
-// Is not called during `@preload()`s and therefore
-// can only be called as part of an HTTP call
-// triggered by some user interaction in a web browser.
-//
-// For example, Auth0 users may listen for
-// JWT token expiration here and redirect to a login page.
-// But a better solution for handling access token expiration
-// is using `http.catch()` function parameter (see below).
-//
-// Due to the introduction of `http.catch()` function parameter
-// I don't see a reason for `http.error()` function parameter existence.
-// It's likely to be removed in a future major release.
--->
-
 ```javascript
 {
   // React-router routes
@@ -1482,6 +1463,19 @@ error: (error, { url, path, redirect, dispatch, getState }) => console.error(err
       // In this case `.application` configuration parameter may be removed
       return `https://api-server.com${path}`
     }
+
+    // (optional)
+    error: (error, { url, path, redirect, dispatch, getState }) => console.error(error)
+    //
+    // Is called when `http` calls either fail or return an error.
+    // Is not called during `@preload()`s and therefore
+    // can only be called as part of an HTTP call
+    // triggered by some user interaction in a web browser.
+    //
+    // For example, Auth0 users may listen for
+    // JWT token expiration here and redirect to a login page.
+    // There's an alternative solution for handling access token expiration:
+    // the `http.catch()` function parameter (see below).
 
     // (optional)
     // (experimental: didn't test this function parameter but it's likely to work)
