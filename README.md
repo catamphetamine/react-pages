@@ -503,6 +503,8 @@ To run `@preload()` only on client side (e.g. when hosting websites statically i
 @preload(({ dispatch }) => dispatch(loadContent()), { client: true })
 ```
 
+Gotcha: `{ client: true }` option **is required** on all `@preload()`s if the website doesn't have the server-side webpage rendering service running (e.g. if the website is hosted statically in the cloud), otherwise `@preload()`s won't fire on initial page load.
+
 Sometimes preloading a page can take some time to finish so one may want to (and actually should) add some kind of a "spinner" to inform the user that the application isn't frozen and the navigation process needs some more time to finish. This can be achieved by adding a Redux reducer listening to these three Redux events:
 
 ```javascript
