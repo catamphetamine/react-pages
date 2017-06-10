@@ -1,4 +1,4 @@
-This section contains advanced topics. This means that the features and gotchas described here are for those who have already spent some time with this library and therefore won't be overwhelmed and confused by the topics covered here.
+This section contains advanced topics. This means that the features described here are for those who have already spent some time with this library and therefore won't be overwhelmed and confused by the topics covered here.
 
 ## react-router-redux
 
