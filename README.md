@@ -275,14 +275,14 @@ try {
 }
 ```
 
-## Ajax
+## Making HTTP Requests
 
-If a Redux action creator returns an object with `promise` (function) and `events` (array) keys then this action is assumed asynchronous.
+If a Redux action creator returns an object with a `promise` (function) and `events` (array) then this action is assumed asynchronous.
 
- * An event of `type` `events[0]` is dispatched
+ * An event of `type = events[0]` is dispatched
  * `promise` function gets called and returns a `Promise`
- * If the `Promise` succeeds then an event of `type` `events[1]` is dispatched having `result` property set to the `Promise` result
- * If the `Promise` fails then an event of `type` `events[2]` is dispatched having `error` property set to the `Promise` error
+ * If the `Promise` succeeds then an event of `type = events[1]` is dispatched having `result` property set to the `Promise` result
+ * If the `Promise` fails then an event of `type = events[2]` is dispatched having `error` property set to the `Promise` error
 
 Example:
 
@@ -295,11 +295,11 @@ function asynchronousAction() {
 }
 ```
 
-This is a handy way of dealing with "asynchronous actions" in Redux, e.g. Ajax requests for HTTP REST API (see the "HTTP utility" section below).
+This is a handy way of dealing with "asynchronous actions" in Redux, e.g. HTTP requests for a server-side HTTP REST API (see the "HTTP utility" section below).
 
 ### Autogenerate event names
 
-When you find yourself copy-pasting those `_PENDING`, `_SUCCESS` and `_ERROR` event names from one action creator to another then take a look at `asynchronousActionEventNaming` setting described in the [All `react-isomorphic-render.js` settings](https://github.com/halt-hammerzeit/react-isomorphic-render#all-react-isomorphic-renderjs-settings) section of this document: it lets a developer just supply a "base" `event` name and then it generates the three lifecycle event names from that "base" `event` significantly reducing boilerplate.
+When you find yourself copy-pasting those `_PENDING`, `_SUCCESS` and `_ERROR` event names from one action creator to another then take a look at `asynchronousActionEventNaming` setting described in the [All `react-isomorphic-render.js` settings](https://github.com/halt-hammerzeit/react-isomorphic-render/blob/master/README-ADVANCED.md#all-react-isomorphic-renderjs-settings) section of the "advanced" readme: it lets a developer just supply a "base" `event` name and then it generates the three lifecycle event names from that "base" `event` significantly reducing boilerplate.
 
 ### HTTP utility
 
@@ -308,7 +308,7 @@ For convenience, the argument of the `promise` function parameter of "asynchrono
 ```js
 function fetchAdmins() {
   return {
-    promise: http => http.get('/api/users', { role: 'admin' }),
+    promise: (http) => http.get('/api/users', { role: 'admin' }),
     events: ['GET_USERS_PENDING', 'GET_USERS_SUCCESS', 'GET_USERS_FAILURE']
   }
 }
@@ -319,7 +319,7 @@ Using ES6 `async/await` this `promise` function can be rewritten as
 ```js
 function fetchAdmins() {
   return {
-    promise: async http => await http.get('/api/users', { role: 'admin' }),
+    promise: async (http) => await http.get('/api/users', { role: 'admin' }),
     events: ['GET_USERS_PENDING', 'GET_USERS_SUCCESS', 'GET_USERS_FAILURE']
   }
 }
@@ -390,35 +390,6 @@ function uploadItemPhoto(itemId, file) {
 ### JSON Date parsing
 
 By default, when using `http` utility all JSON responses get parsed for javascript `Date`s which are then automatically converted from `String`s to `Date`s. This is convenient, and also safe because such date `String`s have to be in a very specific ISO format in order to get parsed (`year-month-dayThours:minutes:seconds[timezone]`), but if someone still prefers to disable this feature and have his `String`ified `Date`s back then there's the `parseDates: false` flag in the configuration to opt-out of this feature.
-
-### Cancelling previous action
-
-(advanced feature; skip this freely)
-
-E.g. for an autocomplete component querying backend for matches it can be useful to be able to abort the previous search for matches when the user enters additional characters. In this case `Promise` cancellation feature can be employed which requires using `bluebird` `Promise` implementation being [configured](http://bluebirdjs.com/docs/api/cancellation.html) for `Promise` cancellation and passing `cancelPrevious: true` flag in an asynchronous Redux "action".
-
-```js
-function autocompleteMatch() {
-  return {
-    promise: (inputValue, http) => http.get(`/search?query=${inputValue}`),
-    events: ['AUTOCOMPLETE_MATCH_PENDING', 'AUTOCOMPLETE_MATCH_SUCCESS', 'AUTOCOMPLETE_MATCH_ERROR'],
-    cancelPrevious: true
-  }
-}
-```
-
-Gotcha: when relying on `bluebird` `Promise` cancellation don't use `async/await` syntax which is transpiled by Babel using [Facebook's `regenerator`](https://github.com/facebook/regenerator) (as of 2017) which doesn't use `Promise`s internally meaning that the following `async/await` rewrite won't actually cancel the previous action:
-
-```js
-// Action cancellation won't work
-function autocompleteMatch() {
-  return {
-    promise: async (inputValue, http) => await http.get(`/search?query=${inputValue}`),
-    events: ['AUTOCOMPLETE_MATCH_PENDING', 'AUTOCOMPLETE_MATCH_SUCCESS', 'AUTOCOMPLETE_MATCH_ERROR'],
-    cancelPrevious: true
-  }
-}
-```
 
 ## Page preloading
 
@@ -491,8 +462,6 @@ npm install babel-plugin-transform-decorators-legacy --save
 }
 ```
 
-P.S.: if `@preload()` decorator seems not working for no reason (though it definitely should) then try to place it on top of all other decorators. Internally it adds a special static method to your `Route`'s `component` and some decorators on top of it may not retain that static method (though all proper decorators nowadays do retain static methods and variables of wrapped components using [`hoist-non-react-statics`](https://github.com/mridgway/hoist-non-react-statics)).
-
 On the client side, in order for `@preload` to work all `<Link/>`s imported from `react-router` **must** be instead imported from `react-isomorphic-render`. Upon a click on a `<Link/>` first it waits for the next page to preload, and then, when the next page is fully loaded, it is displayed to the user and the URL in the address bar is updated.
 
 `@preload()` also works for Back/Forward web browser buttons navigation. If one `@preload()` is in progress and another `@preload()` starts (e.g. Back/Forward browser buttons) the first `@preload()` will be cancelled if `bluebird` `Promise`s are used in the project and also if `bluebird` is configured for [`Promise` cancellation](http://bluebirdjs.com/docs/api/cancellation.html) (this is an advanced feature and is not required for operation). `@preload()` can be disabled for certain "Back" navigation cases by passing `instantBack` property to a `<Link/>` (e.g. for links on search results pages).
@@ -503,7 +472,9 @@ To run `@preload()` only on client side (e.g. when hosting websites statically i
 @preload(({ dispatch }) => dispatch(loadContent()), { client: true })
 ```
 
-Gotcha: `{ client: true }` option **is required** on all `@preload()`s if the website doesn't have the server-side webpage rendering service running (e.g. if the website is hosted statically in the cloud), otherwise `@preload()`s won't fire on initial page load.
+Gotcha: `{ client: true }` option **is required** on all `@preload()`s if the website doesn't have the server-side webpage rendering service running (e.g. if the website is hosted entirely statically in the cloud) otherwise `@preload()`s won't fire on initial page load.
+
+### `@preload()` indicator
 
 Sometimes preloading a page can take some time to finish so one may want to (and actually should) add some kind of a "spinner" to inform the user that the application isn't frozen and the navigation process needs some more time to finish. This can be achieved by adding a Redux reducer listening to these three Redux events:
 
@@ -566,7 +537,7 @@ export default class Preload extends Component {
 }
 ```
 
-## HTTP response status code
+## Page HTTP response status code
 
 To set a custom HTTP response status code for a specific route set the `status` property of that `<Route/>`.
 
@@ -583,7 +554,7 @@ export default (
 
 ## Utilities
 
-### Setting webpage title, description, <meta/> tags
+### Setting <title/> and <meta/> tags
 
 This package uses [react-helmet](https://github.com/nfl/react-helmet) under the hood.
 
@@ -598,14 +569,15 @@ import { Title, Meta } from 'react-isomorphic-render'
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"/>
   <meta property="og:title" content="International Bodybuilders Club"/>
-  <meta property="og:description" content="Do some push ups"/>
-  <meta property="og:locale" content="ru-RU"/>
+  <meta property="og:description" content="This page explains how to do some simple push ups"/>
+  <meta property="og:image" content="https://www.google.ru/images/branding/googlelogo/2x/googlelogo_color_120x44dp.png"/>
+  <meta property="og:locale" content="ru_RU"/>
 </Meta>
 ```
 
 ### Handling asynchronous actions
 
-Once one starts writing a lot of Ajax calls in Redux it becomes obvious that there's **a lot** of boilerplate copy-pasting involved. To reduce those tremendous amounts of copy-pasta an "asynchronous action handler" may be used:
+Once one starts writing a lot of `http` calls in Redux actions it becomes obvious that there's **a lot** of copy-pasting involved. To reduce those tremendous amounts of copy-pasta an "asynchronous action handler" may be used:
 
 #### redux/blogPost.js
 
@@ -872,58 +844,6 @@ export const connector = stateConnector(handler)
 export default handler.reducer()
 ```
 
-### Authorized routes
-
-For authorized routes use the `authorize` helper (kinda "decorator")
-
-```js
-import { authorize } from 'react-isomorphic-render'
-
-// Gets `user` from Redux state
-const getUser = state => state.authentication.user
-
-// Restricts a `<Route/>` to a certain part of users
-const restricted = (route, authorization) => authorize(getUser, authorization, route)
-
-const routes = (
-  <Route path="/" component={ Layout }>
-    <Route path="public" component={ Public }/>
-    <Route path="settings" component={ restricted(UserSettings) }/>
-    <Route path="admin" component={ restricted(AdminPanel, user => user.role === 'admin') }/>
-    <Route path="only-me" component={ restricted(OnlyMe, user => user.id === 1) }/>
-  </Route>
-)
-```
-
-In order for `authorize` helper to work as intended `settings.catch` handler function parameter **must be specified**. Something like this will do:
-
-```js
-{
-  ...
-  catch(error, { path, url, redirect }) {
-    // Not authenticated
-    if (error.status === 401) {
-      return redirect(`/unauthenticated?url=${encodeURIComponent(url)}`)
-    }
-    // Not authorized
-    if (error.status === 403)
-    {
-      return redirect(`/unauthorized?url=${encodeURIComponent(url)}`)
-    }
-    // Redirect to a generic error page
-    // (also prevents infinite recursion in case of bugs)
-    if (path !== '/error')
-    {
-      redirect('/error')
-    }
-    // Some kind of a bug
-    throw error
-  }
-}
-```
-
-Also make sure to authorize a user inside REST API endpoints as well, because, say, you set up `authorize` for a restricted page in `routes.js`, but a hacker still can send any REST API HTTP request to the server so if a REST API endpoint doesn't double-check the user's authorization then the whole authorization system is actually considered useless.
-
 ### Locale detection
 
 This library performs the following locale detection steps for each webpage rendering HTTP request:
@@ -1094,16 +1014,6 @@ telegraf -input-filter statsd -output-filter file config > telegraf.conf
 telegraf -config telegraf.conf
 # Request a webpage and see rendering stats being output to the terminal.
 ```
-
-## CSRF protection
-
-[Cross-Site Request Forgery attacks](http://docs.spring.io/spring-security/site/docs/current/reference/html/csrf.html) are the kind of attacks when a legitimate user is tricked into navigating a malicious website which, upon loading, sends a forged HTTP request (GET, POST) to the legitimate website therefore performing an action on behalf of the legitimate user (because the "remember me" cookie is also sent along).
-
-How can a legitimate website guard its users from such attacks? One solution is to ignore the "remember me" cookie and force reading its value from an HTTP header. Because CSRF attacks can't send custom headers (at least using bare HTML/Javascript, without exploiting Adobe Flash plugin bugs, etc), this renders such hacking attempts useless.
-
-Therefore the API should only read "remember me" token from an HTTP header. The client-side application will read "remember me" cookie value and send it as part of an HTTP header for each HTTP request. Alternatively "remember me" token can be stored in a web browser's `localStorage`.
-
-So, **javascript is required** on the client side in order for this CSRF attacks protection to work (because only javascript can set HTTP headers). If a developer instead prefers to run a website for javascript-disabled users (like [Tor](https://www.deepdotweb.com/)) then the only way is to authenticate users in REST API endpoints by a "remember me" cookie rather than `Authorization` HTTP header. This will open the website users to various possible javascriptless CSRF attacks.
 
 ## Webpack HMR
 
@@ -1387,503 +1297,6 @@ function reducer(state, action) {
 }
 ```
 
-## Bundlers
-
-If you're using Webpack then make sure you either build your server-side code with Webpack too (so that asset `require()` calls (images, styles, fonts, etc) inside React components work, see [universal-webpack](https://github.com/halt-hammerzeit/universal-webpack)) or use something like [webpack-isomorphic-tools](https://github.com/halt-hammerzeit/webpack-isomorphic-tools).
-
-## All `react-isomorphic-render.js` settings
-
-```javascript
-{
-  // React-router routes
-  // (either a `<Route/>` element or a
-  //  `function({ dispatch, getState })`
-  //  returning a `<Route/>` element)
-  routes: require('./src/client/routes')
-
-  // Redux reducers (an object)
-  reducer: require('./src/client/redux/reducers')
-  
-  // A React component.
-  //
-  // Wraps React page component (`children` property)
-  // with arbitrary React components.
-  // (e.g. Redux `<Provider/>`,
-  //  `react-hot-loader@3`'s `<AppContainer/>`
-  //  and other "context providers")
-  //
-  // By default it just wraps everything with Redux'es `<Provider/>`:
-  //
-  // export default ({ store, children }) => <Provider store={ store }>{ children }</Provider>
-  //
-  wrapper: require('./src/client/wrapper')
-
-  // (optional)
-  // User can add custom Redux middleware
-  reduxMiddleware: () => [...]
-
-  // (optional)
-  // User can add custom Redux store enhancers
-  reduxStoreEnhancers: () => [...]
-
-  // (optional)
-  // `http` utility settings
-  http:
-  {
-    // (optional)
-    // Will be called for each HTTP request
-    // sent using `http` utility inside Redux action creators.
-    // (`request` is a `superagent` request)
-    request: (request, { store }) =>
-    {
-      if (request.url.indexOf('https://my.domain.com') === 0)
-      {
-        request.set('X-Secret-Token', store.getState().secretToken)
-      }
-    }
-
-    // (optional)
-    // Custom control over `http` utility HTTP requests URL.
-    // E.g. for those who don't want to proxy their API calls
-    // and instead prefer to query REST API server directly
-    // from the web browser (using Cross-Origin Requests).
-    // (e.g. when using AWS Lambda).
-    // The default `url` formatter only allows "local" URLs
-    // to be requested therefore guarding against
-    // leaking the authentication token header
-    // (e.g. `Authorization: Bearer ${token}`) to a 3rd party.
-    // Therefore by supplying a custom `url` formatter
-    // a developer takes full responsibility for guarding
-    // the authentication token header from being leaked to a 3rd party:
-    // when using `http` utility for querying 3rd party API
-    // a developer must supply an explicit option `{ authentication: false }`
-    // to prevent the authentication token header
-    // (e.g. `Authorization: Bearer ${token}`)
-    // to be sent to that 3rd party API endpoint.
-    url: (path, isServerSide) =>
-    {
-      // In this case `.application` configuration parameter may be removed
-      return `https://api-server.com${path}`
-    }
-
-    // (optional)
-    error: (error, { url, path, redirect, dispatch, getState }) => console.error(error)
-    //
-    // Is called when `http` calls either fail or return an error.
-    // Is not called during `@preload()`s and therefore
-    // can only be called as part of an HTTP call
-    // triggered by some user interaction in a web browser.
-    //
-    // For example, Auth0 users may listen for
-    // JWT token expiration here and redirect to a login page.
-    // There's an alternative solution for handling access token expiration:
-    // the `http.catch()` function parameter (see below).
-
-    // (optional)
-    // (experimental: didn't test this function parameter but it's likely to work)
-    //
-    catch: async (error, retryCount, helpers) => {}
-    //
-    // Can optionally retry an HTTP request in case of an error
-    // (e.g. if an Auth0 access token expired and has to be refreshed).
-    // https://auth0.com/blog/refresh-tokens-what-are-they-and-when-to-use-them/
-    //
-    // If an error happens then the logic is (concept):
-    //
-    // httpRequest().catch((error) => {
-    //   return catch(error, 0, helpers).then(httpRequest).catch((error) => {
-    //     return catch(error, 1, helpers).then(httpRequest).catch((error) => {
-    //       ...
-    //     ))
-    //   ))
-    // ))
-    //
-    // Auth0 `catch` example:
-    //
-    // catch(error, retryCount, helpers) {
-    //   if (retryCount === 0) {
-    //     if (error.status === 401 && error.data && error.data.name === 'TokenExpiredError') {
-    //       return requestNewAccessToken(localStorage.refreshToken)
-    //     }
-    //   }
-    //   throw error
-    // }
-    //
-    // The `helpers` argument object holds:
-    //
-    // * `getCookie(name)` – a helper function which works both on client and server.
-    //   This function can be used to obtain a "refresh token" stored in a non-"httpOnly" cookie.
-    //
-    // * `store` – Redux store.
-    //
-    // * `http` – `http` utility.
-  }
-
-  // (optional)
-  // `@preload()` customization
-  preload:
-  {
-    // (optional)
-    // For those coming from `redux-connect`, the same `helpers` parameter.
-    // All properties of this object will be available as named arguments
-    // inside `@preload({ dispatch, ..., helper })` decorator
-    helpers:
-    {
-      helper: require('./helper')
-    }
-  }
-
-  // (optional)
-  // Can handle errors occurring inside `@preload()`.
-  // For example, if `@preload()` throws a `new Error("Unauthorized")`
-  // then a redirect to "/unauthorized" page can be made here.
-  error: (error, { path, url, redirect, dispatch, getState, server }) => redirect(`/error?url=${encodeURIComponent(url)}&error=${error.status}`)
-
-  // (optional)
-  authentication:
-  {
-    // (optional)
-    protectedCookie: 'cookie-name'
-    //
-    // The "remember me" cookie can be further protected
-    // by making it non-readable in a web browser (the so called "httpOnly" cookies).
-    // But how a web browser is gonna get the cookie value to send it as part of an HTTP header?
-    // The answer is: the cookie can be read on the server side when the page is being rendered,
-    // and then be inserted on a page as a javascript variable which is captured by
-    // `http` utility HTTP request methods and immediately removed from the global scope.
-    // Therefore this variable will only be accessible inside `http` utility methods
-    // and an attacker won't be able neither to read the cookie value nor to read the variable value.
-    // This way the only thing a CSRF attacker could do is to request a webpage
-    // (without being able to analyse its content) which is never an action so it's always safe.
-    // And so the user is completely protected against CSRF attacks.
-    //
-    // This can be an Auth0 "refresh token", for example.
-    // https://auth0.com/blog/refresh-tokens-what-are-they-and-when-to-use-them/
-    // If it is, then it's gonna be available in `http.catch()` function
-    // and can be used there to refresh expired (short lived) access tokens.
-    // If it's the case and `authentication.protectedCookie` is a "refresh token",
-    // then also set `authentication.accessToken()` function parameter
-    // to return the currently used "access token":
-    // this "access token" will always be set automatically
-    // in the "Authorization" HTTP header
-    // when using `http` utility inside Redux actions.
-
-    // (optional)
-    accessToken: (getCookie, helpers) => String
-    //
-    // If specified, this "access token" will always be set
-    // automatically in the "Authorization" HTTP header
-    // when using `http` utility inside Redux actions.
-    // "Access tokens" are supposed to be short-lived
-    // and their storage requirements are less strict
-    // than those for the "refresh token".
-    // For example, an "access token" may be stored
-    // in a regular non-"httpOnly" cookie.
-    // Since this method is run both on client and server
-    // the provided `getCookie(name)` function works in both cases.
-    //
-    // `helpers` object holds:
-    //
-    // * `store` - Redux store
-
-    // (optional)
-    header: 'Authorization'
-    // The HTTP header containing authentication token
-    // (e.g. "Authorization: Bearer {token}").
-    // Is "Authorization" by default.
-    // (some people requested this setting for
-    //  some projects using 'X-Authorization' header
-    //  due to the 'Authorization' header being blocked)
-  }
-
-  // (optional)
-  history:
-  {
-    // (optional)
-    // `history` options (like `basename`)
-    options: {}
-
-    // (optional)
-    // Custom `history` wrapper, like `syncHistoryWithStore` from `react-router-redux`
-    wrap: (history, { store }) => history
-  }
-
-  // (optional)
-  // Controls automatic `Date` parsing
-  // when using `http` utility, and when
-  // restoring Redux state on the client-side.
-  // (is `true` by default)
-  parseDates: `true` / `false`
-
-  // (optional)
-  // When supplying `event` instead of `events`
-  // as part of an asynchronous Redux action
-  // this will generate `events` from `event`
-  // using this function.
-  asynchronousActionEventNaming: event => ([
-    `${event}_PENDING`,
-    `${event}_SUCCESS`,
-    `${event}_ERROR`
-  ])
-
-  // (optional)
-  // When using asynchronous action handlers
-  // this function will generate a Redux state property name for an event name.
-  // E.g. event `GET_USERS_ERROR` => state.`getUsersError`.
-  asynchronousActionHandlerStatePropertyNaming(event) {
-    // Converts `CAPS_LOCK_UNDERSCORED_NAMES` to `camelCasedNames`
-    return event.split('_')
-      .map((word, i) =>  {
-        let firstLetter = word.slice(0, 1)
-        if (i === 0) {
-          firstLetter = firstLetter.toLowerCase()
-        }
-        return firstLetter + word.slice(1).toLowerCase()
-      })
-      .join('')
-  }
-}
-```
-
-## All webpage rendering server options
-
-```javascript
-{
-  // Already discussed above
-  application,
-
-  // `assets` parameter is introduced for the cases
-  // when the project is built with Webpack.
-  //
-  // The reason is that usually the output filenames
-  // in Webpack contain `[hash]`es or `[chunkhash]`es,
-  // and so when the project is built
-  // the assets have not their original filenames (like "main.js")
-  // but rather autogenerated filenames (like "main-0ad5f7ec51a....js"),
-  // so the corresponding `<script/>` tags must not be constant
-  // and must instead be autogenerated each time the project is built.
-  // That's what this `assets` parameter does:
-  // if one passes these `assets` to the webpage rendering server,
-  // then they will be transformed into the corresponding HTML tags
-  // each time the `assets` are changed (i.e. each time the project is rebuilt).
-  //
-  // The `assets` parameter provides URLs of javascript and CSS files
-  // which will be insterted into the <head/> element of the resulting Html webpage
-  // (as <script src="..."/> and <link rel="style" href="..."/>)
-  //
-  // Also a website "favicon" URL, if any.
-  //
-  // Can be an `object` or a function returning an object.
-  //
-  // `javascript` and `style` can be strings or objects.
-  // If they are objects then one should also provide an `entry` parameter.
-  // The objects may also contain `common` entry
-  // which will also be included on the page.
-  //
-  assets: (path, { store }) =>
-  {
-    return {
-      javascript: {
-        main: '/assets/main.js'
-      },
-
-      // (optional)
-      styles: {
-        main: '/assets/main.css'
-      },
-
-      // (optional)
-      // URL of your "favicon".
-      // If you're using Webpack then the URL is the result of a require() call.
-      icon: '/assets/icon.png',
-
-      // Webpack "entry points" to be included for this URL
-      entries: ['main']
-    }
-  },
-
-  // (optional)
-  // Custom Koa middleware (an array of middlewares).
-  // Inserted before page rendering middleware.
-  // (if anyone needs that for extending
-  //  page rendering service with extra functionality)
-  middleware: [...]
-
-  // (optional)
-  // HTML code injection
-  html:
-  {
-    // (optional)
-    // Markup inserted into server rendered webpage's <head/>.
-    // Can be either a function returning a value or just a value.
-    head: (path, { store }) => String, or React.Element, or an array of React.Elements
-
-    // (optional)
-    // Markup inserted to the start of the server rendered webpage's <body/>.
-    // Can be either a function returning a value or just a value.
-    bodyStart: (path, { store }) => String, or React.Element, or an array of React.Elements
-    // (aka `body_start`)
-
-    // (optional)
-    // Markup inserted to the end of the server rendered webpage's <body/>.
-    // Can be either a function returning a value or just a value.
-    bodyEnd: (path, { store }) => String, or React.Element, or an array of React.Elements
-    // (aka `body_end`)
-  }
-
-  // (optional)
-  // Initializes Redux state before performing
-  // page preloading and rendering.
-  //
-  // If defined, this function must return an object
-  // which is gonna be the initial Redux state.
-  // 
-  // `request` is the original HTTP request for the webpage.
-  // It can be used, for example, to load the currently
-  // logged in user info (user name, user picture, etc).
-  //
-  initialize: async (httpClient, { request }) => ({})
-  // (or same without `async`: (httpClient, { request }) => Promise.resolve({})
-
-  // (optional)
-  //
-  // Returns an object of shape `{ locale, messages }`,
-  // where `locale` is the page locale chosen for this HTTP request,
-  // and `messages` are the translated messages for this `locale`
-  // (an object of shape `{ "message.key": "Message value", ... }`).
-  //
-  // The returned object may optionally have
-  // the third property `messagesJSON` (stringified `messages`)
-  // to avoid calculating `JSON.stringify(messages)`
-  // for each rendered page (a tiny optimization).
-  //
-  // `preferredLocales` argument is an array
-  // of the preferred locales for this user
-  // (from the most preferred to the least preferred)
-  //
-  // `localize()` should normally be a synchronous function.
-  // It could be asynchronous though for cases when it's taking
-  // messages not from a JSON file but rather from an
-  // "admin" user editable database.
-  // If the rountrip time (ping) from the rendering service
-  // to the database is small enough then it theoretically
-  // won't introduce any major page rendering latency
-  // (the database will surely cache such a hot query).
-  // On the other hand, if a developer fights for each millisecond
-  // then `localize()` should just return `messages` from memory.
-  //
-  localize: ({ store }, preferredLocales) => ({ locale: preferredLocales[0], messages: { 'page.heading': 'Test' } })
-
-  // Is React Server Side Rendering enabled?
-  // (is `true` by default)
-  //
-  // (does not affect server side routing
-  //  and server side page preloading)
-  //
-  // Can be used to offload React server-side rendering
-  // from the server side to the client's web browser
-  // (as a performance optimization) by setting it to `false`.
-  //
-  render: `true`/`false`
-
-  // (optional)
-  // Is called after all `@preload()`s finish and before React renders.
-  beforeRender: async ({ dispatch, getState }) => {}
-
-  // (optional)
-  // Markup for "loading" screen
-  // (when server-side rendering is disabled).
-  // Can be a String, or a React.Element, or an array of React.Elements
-  loading: <div className="loading">Loading...</div>
-
-  // (optional)
-  // A custom `log`
-  log: bunyan.createLogger(...)
-}
-```
-
-## All client side rendering options
-
-```javascript
-{
-  ...
-
-  // (optional)
-  // Is fired when a user performs navigation (and also on initial page load).
-  // This exists mainly for Google Analytics.
-  // `url` is a string (`path` + "search" (?...) + "hash" (#...)).
-  // "search" query parameters can be stripped in Google Analytics itself.
-  // They aren't stripped out-of-the-box because they might contain
-  // meaningful data like "/search?query=dogs".
-  // http://www.lunametrics.com/blog/2015/04/17/strip-query-parameters-google-analytics/
-  // The "hash" part should also be stripped manually inside `onNavigate` function
-  // because someone somewhere someday might make use of those "hashes".
-  onNavigate: (url, location) => {}
-
-  // (optional)
-  // Is called as soon as Redux store is created.
-  //
-  // For example, client-side-only applications
-  // may capture this `store` as `window.store`
-  // to call `bindActionCreators()` for all actions (globally).
-  //
-  // onStoreCreated: store => window.store = store
-  //
-  // import { bindActionCreators } from 'redux'
-  // import actionCreators from './actions'
-  // const boundActionCreators = bindActionCreators(actionCreators, window.store.dispatch)
-  // export default boundActionCreators
-  //
-  onStoreCreated: (store) => {}
-
-  // (optional)
-  // Enables/disables Redux development tools.
-  //
-  // This is not an optional `true` boolean flag,
-  // but rather an optional "DevTools" instance created by "createDevTools()".
-  //
-  // An example of "DevTools.js":
-  //
-  // npm install redux-devtools redux-devtools-log-monitor redux-devtools-dock-monitor --save-dev
-  //
-  // import React from 'react'
-  // import { createDevTools, persistState } from 'redux-devtools'
-  // import LogMonitor from 'redux-devtools-log-monitor'
-  // import DockMonitor from 'redux-devtools-dock-monitor'
-  // 
-  // export default
-  // {
-  //   component: createDevTools
-  //   (
-  //     <DockMonitor toggleVisibilityKey="ctrl-H" changePositionKey="ctrl-Q" defaultIsVisible>
-  //       <LogMonitor theme="tomorrow" />
-  //     </DockMonitor>
-  //   ),
-  //   persistState
-  // }
-  //
-  devtools: process.env.REDUX_DEVTOOLS && require('./DevTools.js')
-
-  // (optional)
-  // Loads localized messages (asynchronously).
-  // The main purpose for introducting this function
-  // is to enable Webpack Hot Module Replacement (aka "hot reload")
-  // for translation files in development mode.
-  translation: async locale => messages
-  // (or same without `async`: locale => Promise.resolve(messages))
-}
-```
-
-Client-side `render` function returns a `Promise` resolving to an object
-
-```js
-{
-  component, // root React component (i.e. the `wrapper`; will be `null` if `wrapper` is a stateless React component)
-  store,     // (Redux) store
-  rerender   // (Redux) rerender React application
-}
-```
-
 ## Static site generation
 
 In those rare cases when website's content doesn't change at all (or changes very rarely, e.g. a blog) it may be beneficial to host a statically generated version of such a website on a CDN as opposed to hosting a full-blown Node.js application just for the purpose of real-time webpage rendering. In such cases one may choose to generate a static version of the website by snapshotting it on a local machine and then host it in a cloud at virtually zero cost.
@@ -1951,17 +1364,13 @@ run().catch((error) =>
 })
 ```
 
-## For purists
+## Bundlers
 
-See [PHILOSOPHY](https://github.com/halt-hammerzeit/react-isomorphic-render/blob/master/PHILOSOPHY.md)
+If you're using Webpack then make sure you either build your server-side code with Webpack too (so that asset `require()` calls (images, styles, fonts, etc) inside React components work, see [universal-webpack](https://github.com/halt-hammerzeit/universal-webpack)) or use something like [webpack-isomorphic-tools](https://github.com/halt-hammerzeit/webpack-isomorphic-tools).
 
-## onEnter
+## Advanced
 
-`react-router`'s `onEnter` hook is being called twice both on server and client because `react-router`'s `match()` is called before preloading and then the actual navigation happens which triggers the second `match()` call (internally inside `react-router`). This is not considered a blocker because in this library `@preload()` substitutes `onEnter` hooks so just use `@preload()` instead. Double `onEnter` can be fixed using `<RouterContext/>` instead of `<Router/>` but I see no reason to implement such a fix since `onEnter` is simply not used.
-
-## To do
-
-* (minor) Server-side `@preload()` redirection could be rewritten from `throw`ing special "redirection" `Error`s into `.listen()`ing the server-side `MemoryHistory` but since the current "special redirection errors" approach works and has no operational downsides I think that there's no need in such a rewrite.
+At some point in time this README became huge so I extracted some less relevant parts of it into [README-ADVANCED](https://github.com/halt-hammerzeit/react-isomorphic-render/blob/master/README-ADVANCED.md). If you're a first timer then just skip that one.
 
 ## Contributing
 
