@@ -519,7 +519,7 @@ export default class Preload extends Component {
   right  : 0;
   bottom : 0;
   z-index: 1;
-  background-color: rgba(0, 0, 0, 0.2);
+  background-color: rgba(0, 0, 0, 0.1);
   display: none;
 }
 
