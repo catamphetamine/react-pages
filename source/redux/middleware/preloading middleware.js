@@ -503,17 +503,28 @@ const preloader = (initial_client_side_preload, server, routes, components, getS
 	{
 		return chain.reduce((promise, link) =>
 		{
-			if (preloading.cancelled)
-			{
-				return
-			}
-
 			if (Array.isArray(link))
 			{
-				return promise.then(() => Promise.all(link.map(_ => _())))
+				return promise.then(() =>
+				{
+					if (preloading.cancelled)
+					{
+						return
+					}
+
+					return Promise.all(link.map(thread => thread()))
+				})
 			}
 
-			return promise.then(link)
+			return promise.then(() =>
+			{
+				if (preloading.cancelled)
+				{
+					return
+				}
+
+				return link()
+			})
 		},
 		Promise.resolve())
 	}
