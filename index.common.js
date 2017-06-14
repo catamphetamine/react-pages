@@ -7,7 +7,9 @@ exports.Meta  = head.Meta
 
 // Redux
 
-exports.preload = require('./build/redux/preload').default
+exports.preload       = require('./build/redux/preload').default
+exports.onPageLoaded  = require('./build/redux/on page loaded').default
+
 exports.render        = require('./build/redux/client/client').default
 exports.getState      = require('./build/redux/client/client').getState
 exports.getHttpClient = require('./build/redux/client/client').getHttpClient

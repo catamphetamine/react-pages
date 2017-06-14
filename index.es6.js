@@ -12,6 +12,12 @@ from './es6/redux/preload'
 
 export
 {
+	default as onPageLoaded
+}
+from './es6/redux/on page loaded'
+
+export
+{
 	default as render,
 	getState,
 	getHttpClient

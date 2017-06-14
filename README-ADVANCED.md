@@ -16,8 +16,21 @@ So, **javascript is required** on the client side in order for this CSRF attacks
 
 ## `@preload()`
 
-`@preload()` decorator seems not working for no reason (though it definitely should) then try to place it on top of all other decorators. Internally it adds a special static method to your `Route`'s `component` and some decorators on top of it may not retain that static method (though all proper decorators nowadays do retain static methods and variables of wrapped components using [`hoist-non-react-statics`](https://github.com/mridgway/hoist-non-react-statics)).
+`@preload()` decorator seems not working for no reason (though it definitely works) then try to place it on top of all other decorators. Internally it adds a special static method to your `Route`'s `component` and some 3rd party decorators on top of it may not retain that static method (though all proper decorators nowadays do retain static methods and variables of wrapped components using [`hoist-non-react-statics`](https://github.com/mridgway/hoist-non-react-statics)).
 
+## `@onPageLoaded()`
+
+When using `{ client: true }` `@preload()`s it's sometimes required to perform some actions (e.g. adjust the current URL) after those `@preload()`s finish (and after the browser navigates to the preloaded page). While with regular `@preload()`s it could be done using `componentDidMount()` (though only on the client side) such an approach wouldn't work for `{ client: true }` `@preload()`s because they're called after `componentDidMount()`. The solution is `@onPageLoaded()` decorator which takes a function parameter, exactly as `@preload()` decorator does, with an extra `history` parameter.
+
+```js
+import { onPageLoaded, replaceLocation } from 'react-isomorphic-render'
+
+@onPageLoaded(function({ dispatch, getState, history, location, parameters, server }) {
+  if (isAnIdURL(location.pathname)) {
+    replaceLocation(replaceIdWithAnAlias(location, getState().userProfilePage.userProfile), history)
+  }
+}
+```
 
 ## Restricted routes
 

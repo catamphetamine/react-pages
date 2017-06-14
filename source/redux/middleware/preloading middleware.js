@@ -13,6 +13,7 @@ import { add_instant_back, reset_instant_back } from '../client/instant back'
 
 export const Preload_method_name  = '__preload__'
 export const Preload_options_name = '__preload_options__'
+export const On_page_loaded_method_name = '__on_page_loaded__'
 
 export const Preload_started  = '@@react-isomorphic-render/redux/preload started'
 export const Preload_finished = '@@react-isomorphic-render/redux/preload finished'
@@ -161,6 +162,8 @@ export default function preloading_middleware(server, error_handler, preload_hel
 				components,
 				getState,
 				preloader_dispatch(dispatch, preloading),
+				// Remove `get_history()` line in the next major version release
+				// due to this parameter being deprecated.
 				get_history(),
 				location,
 				params,
@@ -171,9 +174,7 @@ export default function preloading_middleware(server, error_handler, preload_hel
 			// If nothing to preload, just move to the next middleware
 			if (!preload)
 			{
-				// Trigger `react-router` navigation on client side
-				// (and do nothing on server side)
-				proceed_with_navigation(dispatch, action, server, get_history, previous_location)
+				after_preload(dispatch, getState, components, params, action, server, get_history, previous_location)
 				// Explicitly return `undefined`
 				// (not `false` by accident)
 				return
@@ -227,9 +228,7 @@ export default function preloading_middleware(server, error_handler, preload_hel
 					// Report preloading time
 					report_preload_stats(Date.now() - started_at, route)
 
-					// Trigger `react-router` navigation on client side
-					// (and do nothing on server side)
-					proceed_with_navigation(dispatch, action, server, get_history, previous_location)
+					after_preload(dispatch, getState, components, params, action, server, get_history, previous_location)
 				},
 				(error) =>
 				{
@@ -295,6 +294,28 @@ export default function preloading_middleware(server, error_handler, preload_hel
 	}
 }
 
+function after_preload(dispatch, getState, components, parameters, action, server, get_history, previous_location)
+{
+	// Trigger `react-router` navigation on client side
+	// (and do nothing on server side)
+	proceed_with_navigation(dispatch, action, server, get_history, previous_location)
+
+	// Call `onPageLoaded()`
+	const page = components[components.length - 1]
+	if (page[On_page_loaded_method_name])
+	{
+		page[On_page_loaded_method_name]
+		({
+			dispatch,
+			getState,
+			location: action.location,
+			parameters,
+			history: get_history(),
+			server
+		})
+	}
+}
+
 // Trigger `react-router` navigation on client side
 // (and do nothing on server side).
 // `previous_location` is the location before the transition.
@@ -336,8 +357,13 @@ function proceed_with_navigation(dispatch, action, server, get_history, previous
 //
 // If no preloading is needed, then returns nothing.
 //
+// * Remove the `history` argument in the next major version release
+//   due to it being deprecated.
+//
 const preloader = (initial_client_side_preload, server, routes, components, getState, dispatch, history, location, parameters, preload_helpers, preloading) =>
 {
+	// Remove the `history` parameter in the next major version release
+	// due to it being deprecated.
 	let preload_arguments = { dispatch, getState, history, location, parameters }
 
 	if (preload_helpers)
