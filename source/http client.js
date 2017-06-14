@@ -481,7 +481,10 @@ class Http_request
 				if (error)
 				{
 					// Infer additional `error` properties from the HTTP response
-					this.populate_error_data(error, response)
+					if (response)
+					{
+						this.populate_error_data(error, response)
+					}
 
 					return reject(error)
 				}
