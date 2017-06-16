@@ -526,13 +526,16 @@ export default class Preload extends Component {
   left   : 0;
   right  : 0;
   bottom : 0;
-  z-index: 1;
   background-color: rgba(0, 0, 0, 0.1);
-  display: none;
+  z-index: 0;
+  opacity: 0;
+  transition: opacity 100ms ease-out, z-index 100ms step-end;
 }
 
 .preloading--shown {
-  display: block;
+  z-index: 1;
+  opacity: 1;
+  transition: opacity 600ms ease-out 500ms, z-index 0ms step-start;
   cursor: wait;
 }
 
@@ -542,6 +545,7 @@ export default class Preload extends Component {
   top: calc(50% - 2rem);
   width: 4rem;
   height: 4rem;
+  color: white;
 }
 ```
 
