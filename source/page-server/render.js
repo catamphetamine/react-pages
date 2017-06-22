@@ -220,7 +220,14 @@ export default async function(settings, { initialize, localize, assets, applicat
 			{
 				path,
 				url      : location_url(location),
-				redirect : to => result.redirect = parse_location(to),
+				redirect : (to) =>
+				{
+					// Only the first redirect takes effect on the server side
+					if (!result.redirect)
+					{
+						result.redirect = parse_location(to)
+					}
+				},
 				server   : true
 			}
 
