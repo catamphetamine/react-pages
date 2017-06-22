@@ -433,7 +433,7 @@ In the example above `@preload()` helper is called to preload a web page before 
 
 ```javascript
 @preload(function({ dispatch, getState, location, parameters, server }) {
-  return Promise
+  return Promise.resolve()
 })
 ```
 
@@ -441,7 +441,7 @@ Alternatively, `async/await` syntax may be used:
 
 ```javascript
 @preload(async ({ dispatch, getState, location, parameters, server }) => {
-  ...
+  await fetchWhatever(parameters.id)
 })
 ```
 
