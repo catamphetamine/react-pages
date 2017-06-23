@@ -10,6 +10,7 @@ import { Preload, Redirect, GoTo, redirect_action, goto_action, history_redirect
 import match_routes_against_location from '../../react-router/match'
 import get_route_path from '../../react-router/get route path'
 import { add_instant_back, reset_instant_back } from '../client/instant back'
+import timer from '../../timer'
 
 export const Preload_method_name  = '__preload__'
 export const Preload_options_name = '__preload_options__'
@@ -206,11 +207,19 @@ export default function preloading_middleware(server, error_handler, preload_hel
 				}
 			}
 
+			const preload_timer = timer()
+
 			return promise
 				// Navigate to the new page
 				.then(() =>
 				{
 					preloading.pending = false
+
+					// Report stats to the web browser console
+					if (!server)
+					{
+						console.log(`[react-isomorphic-render] @preload() took ${preload_timer()} milliseconds for ${action.location.pathname}`)
+					}
 
 					// If this navigation process was cancelled
 					// before @preload() finished its work,

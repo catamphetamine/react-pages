@@ -4,7 +4,7 @@ export default function timer()
 	let started_at
 
 	// System nanosecond high-precision time
-	if (typeof process.hrtime === 'function')
+	if (process && typeof process.hrtime === 'function')
 	{
 		started_at = process.hrtime()
 	}
@@ -18,7 +18,7 @@ export default function timer()
 	return function stop()
 	{
 		// System nanosecond high-precision time
-		if (typeof process.hrtime === 'function')
+		if (process && typeof process.hrtime === 'function')
 		{
 			const stopped_at = process.hrtime()
 
