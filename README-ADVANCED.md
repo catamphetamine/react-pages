@@ -259,6 +259,12 @@ function autocompleteMatch() {
     {
       helper: require('./helper')
     }
+
+    // Sets `{ client: true }` option for all `@preload()`s.
+    // Should be set when the application is client-side only
+    // (e.g. hosted entirely on an Amazon S3 cloud).
+    client: true
+    // (is `false` by default)
   }
 
   // (optional)

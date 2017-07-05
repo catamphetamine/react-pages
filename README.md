@@ -474,13 +474,15 @@ On the client side, in order for `@preload` to work all `<Link/>`s imported from
 
 `@preload()` also works for Back/Forward web browser buttons navigation. If one `@preload()` is in progress and another `@preload()` starts (e.g. Back/Forward browser buttons) the first `@preload()` will be cancelled if `bluebird` `Promise`s are used in the project and also if `bluebird` is configured for [`Promise` cancellation](http://bluebirdjs.com/docs/api/cancellation.html) (this is an advanced feature and is not required for operation). `@preload()` can be disabled for certain "Back" navigation cases by passing `instantBack` property to a `<Link/>` (e.g. for links on search results pages).
 
-To run `@preload()` only on client side (e.g. when hosting websites statically in the cloud like Amazon S3 and using a separately hosted API like Amazon Lambda) pass the second `{ client: true }` options argument to it
+To run `@preload()` only on client side pass the second `{ client: true }` options argument to it
 
 ```js
 @preload(({ dispatch }) => dispatch(loadContent()), { client: true })
 ```
 
-Gotcha: `{ client: true }` option **is required** on all `@preload()`s if the website doesn't have the server-side webpage rendering service running (e.g. if the website is hosted entirely statically in the cloud) otherwise `@preload()`s won't fire on initial page load.
+For example, a web application could be hosted entirely statically in a cloud like Amazon S3 and fetch data using a separately hosted API like Amazon Lambda. This kind of setup is quite popular due to being simple and cheap. Yes, it's not a true isomorphic approach because the user is given a blank page first and then some `main.js` script fetches the page data in the browser. But, as being said earlier, this kind of setup is rediculously simple to build and cheap to maintain so why not. Yes, Google won't index such websites, but if searchability is not a requirement (yet) then it's the way to go (e.g. "MVP"s).
+
+Specifying `{ client: true }` option for each `@preload()` would result in a lot of copy-pasta so there's a [special configuration option](https://github.com/halt-hammerzeit/react-isomorphic-render/blob/master/README-ADVANCED.md#all-react-isomorphic-renderjs-settings) for that: `{ preload: { client: true } }`.
 
 ### `@preload()` indicator
 

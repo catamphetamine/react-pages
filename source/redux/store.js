@@ -56,7 +56,8 @@ export default function create_store(settings, data, get_history, http_client, o
 		(
 			server,
 			settings.error,
-			preload && preload.helpers, 
+			preload && preload.client,
+			preload && preload.helpers,
 			routes,
 			get_history,
 			settings.history.options.basename,

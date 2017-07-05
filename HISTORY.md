@@ -1,3 +1,8 @@
+11.0.26 / 05.07.2017
+====================
+
+  * Added `preload.client: true` configuration option for setting `{ client: true }` option for all `@preload()`s in the application. This should be used for entirely statically hosted websites to eliminate copy-pasta.
+
 11.0.12 / 14.05.2017
 ====================
 

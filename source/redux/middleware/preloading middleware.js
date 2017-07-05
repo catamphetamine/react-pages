@@ -20,7 +20,7 @@ export const Preload_started  = '@@react-isomorphic-render/redux/preload started
 export const Preload_finished = '@@react-isomorphic-render/redux/preload finished'
 export const Preload_failed   = '@@react-isomorphic-render/redux/preload failed'
 
-export default function preloading_middleware(server, error_handler, preload_helpers, routes, get_history, basename, report_stats, on_navigate)
+export default function preloading_middleware(server, error_handler, preload_on_client_side_only, preload_helpers, routes, get_history, basename, report_stats, on_navigate)
 {
 	return ({ getState, dispatch }) => next => action =>
 	{
@@ -475,7 +475,11 @@ const preloader = (initial_client_side_preload, server, routes, components, getS
 						return Promise.reject(error)
 					}
 				},
-				options: component[Preload_options_name] || {}
+				options:
+				{
+					client: preload_on_client_side_only,
+					...component[Preload_options_name]
+				}
 			}))
 	}
 
