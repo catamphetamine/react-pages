@@ -168,6 +168,7 @@ export default function preloading_middleware(server, error_handler, preload_on_
 				get_history(),
 				location,
 				params,
+				preload_on_client_side_only,
 				preload_helpers,
 				preloading
 			)
@@ -369,7 +370,7 @@ function proceed_with_navigation(dispatch, action, server, get_history, previous
 // * Remove the `history` argument in the next major version release
 //   due to it being deprecated.
 //
-const preloader = (initial_client_side_preload, server, routes, components, getState, dispatch, history, location, parameters, preload_helpers, preloading) =>
+const preloader = (initial_client_side_preload, server, routes, components, getState, dispatch, history, location, parameters, preload_on_client_side_only, preload_helpers, preloading) =>
 {
 	// Remove the `history` parameter in the next major version release
 	// due to it being deprecated.
