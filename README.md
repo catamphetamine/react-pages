@@ -166,7 +166,7 @@ The following 3 sections illustrate each one of these 3 approaches.
 
 This section illustrates the "simple homemade Node.js application" approach. It's not the approach I'd use for a real-world website but it's the simplest one so it's for illustration purposes only.
 
-So, a Node.js process is already running for page rendering, so it also be employed to perform other tasks like serving "static" files (`webpack-dev-server` is not running in production) or hosting a REST API.
+So, a Node.js process is already running for page rendering, so it could also be employed to perform other tasks like serving "static" files (`webpack-dev-server` is not running in production) or hosting a REST API.
 
 ```javascript
 import webpageServer from 'react-isomorphic-render/server'
