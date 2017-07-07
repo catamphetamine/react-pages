@@ -126,17 +126,6 @@ const maxAge = 365 * 24 * 60 * 60;
 
 // Create webpage rendering server
 const server = webpageServer(settings, {
-  // HTTP host and port for performing all AJAX requests
-  // when rendering pages on server-side.
-  // E.g. an AJAX request to `/items/5` will be transformed to
-  // `http://${host}:${port}/items/5` during server-side rendering.
-  // Specify `secure: true` flag to use `https` protocol instead of `http`.
-  application: {
-    host: '192.168.0.1',
-    port: 3000,
-    // secure: true
-  },
-
   // URLs of the "static" javascript and CSS files
   // which will be insterted into the <head/> element of the resulting Html webpage
   // as <script src="..."/> and <link rel="style" href="..."/> respectively.

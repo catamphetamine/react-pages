@@ -423,8 +423,16 @@ try {
 
 ```javascript
 {
-  // Already discussed above
-  application,
+  // This setting is only used when querying API by relative URLs
+  // like `/api/items/5` instead of `https://api-server.com/items/5`.
+  // The purpose of this setting is to prepend `host` and `port`
+  // to such relative API URLs on the server side when using the `http` utility.
+  // Specify `secure: true` flag to use `https` protocol instead of `http`.
+  application: {
+    host: '192.168.0.1',
+    port: 3000,
+    // secure: true
+  }
 
   // `assets` parameter is introduced for the cases
   // when the project is built with Webpack.
