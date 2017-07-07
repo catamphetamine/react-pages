@@ -3,7 +3,7 @@
 [![npm version](https://img.shields.io/npm/v/react-isomorphic-render.svg?style=flat-square)](https://www.npmjs.com/package/react-isomorphic-render)
 [![npm downloads](https://img.shields.io/npm/dm/react-isomorphic-render.svg?style=flat-square)](https://www.npmjs.com/package/react-isomorphic-render)
 
-Server Side Rendering for `React + React-router + Redux` stack.
+Server Side Rendering for `React + React-router v3 + Redux` stack.
 
  * Asynchronously preloads pages before performing client-side navigation
  * Provides an isomorphic HTTP client for calling REST API in Redux ["action creators"](http://redux.js.org/docs/basics/Actions.html)
@@ -48,7 +48,7 @@ Start by creating a settings file (it configures both client side and server sid
 
 ```javascript
 export default {
-  // React-Router routes
+  // React-router v3 routes
   routes: require('./src/client/routes'),
 
   // Redux reducers
