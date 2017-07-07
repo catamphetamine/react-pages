@@ -97,19 +97,19 @@ And the `index.html` would look like this:
 </html>
 ```
 
-Notice the `/assets/main.css` and `/assets/main.js` paths: in this example I assume that you're running [`webpack-dev-server`](https://webpack.github.io/docs/webpack-dev-server.html) and this `index.html` file is put into the `build` folder.
+Notice the `/assets/main.css` and `/assets/main.js` paths: in this example I assume that you're running [`webpack-dev-server`](https://webpack.github.io/docs/webpack-dev-server.html) and this `index.html` file is put into the `build` folder and therefore is served by `webpack-dev-server` on `/assets/` URL path.
 
-Now open `localhost:8080` in a web browser. Client-side rendering should work now. The whole setup can be deployed as-is being uploaded to a cloud and served statically (which is very cheap) – everything would work and adding server-side rendering is not required (though it might be required for better search engine indexing).
+Now open `localhost:8080` (or whichever `--port` your `webpack-dev-server` is listening on) in a web browser. Client-side rendering should work now. The whole setup can be deployed as-is being uploaded to a cloud and served statically (which is very cheap) – everything would work and adding server-side rendering is not required (though it might be required for better search engine indexing).
 
 ## Server side
 
 Adding Server Side Rendering to the setup is quite simple though requiring a running Node.js process therefore the website is no longer just statics served from the cloud but is both statics and a Node.js application running somewhere (say, in a Docker container).
 
-Node.js would perform server-side page rendering and also serving "static files" via HTTP for production mode when `webpack-dev-server` is not running.
+Since a Node.js process is running for page rendering it could be used to perform other tasks like serving "static" files (`webpack-dev-server` is not running in production) or hosting a REST API.
 
 `index.html` will be generated on-the-fly by page rendering server for each HTTP request, so the `index.html` file may be deleted as it's of no use now.
 
-Here's how the webpage rendering server is started (also serving assets):
+Here's how the webpage rendering server is started (in this particular example it's also serving assets and hosting a REST API):
 
 ```javascript
 import path from 'path'
@@ -149,12 +149,18 @@ const server = webpageServer(settings, {
   },
 
   // (optional)
-  // Custom Koa middlewares.
-  // Inserted before page rendering middleware.
-  // Serves "static files" by `/assets` path
-  // from the `../build` folder.
-  // Adjust the path to the Webpack `build` folder.
-  middleware: [mount('/assets', statics(path.join(__dirname, '../build'), { maxAge }))]
+  // Any custom Koa middlewares go here.
+  // They are `.use()`d before page rendering middleware.
+  middleware: [
+    // Serves "static files" on `/assets` URL path from the `../build` folder
+    // (the Webpack `configuration.output.path` folder).
+    mount('/assets', statics(path.join(__dirname, '../build'), { maxAge })),
+    // REST API
+    mount('/api', async (ctx, next) => {
+      ctx.type = 'application/json'
+      ctx.body = '{"data":[1,2,3]}'
+    })
+  ]
 })
 
 // Start webpage rendering server on port 3000
@@ -167,7 +173,9 @@ server.listen(3000, function(error) {
 })
 ```
 
-`server` is just a [Koa](http://koajs.com/) application, so alternatively it could be started like this:
+Now [disable javascript in Chrome DevTools](http://stackoverflow.com/questions/13405383/how-to-disable-javascript-in-chrome-developer-tools), go to `localhost:3000` and the server should respond with a fully rendered page.
+
+The `server` variable in the example above is just a [Koa](http://koajs.com/) application, so alternatively it could be started like this:
 
 ```js
 import http from 'http'
@@ -182,22 +190,39 @@ And for HTTPS websites start the page server like this:
 import https from 'https'
 import webpageServer from 'react-isomorphic-render/server'
 const server = webpageServer(settings, {...})
-https.createServer(options, server.callback()).listen(3001, error => ...)
+https.createServer(options, server.callback()).listen(443, error => ...)
 ```
-
-Now [disable javascript in Chrome DevTools](http://stackoverflow.com/questions/13405383/how-to-disable-javascript-in-chrome-developer-tools), go to `localhost:3000` and the server should respond with a fully rendered page.
 
 ## Proxying
 
-In the example above all HTTP requests to the server are served either with `/assets` "static files" or with HTML pages which is not the case in real-world applications: for example, a request to `/api/items` REST API should return a JSON response from the database.
+In the example above everything ("static" files, the API) is handled by a single Node.js process. This is for illustration purposes only and in reality it's different.
 
-To accomplish that a proxy server is set up which routes all HTTP requests to their appropriate destination. For example, API requests go to the REST API server, requests for static files return static files, and HTTP requests for webpages are routed to the webpage rendering server. So the HTTP proxying plan would look like this:
+The old-school way is to set up a "proxy server" like [NginX](https://www.sep.com/sep-blog/2014/08/20/hosting-the-node-api-in-nginx-with-a-reverse-proxy/) dispatching all incoming HTTP requests: serving "static" files, redirecting to the API server for `/api` calls, etc.
 
- * all HTTP GET requests starting with `/assets` return static files from your `build` folder
- * all HTTP requests starting with `/api` are proxied to the REST API service
- * all the other HTTP GET requests are proxied to `http://localhost:3000` for webpage rendering
+```
+server {
+  # Web server listens on port 80
+  listen 80;
 
-For development purposes, proxying can be easily set up, for example, using [http-proxy](https://github.com/nodejitsu/node-http-proxy) library in Node.js
+  # Serving "static" files (assets)
+  location /assets/ {
+    root "/filesystem/path/to/static/files";
+  }
+
+  # By default everything goes to the page rendering service
+  location / {
+    proxy_pass http://localhost:3001;
+  }
+
+  # Redirect "/api" requests to API service
+  location /api {
+    rewrite ^/api/?(.*) /$1 break;
+    proxy_pass http://localhost:3000;
+  }
+}
+```
+
+Or, alternatively, a quick Node.js proxy server could be made up for development purposes using [http-proxy](https://github.com/nodejitsu/node-http-proxy) library
 
 ```js
 const path = require('path')
@@ -211,69 +236,21 @@ const proxy = httpProxy.createProxyServer({})
 // Serve static files
 app.use('/assets', express.static(path.join(__dirname, '../build')))
 
-// Define the REST API
+// Proxy `/api` calls to the API service
 app.get('/api', function(request, response) {
-  response.send({ result: true })
+  proxy.web(request, response, { target: 'http://localhost:3001' })
 })
-
-// Or just extract the REST API into its
-// own microservice running on port 3001:
-// app.get('/api', function(request, response) {
-//   proxy.web(request, response, { target: 'http://localhost:3001' })
-// })
 
 // Proxy all other HTTP requests to webpage rendering service
 app.use(function(request, response) {
   proxy.web(request, response, { target: 'http://localhost:3000' })
 })
+
+// Web server listens on port `80`
+app.listen(80)
 ```
 
-For production usage something like the [NginX proxy](https://www.sep.com/sep-blog/2014/08/20/hosting-the-node-api-in-nginx-with-a-reverse-proxy/) is a better solution (both for proxying and for serving static files).
-
-## Without proxying
-
-(Advanced section, may be skipped)
-
-To use `react-isomorphic-render` without proxying there are two options
-
-  * Either supply custom Koa `middleware` array option in webpage server configuration
-  * Or call the internal `render` function manually:
-
-```js
-import { render } from 'react-isomorphic-render/server'
-import settings from './react-isomorphic-render'
-
-try {
-  // Returns a Promise.
-  //
-  // status  - HTTP response status
-  // content - rendered HTML document (markup)
-  // redirect - redirection URL (in case of HTTP redirect)
-  //
-  const { status, content, redirect } = await render(settings, {
-    // Takes the same parameters as webpage server
-    ...
-
-    // Original HTTP request, which is used for
-    // getting URL, cloning cookies, and inside `initialize`.
-    request,
-
-    // Cookies object having `.get(name)` function
-    // (only needed if using `authentication` cookie feature)
-    cookies
-  })
-
-  if (redirect) {
-    return redirect_to(redirect)
-  }
-
-  response.status(status || 200)
-  response.send(content)
-} catch (error) {
-  response.status(500)
-  response.send('Internal server error')
-}
-```
+The modern way is not using any "proxy servers" at all. Instead everything is distributed and decentralized. Webpack-built assets are uploaded to the cloud (say, to Amazon S3) and webpack configuration option `.output.publicPath` is set to something like `https://s3-ap-southeast-1.amazonaws.com/my-bucket/folder-1/` (your CDN URL) so now serving "static" files is not your job. API is dealt with in a similar way: CORS headers are set up to allow querying from a web browser by an absolute URL and the API is either hosted as a standalone API server or run "serverless"ly, say, on Amazon Lambda, and is queried by an absolute URL, like `https://at9y1jpex0.execute-api.us-east-1.amazonaws.com/develop/`.
 
 ## Making HTTP Requests
 

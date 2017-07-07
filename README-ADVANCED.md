@@ -119,6 +119,46 @@ function autocompleteMatch() {
 
 `react-router`'s `onEnter` hook is being called twice both on server and client because `react-router`'s `match()` is called before preloading and then the actual navigation happens which triggers the second `match()` call (internally inside `react-router`). This is not considered a blocker because in this library `@preload()` substitutes `onEnter` hooks so just use `@preload()` instead. Double `onEnter` can be fixed using `<RouterContext/>` instead of `<Router/>` but I see no reason to implement such a fix since `onEnter` is simply not used.
 
+## Internal `render()` function
+
+For some advanced use cases (though most likely no one's using this) the internal `render()` function is exposed.
+
+```js
+import { render } from 'react-isomorphic-render/server'
+import settings from './react-isomorphic-render'
+
+try {
+  // Returns a Promise.
+  //
+  // status  - HTTP response status
+  // content - rendered HTML document (markup)
+  // redirect - redirection URL (in case of HTTP redirect)
+  //
+  const { status, content, redirect } = await render(settings, {
+    // Takes the same parameters as webpage server
+    ...
+
+    // Original HTTP request, which is used for
+    // getting URL, cloning cookies, and inside `initialize`.
+    request,
+
+    // Cookies object having `.get(name)` function
+    // (only needed if using `authentication` cookie feature)
+    cookies
+  })
+
+  if (redirect) {
+    return redirect_to(redirect)
+  }
+
+  response.status(status || 200)
+  response.send(content)
+} catch (error) {
+  response.status(500)
+  response.send('Internal server error')
+}
+```
+
 ## All `react-isomorphic-render.js` settings
 
 ```javascript
