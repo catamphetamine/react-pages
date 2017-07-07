@@ -261,7 +261,7 @@ app.listen(80)
 
 ### The modern way
 
-Finally, the modern way is not using any "proxy servers" at all. Instead everything is distributed and decentralized. Webpack-built assets are uploaded to the cloud (say, to Amazon S3) and webpack configuration option `.output.publicPath` is set to something like `https://s3-ap-southeast-1.amazonaws.com/my-bucket/folder-1/` (your CDN URL) so now serving "static" files is not your job. API is dealt with in a similar way: CORS headers are set up to allow querying from a web browser by an absolute URL and the API is either hosted as a standalone API server or run "serverless"ly, say, on Amazon Lambda, and is queried by an absolute URL, like `https://at9y1jpex0.execute-api.us-east-1.amazonaws.com/develop/`.
+Finally, the modern way is not using any "proxy servers" at all. Instead everything is distributed and decentralized. Webpack-built assets are uploaded to the cloud (e.g. Amazon S3) and webpack configuration option `.output.publicPath` is set to something like `https://s3-ap-southeast-1.amazonaws.com/my-bucket/folder-1/` (your CDN URL) so now serving "static" files is not your job – your only job is to upload them to the cloud after Webpack build finishes. API is dealt with in a similar way: CORS headers are set up to allow querying directly from a web browser by an absolute URL and the API is either hosted as a standalone API server or run "serverless"ly, say, on Amazon Lambda, and is queried by an absolute URL, like `https://at9y1jpex0.execute-api.us-east-1.amazonaws.com/develop/users/list`.
 
 This concludes the introductory part of the README and the rest is the description of the various (useful) tools which come prepackaged with this library.
 
@@ -295,13 +295,13 @@ When you find yourself copy-pasting those `_PENDING`, `_SUCCESS` and `_ERROR` ev
 
 ### HTTP utility
 
-For convenience, the argument of the `promise` function parameter of "asynchronous actions" described above is the built-in `http` utility having methods `get`, `head`, `post`, `put`, `patch`, `delete`, each returning a `Promise` and taking three arguments: the `url` of the HTTP request, `parameters` object, and an `options` object. It can be used to easily query HTTP REST API endpoints in Redux action creators.
+For convenience, the argument of the `promise` function parameter of "asynchronous actions" described above is always the built-in `http` utility having methods `get`, `head`, `post`, `put`, `patch`, `delete`, each returning a `Promise` and taking three arguments: the `url` of the HTTP request, `parameters` object, and an `options` object. It can be used to easily query HTTP REST API endpoints in Redux action creators.
 
 ```js
-function fetchAdmins() {
+function fetchFriends(personId, gender) {
   return {
-    promise: (http) => http.get('/api/users', { role: 'admin' }),
-    events: ['GET_USERS_PENDING', 'GET_USERS_SUCCESS', 'GET_USERS_FAILURE']
+    promise: (http) => http.get(`/api/person/${personId}/friends`, { gender }),
+    events: ['GET_FRIENDS_PENDING', 'GET_FRIENDS_SUCCESS', 'GET_FRIENDS_FAILURE']
   }
 }
 ```
@@ -309,33 +309,55 @@ function fetchAdmins() {
 Using ES6 `async/await` this `promise` function can be rewritten as
 
 ```js
-function fetchAdmins() {
+function fetchFriends(personId, gender) {
   return {
-    promise: async (http) => await http.get('/api/users', { role: 'admin' }),
-    events: ['GET_USERS_PENDING', 'GET_USERS_SUCCESS', 'GET_USERS_FAILURE']
+    promise: async (http) => await http.get(`/api/person/${personId}/friends`, { gender }),
+    events: ['GET_FRIENDS_PENDING', 'GET_FRIENDS_SUCCESS', 'GET_FRIENDS_FAILURE']
   }
 }
 ```
 
-The possible `options` are
+The possible `options` (the third argument of all `http` methods) are
 
   * `headers` — HTTP Headers JSON object
-  * `authentication` — set to `false` to disable sending the authentication token as part of the HTTP request, set to a String to pass it as an `Authorization: Bearer ${token}` token
-  * `progress(percent, event)` — for tracking HTTP request progress (e.g. file upload)
+  * `authentication` — set to `false` to disable sending the authentication token as part of the HTTP request, set to a String to pass it as an `Authorization: Bearer ${token}` token (no need to set the token explicitly for every `http` method call, it is supposed to be set globally, see below)
+  * `progress(percent, event)` — is used for tracking HTTP request progress (e.g. file upload)
 
 <!--
+  (removed)
   * `onRequest(request)` – for capturing `superagent` request (there was [a feature request](https://github.com/halt-hammerzeit/react-isomorphic-render/issues/46) to provide a way for aborting running HTTP requests via `request.abort()`)
 -->
 
-`http` utility is also available from anywhere on the client side via an exported `getHttpClient()` function.
+<!--
+`http` utility is also available from anywhere on the client side via an exported `getHttpClient()` function (e.g. for bootstrapping).
+-->
 
-### HTTP utility and relative URLs
+### HTTP utility authentication token
 
-In the examples above the URLs queried via `http` utility are relative ones (e.g. `/api/users`). This is gonna be the case if you're using a proxy server. In order for such relative URL `http` calls to work on the server side the webpage rendering service must be passed a couple of extra parameters:
+In order for `http` utility calls to send an authentication token as part of an HTTP request (the `Authorization: Bearer ${token}` HTTP header) the `authentication.accessToken()` function must be specified in `react-isomorphic-render.js`.
+
+```js
+{
+  authentication: {
+    accessToken(getCookie, { store, path, url }) {
+      // (make sure the access token is not leaked to a third party)
+      return getCookie('accessToken')
+      return localStorage.getItem('accessToken')
+      return store.getState().authentication.accessToken
+    }
+  }
+}
+```
+
+### HTTP utility and URLs
+
+All URLs queried via `http` utility must be relative ones (e.g. `/api/users/list`). In order to transform these relative URLs into absolute ones there are two approaches.
+
+The first approach is for people using a proxy server (minority). In this case all client-side HTTP requests will still query relative URLs which are gonna hit the proxy server and the proxy server will route them to their proper destination. And the server side is gonna query the proxy server directly (there is no notion of "relative URLs" on the server side) therefore the proxy `host` and `port` need to be configured in webpage rendering service options.
 
 ```js
 const server = webpageServer(settings, {
-  http: {
+  proxy: {
     host: '192.168.0.1',
     port: 3000,
     // (enable for HTTPS protocol)
@@ -344,7 +366,15 @@ const server = webpageServer(settings, {
 })
 ```
 
-These `host` and `port` will be prepended to all relative URLs queried via the `http` utility. If you only query absolute API URLs then you don't need to configure this setting.
+The second approach is for everyone else (majority). In this case all URLs are transformed from relative ones into absolute ones by the `http.url()` function parameter configured in `react-isomorphic-render.js`.
+
+```js
+{
+  http: {
+    url: path => `https://api.server.com${path}`
+  }
+}
+```
 
 ### File upload
 
@@ -398,7 +428,7 @@ function uploadItemPhoto(itemId, file) {
 
 ### JSON Date parsing
 
-By default, when using `http` utility all JSON responses get parsed for javascript `Date`s which are then automatically converted from `String`s to `Date`s. This is convenient, and also safe because such date `String`s have to be in a very specific ISO format in order to get parsed (`year-month-dayThours:minutes:seconds[timezone]`), but if someone still prefers to disable this feature and have his `String`ified `Date`s back then there's the `parseDates: false` flag in the configuration to opt-out of this feature.
+By default, when using `http` utility all JSON responses get parsed for javascript `Date`s which are then automatically converted from `String`s to `Date`s. This is convenient, and also safe because such date `String`s have to be in a very specific ISO format in order to get parsed (`year-month-dayThours:minutes:seconds[timezone]`), but if someone still prefers to disable this feature and have their `String`ified `Date`s back then there's the `parseDates: false` flag in the configuration to opt-out of this feature.
 
 ## Page preloading
 
@@ -1393,7 +1423,7 @@ If you're using Webpack then make sure you either build your server-side code wi
 
 ## Advanced
 
-At some point in time this README became huge so I extracted some less relevant parts of it into [README-ADVANCED](https://github.com/halt-hammerzeit/react-isomorphic-render/blob/master/README-ADVANCED.md). If you're a first timer then just skip that one.
+At some point in time this README became huge so I extracted some less relevant parts of it into [README-ADVANCED](https://github.com/halt-hammerzeit/react-isomorphic-render/blob/master/README-ADVANCED.md) (including the list of all possible settings and options). If you're a first timer then just skip that one.
 
 ## Contributing
 

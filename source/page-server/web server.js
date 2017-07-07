@@ -24,12 +24,12 @@ export default function start_webpage_rendering_server(settings, options)
 
 	let
 	{
-		http
+		proxy
 	}
 	= options
 
 	// Legacy `application` option will be removed in a future major release
-	http = http || application
+	proxy = proxy || application
 
 	const web = new koa()
 
@@ -102,7 +102,7 @@ export default function start_webpage_rendering_server(settings, options)
 
 		const { status, content, redirect, route, time, afterwards } = await render_page(settings,
 		{
-			http,
+			proxy,
 			assets,
 			initialize,
 			localize: localize ? parameters => localize(parameters, get_preferred_locales(ctx)) : undefined,

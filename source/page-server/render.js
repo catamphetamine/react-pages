@@ -21,10 +21,10 @@ import { Preload } from '../redux/actions'
 
 // isomorphic (universal) rendering (middleware).
 // will be used in web_application.use(...)
-export default async function(settings, { initialize, localize, assets, application, http, request, render, loading, html = {}, cookies, beforeRender })
+export default async function(settings, { initialize, localize, assets, application, proxy, request, render, loading, html = {}, cookies, beforeRender })
 {
 	// Legacy `application` option will be removed in a future major release
-	http = http || application
+	proxy = proxy || application
 	
 	settings = normalize_common_settings(settings)
 
@@ -63,7 +63,7 @@ export default async function(settings, { initialize, localize, assets, applicat
 	const initialize_result = await redux_initialize(settings,
 	{
 		protected_cookie_value,
-		http,
+		proxy,
 		request,
 		cookies,
 		initialize,

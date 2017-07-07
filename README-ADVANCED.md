@@ -234,6 +234,12 @@ try {
       return `https://api-server.com${path}`
     }
 
+    // By default the `http` utility methods
+    // only accept relative URLs.
+    // Set this flag to `true` to allow absolute URLs.
+    // (is `false` by default)
+    allowAbsoluteURLs: true
+
     // (optional)
     error: (error, { url, path, redirect, dispatch, getState }) => console.error(error)
     //
@@ -343,7 +349,7 @@ try {
     // when using `http` utility inside Redux actions.
 
     // (optional)
-    accessToken: (getCookie, helpers) => String
+    accessToken: (getCookie, { store }) => String
     //
     // If specified, this "access token" will always be set
     // automatically in the "Authorization" HTTP header
@@ -423,14 +429,14 @@ try {
 
 ```javascript
 {
-  // This setting is only used when querying API by relative URLs
+  // This setting is for people using a proxy server
+  // to query their API by relative URLs
   // using the `http` utility in Redux "action creators".
-  // E.g. `http.get('/api/items/5')` instead of
-  // `http.get('https://api-server.com/items/5')`.
   // The purpose of this setting is to prepend `host` and `port`
   // to such relative API URLs on the server side when using the `http` utility.
   // Specify `secure: true` flag to use `https` protocol instead of `http`.
-  http: {
+  proxy:
+  {
     host: '192.168.0.1',
     port: 3000,
     // secure: true

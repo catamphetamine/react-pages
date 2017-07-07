@@ -20,9 +20,7 @@ export default class http_client
 	{
 		const
 		{
-			secure,
-			host,
-			port,
+			proxy,
 			headers,
 			clone_request,
 			cookies,
@@ -31,33 +29,34 @@ export default class http_client
 			authentication_token_header,
 			on_before_send,
 			catch_to_retry,
-			get_access_token
+			get_access_token,
+			allow_absolute_urls
 		}
 		= options
 
 		const parse_json_dates = options.parse_dates !== false
 
-		// The default `format_url` gives protection against XSS attacks
+		// The default `transform_url` gives protection against XSS attacks
 		// in a way that `Authorization: Bearer {token}` HTTP header
 		// is only exposed (sent) to local URLs, therefore an attacker
 		// theoretically won't be able to hijack that authentication token.
 		//
 		// An XSS attacker is assumed to be unable to set his own
-		// `options.format_url` because the rendered page content
+		// `options.transform_url` because the rendered page content
 		// is placed before the `options` are even defined (inside webpack bundle).
 		//
 		// Once `http_client` instance is created, the `protected_cookie_value` variable
 		// is erased from everywhere except the closures of HTTP methods defined below,
 		// and the protected cookie value is therefore unable to be read directly by an attacker.
 		//
-		// The `format_url` function also resided in the closures of HTTP methods defined below,
+		// The `transform_url` function also resided in the closures of HTTP methods defined below,
 		// so it's also unable to be changed by an attacker.
 		//
 		// The only thing an attacker is left to do is to send malicious requests
 		// to the server on behalf of the user, and those requests would be executed,
 		// but the attacker won't be able to hijack the protected cookie value.
 		//
-		const format_url = options.format_url || this.format_url.bind(this)
+		const transform_url = options.transform_url || this.proxy_url.bind(this)
 
 		// Clone HTTP request cookies on the server-side
 		// (to make authentication work)
@@ -67,9 +66,7 @@ export default class http_client
 			this.cookies_raw = clone_request.headers.cookie
 		}
 		
-		this.host = host
-		this.port = port || 80
-		this.secure = secure
+		this.proxy = proxy
 
 		const http_methods =
 		[
@@ -118,12 +115,21 @@ export default class http_client
 		const agent = this.server ? superagent.agent() : superagent
 
 		// Define HTTP methods on this `http` utility instance
-		for (let method of http_methods)
+		for (const method of http_methods)
 		{
 			this[method] = (path, data, options = {}) =>
 			{
+				// Rejects URLs of form "//www.google.ru/search",
+				// and verifies that the `path` is an internal URL.
+				// This check is performed to avoid leaking cookies
+				// and HTTP authentication headers to a third party.
+				if (!is_relative_url(path) && !allow_absolute_urls)
+				{
+					throw new Error(`You requested an absolute URL using "http" utility: "${path}". Use relative URLs instead (e.g. "/api/item/3") – this is cleaner and safer. To transform relative URLs into absolute ones configure the "http.url(relativeURL) -> absoluteURL" parameter function in "react-isomorphic-render.js". Example: (path) => \`https://api.server.com\${path}\`. Alternatively, set "http.allowAbsoluteURLs" setting to "true" (for those rare cases when it is justifiable).`)
+				}
+
 				// `url` will be absolute for server-side
-				const url = format_url(path, this.server)
+				const url = transform_url(path, this.server)
 
 				// Is incremented on each retry
 				let retry_count = -1
@@ -161,7 +167,9 @@ export default class http_client
 						authentication_token_header,
 						options.authentication,
 						get_access_token,
-						getCookie
+						getCookie,
+						url,
+						path
 					)
 
 					// Server side only
@@ -259,21 +267,13 @@ export default class http_client
 
 	// Validates the requested URL,
 	// and also prepends host and port to it on the server side.
-	format_url(path, server)
+	proxy_url(path, server)
 	{
-		// Rejects URLs of form "//www.google.ru/search",
-		// and verifies that the `path` is an internal URL.
-		// This check is performed to avoid leaking cookies to a third party.
-		if (!is_relative_url(path))
-		{
-			throw new Error(`Only internal URLs (e.g. "/api/item?id=1") are allowed for the "http" utility. Got an external url "${path}". A developer can allow absolute URLs by supplying a custom (looser) "http.url" parameter function (see the README).`)
-		}
-
 		// Prepend host and port on the server side
-		if (server)
+		if (this.proxy && server)
 		{
-			const protocol = this.secure ? 'https' : 'http'
-			return `${protocol}://${this.host}:${this.port}${path}`
+			const protocol = this.proxy.secure ? 'https' : 'http'
+			return `${protocol}://${this.proxy.host}:${this.proxy.port || '80'}${path}`
 		}
 
 		return path
@@ -395,7 +395,7 @@ class Http_request
 	}
 
 	// Sets `Authorization: Bearer ${token}` in HTTP request header
-	add_authentication(authentication_token_header, authentication, get_access_token, getCookie)
+	add_authentication(authentication_token_header, authentication, get_access_token, getCookie, url, path)
 	{
 		let token
 
@@ -405,7 +405,7 @@ class Http_request
 		}
 		else if (get_access_token)
 		{
-			token = get_access_token(getCookie)
+			token = get_access_token(getCookie, { url, path })
 		}
 
 		if (token && authentication !== false)
