@@ -133,7 +133,7 @@ const server = webpageServer(settings, {
   // Specify `secure: true` flag to use `https` protocol instead of `http`.
   application: {
     host: '192.168.0.1',
-    port: 80,
+    port: 3000,
     // secure: true
   },
 
@@ -199,7 +199,7 @@ In the example above everything ("static" files, the API) is handled by a single
 
 The old-school way is to set up a "proxy server" like [NginX](https://www.sep.com/sep-blog/2014/08/20/hosting-the-node-api-in-nginx-with-a-reverse-proxy/) dispatching all incoming HTTP requests: serving "static" files, redirecting to the API server for `/api` calls, etc.
 
-```
+```nginx
 server {
   # Web server listens on port 80
   listen 80;
