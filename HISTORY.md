@@ -1,3 +1,9 @@
+11.0.28 / 07.07.2017
+====================
+
+  * `application` setting of page rendering server was renamed to `http`. The older way still works in the current major version.
+
+
 11.0.26 / 05.07.2017
 ====================
 

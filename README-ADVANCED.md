@@ -430,7 +430,7 @@ try {
   // The purpose of this setting is to prepend `host` and `port`
   // to such relative API URLs on the server side when using the `http` utility.
   // Specify `secure: true` flag to use `https` protocol instead of `http`.
-  application: {
+  http: {
     host: '192.168.0.1',
     port: 3000,
     // secure: true

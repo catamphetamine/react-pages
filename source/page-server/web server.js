@@ -22,6 +22,15 @@ export default function start_webpage_rendering_server(settings, options)
 	}
 	= options
 
+	let
+	{
+		http
+	}
+	= options
+
+	// Legacy `application` option will be removed in a future major release
+	http = http || application
+
 	const web = new koa()
 
 	// Handles errors
@@ -93,7 +102,7 @@ export default function start_webpage_rendering_server(settings, options)
 
 		const { status, content, redirect, route, time, afterwards } = await render_page(settings,
 		{
-			application,
+			http,
 			assets,
 			initialize,
 			localize: localize ? parameters => localize(parameters, get_preferred_locales(ctx)) : undefined,

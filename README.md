@@ -10,7 +10,7 @@ Server Side Rendering for `React + React-router + Redux` stack.
  * Supports Webpack "hot reload" (aka "Hot Module Replacement")
  * Provides supplementary utilities: locale detection for internationalization, easy setting page `<title/>` and `<meta/>`, programmatic redirects, 100% correct handling of HTTP Cookies, etc
 
-## Why Server Side Rendering
+# Why Server Side Rendering
 
 ### World-Wide Web Concepts
 
@@ -34,15 +34,13 @@ While the first approach is more elegant and pure, currently it is a very CPU in
 
 The final argument in favour of Server Side Rendering is that even if a website doesn't need search engine indexing it would still benefit from employing Server Side Rendering because that would save that additional HTTP roundtrip from the web browser to the API server for fetching the page's data. And no matter how fast the API server is, [latency is unbeatable](https://www.igvita.com/2012/07/19/latency-the-new-web-performance-bottleneck/) being about 100ms. So, by performing routing and page preloading on the server side one can speed up website loading by about 100ms. Not that it mattered that much for non-perfectionists but still why not do it when it's so simple to implement.
 
-## Installation
+# Usage
+
+(see [webpack-react-redux-isomorphic-render-example](https://github.com/halt-hammerzeit/webpack-react-redux-isomorphic-render-example) or [webapp](https://github.com/halt-hammerzeit/webapp) as references)
 
 ```bash
 $ npm install react-isomorphic-render --save
 ```
-
-## Usage
-
-(see [webpack-react-redux-isomorphic-render-example](https://github.com/halt-hammerzeit/webpack-react-redux-isomorphic-render-example) or [webapp](https://github.com/halt-hammerzeit/webapp) as references)
 
 Start by creating a settings file (it configures both client side and server side)
 
@@ -99,30 +97,17 @@ And the `index.html` would look like this:
 
 Notice the `/assets/main.css` and `/assets/main.js` paths: in this example I assume that you're running [`webpack-dev-server`](https://webpack.github.io/docs/webpack-dev-server.html) and this `index.html` file is put into the `build` folder and therefore is served by `webpack-dev-server` on `/assets/` URL path.
 
-Now open `localhost:8080` (or whichever `--port` your `webpack-dev-server` is listening on) in a web browser. Client-side rendering should work now. The whole setup can be deployed as-is being uploaded to a cloud and served statically (which is very cheap) – everything would work and adding server-side rendering is not required (though it might be required for better search engine indexing).
+Now open `localhost:8080` (or whichever `--port` your `webpack-dev-server` is listening on) in a web browser – it should respond with the contents of the `index.html` file. Client-side rendering should work now. The whole setup can be deployed as-is being uploaded to a cloud and served statically (which is very cheap) – everything would work and adding server-side rendering is not required (though it might be required for better search engine indexing).
 
-## Server side
+### Server side
 
-Adding Server Side Rendering to the setup is quite simple though requiring a running Node.js process therefore the website is no longer just statics served from the cloud but is both statics and a Node.js application running somewhere (say, in a Docker container).
-
-Since a Node.js process is running for page rendering it could be used to perform other tasks like serving "static" files (`webpack-dev-server` is not running in production) or hosting a REST API.
+Adding Server Side Rendering to the setup is quite simple though requiring a running Node.js process therefore the website is no longer just statics served from the cloud but is both statics and a Node.js rendering process running somewhere (say, in a Docker container).
 
 `index.html` will be generated on-the-fly by page rendering server for each HTTP request, so the `index.html` file may be deleted as it's of no use now.
 
-Here's how the webpage rendering server is started (in this particular example it's also serving assets and hosting a REST API):
-
 ```javascript
-import path from 'path'
 import webpageServer from 'react-isomorphic-render/server'
-
-// `npm install koa-static koa-mount --save`
-import statics from 'koa-static'
-import mount from 'koa-mount'
-
 import settings from './react-isomorphic-render'
-
-// Cache assets in the web browser for 1 year by default
-const maxAge = 365 * 24 * 60 * 60;
 
 // Create webpage rendering server
 const server = webpageServer(settings, {
@@ -131,25 +116,12 @@ const server = webpageServer(settings, {
   // as <script src="..."/> and <link rel="style" href="..."/> respectively.
   // (also can be a function returning an object)
   // (this is for the main application JS and CSS only,
-  //  for 3rd party JS and CSS use `html` parameter instead)
+  //  for 3rd party JS and CSS use `html` parameter instead:
+  //  https://github.com/halt-hammerzeit/react-isomorphic-render/blob/master/README-ADVANCED.md#all-webpage-rendering-server-options)
   assets: {
-    javascript: '/assets/main.js',
-    style: '/assets/main.css'
-  },
-
-  // (optional)
-  // Any custom Koa middlewares go here.
-  // They are `.use()`d before page rendering middleware.
-  middleware: [
-    // Serves "static files" on `/assets` URL path from the `../build` folder
-    // (the Webpack `configuration.output.path` folder).
-    mount('/assets', statics(path.join(__dirname, '../build'), { maxAge })),
-    // REST API
-    mount('/api', async (ctx, next) => {
-      ctx.type = 'application/json'
-      ctx.body = '{"data":[1,2,3]}'
-    })
-  ]
+    javascript: 'http://localhost:8080/assets/main.js',
+    style: 'http://localhost:8080/assets/main.css'
+  }
 })
 
 // Start webpage rendering server on port 3000
@@ -173,7 +145,7 @@ const server = webpageServer(settings, {...})
 http.createServer(server.callback()).listen(3000, error => ...)
 ```
 
-And for HTTPS websites start the page server like this:
+Or, for HTTPS websites, start the page server like this:
 
 ```js
 import https from 'https'
@@ -182,9 +154,57 @@ const server = webpageServer(settings, {...})
 https.createServer(options, server.callback()).listen(443, error => ...)
 ```
 
-## Proxying
+### Serving assets and API
 
-In the example above everything ("static" files, the API) is handled by a single Node.js process. This is for illustration purposes only and in reality it's different.
+In the examples above "static" files (assets) are served by `webpack-dev-server` on `localhost:8080`. But it's for local development only. For production these "static" files must be served by someone else, be it a dedicated proxy server like NginX, a simple homemade Node.js application or (recommended) a cloud-based solution like Amazon S3.
+
+Also, a real-world website most likely has some kind of an API, which, again, could be either a dedicated API server (e.g. written in Golang), a simple Node.js application or a modern "serverless" API like Amazon Lambda hosted in the cloud.
+
+The following 3 sections illustrate each one of these 3 approaches.
+
+### The simplest approach
+
+This section illustrates the "simple homemade Node.js application" approach. It's not the approach I'd use for a real-world website but it's the simplest one so it's for illustration purposes only.
+
+So, a Node.js process is already running for page rendering, so it also be employed to perform other tasks like serving "static" files (`webpack-dev-server` is not running in production) or hosting a REST API.
+
+```javascript
+import webpageServer from 'react-isomorphic-render/server'
+import settings from './react-isomorphic-render'
+
+import path from 'path'
+// `npm install koa-static koa-mount --save`
+import statics from 'koa-static'
+import mount from 'koa-mount'
+
+// Create webpage rendering server
+const server = webpageServer(settings, {
+  assets: ...,
+
+  // (optional)
+  // This parameter is specified here for the example purpose only.
+  // Any custom Koa middlewares go here.
+  // They are `.use()`d before page rendering middleware.
+  middleware: [
+    // Serves "static files" on `/assets` URL path from the `../build` folder
+    // (the Webpack `configuration.output.path` folder).
+    mount('/assets', statics(path.join(__dirname, '../build'), {
+      // Cache assets in the web browser for 1 year
+      maxAge: 365 * 24 * 60 * 60
+    })),
+    // Hosts REST API on `/api` URL path.
+    mount('/api', async (ctx, next) => {
+      ctx.type = 'application/json'
+      ctx.body = '{"data":[1,2,3]}'
+    })
+  ]
+})
+
+// Start webpage rendering server on port 3000
+...
+```
+
+### The old-school way
 
 The old-school way is to set up a "proxy server" like [NginX](https://www.sep.com/sep-blog/2014/08/20/hosting-the-node-api-in-nginx-with-a-reverse-proxy/) dispatching all incoming HTTP requests: serving "static" files, redirecting to the API server for `/api` calls, etc.
 
@@ -239,7 +259,13 @@ app.use(function(request, response) {
 app.listen(80)
 ```
 
-The modern way is not using any "proxy servers" at all. Instead everything is distributed and decentralized. Webpack-built assets are uploaded to the cloud (say, to Amazon S3) and webpack configuration option `.output.publicPath` is set to something like `https://s3-ap-southeast-1.amazonaws.com/my-bucket/folder-1/` (your CDN URL) so now serving "static" files is not your job. API is dealt with in a similar way: CORS headers are set up to allow querying from a web browser by an absolute URL and the API is either hosted as a standalone API server or run "serverless"ly, say, on Amazon Lambda, and is queried by an absolute URL, like `https://at9y1jpex0.execute-api.us-east-1.amazonaws.com/develop/`.
+### The modern way
+
+Finally, the modern way is not using any "proxy servers" at all. Instead everything is distributed and decentralized. Webpack-built assets are uploaded to the cloud (say, to Amazon S3) and webpack configuration option `.output.publicPath` is set to something like `https://s3-ap-southeast-1.amazonaws.com/my-bucket/folder-1/` (your CDN URL) so now serving "static" files is not your job. API is dealt with in a similar way: CORS headers are set up to allow querying from a web browser by an absolute URL and the API is either hosted as a standalone API server or run "serverless"ly, say, on Amazon Lambda, and is queried by an absolute URL, like `https://at9y1jpex0.execute-api.us-east-1.amazonaws.com/develop/`.
+
+This concludes the introductory part of the README and the rest is the description of the various (useful) tools which come prepackaged with this library.
+
+# Tools
 
 ## Making HTTP Requests
 
@@ -302,6 +328,23 @@ The possible `options` are
 -->
 
 `http` utility is also available from anywhere on the client side via an exported `getHttpClient()` function.
+
+### HTTP utility and relative URLs
+
+In the examples above the URLs queried via `http` utility are relative ones (e.g. `/api/users`). This is gonna be the case if you're using a proxy server. In order for such relative URL `http` calls to work on the server side the webpage rendering service must be passed a couple of extra parameters:
+
+```js
+const server = webpageServer(settings, {
+  http: {
+    host: '192.168.0.1',
+    port: 3000,
+    // (enable for HTTPS protocol)
+    // secure: true
+  }
+})
+```
+
+These `host` and `port` will be prepended to all relative URLs queried via the `http` utility. If you only query absolute API URLs then you don't need to configure this setting.
 
 ### File upload
 

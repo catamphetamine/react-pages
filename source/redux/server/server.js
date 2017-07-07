@@ -15,7 +15,7 @@ export default function _render(options)
 	})
 }
 
-export async function initialize(settings, { protected_cookie_value, application, request, cookies, initialize, get_history })
+export async function initialize(settings, { protected_cookie_value, http, request, cookies, initialize, get_history })
 {
 	// Redux store
 	let store
@@ -23,9 +23,9 @@ export async function initialize(settings, { protected_cookie_value, application
 	// Create HTTP client (Redux action creator `http` utility)
 	const http_client = create_http_client(settings, () => store, protected_cookie_value,
 	{
-		host          : application ? application.host : undefined,
-		port          : application ? application.port : undefined,
-		secure        : application ? application.secure : false,
+		host          : http ? http.host : undefined,
+		port          : http ? http.port : undefined,
+		secure        : http ? http.secure : false,
 		clone_request : request,
 		cookies
 	})
