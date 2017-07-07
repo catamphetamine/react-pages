@@ -246,7 +246,7 @@ const proxy = httpProxy.createProxyServer({})
 app.use('/assets', express.static(path.join(__dirname, '../build')))
 
 // Proxy `/api` calls to the API service
-app.get('/api', function(request, response) {
+app.use('/api', function(request, response) {
   proxy.web(request, response, { target: 'http://localhost:3001' })
 })
 
