@@ -94,15 +94,15 @@ And the `index.html` would look like this:
 
 Where `bundle.js` is the `./src/client/application.js` file built with Webpack (or you could use any other javascript bundler).
 
-Now put `index.html` and `bundle.js` together to serve them statically over HTTP. If you're using Webpack then `bundle.js` is already being served by [`webpack-dev-server`](https://webpack.github.io/docs/webpack-dev-server.html) which is listening on the `--port` you specified when running it (imagine it's `8080`) – in that case just put `index.html` alongside `bundle.js` (which resides at the path configured as Webpack's `configuration.output.path`).
+Now, `index.html` and `bundle.js` files must be served over HTTP. If you're using Webpack then go to the folder where `index.html` is located and run [`webpack-dev-server`](https://webpack.js.org/guides/development/#webpack-dev-server): it will serve `index.html` from disk and `bundle.js` from memory.
 
-Now go to `localhost:8080` (or whichever `--port` your `webpack-dev-server` is listening on). It should respond with the contents of the `index.html` file. Client-side rendering should work now. The whole setup can be deployed as-is being uploaded to a cloud and served statically (which is very cheap) – everything would work and adding server-side rendering is not required (though it might be required for better search engine indexing).
+Now go to `localhost:8080`. It should respond with the contents of the `index.html` file. Client-side rendering should work now. The whole setup can be deployed as-is being uploaded to a cloud and served statically (which is very cheap).
 
 ### Server side
 
 Adding Server Side Rendering to the setup is quite simple though requiring a running Node.js process therefore the website is no longer just statics served from the cloud but is both statics and a Node.js rendering process running somewhere (say, in a Docker container).
 
-`index.html` will be generated on-the-fly by page rendering server for each HTTP request, so the `index.html` file may be deleted as it's of no use now.
+`index.html` will be generated on-the-fly by page rendering server for each incoming HTTP request, so the `index.html` file may be deleted as it's of no use now.
 
 ```javascript
 import webpageServer from 'react-isomorphic-render/server'
@@ -110,16 +110,17 @@ import settings from './react-isomorphic-render'
 
 // Create webpage rendering server
 const server = webpageServer(settings, {
-  // URLs of the "static" javascript and CSS files
-  // which will be insterted into the <head/> element of the resulting Html webpage
-  // as <script src="..."/> and <link rel="style" href="..."/> respectively.
-  // (also can be a function returning an object)
-  // (this is for the main application JS and CSS only,
-  //  for 3rd party JS and CSS use `html` parameter instead:
+  // These are the URLs of the "static" javascript and CSS files
+  // which are injected in the resulting Html webpage
+  // as <script src="..."/> and <link rel="style" href="..."/>.
+  // (this is for the main application JS and CSS bundles only,
+  //  for injecting 3rd party JS and CSS use `html` settings instead:
   //  https://github.com/halt-hammerzeit/react-isomorphic-render/blob/master/README-ADVANCED.md#all-webpage-rendering-server-options)
-  assets: {
-    javascript: 'http://localhost:8080/assets/main.js',
-    style: 'http://localhost:8080/assets/main.css'
+  assets() {
+    return {
+      javascript: 'http://localhost:8080/bundle.js',
+      style: 'http://localhost:8080/bundle.css'
+    }
   }
 })
 
@@ -133,24 +134,17 @@ server.listen(3000, function(error) {
 })
 ```
 
-Now [disable javascript in Chrome DevTools](http://stackoverflow.com/questions/13405383/how-to-disable-javascript-in-chrome-developer-tools), go to `localhost:3000` and the server should respond with a fully rendered page.
+Now [disable javascript in Chrome DevTools](http://stackoverflow.com/questions/13405383/how-to-disable-javascript-in-chrome-developer-tools), go to `localhost:3000` and the server should respond with a server-side-rendered page.
 
 The `server` variable in the example above is just a [Koa](http://koajs.com/) application, so alternatively it could be started like this:
 
 ```js
 import http from 'http'
+// import https from 'https'
 import webpageServer from 'react-isomorphic-render/server'
 const server = webpageServer(settings, {...})
-http.createServer(server.callback()).listen(3000, error => ...)
-```
-
-Or, for HTTPS websites, start the page server like this:
-
-```js
-import https from 'https'
-import webpageServer from 'react-isomorphic-render/server'
-const server = webpageServer(settings, {...})
-https.createServer(options, server.callback()).listen(443, error => ...)
+http.createServer(server.callback()).listen(80, (error) => ...)
+// https.createServer(options, server.callback()).listen(443, (error) => ...)
 ```
 
 ### Serving assets and API
