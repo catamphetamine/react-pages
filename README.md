@@ -94,7 +94,7 @@ And the `index.html` would look like this:
 
 Where `bundle.js` is the `./src/client/application.js` file built with Webpack (or you could use any other javascript bundler).
 
-Now, `index.html` and `bundle.js` files must be served over HTTP. If you're using Webpack then go to the folder where `index.html` is located and run [`webpack-dev-server`](https://webpack.js.org/guides/development/#webpack-dev-server): it will serve `index.html` from disk and `bundle.js` from memory.
+Now, `index.html` and `bundle.js` files must be served over HTTP. If you're using Webpack then place `index.html` to Webpack's `configuration.output.path` folder and run [`webpack-dev-server`](https://webpack.js.org/guides/development/#webpack-dev-server): it will serve `index.html` from disk and `bundle.js` from memory.
 
 Now go to `localhost:8080`. It should respond with the contents of the `index.html` file. Client-side rendering should work now. The whole setup can be deployed as-is being uploaded to a cloud and served statically (which is very cheap).
 
