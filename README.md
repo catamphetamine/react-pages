@@ -52,7 +52,8 @@ export default {
   routes: require('./src/client/routes'),
 
   // Redux reducers
-  // (they will be combined via `combineReducers()`)
+  // (they will be combined into the
+  //  root reducer via `combineReducers()`)
   reducer: require('./src/client/redux/reducers')
 }
 ```
@@ -60,19 +61,16 @@ export default {
 #### ./src/client/redux/reducers/index.js
 
 ```js
-export { default as reducer1 } from './reducer1'
-export { default as reducer2 } from './reducer2'
+export { default as pageOne } from './pageOneReducer'
+export { default as pageTwo } from './pageTwoReducer'
 ...
 ```
 
-Then call `render()` in the main client-side javascript file
+Then call `render()` in the main client-side javascript file.
 
 #### ./src/client/application.js
 
 ```javascript
-// Include CSS styles in the bundle
-require('../styles/main.css')
-
 import { render } from 'react-isomorphic-render'
 import settings from './react-isomorphic-render'
 
@@ -86,18 +84,19 @@ And the `index.html` would look like this:
 <html>
   <head>
     <title>react-isomorphic-render</title>
-    <link rel="stylesheet" type="text/css" href="/assets/main.css">
   </head>
   <body>
     <div id="react"></div>
-    <script src="/assets/main.js"></script>
+    <script src="/bundle.js"></script>
   </body>
 </html>
 ```
 
-Notice the `/assets/main.css` and `/assets/main.js` paths: in this example I assume that you're running [`webpack-dev-server`](https://webpack.github.io/docs/webpack-dev-server.html) and this `index.html` file is put into the `build` folder and therefore is served by `webpack-dev-server` on `/assets/` URL path.
+Where `bundle.js` is the `./src/client/application.js` file built with Webpack (or you could use any other javascript bundler).
 
-Now open `localhost:8080` (or whichever `--port` your `webpack-dev-server` is listening on) in a web browser – it should respond with the contents of the `index.html` file. Client-side rendering should work now. The whole setup can be deployed as-is being uploaded to a cloud and served statically (which is very cheap) – everything would work and adding server-side rendering is not required (though it might be required for better search engine indexing).
+Now put `index.html` and `bundle.js` together to serve them statically over HTTP. If you're using Webpack then `bundle.js` is already being served by [`webpack-dev-server`](https://webpack.github.io/docs/webpack-dev-server.html) which is listening on the `--port` you specified when running it (imagine it's `8080`) – in that case just put `index.html` alongside `bundle.js` (which resides at the path configured as Webpack's `configuration.output.path`).
+
+Now go to `localhost:8080` (or whichever `--port` your `webpack-dev-server` is listening on). It should respond with the contents of the `index.html` file. Client-side rendering should work now. The whole setup can be deployed as-is being uploaded to a cloud and served statically (which is very cheap) – everything would work and adding server-side rendering is not required (though it might be required for better search engine indexing).
 
 ### Server side
 
