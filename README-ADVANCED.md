@@ -424,7 +424,9 @@ try {
 ```javascript
 {
   // This setting is only used when querying API by relative URLs
-  // like `/api/items/5` instead of `https://api-server.com/items/5`.
+  // using the `http` utility in Redux "action creators".
+  // E.g. `http.get('/api/items/5')` instead of
+  // `http.get('https://api-server.com/items/5')`.
   // The purpose of this setting is to prepend `host` and `port`
   // to such relative API URLs on the server side when using the `http` utility.
   // Specify `secure: true` flag to use `https` protocol instead of `http`.
