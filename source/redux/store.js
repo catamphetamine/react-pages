@@ -48,6 +48,7 @@ export default function create_store(settings, data, get_history, http_client, o
 			asynchronous_action_event_naming,
 			server,
 			http.error,
+			http.errorState,
 			get_history
 		),
 

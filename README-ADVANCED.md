@@ -211,6 +211,11 @@ try {
     }
 
     // (optional)
+    url: (path, isServerSide) =>
+    {
+      // In this case `.application` configuration parameter may be removed
+      return `https://api-server.com${path}`
+    }
     // Custom control over `http` utility HTTP requests URL.
     // E.g. for those who don't want to proxy their API calls
     // and instead prefer to query REST API server directly
@@ -228,11 +233,6 @@ try {
     // to prevent the authentication token header
     // (e.g. `Authorization: Bearer ${token}`)
     // to be sent to that 3rd party API endpoint.
-    url: (path, isServerSide) =>
-    {
-      // In this case `.application` configuration parameter may be removed
-      return `https://api-server.com${path}`
-    }
 
     // By default the `http` utility methods
     // only accept relative URLs.
@@ -252,6 +252,21 @@ try {
     // JWT token expiration here and redirect to a login page.
     // There's an alternative solution for handling access token expiration:
     // the `http.catch()` function parameter (see below).
+
+    // (optional)
+    errorState: (error) => ({ ... })
+    // 
+    // Parses a `superagent` `Error` instance
+    // into a plain JSON object for storing it in Redux state.
+    // The reason is that `Error` instance can't be part of Redux state
+    // because it's not a plain JSON object and therefore violates Redux philosophy.
+    //
+    // In case of an `application/json` HTTP response
+    // the `error` instance has `.data` JSON object property
+    // which carries the `application/json` HTTP response payload.
+    //
+    // By default `errorState` takes the `application/json` HTTP response payload
+    // and complements it with HTTP response `status` and `Error` `message`.
 
     // (optional)
     // (experimental: didn't test this function parameter but it's likely to work)

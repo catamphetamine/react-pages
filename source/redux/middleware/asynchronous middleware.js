@@ -9,7 +9,7 @@ import { location_url } from '../../location'
 //
 // `dispatch()` call will return a `Promise`.
 //
-export default function asynchronous_middleware(http_client, asynchronous_action_event_naming, server, on_error, get_history)
+export default function asynchronous_middleware(http_client, asynchronous_action_event_naming, server, on_error, parseError = parse_error, get_history)
 {
 	return ({ dispatch, getState }) =>
 	{
@@ -105,49 +105,16 @@ export default function asynchronous_middleware(http_client, asynchronous_action
 						cancellable_promises.delete(Request)
 					}
 
-					// Transform Javascript `Error` instance into a plain JSON object
-					// because the meaning of the `error` action is different
-					// from what `Error` class is: it should only carry info like
-					// `status`, `message` and possible other values (e.g. `code`),
-					// without any stack traces, line numbers, etc.
-					// I.e. the `error` action should be a plain javascript object,
-					// not an instance of an `Error` class, because it's Redux (stateless).
-
-					// `error` is an `Error` instance thrown by `http client.js`.
-					// It has `.data` JSON object set to HTTP response data
-					// in case of an `application/json` response.
-					const error_data = is_object(error.data) ? error.data : {}
-
-					if (!exists(error_data.message))
-					{
-						error_data.message = error.message
-					}
-
-					if (!exists(error_data.status))
-					{
-						error_data.status = error.status
-					}
-
 					// Dispatch the `failure` event to the Redux store
 					dispatch
 					({
 						...rest,
-						error : error_data,
+						error : parseError(error),
 						type  : Failure
 					})
 
 					// The Promise returned from `dispatch()` call
 					// is rejected with this error.
-
-					// if (error.data)
-					// {
-					// 	delete error.data
-					// }
-					//
-					// for (let key of Object.keys(error_data))
-					// {
-					// 	error[key] = error_data[key]
-					// }
 
 					// Only checks `http` calls which are not part of `@preload()`
 					// so that they don't get "error handled" twice
@@ -188,4 +155,40 @@ export default function asynchronous_middleware(http_client, asynchronous_action
 			)
 		}
 	}
+}
+
+// Transform Javascript `Error` instance into a plain JSON object
+// because the meaning of the `error` action is different
+// from what `Error` class is: it should only carry info like
+// `status`, `message` and possible other values (e.g. `code`),
+// without any stack traces, line numbers, etc.
+// I.e. the `error` action should be a plain javascript object,
+// not an instance of an `Error` class, because it's Redux (stateless).
+//
+// Parses a `superagent` `Error` instance
+// into a plain JSON object for storing it in Redux state.
+// In case of an `application/json` HTTP response
+// the `error` instance ha `.data` JSON object property
+// which carries the `application/json` HTTP response data.
+//
+function parse_error(error)
+{
+	// Copies JSON HTTP response entirely
+	const error_data = is_object(error.data) ? error.data : {}
+
+	// Sets HTTP response `status` code
+	// if `status` property wasn't present in JSON HTTP response.
+	if (!exists(error_data.status))
+	{
+		error_data.status = error.status
+	}
+
+	// Copies `message` from `Error` instance
+	// if `message` property wasn't present in JSON HTTP response.
+	if (!exists(error_data.message))
+	{
+		error_data.message = error.message
+	}
+	
+	return error_data
 }
