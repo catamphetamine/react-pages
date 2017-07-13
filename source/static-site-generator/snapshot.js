@@ -39,8 +39,23 @@ async function snapshot(host, port, pages, output, tick)
 	// Snapshot every page and put it into the output folder
 	for (const page of pages)
 	{
-		const page_contents = await download(`http://${host}:${port}${page}`)
-		fs.outputFileSync(path.join(output, page, '/index.html'), page_contents)
+		let url                = page
+		let target_status_code = 200
+
+		if (typeof page !== 'string' && page.status)
+		{
+			url                = page.url
+			target_status_code = page.status
+		}
+
+		const { status, content } = await download(`http://${host}:${port}${url}`)
+
+		if (status !== targetStatusCode)
+		{
+			throw new Error(`Expected ${targetStatusCode} HTTP status code for page "${url}". Got ${status}.`);
+		}
+
+		fs.outputFileSync(path.join(output, url, '/index.html'), content)
 		tick()
 	}
 }

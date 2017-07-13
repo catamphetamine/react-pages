@@ -359,7 +359,7 @@ const server = webpageServer(settings, {
 })
 ```
 
-The second approach is for everyone else (majority). In this case all URLs are transformed from relative ones into absolute ones by the `http.url()` function parameter configured in `react-isomorphic-render.js`.
+The second approach is for everyone else (majority). In this case all URLs are transformed from relative ones into absolute ones by the `http.url(path)` function parameter configured in `react-isomorphic-render.js`.
 
 ```js
 {
@@ -1364,18 +1364,27 @@ import { snapshot, upload, S3Uploader, copy, download } from 'react-isomorphic-r
 
 import configuration from '../configuration'
 
+// Index page is added by default
 let pages =
 [
   '/about',
-  '/error',
-  '/unauthenticated',
-  '/unauthorized',
-  '/not-found'
+
+  { url: '/unauthenticated', status: 401 },
+  { url: '/unauthorized', status: 403 },
+  { url: '/not-found', status: 404 },
+  { url: '/error', status: 500 }
 ]
 
 async function run()
 {
-  const items = JSON.parse(await download(`https://example.com/api/items`))
+  const { status, content } = JSON.parse(await download(`https://example.com/api/items`))
+
+  if (status !== 200)
+  {
+    throw new Error('Couldn\'t load items')
+  }
+
+  const items = JSON.parse(content)
 
   pages = pages.concat(items.map(item => `/items/${item.id}`))
 
