@@ -210,7 +210,7 @@ export default class http_client
 						}
 
 						// // One could store the `request` to later `.abort()` it.
-						// // https://github.com/halt-hammerzeit/react-isomorphic-render/issues/46
+						// // https://github.com/catamphetamine/react-isomorphic-render/issues/46
 						// if (options.onRequest)
 						// {
 						// 	options.onRequest(request.request)

@@ -2,7 +2,7 @@ This section contains advanced topics. This means that the features described he
 
 ## react-router-redux
 
-I didn't build [`react-router-redux`](https://github.com/reactjs/react-router-redux) functionality into this library because I thought that Redux state is actually not intended for storing router state. See [PHILOSOPHY](https://github.com/halt-hammerzeit/react-isomorphic-render/blob/master/PHILOSOPHY.md).
+I didn't build [`react-router-redux`](https://github.com/reactjs/react-router-redux) functionality into this library because I thought that Redux state is actually not intended for storing router state. See [PHILOSOPHY](https://github.com/catamphetamine/react-isomorphic-render/blob/master/PHILOSOPHY.md).
 
 ## CSRF protection
 

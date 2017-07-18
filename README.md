@@ -36,7 +36,7 @@ The final argument in favour of Server Side Rendering is that even if a website 
 
 # Usage
 
-(see [webpack-react-redux-isomorphic-render-example](https://github.com/halt-hammerzeit/webpack-react-redux-isomorphic-render-example) or [webapp](https://github.com/halt-hammerzeit/webapp) as references)
+(see [webpack-react-redux-isomorphic-render-example](https://github.com/catamphetamine/webpack-react-redux-isomorphic-render-example) or [webapp](https://github.com/catamphetamine/webapp) as references)
 
 ```bash
 $ npm install react-isomorphic-render --save
@@ -115,7 +115,7 @@ const server = webpageServer(settings, {
   // as <script src="..."/> and <link rel="style" href="..."/>.
   // (this is for the main application JS and CSS bundles only,
   //  for injecting 3rd party JS and CSS use `html` settings instead:
-  //  https://github.com/halt-hammerzeit/react-isomorphic-render/blob/master/README-ADVANCED.md#all-webpage-rendering-server-options)
+  //  https://github.com/catamphetamine/react-isomorphic-render/blob/master/README-ADVANCED.md#all-webpage-rendering-server-options)
   assets() {
     return {
       javascript: 'http://localhost:8080/bundle.js',
@@ -284,7 +284,7 @@ This is a handy way of dealing with "asynchronous actions" in Redux, e.g. HTTP r
 
 ### Autogenerate event names
 
-When you find yourself copy-pasting those `_PENDING`, `_SUCCESS` and `_ERROR` event names from one action creator to another then take a look at `asynchronousActionEventNaming` setting described in the [All `react-isomorphic-render.js` settings](https://github.com/halt-hammerzeit/react-isomorphic-render/blob/master/README-ADVANCED.md#all-react-isomorphic-renderjs-settings) section of the "advanced" readme: it lets a developer just supply a "base" `event` name and then it generates the three lifecycle event names from that "base" `event` significantly reducing boilerplate.
+When you find yourself copy-pasting those `_PENDING`, `_SUCCESS` and `_ERROR` event names from one action creator to another then take a look at `asynchronousActionEventNaming` setting described in the [All `react-isomorphic-render.js` settings](https://github.com/catamphetamine/react-isomorphic-render/blob/master/README-ADVANCED.md#all-react-isomorphic-renderjs-settings) section of the "advanced" readme: it lets a developer just supply a "base" `event` name and then it generates the three lifecycle event names from that "base" `event` significantly reducing boilerplate.
 
 ### HTTP utility
 
@@ -319,7 +319,7 @@ The possible `options` (the third argument of all `http` methods) are
 
 <!--
   (removed)
-  * `onRequest(request)` – for capturing `superagent` request (there was [a feature request](https://github.com/halt-hammerzeit/react-isomorphic-render/issues/46) to provide a way for aborting running HTTP requests via `request.abort()`)
+  * `onRequest(request)` – for capturing `superagent` request (there was [a feature request](https://github.com/catamphetamine/react-isomorphic-render/issues/46) to provide a way for aborting running HTTP requests via `request.abort()`)
 -->
 
 <!--
@@ -462,7 +462,7 @@ export default class Page extends Component {
 
 In the example above `@preload()` helper is called to preload a web page before it is displayed, i.e. before the page is rendered (both on server side and on client side).
 
-[`@preload()` decorator](https://github.com/halt-hammerzeit/react-isomorphic-render/blob/master/source/redux/preload.js) takes a function which must return a `Promise`:
+[`@preload()` decorator](https://github.com/catamphetamine/react-isomorphic-render/blob/master/source/redux/preload.js) takes a function which must return a `Promise`:
 
 ```javascript
 @preload(function({ dispatch, getState, location, parameters, server }) {
@@ -515,7 +515,7 @@ To run `@preload()` only on client side pass the second `{ client: true }` optio
 
 For example, a web application could be hosted entirely statically in a cloud like Amazon S3 and fetch data using a separately hosted API like Amazon Lambda. This kind of setup is quite popular due to being simple and cheap. Yes, it's not a true isomorphic approach because the user is given a blank page first and then some `main.js` script fetches the page data in the browser. But, as being said earlier, this kind of setup is rediculously simple to build and cheap to maintain so why not. Yes, Google won't index such websites, but if searchability is not a requirement (yet) then it's the way to go (e.g. "MVP"s).
 
-Specifying `{ client: true }` option for each `@preload()` would result in a lot of copy-pasta so there's a [special configuration option](https://github.com/halt-hammerzeit/react-isomorphic-render/blob/master/README-ADVANCED.md#all-react-isomorphic-renderjs-settings) for that: `{ preload: { client: true } }`.
+Specifying `{ client: true }` option for each `@preload()` would result in a lot of copy-pasta so there's a [special configuration option](https://github.com/catamphetamine/react-isomorphic-render/blob/master/README-ADVANCED.md#all-react-isomorphic-renderjs-settings) for that: `{ preload: { client: true } }`.
 
 ### `@preload()` indicator
 
@@ -990,7 +990,7 @@ class Page extends Component {
 
 ## Performance and Caching
 
-React Server Side Rendering is quite slow, so I prefer setting `render: false` flag to move all React rendering to the web browser. This approach has virtually no complications. There are still numerous (effective) approaches to speeding up React Server Side Rendering like leveraging component markup caching and swapping the default React renderer with a much faster stripped down custom one. [Read more](https://github.com/halt-hammerzeit/react-isomorphic-render/blob/master/PERFORMANCE.md).
+React Server Side Rendering is quite slow, so I prefer setting `render: false` flag to move all React rendering to the web browser. This approach has virtually no complications. There are still numerous (effective) approaches to speeding up React Server Side Rendering like leveraging component markup caching and swapping the default React renderer with a much faster stripped down custom one. [Read more](https://github.com/catamphetamine/react-isomorphic-render/blob/master/PERFORMANCE.md).
 
 ## Monitoring
 
@@ -1422,11 +1422,11 @@ run().catch((error) =>
 
 ## Bundlers
 
-If you're using Webpack then make sure you either build your server-side code with Webpack too (so that asset `require()` calls (images, styles, fonts, etc) inside React components work, see [universal-webpack](https://github.com/halt-hammerzeit/universal-webpack)) or use something like [webpack-isomorphic-tools](https://github.com/halt-hammerzeit/webpack-isomorphic-tools).
+If you're using Webpack then make sure you either build your server-side code with Webpack too (so that asset `require()` calls (images, styles, fonts, etc) inside React components work, see [universal-webpack](https://github.com/catamphetamine/universal-webpack)) or use something like [webpack-isomorphic-tools](https://github.com/catamphetamine/webpack-isomorphic-tools).
 
 ## Advanced
 
-At some point in time this README became huge so I extracted some less relevant parts of it into [README-ADVANCED](https://github.com/halt-hammerzeit/react-isomorphic-render/blob/master/README-ADVANCED.md) (including the list of all possible settings and options). If you're a first timer then just skip that one.
+At some point in time this README became huge so I extracted some less relevant parts of it into [README-ADVANCED](https://github.com/catamphetamine/react-isomorphic-render/blob/master/README-ADVANCED.md) (including the list of all possible settings and options). If you're a first timer then just skip that one.
 
 ## Contributing
 
