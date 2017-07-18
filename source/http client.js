@@ -143,6 +143,7 @@ export default class http_client
 					{
 						agent,
 						parse_json_dates,
+						on_response_headers : options.onResponseHeaders,
 						headers : { ...headers, ...options.headers },
 						new_cookies : (new_cookies) =>
 						{
@@ -287,7 +288,12 @@ function is_relative_url(path)
 
 function has_binary_data(data)
 {
-	for (let key of Object.keys(data))
+	if (!is_object(data))
+	{
+		return false
+	}
+
+	for (const key of Object.keys(data))
 	{
 		const parameter = data[key]
 
@@ -321,7 +327,7 @@ function construct_form_data(data)
 
 	const form_data = new FormData()
 
-	for (let key of Object.keys(data))
+	for (const key of Object.keys(data))
 	{
 		let parameter = data[key]
 
@@ -355,7 +361,15 @@ class Http_request
 {
 	constructor(method, url, data, options)
 	{
-		const { agent, headers, parse_json_dates, new_cookies } = options
+		const
+		{
+			agent,
+			headers,
+			parse_json_dates,
+			new_cookies,
+			on_response_headers
+		}
+		= options
 
 		this.new_cookies = new_cookies
 
@@ -392,6 +406,10 @@ class Http_request
 
 		// `true`/`false`
 		this.parse_json_dates = parse_json_dates
+
+		// Can be used for examining HTTP response headers
+		// (e.g. Amazon S3 file upload)
+		this.on_response_headers = on_response_headers
 	}
 
 	// Sets `Authorization: Bearer ${token}` in HTTP request header
@@ -472,10 +490,18 @@ class Http_request
 		{
 			this.request.end((error, response) =>
 			{
-				// If any cookies were set then track them (for later)
-				if (response && response.headers['set-cookie'])
+				if (response)
 				{
-					this.new_cookies(response.headers['set-cookie'])
+					if (this.on_response_headers)
+					{
+						this.on_response_headers(response.headers)
+					}
+
+					// If any cookies were set then track them (for later)
+					if (response.headers['set-cookie'])
+					{
+						this.new_cookies(response.headers['set-cookie'])
+					}
 				}
 
 				if (error)
