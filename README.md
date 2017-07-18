@@ -315,7 +315,7 @@ The possible `options` (the third argument of all `http` methods) are
   * `headers` — HTTP Headers JSON object
   * `authentication` — set to `false` to disable sending the authentication token as part of the HTTP request, set to a String to pass it as an `Authorization: Bearer ${token}` token (no need to set the token explicitly for every `http` method call, it is supposed to be set globally, see below)
   * `progress(percent, event)` — is used for tracking HTTP request progress (e.g. file upload)
-  * `onResponseHeaders(headers)` – for examining HTTP response headers (e.g. [Amazon S3](http://docs.aws.amazon.com/AmazonS3/latest/API/RESTObjectPUT.html#RESTObjectPUT-responses-response-headers))
+  * `onResponseHeaders(headers)` – for examining HTTP response headers (e.g. [Amazon S3](http://docs.aws.amazon.com/AmazonS3/latest/API/RESTObjectPUT.html#RESTObjectPUT-responses-response-headers) file upload)
 
 <!--
   (removed)
