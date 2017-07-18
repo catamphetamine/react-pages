@@ -494,10 +494,10 @@ class Http_request
 				// then resolve with an empty result.
 				if (response.statusCode === 204)
 				{
-					return resolve()
+					return resolve(undefined, response.headers)
 				}
 
-				resolve(this.get_response_data(response))
+				resolve(this.get_response_data(response), response.headers)
 			})
 		})
 	}
