@@ -13,7 +13,7 @@ import match_routes_against_location from '../../react-router/match'
 // where `component` is the rendered React component
 // and `store` is the Redux store.
 //
-export default function render_on_client({ history, devtools, create_page_element, routes, store, to })
+export default function render_on_client({ history, create_page_element, routes, store, to })
 {
 	// Performs `react-router` asynchronous match for current location
 	// (is required for asynchonous routes to work).
@@ -30,7 +30,12 @@ export default function render_on_client({ history, devtools, create_page_elemen
 		// In case of a `react-router` `<Redirect/>`
 		if (redirect)
 		{
-			return store.dispatch(redirect_action(redirect))
+			window.location = location_url(redirect)
+			return Promise.reject(`[react-isomorphic-render] (Not an error) Redirecting to ${location_url(redirect)}`);
+
+			// This kind of a redirect won't work because
+			// the `<Router/>` hasn't been rendered yet.
+			// return store.dispatch(redirect_action(redirect))
 		}
 
 		const router_element = <Router
@@ -52,51 +57,7 @@ export default function render_on_client({ history, devtools, create_page_elemen
 			})
 			.component
 
-			const result =
-			{
-				component,
-				store
-			}
-
-			// If Redux-devtools aren't enabled, then just return the rendered page component
-			// (if Redux-devtools are installed as a web browser extension
-			//  then no need to do the second render pass too)
-			if (process.env.NODE_ENV === 'production' || !devtools || window.devToolsExtension)
-			{
-				return result
-			}
-
-			// Dev tools should be rendered after initial client render to prevent warning
-			// "React attempted to reuse markup in a container but the checksum was invalid"
-
-			// React JSX syntax can't detect lowercase elements
-			const DevTools = devtools.component
-
-			// This element will contain
-			// React page element and Redux-devtools.
-			//
-			// Since `DevTools` are inserted
-			// outside of the `<Provider/>`,
-			// provide the `store` manually.
-			//
-			element = 
-			(
-				<div>
-					{ element }
-					<DevTools store={ store }/>
-				</div>
-			)
-
-			// Render the wrapped React page element to DOM
-			result.component = react_render_on_client
-			({
-				element, // wrapped React page element
-				to, // DOM element to which React markup will be rendered
-				subsequent_render: true // Prevents "Server-side React render was discarded" warning
-			})
-			.component
-
-			return result
+			return { component, store }
 		})
 	})
 }

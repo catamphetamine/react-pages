@@ -145,8 +145,7 @@ export default function set_up_and_render(settings, options = {})
 		{
 			history,
 			routes: settings.routes,
-			store,
-			devtools
+			store
 		}
 	})
 	.then((result) =>

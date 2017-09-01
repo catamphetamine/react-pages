@@ -1,6 +1,6 @@
 {
   "name": "react-isomorphic-render",
-  "version": "11.0.32",
+  "version": "11.0.33",
   "description": "Isomorphic rendering with React, Redux, React-router and Redux-router. Includes support for Webpack",
   "main": "index.common.js",
   "module": "index.es6.js",
@@ -16,6 +16,7 @@
     "prop-types": "^15.5.6",
     "react-helmet": "^5.0.3",
     "react-router-scroll": "^0.4.1",
+    "redux-devtools-extension": "^2.13.2",
     "superagent": "^2.1.0",
     "uglify-js": "^2.7.5"
   },
@@ -38,9 +39,6 @@
     "react-redux": "^4.4.5",
     "react-router": "^3.0.0",
     "redux": "^3.5.2",
-    "redux-devtools": "^3.3.1",
-    "redux-devtools-dock-monitor": "^1.1.0",
-    "redux-devtools-log-monitor": "^1.0.5",
     "rimraf": "^2.5.0"
   },
   "peerDependencies": {
@@ -48,7 +46,7 @@
     "react-dom": ">= 15.0.0",
     "react-router": "^3.0.0",
     "history": "^3.0.0",
-    "redux": "^3.0.0",
+    "redux": "^3.1.0",
     "react-redux": "*"
   },
   "scripts": {

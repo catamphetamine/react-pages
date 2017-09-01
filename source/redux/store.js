@@ -1,4 +1,5 @@
 import { createStore, combineReducers, applyMiddleware, compose } from 'redux'
+import { composeWithDevTools } from 'redux-devtools-extension/logOnlyInProduction'
 
 import asynchronous_middleware from './middleware/asynchronous middleware'
 import preloading_middleware from './middleware/preloading middleware'
@@ -84,20 +85,8 @@ export default function create_store(settings, data, get_history, http_client, o
 		store_enhancers.push(...redux_store_enhancers())
 	}
 
-	// Add Redux DevTools (if they're enabled)
-	if (process.env.NODE_ENV !== 'production' && !server && devtools)
-	{
-		store_enhancers.push
-		(
-			// Provides support for DevTools
-			window.devToolsExtension ? window.devToolsExtension() : devtools.component.instrument(),
-			// Lets you write ?debug_session=<name> in address bar to persist debug sessions
-			devtools.persistState(window.location.href.match(/[?&]debug_session=([^&]+)\b/))
-		)
-	}
-
 	// Create Redux store
-	const store = compose(...store_enhancers)(createStore)(create_reducer(reducer), data)
+	const store = get_store_enhancers_composer(server, devtools)(...store_enhancers)(createStore)(create_reducer(reducer), data)
 
 	// On the client side, add `hotReload()` function to the `store`.
 	// (could just add this function to `window` but adding it to the `store` fits more)
@@ -130,4 +119,28 @@ function replaceable_state(reducer, event)
 				return reducer(state, action)
 		}
 	}
+}
+
+function get_store_enhancers_composer(server, devtools)
+{
+	// Redux DevTools aren't used on the server side
+	if (server)
+	{
+		return compose
+	}
+
+	// Custom behaviour
+	if (devtools && devtools.compose)
+	{
+		return devtools.compose
+	}
+
+	// With custom options
+	if (devtools && devtools.options)
+	{
+		return composeWithDevTools(devtools.options)
+	}
+
+	// Without custom options
+	return composeWithDevTools
 }

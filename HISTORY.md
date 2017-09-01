@@ -1,3 +1,8 @@
+11.0.33 / 24.07.2017
+===================
+
+  * (breaking change) Redux DevTools web browser extension before v2.7 is no longer supported. Because web browser extensions usually update themselves automatically this shouldn't be an issue, and also this change doesn't affect production, therefore it's a non-major version bump. Also the `devtools` parameter has completely changed, see `README-ADVANCED.md`: the old options are now deprecated and ignored and the new options are all optional. The entire `devtools` parameter is optional now too because it is considered beneficial to enable Redux DevTools in production too (https://medium.com/@zalmoxis/using-redux-devtools-in-production-4c5b56c5600f).
+
 11.0.29 / 07.07.2017
 ====================
 

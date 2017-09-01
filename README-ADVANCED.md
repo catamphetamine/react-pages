@@ -642,32 +642,27 @@ try {
   onStoreCreated: (store) => {}
 
   // (optional)
-  // Enables/disables Redux development tools.
+  // Configures Redux development tools.
   //
-  // This is not an optional `true` boolean flag,
-  // but rather an optional "DevTools" instance created by "createDevTools()".
+  // By default Redux development tools are enabled both in development (full-featured)
+  // and production (log only, for performance reasons) if the web browser extension is installed.
+  // The default behaviour is considered the best practice.
   //
-  // An example of "DevTools.js":
-  //
-  // npm install redux-devtools redux-devtools-log-monitor redux-devtools-dock-monitor --save-dev
-  //
-  // import React from 'react'
-  // import { createDevTools, persistState } from 'redux-devtools'
-  // import LogMonitor from 'redux-devtools-log-monitor'
-  // import DockMonitor from 'redux-devtools-dock-monitor'
-  // 
-  // export default
-  // {
-  //   component: createDevTools
-  //   (
-  //     <DockMonitor toggleVisibilityKey="ctrl-H" changePositionKey="ctrl-Q" defaultIsVisible>
-  //       <LogMonitor theme="tomorrow" />
-  //     </DockMonitor>
-  //   ),
-  //   persistState
-  // }
-  //
-  devtools: process.env.REDUX_DEVTOOLS && require('./DevTools.js')
+  devtools:
+  {
+    // (optional)
+    // A developer can supply his custom `compose` function
+    // (e.g. when not using the web browser extension).
+    // By default, "logOnlyInProduction" compose function is used
+    // which is the best practice according to the web browser extension author:
+    // https://medium.com/@zalmoxis/using-redux-devtools-in-production-4c5b56c5600f
+    compose: require('remote-redux-devtools/composeWithDevTools')
+
+    // (optional)
+    // Web browser extension options (when no custom `compose` is supplied).
+    // https://github.com/zalmoxisus/redux-devtools-extension/blob/master/docs/API/Arguments.md
+    options: { ... }
+  }
 
   // (optional)
   // Loads localized messages (asynchronously).
