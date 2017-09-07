@@ -312,6 +312,14 @@ function after_preload(dispatch, getState, components, parameters, action, serve
 
 	// Call `onPageLoaded()`
 	const page = components[components.length - 1]
+
+	// The current `<Route/>` component might be `undefined`
+	// if a developer forgot to `export default` it.
+	if (!page)
+	{
+		throw new Error('The current `<Route/>` component is `undefined`. Make sure you didn\'t forget to `export default` it from the component file.')
+	}
+	
 	if (page[On_page_loaded_method_name])
 	{
 		page[On_page_loaded_method_name]
