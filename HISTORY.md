@@ -347,7 +347,7 @@
 4.1.4 / 02.09.2016
 ===================
 
-  * `development_tools` option is now not a `true` flag but rather a `DevTools` instance created by `crateDevTools()` function call. This way one can customize the tools however he likes. See https://github.com/halt-hammerzeit/react-isomorphic-render#miscellaneous-client-side-rendering-options
+  * `development_tools` option is now not a `true` flag but rather a `DevTools` instance created by `crateDevTools()` function call. This way one can customize the tools however he likes. See https://github.com/catamphetamine/react-isomorphic-render#miscellaneous-client-side-rendering-options
 
 4.1.3 / 27.08.2016
 ===================
