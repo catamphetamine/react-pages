@@ -1,4 +1,4 @@
-11.0.37 / 21.09.2017
+11.0.38 / 21.09.2017
 ====================
 
   * (change) When a `result: String` parameter is used with "asynchronous action handler" utility then this `result` variable is set to `undefined` whenever "pending" stage takes place (because it makes sense to clear old data when new data is queried).
