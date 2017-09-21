@@ -290,21 +290,23 @@ When you find yourself copy-pasting those `_PENDING`, `_SUCCESS` and `_ERROR` ev
 
 For convenience, the argument of the `promise` function parameter of "asynchronous actions" described above is always the built-in `http` utility having methods `get`, `head`, `post`, `put`, `patch`, `delete`, each returning a `Promise` and taking three arguments: the `url` of the HTTP request, `parameters` object, and an `options` object. It can be used to easily query HTTP REST API endpoints in Redux action creators.
 
-```js
-function fetchFriends(personId, gender) {
-  return {
-    promise: (http) => http.get(`/api/person/${personId}/friends`, { gender }),
-    events: ['GET_FRIENDS_PENDING', 'GET_FRIENDS_SUCCESS', 'GET_FRIENDS_FAILURE']
-  }
-}
-```
-
-Using ES6 `async/await` this `promise` function can be rewritten as
+Using ES6 `async/await`:
 
 ```js
 function fetchFriends(personId, gender) {
   return {
     promise: async (http) => await http.get(`/api/person/${personId}/friends`, { gender }),
+    events: ['GET_FRIENDS_PENDING', 'GET_FRIENDS_SUCCESS', 'GET_FRIENDS_FAILURE']
+  }
+}
+```
+
+Or using plain `Promise`s (for those who prefer)
+
+```js
+function fetchFriends(personId, gender) {
+  return {
+    promise: (http) => http.get(`/api/person/${personId}/friends`, { gender }),
     events: ['GET_FRIENDS_PENDING', 'GET_FRIENDS_SUCCESS', 'GET_FRIENDS_FAILURE']
   }
 }
