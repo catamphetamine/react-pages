@@ -216,13 +216,19 @@ function create_redux_handlers(handler, namespace, event, on_result)
 	// clear `error`,
 	// set `pending` flag.
 	handler.handle(event_name(namespace, pending_event_name), (state, result) =>
-	({
-		...state,
+	{
+		// This will be the new Redux state
+		const new_state = on_result(state, undefined)
+
 		// Set `pending` flag
-		[pending_property_name] : true,
+		new_state[pending_property_name] = true
+
 		// Clear `error`
-		[error_property_name] : undefined
-	}))
+		new_state[error_property_name] = undefined
+
+		// Return the new Redux state
+		return new_state
+	})
 
 	// When Promise succeeds
 	handler.handle(event_name(namespace, success_event_name), (state, result) =>
