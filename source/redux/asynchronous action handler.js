@@ -50,7 +50,8 @@ export function action(options, handler)
 	if (promise || action)
 	{
 		// Normalize `result` reducer into a function
-		if (typeof result === 'string')
+		const result_variable_name_passed = typeof result === 'string'
+		if (result_variable_name_passed)
 		{
 			const property = result
 			result = (state, result) =>
@@ -66,7 +67,7 @@ export function action(options, handler)
 		//   * success
 		//   * error
 		//
-		create_redux_handlers(handler, namespace, event, result)
+		create_redux_handlers(handler, namespace, event, result, result_variable_name_passed)
 
 		// Redux "action creator"
 		return (...parameters) =>
@@ -186,7 +187,7 @@ export function create_handler(settings)
 //   * failed
 //   * reset error
 //
-function create_redux_handlers(handler, namespace, event, on_result)
+function create_redux_handlers(handler, namespace, event, on_result, result_variable_name_passed)
 {
 	if (!handler.settings.asynchronous_action_event_naming)
 	{
@@ -218,9 +219,13 @@ function create_redux_handlers(handler, namespace, event, on_result)
 	handler.handle(event_name(namespace, pending_event_name), (state, result) =>
 	{
 		// This will be the new Redux state.
+		let new_state = state
+
 		// Clearing the old `result` variable
 		// when fetching of a new one starts.
-		const new_state = on_result(state, {})
+		if (result_variable_name_passed) {
+			new_state = on_result(state, undefined)
+		}
 
 		// Set `pending` flag
 		new_state[pending_property_name] = true
