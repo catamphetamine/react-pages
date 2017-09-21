@@ -217,8 +217,10 @@ function create_redux_handlers(handler, namespace, event, on_result)
 	// set `pending` flag.
 	handler.handle(event_name(namespace, pending_event_name), (state, result) =>
 	{
-		// This will be the new Redux state
-		const new_state = on_result(state, undefined)
+		// This will be the new Redux state.
+		// Clearing the old `result` variable
+		// when fetching of a new one starts.
+		const new_state = on_result(state, {})
 
 		// Set `pending` flag
 		new_state[pending_property_name] = true
