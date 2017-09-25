@@ -217,13 +217,11 @@ function create_redux_handlers(handler, namespace, event, on_result, result_vari
 	// This info will be used in `storeConnector`
 	handler.add_state_properties(pending_property_name, error_property_name)
 
-	// When Promise is created,
-	// clear `error`,
-	// set `pending` flag.
+	// When Promise is created: reset result variable, clear `error`, set `pending` flag.
 	handler.handle(event_name(namespace, pending_event_name), (state, result) =>
 	{
 		// This will be the new Redux state.
-		let new_state = state
+		let new_state = { ...state }
 
 		// Clearing the old `result` variable
 		// when fetching of a new one starts.
@@ -242,7 +240,7 @@ function create_redux_handlers(handler, namespace, event, on_result, result_vari
 		return new_state
 	})
 
-	// When Promise succeeds
+	// When Promise succeeds: clear `pending` flag, set result variable.
 	handler.handle(event_name(namespace, success_event_name), (state, result) =>
 	{
 		// This will be the new Redux state
