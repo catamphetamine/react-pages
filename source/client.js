@@ -1,4 +1,6 @@
 import React from 'react'
+import ReactDOM from 'react-dom'
+
 import createHistory from 'history/lib/createBrowserHistory'
 import { createLocation } from 'history/lib/LocationUtils'
 import { readState } from 'history/lib/DOMStateStorage'
@@ -34,41 +36,55 @@ export default function client_side_render({ history, render, render_parameters 
 		delete window._locale_messages
 	}
 
-	// renders current React page.
-	// returns the rendered React page component.
-	function render_page()
+	async function wrapped_page_element(element, wrapper_props = {})
 	{
-		// Returns a Promise for React component.
-		//
-		return render
-		({
-			...render_parameters,
-			to: document.getElementById('react'),
-			create_page_element : async (element, props = {}) =>
-			{
-				// If no i18n is required, then simply create Page element
-				if (!locale)
-				{
-					return React.createElement(wrapper, props, element)
-				}
+		// If no i18n is required, then simply create Page element
+		if (!locale)
+		{
+			return React.createElement(wrapper, wrapper_props, element)
+		}
 
-				// Translation loading function may be passed
-				// (its main purpose is to enable Webpack HMR
-				//  in dev mode for translated messages)
-				if (translation)
-				{
-					messages = await translation(locale)
-				}
+		// Translation loading function may be passed
+		// (its main purpose is to enable Webpack HMR
+		//  in dev mode for translated messages)
+		if (translation)
+		{
+			messages = await translation(locale)
+		}
 
-				// Load translations and then create page element
+		// Load translations and then create page element
 
-				props.locale   = locale
-				props.messages = messages
+		wrapper_props.locale   = locale
+		wrapper_props.messages = messages
 
-				// Create React page element
-				return React.createElement(wrapper, props, element)
-			}
-		})
+		// Create React page element
+		return React.createElement(wrapper, wrapper_props, element)
+	}
+
+	// Renders current React page.
+	// Returns a Promise for an object holding
+	// the rendered React page component.
+	async function render_page()
+	{
+		const { element, wrapper_props, ...rest } = await render(render_parameters)
+
+		const wrapped_element = await wrapped_page_element(element, wrapper_props)
+
+		// DOM element to which React markup will be rendered
+		const to = document.getElementById('react')
+
+		// // In dev mode, check that server-side rendering works correctly
+		// if (process.env.NODE_ENV !== 'production')
+		// {
+		// 	// For React DevTools
+		// 	window.React = React 
+		// }
+
+		return {
+			// Return React component for the rendered `element`.
+			component: render_react(wrapped_element, to),
+			...rest
+		}
 	}
 
 	// Render page (on the client side).
@@ -188,4 +204,16 @@ function get_history_state_location(history_state)
 	},
 	undefined,
 	key)
+}
+
+// Render the React element to `to` DOM node
+function render_react(element, to)
+{
+	// If using React >= 16 and the content is Server-Side Rendered.
+	if (ReactDOM.hydrate && window._server_side_rendered)
+	{
+		return ReactDOM.hydrate(element, to)
+	}
+
+	return ReactDOM.render(element, to)
 }

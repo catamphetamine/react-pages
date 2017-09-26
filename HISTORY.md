@@ -1,3 +1,10 @@
+<!-- 12.0.0 / xx.xx.xxxx
+===================
+
+  * Preparing code for streamed Server-Side Rendering in some future. `React 16` was released which introduced streamed Server-Side Rendering. Still `react-helmet` is architectured around synchronous React therefore until it's replaced with something better React rendering is gonna stay synchronous.
+
+  * (future breaking change) `content` returned from internal `render()` function is now a readable stream rather than a `String` -->
+
 11.0.38 / 21.09.2017
 ====================
 

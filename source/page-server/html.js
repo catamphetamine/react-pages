@@ -5,37 +5,45 @@ import { get_language_from_locale } from '../helpers'
 
 nunjucks.configure({ autoescape: true })
 
-export default function Html(options)
+export function render_before_content({
+	assets,
+	locale,
+	head,
+	body_start
+})
 {
-	const { assets } = options
-
-	const style_urls = []
-	const javascript_urls = []
-
-	for (const entry of assets.entries)
-	{
-		if (assets.styles && assets.styles[entry])
-		{
-			style_urls.push(assets.styles[entry])
-		}
-
-		if (assets.javascript && assets.javascript[entry])
-		{
-			javascript_urls.push(assets.javascript[entry])
-		}
-	}
-
-	const webpage_head = server_side_generated_webpage_head()
-
-	return template.render
+	return template_before_content.render
 	({
-		...options,
-		webpage_head,
-		style_urls,
-		javascript_urls,
-		get_language_from_locale,
-		safe_json_stringify,
-		JSON
+		icon : assets.icon,
+		webpage_head : server_side_generated_webpage_head(),
+		style_urls : assets.entries.map(entry => assets.styles && assets.styles[entry]).filter(url => url),
+		locale,
+		head,
+		body_start,
+		get_language_from_locale
+	})
+}
+
+export function render_after_content({
+	assets,
+	server_side_rendering_enabled,
+	locale,
+	locale_messages_json,
+	extension_javascript,
+	protected_cookie_value,
+	body_end
+})
+{
+	return template_after_content.render
+	({
+		javascript_urls : assets.entries.map(entry => assets.javascript && assets.javascript[entry]).filter(url => url),
+		server_side_rendering_enabled,
+		locale,
+		locale_messages_json,
+		extension_javascript,
+		protected_cookie_value,
+		body_end,
+		safe_json_stringify
 	})
 }
 
@@ -49,9 +57,10 @@ export function safe_json_stringify(json)
 	return JSON.stringify(json).replace(/\//g, '\\/')
 }
 
-const template = nunjucks.compile
+const template_before_content = nunjucks.compile
 (`
-	<html {{ webpage_head.htmlAttributes.toString() }} {% if locale %} lang="{{get_language_from_locale(locale)}}" {% endif %}>
+	<!doctype html>
+	<html {% if locale %} lang="{{get_language_from_locale(locale)}}" {% endif %}>
 		<head>
 			{# "react-helmet" stuff #}
 			{{ webpage_head.title.toString() | safe }}
@@ -75,8 +84,8 @@ const template = nunjucks.compile
 			{{ head | safe }}
 
 			{# Site icon #}
-			{% if assets.icon %}
-				<link rel="shortcut icon" href="{{ assets.icon | safe }}"/>
+			{% if icon %}
+				<link rel="shortcut icon" href="{{ icon | safe }}"/>
 			{% endif %}
 		</head>
 
@@ -91,8 +100,23 @@ const template = nunjucks.compile
 				 so they're unlikely to even be able to hijack it)
 			#}
 			<div id="react">
-				{{- content | safe -}}
+`
+.replace(/\t/g, ''))
+
+const template_after_content = nunjucks.compile
+(`
 			</div>
+
+			{#
+				Server Side Rendering enabled flag.
+				It is used to determine whether to call
+				"ReactDOM.hydrate()" or "ReactDOM.render()".
+			#}
+			{% if server_side_rendering_enabled %}
+				<script>
+					window._server_side_rendered = true
+				</script>
+			{% endif %}
 
 			{#
 				Locale for international messages

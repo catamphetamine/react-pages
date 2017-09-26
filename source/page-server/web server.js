@@ -125,18 +125,22 @@ export default function start_webpage_rendering_server(settings, options)
 			afterwards(ctx)
 		}
 
+		// If a redirect happened perform an HTTP redirect
 		if (redirect)
 		{
 			return ctx.redirect(redirect)
 		}
 
+		// HTTP response status
 		if (status)
 		{
 			ctx.status = status
 		}
 
+		// `String`s are written and `Stream`s are piped
 		ctx.body = content
 
+		// Report page rendering stats
 		if (stats)
 		{
 			stats

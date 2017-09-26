@@ -7,7 +7,6 @@ import ReactDOMServer from 'react-dom/server'
 import { Router, RouterContext } from 'react-router'
 
 import react_render_on_client from '../render on client'
-import react_render_on_server from '../render on server'
 
 // Renders `element` React element inside the `to` DOM element.
 //
@@ -18,35 +17,24 @@ import react_render_on_server from '../render on server'
 // This is not currently being used.
 // It's just an example of Redux-less usage.
 //
-export function render_on_client({ history, routes, create_page_element, to })
+export function render_on_client({ history, routes, create_page_element })
 {
 	routes = typeof routes === 'function' ? routes() : routes
 
-	const router_element = <Router history={ history } routes={ routes }/>
-
-	return create_page_element(router_element).then((element) =>
-	{
-		// render the wrapped React page element to DOM
-		return react_render_on_client
-		({
-			element, // wrapped React page element
-			to // DOM element containing React markup
-		})
-	})
+	return {
+		element: <Router history={ history } routes={ routes }/>
+	}
 }
 
 // returns a Promise resolving to { status, content, redirect }
 //
-export function render_on_server({ disable_server_side_rendering, create_page_element, render_webpage_as_react_element, routes, history })
+export function render_on_server({ disable_server_side_rendering, create_page_element, render_webpage, routes, history })
 {
 	// Maybe no one really needs to `disable_server_side_rendering`
 	if (disable_server_side_rendering)
 	{
 		// Render the empty <Html/> component into Html markup string
-		return Promise.resolve
-		({
-			content: react_render_on_server({ render_webpage_as_react_element })
-		})
+		return Promise.resolve({})
 	}
 
 	// perform React-router routing
@@ -68,7 +56,7 @@ export function render_on_server({ disable_server_side_rendering, create_page_el
 		const page_element = create_page_element(<Router { ...router_state }/>)
 
 		// Render the current page's React element to HTML markup
-		const content = react_render_on_server({ render_webpage_as_react_element, page_element })
+		const content = render_webpage(page_element)
 
 		// return HTTP status code and HTML markup
 		return { content }

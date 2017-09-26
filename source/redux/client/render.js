@@ -13,7 +13,7 @@ import match_routes_against_location from '../../react-router/match'
 // where `component` is the rendered React component
 // and `store` is the Redux store.
 //
-export default function render_on_client({ history, create_page_element, routes, store, to })
+export default function render_on_client({ history, create_page_element, routes, store })
 {
 	// Performs `react-router` asynchronous match for current location
 	// (is required for asynchonous routes to work).
@@ -44,34 +44,18 @@ export default function render_on_client({ history, create_page_element, routes,
 			history={ history }
 			render={ applyRouterMiddleware( useScroll(should_scroll) ) }/>
 
-		// Wraps <Router/> with arbitrary React components (e.g. Redux <Provider/>),
-		// loads internationalization messages,
-		// and then renders the wrapped React page element to DOM
-		return create_page_element(router_element, { store }).then(element =>
-		{
-			// Render the wrapped React page element to DOM
-			const component = react_render_on_client
-			({
-				element, // wrapped React page element
-				to // DOM element to which React markup will be rendered
-			})
-			.component
-
-			return { component, store }
-		})
+		return {
+			element: router_element,
+			wrapper_props: { store },
+			store
+		}
 	})
 }
 
 function should_scroll(previous_router_properties, new_router_properties)
 {
 	const { location } = new_router_properties
-
-	if (location.scroll === false)
-	{
-		return false
-	}
-
-	return true
+	return location.scroll !== false
 }
 
 // Fixes `react-router` bug by forcing 

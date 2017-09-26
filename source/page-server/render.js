@@ -4,11 +4,14 @@
 import React from 'react'
 import ReactDOM from 'react-dom/server'
 
+import { Readable } from 'stream'
+import multistream from 'multistream'
+
 // https://github.com/ReactTraining/react-router/issues/4023
 // Also adds `useBasename` and `useQueries`
 import createHistory from 'react-router/lib/createMemoryHistory'
 
-import Html from './html'
+import { render_before_content, render_after_content } from './html'
 import normalize_common_settings from '../redux/normalize'
 import timer from '../timer'
 import create_history from '../history'
@@ -18,6 +21,19 @@ import redux_render, { initialize as redux_initialize } from '../redux/server/se
 import { render_on_server as react_router_render } from '../react-router/render'
 
 import { Preload } from '../redux/actions'
+
+// Since `react-helmet` relies on React rendering to be synchronous
+// `ReactDOM.renderToString()` is used here instead of
+// the more performant `ReactDOM.renderToNodeStream(element)`.
+//
+// https://github.com/nfl/react-helmet/issues/240
+// 
+// If some day a concurrency-safe alternative to `react-helmet` is found
+// then it will be possible to switch to streamed React rendering.
+//
+// const streaming = ReactDOM.renderToNodeStream ? true : false
+//
+const streaming = false
 
 // isomorphic (universal) rendering (middleware).
 // will be used in web_application.use(...)
@@ -58,9 +74,8 @@ export default async function(settings, { initialize, localize, assets, applicat
 
 	const initialize_timer = timer()
 
-	// These `parameters` are used for `assets`, `html` modifiers
-	// and also for `localize()` call.
-	const initialize_result = await redux_initialize(settings,
+	// `parameters` are used for `assets`, `html` modifiers and also for `localize()` call.
+	const { extension_javascript, afterwards, ...parameters } = await redux_initialize(settings,
 	{
 		protected_cookie_value,
 		proxy,
@@ -69,10 +84,8 @@ export default async function(settings, { initialize, localize, assets, applicat
 		initialize,
 		get_history
 	})
-	
-	const { extension_javascript, afterwards, ...parameters } = initialize_result	
 
-	const normalize_result = result => _normalize_result(result, afterwards, settings)
+	const normalize_result = (result) => _normalize_result(result, afterwards, settings)
 
 	// Create `history` (`true` indicates server-side usage).
 	// Koa `request.url` is not really a URL,
@@ -143,6 +156,7 @@ export default async function(settings, { initialize, localize, assets, applicat
 			disable_server_side_rendering: render === false,
 			history,
 			routes,
+			streaming,
 			before_render: beforeRender,
 
 			create_page_element: (child_element, props) => 
@@ -156,10 +170,11 @@ export default async function(settings, { initialize, localize, assets, applicat
 				return React.createElement(wrapper, props, child_element)
 			},
 
-			render_webpage(content)
+			render_webpage(react_element_tree)
 			{
-				// Render page content
-				content = render === false ? normalize_markup(loading) : (content && ReactDOM.renderToString(content))
+				// For Redux:
+				// `react_element_tree` is undefined if `render === false`.
+				// Otherwise `react_element_tree` is `<Router>...</Router>`.
 
 				// `html` modifiers
 
@@ -169,9 +184,9 @@ export default async function(settings, { initialize, localize, assets, applicat
 				let body_end   = html.body_end   || html.bodyEnd
 
 				// Normalize `html` parameters
-				head       = normalize_markup(typeof head       === 'function' ? head      (path, parameters) : head)
-				body_start = normalize_markup(typeof body_start === 'function' ? body_start(path, parameters) : body_start)
-				body_end   = normalize_markup(typeof body_end   === 'function' ? body_end  (path, parameters) : body_end)
+				head       = render_to_a_string(typeof head       === 'function' ? head      (path, parameters) : head)
+				body_start = render_to_a_string(typeof body_start === 'function' ? body_start(path, parameters) : body_start)
+				body_end   = render_to_a_string(typeof body_end   === 'function' ? body_end  (path, parameters) : body_end)
 
 				// Normalize assets
 				assets = typeof assets === 'function' ? assets(path, parameters) : assets
@@ -182,20 +197,46 @@ export default async function(settings, { initialize, localize, assets, applicat
 					throw new Error(`"assets.entries" array parameter is required as of version 10.1.0. E.g. "{ ... entries: ['main'] ... }"`)
 				}
 
-				// Render the HTML
-				return Html
+				// Render page content
+				const content = render === false ? render_to_a_string(loading) : render_react(react_element_tree)
+
+				// Render all HTML that goes before React markup.
+				// It is rendered after content has been
+				// because that's how `react-helmet` works
+				// (all that "rewind" stuff).
+				const before_content = render_before_content
 				({
-					...parameters,
+					assets,
+					locale,
+					head,
+					body_start
+				})
+
+				// Render all HTML that goes after React markup
+				const after_content = render_after_content
+				({
 					extension_javascript: typeof extension_javascript === 'function' ? extension_javascript() : extension_javascript,
 					assets,
 					locale,
 					locale_messages_json: messagesJSON,
-					head,
-					body_start,
 					body_end,
 					protected_cookie_value,
-					content
+					server_side_rendering_enabled: render !== false
 				})
+
+				// // Returning a readable stream because some day
+				// // `react-helmet` will be replaced with something asynchronous
+				// // in which case streamed React rendering becomes available.
+				// return multistream
+				// ([
+				// 	text_stream(before_content),
+				// 	typeof content === 'string' ? text_stream(content) : content,
+				// 	text_stream(after_content)
+				// ])
+
+				// Returning a `String` for now, since some people could rely
+				// on `render()` result having `content` which is a `String`.
+				return before_content + content + after_content
 			}
 		})
 
@@ -254,29 +295,27 @@ export default async function(settings, { initialize, localize, assets, applicat
 	}
 }
 
-// Converts React.Elements to Strings
-function normalize_markup(anything)
+// Converts `React.Element`s to `String`s
+function render_to_a_string(anything)
 {
 	if (!anything)
 	{
 		return ''
 	}
 
-	if (typeof anything === 'function')
-	{
-		return anything
-	}
-
+	// If it's already a `String` then return it
 	if (typeof anything === 'string')
 	{
 		return anything
 	}
 
+	// Recurse into arrays
 	if (Array.isArray(anything))
 	{
-		return anything.map(normalize_markup).join('')
+		return anything.map(render_to_a_string).join('')
 	}
 
+	// Render `React.Element` to a `String`
 	return ReactDOM.renderToString(anything)
 }
 
@@ -312,4 +351,41 @@ function _normalize_result(result, afterwards, settings)
 	result.afterwards = afterwards
 
 	return result
+}
+
+// Renders React element into a `String` or a stream.
+function render_react(element)
+{
+	if (!element)
+	{
+		return ''
+	}
+
+	if (streaming)
+	{
+		return ReactDOM.renderToNodeStream(element)
+	}
+
+	return ReactDOM.renderToString(element)
+}
+
+// Turns a `String` into a `Stream`
+function text_stream(string)
+{
+	const stream = new Readable()
+	stream.push(string)
+	stream.push(null)
+	return stream
+}
+
+// Just in case
+function read_stream(stream)
+{
+	return new Promise((resolve, reject) =>
+	{
+		let result = ''
+		stream.on('data', chunk => result += chunk)
+		stream.on('end', () => resolve(result))
+		stream.on('error', reject)
+	})
 }

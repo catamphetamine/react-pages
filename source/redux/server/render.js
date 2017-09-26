@@ -1,7 +1,6 @@
 import React from 'react'
 import { Router } from 'react-router'
 
-import react_render_on_server from '../../render on server'
 import { location_url } from '../../location'
 import { get_location } from '../../history'
 import timer from '../../timer'
@@ -9,21 +8,27 @@ import { preload_action } from '../actions'
 import match_routes_against_location from '../../react-router/match'
 import get_route_path from '../../react-router/get route path'
 
-function timed_react_render_on_server(named_arguments)
+function timed_react_render_on_server(streaming, render_webpage, page_element)
 {
-	const render_timer = timer()
-	const markup = react_render_on_server(named_arguments)
-	const result =
+	if (streaming)
 	{
-		content : markup,
+		return {
+			content : render_webpage(page_element)
+		}
+	}
+
+	const render_timer = timer()
+	const html = render_webpage(page_element)
+
+	return {
+		content : html,
 		time    : render_timer()
 	}
-	return result
 }
 
 // Returns a Promise resolving to { status, content, redirect }.
 //
-export default function render_on_server({ history, disable_server_side_rendering, create_page_element, render_webpage, store, routes, before_render })
+export default function render_on_server({ history, disable_server_side_rendering, streaming, create_page_element, render_webpage, store, routes, before_render })
 {
 	// Routing only takes a couple of milliseconds
 	// const routing_timer = timer()
@@ -71,7 +76,7 @@ export default function render_on_server({ history, disable_server_side_renderin
 			if (disable_server_side_rendering)
 			{
 				// Render the empty <Html/> component into Html markup string
-				const rendered = timed_react_render_on_server({ render_webpage })
+				const rendered = timed_react_render_on_server(streaming, render_webpage)
 				time.render = rendered.time
 
 				// return  HTML markup
@@ -83,7 +88,7 @@ export default function render_on_server({ history, disable_server_side_renderin
 			const page_element = create_page_element(<Router { ...router_state }/>, { store })
 
 			// Render the current page's React element to HTML markup
-			const rendered = timed_react_render_on_server({ render_webpage, page_element })
+			const rendered = timed_react_render_on_server(streaming, render_webpage, page_element)
 
 			// Rendering a complex React page (having more than 1000 components)
 			// takes about 100ms (`time.render`).
