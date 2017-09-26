@@ -5,7 +5,6 @@ import React from 'react'
 import ReactDOM from 'react-dom/server'
 
 import { Readable } from 'stream'
-import multistream from 'multistream'
 
 // https://github.com/ReactTraining/react-router/issues/4023
 // Also adds `useBasename` and `useQueries`
@@ -227,12 +226,20 @@ export default async function(settings, { initialize, localize, assets, applicat
 				// // Returning a readable stream because some day
 				// // `react-helmet` will be replaced with something asynchronous
 				// // in which case streamed React rendering becomes available.
+				//
+				// import multistream from 'multistream'
 				// return multistream
 				// ([
 				// 	text_stream(before_content),
 				// 	typeof content === 'string' ? text_stream(content) : content,
 				// 	text_stream(after_content)
 				// ])
+				//
+				// return [
+				// 	before_content,
+				// 	typeof content === 'string' ? text_stream(content) : content,
+				// 	after_content
+				// ]
 
 				// Returning a `String` for now, since some people could rely
 				// on `render()` result having `content` which is a `String`.
