@@ -18,6 +18,7 @@ export function action(options, handler)
 		namespace,
 		promise,
 		action,
+		reset,
 		cancelPrevious
 	}
 	= options
@@ -67,7 +68,7 @@ export function action(options, handler)
 		//   * success
 		//   * error
 		//
-		create_redux_handlers(handler, namespace, event, result, result_variable_name)
+		create_redux_handlers(handler, namespace, event, result, result_variable_name, reset)
 
 		// Redux "action creator"
 		return (...parameters) =>
@@ -191,7 +192,7 @@ export function create_handler(settings)
 //   * failed
 //   * reset error
 //
-function create_redux_handlers(handler, namespace, event, on_result, result_variable_name)
+function create_redux_handlers(handler, namespace, event, on_result, result_variable_name, reset)
 {
 	if (!handler.settings.asynchronous_action_event_naming)
 	{
@@ -225,7 +226,7 @@ function create_redux_handlers(handler, namespace, event, on_result, result_vari
 
 		// Clearing the old `result` variable
 		// when fetching of a new one starts.
-		if (result_variable_name)
+		if (result_variable_name && reset)
 		{
 			new_state = on_result(state, handler.initial_state[result_variable_name])
 		}
