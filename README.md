@@ -36,7 +36,7 @@ The final argument in favour of Server Side Rendering is that even if a website 
 
 # Usage
 
-(see [webpack-react-redux-isomorphic-render-example](https://github.com/catamphetamine/webpack-react-redux-isomorphic-render-example) or [webapp](https://github.com/catamphetamine/webapp) as references)
+See [webpack-react-redux-isomorphic-render-example](https://github.com/catamphetamine/webpack-react-redux-isomorphic-render-example/tree/master/client/src)
 
 ```bash
 $ npm install react-isomorphic-render --save
