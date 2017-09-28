@@ -11,6 +11,10 @@ export const Meta_method_name = '__meta__'
 //
 // * `state` — Redux state
 //
+// Usage:
+//
+// `@meta(({ state }) => ({ title: `${state.user.name}'s profile` }))`
+//
 export default function meta(get_meta)
 {
 	return function(Wrapped)
