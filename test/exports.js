@@ -2,8 +2,7 @@ import React from 'react'
 
 import
 {
-	Title,
-	Meta,
+	meta,
 	render,
 	getState,
 	getHttpClient,
@@ -28,19 +27,13 @@ import
 	LOAD_STATE,
 	GO_TO,
 	NAVIGATED,
-	action,
-	reset_error,
-	resetError,
-	create_handler,
-	createHandler,
-	state_connector,
-	stateConnector,
+	redux_module,
+	reduxModule,
 	underscoredToCamelCase,
 	event_name,
 	eventName,
 	Link,
 	IndexLink,
-	authorize,
 	websocket,
 	get_cookie,
 	getCookie,
@@ -55,8 +48,7 @@ describe(`exports`, function()
 {
 	it(`should export ES6`, () =>
 	{
-		Title.should.be.a('function')
-		Meta.should.be.a('function')
+		meta.should.be.a('function')
 
 		render.should.be.a('function')
 		getState.should.be.a('function')
@@ -87,13 +79,8 @@ describe(`exports`, function()
 		GO_TO.should.be.a('string')
 		NAVIGATED.should.be.a('string')
 
-		action.should.be.a('function')
-		reset_error.should.be.a('function')
-		resetError.should.be.a('function')
-		create_handler.should.be.a('function')
-		createHandler.should.be.a('function')
-		state_connector.should.be.a('function')
-		stateConnector.should.be.a('function')
+		redux_module.should.be.a('function')
+		reduxModule.should.be.a('function')
 
 		underscoredToCamelCase.should.be.a('function')
 		event_name.should.be.a('function')
@@ -102,7 +89,6 @@ describe(`exports`, function()
 		Link.should.be.a('function')
 		IndexLink.should.be.a('function')
 
-		authorize(() => {}, () => {}, () => {}).should.be.a('function')
 		websocket.should.be.a('function')
 
 		get_cookie.should.be.a('function')
@@ -118,8 +104,7 @@ describe(`exports`, function()
 	{
 		const _ = require('../index.common')
 
-		_.Title.should.be.a('function')
-		_.Meta.should.be.a('function')
+		_.meta.should.be.a('function')
 
 		// Combined Redux exports
 
@@ -152,13 +137,8 @@ describe(`exports`, function()
 		_.GO_TO.should.be.a('string')
 		_.NAVIGATED.should.be.a('string')
 
-		_.action.should.be.a('function')
-		_.reset_error.should.be.a('function')
-		_.resetError.should.be.a('function')
-		_.create_handler.should.be.a('function')
-		_.createHandler.should.be.a('function')
-		_.state_connector.should.be.a('function')
-		_.stateConnector.should.be.a('function')
+		_.redux_module.should.be.a('function')
+		_.reduxModule.should.be.a('function')
 
 		_.underscoredToCamelCase.should.be.a('function')
 		_.event_name.should.be.a('function')
@@ -167,7 +147,6 @@ describe(`exports`, function()
 		_.Link.should.be.a('function')
 		_.IndexLink.should.be.a('function')
 
-		_.authorize(() => {}, () => {}, () => {}).should.be.a('function')
 		_.websocket.should.be.a('function')
 
 		_.get_cookie.should.be.a('function')

@@ -1,9 +1,6 @@
 // Helpers
 
-var head = require('./build/webpage head')
-
-exports.Title = head.Title
-exports.Meta  = head.Meta
+exports.meta  = require('./build/meta').default
 
 // Redux
 
@@ -28,12 +25,8 @@ exports.Preload_options_name = preloading_middleware.Preload_options_name
 exports.PRELOAD_OPTIONS_NAME = exports.Preload_options_name
 
 exports.action = require('./build/redux/asynchronous action handler').action
-exports.reset_error = require('./build/redux/asynchronous action handler').reset_error
-exports.resetError = exports.reset_error
-exports.create_handler = require('./build/redux/asynchronous action handler').create_handler
-exports.createHandler = exports.create_handler
-exports.state_connector = require('./build/redux/asynchronous action handler').state_connector
-exports.stateConnector = exports.state_connector
+exports.redux_module = require('./build/redux/asynchronous action handler').create_redux_module
+exports.reduxModule = exports.redux_module
 
 exports.underscoredToCamelCase = require('./build/redux/naming').underscoredToCamelCase
 
@@ -58,7 +51,6 @@ exports.NAVIGATED  = exports.Navigated
 exports.Link = require('./build/redux/Link').default
 exports.IndexLink = require('./build/redux/IndexLink').default
 
-exports.authorize = require('./build/redux/authorize').default
 exports.websocket = require('./build/redux/client/websocket').default
 
 exports.get_cookie = require('./build/cookies').get_cookie_in_a_browser

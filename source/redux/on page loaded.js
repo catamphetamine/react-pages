@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
 import hoist_statics from 'hoist-non-react-statics'
 
+import { get_display_name } from '../utility'
 import { On_page_loaded_method_name } from './middleware/preloading middleware'
 
 // `@onPageLoaded()` decorator.
@@ -25,9 +26,4 @@ export default function onPageLoaded(on_page_loaded, options)
 		
 		return hoist_statics(OnPageLoaded, Wrapped)
 	}
-}
-
-function get_display_name(Wrapped)
-{
-	return Wrapped.displayName || Wrapped.name || 'Component'
 }

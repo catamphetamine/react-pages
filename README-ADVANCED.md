@@ -36,66 +36,14 @@ import { onPageLoaded, replaceLocation } from 'react-isomorphic-render'
 
 In most applications some routes are only accessible by a specific group of users. One may ask what route restriction mechanisms does this library provide. The answer is: you actually don't need them. For example, in my projects the `@preload()` function itself serves as a guard by querying a REST API endpoint which performs user authentication internally and throws a "403 Access Denied" error if a user doesn't have the permission to view the page.
 
-<!--
-For authorized routes use the `authorize` helper (kinda "decorator")
-
-```js
-import { authorize } from 'react-isomorphic-render'
-
-// Gets `user` from Redux state
-const getUser = state => state.authentication.user
-
-// Restricts a `<Route/>` to a certain part of users
-const restricted = (route, authorization) => authorize(getUser, authorization, route)
-
-const routes = (
-  <Route path="/" component={ Layout }>
-    <Route path="public" component={ Public }/>
-    <Route path="settings" component={ restricted(UserSettings) }/>
-    <Route path="admin" component={ restricted(AdminPanel, user => user.role === 'admin') }/>
-    <Route path="only-me" component={ restricted(OnlyMe, user => user.id === 1) }/>
-  </Route>
-)
-```
-
-In order for `authorize` helper to work as intended `settings.catch` handler function parameter **must be specified**. Something like this will do:
-
-```js
-{
-  ...
-  catch(error, { path, url, redirect }) {
-    // Not authenticated
-    if (error.status === 401) {
-      return redirect(`/unauthenticated?url=${encodeURIComponent(url)}`)
-    }
-    // Not authorized
-    if (error.status === 403)
-    {
-      return redirect(`/unauthorized?url=${encodeURIComponent(url)}`)
-    }
-    // Redirect to a generic error page
-    // (also prevents infinite recursion in case of bugs)
-    if (path !== '/error')
-    {
-      redirect('/error')
-    }
-    // Some kind of a bug
-    throw error
-  }
-}
-```
-
-Also make sure to authorize a user inside REST API endpoints as well, because, say, you set up `authorize` for a restricted page in `routes.js`, but a hacker still can send any REST API HTTP request to the server so if a REST API endpoint doesn't double-check the user's authorization then the whole authorization system is actually considered useless.
--->
-
 ## Cancelling previous action
 
 E.g. for an autocomplete component querying backend for matches it can be useful to be able to abort the previous search for matches when the user enters additional characters. In this case `Promise` cancellation feature can be employed which requires using `bluebird` `Promise` implementation being [configured](http://bluebirdjs.com/docs/api/cancellation.html) for `Promise` cancellation and passing `cancelPrevious: true` flag in an asynchronous Redux "action".
 
 ```js
-function autocompleteMatch() {
+function autocompleteMatch(inputValue) {
   return {
-    promise: (inputValue, http) => http.get(`/search?query=${inputValue}`),
+    promise: ({ http }) => http.get(`/search?query=${inputValue}`),
     events: ['AUTOCOMPLETE_MATCH_PENDING', 'AUTOCOMPLETE_MATCH_SUCCESS', 'AUTOCOMPLETE_MATCH_ERROR'],
     cancelPrevious: true
   }
@@ -106,9 +54,9 @@ Gotcha: when relying on `bluebird` `Promise` cancellation don't use `async/await
 
 ```js
 // Action cancellation won't work
-function autocompleteMatch() {
+function autocompleteMatch(inputValue) {
   return {
-    promise: async (inputValue, http) => await http.get(`/search?query=${inputValue}`),
+    promise: async (({ http })) => await http.get(`/search?query=${inputValue}`),
     events: ['AUTOCOMPLETE_MATCH_PENDING', 'AUTOCOMPLETE_MATCH_SUCCESS', 'AUTOCOMPLETE_MATCH_ERROR'],
     cancelPrevious: true
   }

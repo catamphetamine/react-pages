@@ -1,6 +1,6 @@
 // Helpers
 
-export { Title, Meta } from './es6/webpage head'
+export { default as meta } from './es6/meta'
 
 // Redux
 
@@ -42,12 +42,8 @@ from './es6/redux/middleware/preloading middleware'
 export
 {
 	action,
-	reset_error,
-	reset_error as resetError,
-	create_handler,
-	create_handler as createHandler,
-	state_connector,
-	state_connector as stateConnector
+	create_redux_module as redux_module,
+	create_redux_module as reduxModule
 }
 from './es6/redux/asynchronous action handler'
 
@@ -96,12 +92,6 @@ export
 	default as IndexLink
 }
 from './es6/redux/IndexLink'
-
-export
-{
-	default as authorize
-}
-from './es6/redux/authorize'
 
 export
 {

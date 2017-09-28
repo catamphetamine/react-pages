@@ -1,9 +1,33 @@
-<!-- 12.0.0 / xx.xx.xxxx
+12.0.0 / 28.09.2017
 ===================
 
-  * Preparing code for streamed Server-Side Rendering in some future. `React 16` was released which introduced streamed Server-Side Rendering. Still `react-helmet` is architectured around synchronous React therefore until it's replaced with something better React rendering is gonna stay synchronous.
+  * Updated the library for streamed ("asynchronous") Server-Side Rendering introduced in `React 16` which reduces "time to first byte" and is overall more performant than the older "synchronous" Server-Side Rendering. Falls back to "synchronous" on React < 16.
 
-  * (future breaking change) `content` returned from internal `render()` function is now a readable stream rather than a `String` -->
+  * (breaking change) `content` returned from internal `render()` function is now an array `[String, Stream, String]` rather than a `String`.
+
+  * (breaking change) Removed `react-helmet` because it's architectured around synchronous React and won't work with streamed React rendering: it uses `react-side-effect` internally which is [absolutely not thread safe](https://github.com/gaearon/react-document-title/issues/7). Therefore `<Title/>` and `<Meta/>` components are also gone. `@meta()` decorator is introduced as a replacement (see README for usage notes). `@meta()` decorator concept: `react-router`'s `.match()` returns `router_state` which has `components` and so each React `Component` would have some static functions like `.title(redux_state)` and `.meta(redux_state)` which are called for each `component` of the route chain finally being merged into the resulting `title` and `meta` which are passed to the `html()` template rendering function.
+
+  * (breaking change) "Asynchronous actions" (those having `promise()` property) are now called not as `promise(http)` but rather `promise({ http })`. This is to allow for additional parameters/utilities should the need for them arise (e.g. `dispatch`, `getState`, though I'm not sure about those as for now).
+
+  * (breaking change) The last argument of asynchronous actions created via `action()` call is now not `http` utility but rather an object containing `http` utility: `{ http }`. This is to allow for additional parameters/utilities should the need for them arise (e.g. `dispatch`, `getState`, though I'm not sure about those as for now). This new `{ http }` argument was also moved from the last position to the first position to avoid messing up action arguments which happened when a developer omitted some of the trailing function arguments expecting them to be default which instead got overriden by the `http` argument. Now it's guarded against such cases.
+
+  * (documenation change) `handler` -> `redux` (this name makes more sense since `handler` not only "handles" Redux actions)
+
+  * (breaking change) `createHandler(settings)` -> `reduxModule(namespace, settings)`
+
+  * (breaking change) `action({ event, namespace, action, ...options }, handler)` -> `redux.action(event, action, options)`
+
+  * (breaking change) `handler.handle()` -> `redux.on()` and `redux.replace()`
+
+  * (breaking change) `resetError({ namespace, event }, handler)` -> `redux.resetError(event)`
+
+  * (breaking change) `handler.addStateProperties()` -> `redux.property()` and `redux.properties()`
+
+  * (breaking change) `stateConnector()` -> `redux.getProperties`
+
+  * (breaking change) `<html lang>` is now removed because the UI translation language is not the same as the page content language. And even if the content language is known the UI translation language still could be different. Only when content language and UI translation language are the same `<html lang/>` could be set but since content language is unknown to the library it doesn't make any assumptions.
+
+  * (breaking change) `@authorize()` decorator removed due to not being used
 
 11.0.38 / 21.09.2017
 ====================

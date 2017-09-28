@@ -20,19 +20,12 @@ import redux_render, { initialize as redux_initialize } from '../redux/server/se
 import { render_on_server as react_router_render } from '../react-router/render'
 
 import { Preload } from '../redux/actions'
+import { meta_tags } from '../meta'
 
-// Since `react-helmet` relies on React rendering to be synchronous
 // `ReactDOM.renderToString()` is used here instead of
-// the more performant `ReactDOM.renderToNodeStream(element)`.
-//
-// https://github.com/nfl/react-helmet/issues/240
-// 
-// If some day a concurrency-safe alternative to `react-helmet` is found
-// then it will be possible to switch to streamed React rendering.
-//
-// const streaming = ReactDOM.renderToNodeStream ? true : false
-//
-const streaming = false
+// If React version is >= 16 then `ReactDOM.renderToNodeStream(element)` is used.
+// Otherwise, `ReactDOM.renderToString()` is used.
+const streaming = ReactDOM.renderToNodeStream ? true : false
 
 // isomorphic (universal) rendering (middleware).
 // will be used in web_application.use(...)
@@ -169,7 +162,7 @@ export default async function(settings, { initialize, localize, assets, applicat
 				return React.createElement(wrapper, props, child_element)
 			},
 
-			render_webpage(react_element_tree)
+			render_webpage(react_element_tree, meta)
 			{
 				// For Redux:
 				// `react_element_tree` is undefined if `render === false`.
@@ -196,20 +189,18 @@ export default async function(settings, { initialize, localize, assets, applicat
 					throw new Error(`"assets.entries" array parameter is required as of version 10.1.0. E.g. "{ ... entries: ['main'] ... }"`)
 				}
 
-				// Render page content
-				const content = render === false ? render_to_a_string(loading) : render_react(react_element_tree)
-
 				// Render all HTML that goes before React markup.
-				// It is rendered after content has been
-				// because that's how `react-helmet` works
-				// (all that "rewind" stuff).
 				const before_content = render_before_content
 				({
 					assets,
 					locale,
+					meta: meta_tags(meta).join(''),
 					head,
 					body_start
 				})
+
+				// Render page content
+				const content = render === false ? render_to_a_string(loading) : render_react(react_element_tree)
 
 				// Render all HTML that goes after React markup
 				const after_content = render_after_content
@@ -223,27 +214,11 @@ export default async function(settings, { initialize, localize, assets, applicat
 					server_side_rendering_enabled: render !== false
 				})
 
-				// // Returning a readable stream because some day
-				// // `react-helmet` will be replaced with something asynchronous
-				// // in which case streamed React rendering becomes available.
-				//
-				// import multistream from 'multistream'
-				// return multistream
-				// ([
-				// 	text_stream(before_content),
-				// 	typeof content === 'string' ? text_stream(content) : content,
-				// 	text_stream(after_content)
-				// ])
-				//
-				// return [
-				// 	before_content,
-				// 	typeof content === 'string' ? text_stream(content) : content,
-				// 	after_content
-				// ]
-
-				// Returning a `String` for now, since some people could rely
-				// on `render()` result having `content` which is a `String`.
-				return before_content + content + after_content
+				return [
+					before_content,
+					typeof content === 'string' ? text_stream(content) : content,
+					after_content
+				]
 			}
 		})
 
@@ -385,14 +360,14 @@ function text_stream(string)
 	return stream
 }
 
-// Just in case
-function read_stream(stream)
-{
-	return new Promise((resolve, reject) =>
-	{
-		let result = ''
-		stream.on('data', chunk => result += chunk)
-		stream.on('end', () => resolve(result))
-		stream.on('error', reject)
-	})
-}
+// // Just in case
+// function read_stream(stream)
+// {
+// 	return new Promise((resolve, reject) =>
+// 	{
+// 		let result = ''
+// 		stream.on('data', chunk => result += chunk)
+// 		stream.on('end', () => resolve(result))
+// 		stream.on('error', reject)
+// 	})
+// }

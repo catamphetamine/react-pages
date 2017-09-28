@@ -11,6 +11,7 @@ import match_routes_against_location from '../../react-router/match'
 import get_route_path from '../../react-router/get route path'
 import { add_instant_back, reset_instant_back } from '../client/instant back'
 import timer from '../../timer'
+import { get_meta, update_meta } from '../../meta'
 
 export const Preload_method_name  = '__preload__'
 export const Preload_options_name = '__preload_options__'
@@ -53,7 +54,7 @@ export default function preloading_middleware(server, error_handler, preload_on_
 		// A special flavour of `dispatch` which `throw`s for redirects on the server side.
 		dispatch = preloading_middleware_dispatch(dispatch, server)
 
-		// Navigation event triggered
+		// On client-side page navigation
 		if (on_navigate && !action.initial)
 		{
 			on_navigate(location_url(action.location), action.location)
@@ -153,6 +154,12 @@ export default function preloading_middleware(server, error_handler, preload_on_
 
 			// `react-router` matched route "state"
 			const { routes, components, location, params } = router_state
+
+			// On client-side page navigation
+			if (!server && !action.initial)
+			{
+				update_meta(get_meta(components, location, params, getState()))
+			}
 
 			// Preload all the required data for this route (page)
 			const preload = preloader

@@ -46,7 +46,7 @@ export default function asynchronous_middleware(http_client, asynchronous_action
 			dispatch({ ...rest, type: Request })
 
 			// Run the asychronous action (e.g. an HTTP request)
-			const promised = promise(http_client)
+			const promised = promise({ http: http_client, dispatch, getState })
 
 			// Validate that `promise()` actually returned a `Promise`
 			if (!promised || typeof promised.then !== 'function')

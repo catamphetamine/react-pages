@@ -1,6 +1,5 @@
 import nunjucks from 'nunjucks'
 
-import { server_side_generated_webpage_head } from '../webpage head'
 import { get_language_from_locale } from '../helpers'
 
 nunjucks.configure({ autoescape: true })
@@ -8,6 +7,7 @@ nunjucks.configure({ autoescape: true })
 export function render_before_content({
 	assets,
 	locale,
+	meta,
 	head,
 	body_start
 })
@@ -15,9 +15,9 @@ export function render_before_content({
 	return template_before_content.render
 	({
 		icon : assets.icon,
-		webpage_head : server_side_generated_webpage_head(),
 		style_urls : assets.entries.map(entry => assets.styles && assets.styles[entry]).filter(url => url),
 		locale,
+		meta,
 		head,
 		body_start,
 		get_language_from_locale
@@ -60,12 +60,10 @@ export function safe_json_stringify(json)
 const template_before_content = nunjucks.compile
 (`
 	<!doctype html>
-	<html {% if locale %} lang="{{get_language_from_locale(locale)}}" {% endif %}>
+	<html>
 		<head>
-			{# "react-helmet" stuff #}
-			{{ webpage_head.title.toString() | safe }}
-			{{ webpage_head.meta.toString()  | safe }}
-			{{ webpage_head.link.toString()  | safe }}
+			{# <title/> and <meta/> tags, properly escaped #}
+			{{ meta | safe }}
 
 			{#
 				(will be done only in production mode
@@ -99,13 +97,11 @@ const template_before_content = nunjucks.compile
 				 before the global protected cookie value variable is set,
 				 so they're unlikely to even be able to hijack it)
 			#}
-			<div id="react">
-`
+			<div id="react">`
 .replace(/\t/g, ''))
 
 const template_after_content = nunjucks.compile
-(`
-			</div>
+(`</div>
 
 			{#
 				Server Side Rendering enabled flag.

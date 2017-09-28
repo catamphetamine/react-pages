@@ -4,20 +4,31 @@ import normalize_common_settings from './normalize'
 // Returns Redux action creator.
 // `promise` is for backwards compatibility:
 // it has been renamed to `action` since `9.0.8`.
-export function action(options, handler)
+function create_action(event, action, options, redux)
 {
-	// Sanity check
-	if (!handler)
+	// If it's not an asynchronous action
+	// but rather a generic Redux action
+	// then `action` argument doesn't get passed.
+	if (typeof action === 'object')
 	{
-		throw new Error('You must pass "handler" as the second argument of "action()"')
+		redux = options
+		options = action
+		action = undefined
 	}
+	// If no options were specified
+	// when creating this asynchronous action
+	// then correct the arguments accordingly.
+	else if (!redux)
+	{
+		redux = options
+		options = {}
+	}
+
+	const namespace = redux.namespace
 
 	const
 	{
 		type,
-		namespace,
-		promise,
-		action,
 		reset,
 		cancelPrevious
 	}
@@ -25,7 +36,6 @@ export function action(options, handler)
 
 	let
 	{
-		event,
 		payload,
 		result
 	}
@@ -41,25 +51,60 @@ export function action(options, handler)
 	// then add that property to the `connector`.
 	if (typeof result === 'string')
 	{
-		handler.add_state_properties(result)
+		redux.add_state_properties(result)
+	}
+	// If `result` is an object of property getters,
+	// then add those properties to the `connector`.
+	else if (typeof result === 'object')
+	{
+		redux.add_state_properties(...Object.keys(result))
 	}
 
-	// Default "on result" handler
+	// Default "on result" handler is a reducer that does nothing
 	result = result || (state => state)
 
 	// Asynchronous action
-	if (promise || action)
+	if (action)
 	{
-		// Normalize `result` reducer into a function
-		const result_variable_name = typeof result === 'string' && result
-		if (result_variable_name)
+		// Normalize `result` argument into a function
+
+		let result_property_name
+
+		// If `result` is a property name,
+		// then the reducer will write action result
+		// to that property of Redux state.
+		if (typeof result === 'string')
 		{
-			const property = result
+			result_property_name = result
 			result = (state, result) =>
 			({
 				...state,
-				[property]: result
+				[result_property_name]: result
 			})
+		}
+		// If `result` is an object of property getters
+		// then those properties will be added to Redux state.
+		else if (typeof result === 'object')
+		{
+			const property_getters = result
+			result = (state, result) =>
+			{
+				let updated_properties = {}
+
+				for (const property of Object.keys(property_getters))
+				{
+					updated_properties =
+					{
+						...updated_properties,
+						...property_getters[property](result)
+					}
+				}
+
+				return {
+					...state,
+					...updated_properties
+				}
+			}
 		}
 
 		// Adds Redux reducers handling events:
@@ -68,13 +113,13 @@ export function action(options, handler)
 		//   * success
 		//   * error
 		//
-		create_redux_handlers(handler, namespace, event, result, result_variable_name, reset)
+		create_redux_handlers(redux, namespace, event, result, result_property_name, reset)
 
 		// Redux "action creator"
 		return (...parameters) =>
 		({
 			event   : event_name(namespace, event),
-			promise : http => (action || promise).apply(this, parameters.concat(http)),
+			promise : (utility) => action.apply(this, [utility].concat(parameters)),
 			cancelPrevious
 		})
 	}
@@ -95,7 +140,7 @@ export function action(options, handler)
 	}
 
 	// Reducer
-	handler.handle(event_name(namespace, event), result)
+	redux.on(event_name(namespace, event), result)
 
 	// Redux "action creator"
 	return (...parameters) =>
@@ -105,84 +150,160 @@ export function action(options, handler)
 	})
 }
 
-// Creates Redux handler object
+// Creates Redux module object
 // (which will eventually be transformed into a reducer)
-export function create_handler(settings)
+export function create_redux_module(namespace, settings)
 {
-	settings = normalize_common_settings(settings, { full: false })
+	const redux = new Redux_module(namespace, settings)
 
-	const handlers = {}
-	const registered_state_properties = []
+	// Public aliases
+	redux.getProperties = redux.get_properties
+	redux.resetError = redux.reset_error
+	redux.properties = redux.add_state_properties
+	redux.property = redux.add_state_properties
 
-	const result =
+	return redux
+}
+
+class Redux_module
+{
+	handlers = {}
+	registered_state_properties = []
+
+	constructor(namespace, settings)
 	{
-		settings,
-
-		handle(event, handler)
+		// Sanity check
+		if (typeof namespace !== 'string')
 		{
-			handlers[event] = handler
-		},
+			throw new Error("`namespace: String` argument not passed to `reduxModule(namespace, settings)`")
+		}
 
-		reducer(initial_state = {})
+		// This is later being read by `action()`s to reduce copy-pasta
+		this.namespace = namespace
+
+		this.settings = normalize_common_settings(settings, { full: false })
+	}
+
+	replace(event, handler)
+	{
+		if (!Array.isArray(handler))
 		{
-			// This is later used for resetting variables
-			// being fetched to their initial values.
-			this.initial_state = initial_state
+			handler = [handler]
+		}
 
-			// applies a handler based on the action type
-			// (is copy & paste'd for all action response handlers)
-			return function(state = initial_state, action_data = {})
+		this.handlers[event] = handler
+	}
+
+	on(event, handler)
+	{
+		if (!this.handlers[event])
+		{
+			this.handlers[event] = []
+		}
+
+		this.handlers[event].push(handler)
+	}
+
+	action(...parameters)
+	{
+		return create_action(...parameters, this)
+	}
+
+	// Returns Redux action creator for resetting error.
+	reset_error(event)
+	{
+		const
+		[
+			pending_event_name,
+			success_event_name,
+			error_event_name
+		]
+		= this.settings.asynchronous_action_event_naming(event)
+
+		// Redux "action creator"
+		return () =>
+		({
+			type  : event_name(this.namespace, error_event_name),
+			error : null
+		})
+	}
+
+	get_properties = (state) =>
+	{
+		const properties = {}
+
+		for (const property_name of this.registered_state_properties)
+		{
+			properties[property_name] = state[property_name]
+		}
+
+		return properties
+	}
+
+	// camelCased alias
+	getProperties = (state) =>
+	{
+		return this.get_properties(state)
+	}
+
+	reducer(initial_state = {})
+	{
+		// This is later used for resetting variables
+		// being fetched to their initial values.
+		this.initial_state = initial_state
+
+		// applies a handler based on the action type
+		// (is copy & paste'd for all action response handlers)
+		return (state = initial_state, action_data = {}) =>
+		{
+			const event_handlers = this.handlers[action_data.type]
+
+			if (!event_handlers || event_handlers.length === 0)
 			{
-				const handler = handlers[action_data.type]
-
-				if (!handler)
-				{
-					return state
-				}
-
-				let handler_argument = action_data
-
-				// if (action_data.result !== undefined)
-				if (Object.prototype.hasOwnProperty.call(action_data, 'result'))
-				{
-					handler_argument = action_data.result
-				}
-				else if (action_data.error !== undefined)
-				{
-					handler_argument = action_data.error
-				}
-				// This proved to be not that convenient
-				// // When only `type` of a Redux "action" is set
-				// else if (Object.keys(action_data).length === 1)
-				// {
-				// 	handler_argument = undefined
-				// }
-
-				// For some strange reason Redux didn't report
-				// these errors to the console, hence the manual `console.error`.
-				try
-				{
-					return handler(state, handler_argument)
-				}
-				catch (error)
-				{
-					console.error(error)
-					throw error
-				}
+				return state
 			}
-		},
 
-		registered_state_properties,
+			let handler_argument = action_data
 
-		add_state_properties()
-		{
-			registered_state_properties.push.apply(registered_state_properties, arguments)
+			// if (action_data.result !== undefined)
+			if (Object.prototype.hasOwnProperty.call(action_data, 'result'))
+			{
+				handler_argument = action_data.result
+			}
+			else if (action_data.error !== undefined)
+			{
+				handler_argument = action_data.error
+			}
+			// This proved to be not that convenient
+			// // When only `type` of a Redux "action" is set
+			// else if (Object.keys(action_data).length === 1)
+			// {
+			// 	handler_argument = undefined
+			// }
+
+			// For some strange reason Redux didn't report
+			// these errors to the console, hence the manual `console.error`.
+			try
+			{
+				for (const event_handler of event_handlers)
+				{
+					state = event_handler(state, handler_argument)
+				}
+
+				return state
+			}
+			catch (error)
+			{
+				console.error(error)
+				throw error
+			}
 		}
 	}
 
-	result.addStateProperties = result.add_state_properties
-
-	return result
+	add_state_properties()
+	{
+		this.registered_state_properties.push.apply(this.registered_state_properties, arguments)
+	}
 }
 
 // Adds handlers for:
@@ -192,14 +313,14 @@ export function create_handler(settings)
 //   * failed
 //   * reset error
 //
-function create_redux_handlers(handler, namespace, event, on_result, result_variable_name, reset)
+function create_redux_handlers(redux, namespace, event, on_result, result_property_name, reset)
 {
-	if (!handler.settings.asynchronous_action_event_naming)
+	if (!redux.settings.asynchronous_action_event_naming)
 	{
 		throw new Error("`asynchronousActionEventNaming` function parameter was not passed")
 	}
 	
-	if (!handler.settings.asynchronous_action_handler_state_property_naming)
+	if (!redux.settings.asynchronous_action_handler_state_property_naming)
 	{
 		throw new Error("`asynchronousActionHandlerStatePropertyNaming` function parameter was not passed")
 	}
@@ -210,25 +331,25 @@ function create_redux_handlers(handler, namespace, event, on_result, result_vari
 		success_event_name,
 		error_event_name
 	]
-	= handler.settings.asynchronous_action_event_naming(event)
+	= redux.settings.asynchronous_action_event_naming(event)
 
-	const pending_property_name = handler.settings.asynchronous_action_handler_state_property_naming(pending_event_name)
-	const error_property_name   = handler.settings.asynchronous_action_handler_state_property_naming(error_event_name)
+	const pending_property_name = redux.settings.asynchronous_action_handler_state_property_naming(pending_event_name)
+	const error_property_name   = redux.settings.asynchronous_action_handler_state_property_naming(error_event_name)
 
 	// This info will be used in `storeConnector`
-	handler.add_state_properties(pending_property_name, error_property_name)
+	redux.add_state_properties(pending_property_name, error_property_name)
 
 	// When Promise is created: reset result variable, clear `error`, set `pending` flag.
-	handler.handle(event_name(namespace, pending_event_name), (state, result) =>
+	redux.on(event_name(namespace, pending_event_name), (state, result) =>
 	{
 		// This will be the new Redux state.
 		let new_state = { ...state }
 
 		// Clearing the old `result` variable
 		// when fetching of a new one starts.
-		if (result_variable_name && reset)
+		if (result_property_name && reset)
 		{
-			new_state = on_result(state, handler.initial_state[result_variable_name])
+			new_state = on_result(state, handler.initial_state[result_property_name])
 		}
 
 		// Set `pending` flag
@@ -242,7 +363,7 @@ function create_redux_handlers(handler, namespace, event, on_result, result_vari
 	})
 
 	// When Promise succeeds: clear `pending` flag, set result variable.
-	handler.handle(event_name(namespace, success_event_name), (state, result) =>
+	redux.on(event_name(namespace, success_event_name), (state, result) =>
 	{
 		// This will be the new Redux state
 		const new_state = on_result(state, result)
@@ -256,45 +377,10 @@ function create_redux_handlers(handler, namespace, event, on_result, result_vari
 
 	// When Promise fails, clear `pending` flag and set `error`.
 	// Can also clear `error` when no `error` is passed as part of an action.
-	handler.handle(event_name(namespace, error_event_name), (state, error) =>
+	redux.on(event_name(namespace, error_event_name), (state, error) =>
 	({
 		...state,
 		[pending_property_name] : false,
 		[error_property_name] : error
 	}))
-}
-
-// Returns Redux action creator for resetting error.
-export function reset_error({ namespace, event }, handler)
-{
-	const
-	[
-		pending_event_name,
-		success_event_name,
-		error_event_name
-	]
-	= handler.settings.asynchronous_action_event_naming(event)
-
-	// Redux "action creator"
-	return () =>
-	({
-		type  : event_name(namespace, error_event_name),
-		error : null
-	})
-}
-
-// A little helper for Redux `@connect()`
-export function state_connector(handler)
-{
-	return function connect_state(state)
-	{
-		const result = {}
-
-		for (let property_name of handler.registered_state_properties)
-		{
-			result[property_name] = state[property_name]
-		}
-
-		return result
-	}
 }

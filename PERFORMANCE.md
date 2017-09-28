@@ -36,8 +36,6 @@ There is however an interesting project out of Walmart Labs worth checking out: 
 
 And of course there are a handful of other independent efforts to fix React server side rendering, like [Rapscallion](http://formidable.com/blog/2017/introducing-rapscallion/) and [`fast-react-server`](https://github.com/alt-j/fast-react-server).
 
-In case of using asynchronous (e.g. streamed) alternative React renderers make sure you aren't using `<Title/>` and `<Meta/>` helpers from this package because they're based on `react-helmet` library which uses `react-side-effect` internally which is [absolutely not thread safe](https://github.com/gaearon/react-document-title/issues/7). In such case implementing an alternative solution would be the way to go: `react-router`'s `.match()` returns `router_state` which has `components` and so each React `Component` would have static `.title(redux_state)` and `.meta(redux_state)` functions which are called for each `component` of the route chain finally being merged into the resulting `title` and `meta` which are passed to the `html()` template rendering function.
-
 ## Caching the whole page
 
 Theorectially, some kind of SEO-friendly generic prerender of a page could be cached (say, the text of an article), and then, on the client side, inside `componentDidMount` it could be further customized for this particular point in time and space: say, a user bar could be dynamically loaded and added at the top of the page, or a comments section could be fetched and rendered at the bottom of the page.

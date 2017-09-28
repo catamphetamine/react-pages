@@ -295,7 +295,7 @@ Using ES6 `async/await`:
 ```js
 function fetchFriends(personId, gender) {
   return {
-    promise: async (http) => await http.get(`/api/person/${personId}/friends`, { gender }),
+    promise: async ({ http }) => await http.get(`/api/person/${personId}/friends`, { gender }),
     events: ['GET_FRIENDS_PENDING', 'GET_FRIENDS_SUCCESS', 'GET_FRIENDS_FAILURE']
   }
 }
@@ -306,7 +306,7 @@ Or using plain `Promise`s (for those who prefer)
 ```js
 function fetchFriends(personId, gender) {
   return {
-    promise: (http) => http.get(`/api/person/${personId}/friends`, { gender }),
+    promise: ({ http }) => http.get(`/api/person/${personId}/friends`, { gender }),
     events: ['GET_FRIENDS_PENDING', 'GET_FRIENDS_SUCCESS', 'GET_FRIENDS_FAILURE']
   }
 }
@@ -412,7 +412,7 @@ class ItemPage extends React.Component {
 // Redux action creator
 function uploadItemPhoto(itemId, file) {
   return {
-    promise: http => http.post(
+    promise: ({ http }) => http.post(
       '/item/photo',
       { itemId, file },
       { progress(percent) { console.log(percent) } }
@@ -432,17 +432,18 @@ For page preloading consider using `@preload()` helper to load the neccessary da
 
 ```javascript
 import { connect } from 'react-redux'
-import { Title, preload } from 'react-isomorphic-render'
+import { meta, preload } from 'react-isomorphic-render'
 
 // fetches the list of users from the server
 function fetchUsers() {
   return {
-    promise: http => http.get('/api/users'),
+    promise: ({ http }) => http.get('/api/users'),
     events: ['GET_USERS_PENDING', 'GET_USERS_SUCCESS', 'GET_USERS_FAILURE']
   }
 }
 
 @preload(({ dispatch }) => dispatch(fetchUsers))
+@meta(({ state }) => ({ title: 'Users' }))
 @connect(
   state => ({ users: state.users.users }),
   // `bindActionCreators()` for Redux action creators
@@ -453,7 +454,6 @@ export default class Page extends Component {
     const { users, fetchUsers } = this.props
     return (
       <div>
-        <Title>Users</Title>
         <ul>{ users.map(user => <li>{ user.name }</li>) }</ul>
         <button onClick={ fetchUsers }>Refresh</button>
       </div>
@@ -605,23 +605,64 @@ export default (
 
 ### Setting <title/> and <meta/> tags
 
-This package uses [react-helmet](https://github.com/nfl/react-helmet) under the hood.
+Use `@meta(state => ...)` decorator for adding `<title/>` and `<meta/>` tags:
 
-```javascript
-import { Title, Meta } from 'react-isomorphic-render'
+```js
+import { meta } from 'react-isomorphic-render'
 
-// Webpage title will be replaced with this one
-<Title>Home</Title>
+@meta(({ state, location, parameters }) => ({
+  // `<meta property="og:site_name" .../>`
+  site_name: 'International Bodybuilders Club',
 
-// Adds additional <meta/> tags to the webpage <head/>
-<Meta>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"/>
-  <meta property="og:title" content="International Bodybuilders Club"/>
-  <meta property="og:description" content="This page explains how to do some simple push ups"/>
-  <meta property="og:image" content="https://www.google.ru/images/branding/googlelogo/2x/googlelogo_color_120x44dp.png"/>
-  <meta property="og:locale" content="ru_RU"/>
-</Meta>
+  // Webpage `<title/>` will be replaced with this one
+  // and also `<meta property="og:title" .../>` will be added.
+  title: `${state.user.name}`,
+
+  // `<meta property="og:description" .../>`
+  description: 'Muscles',
+  
+  // `<meta property="og:image" .../>`
+  image: 'https://cdn.google.com/logo.png',
+  
+  // `<meta property="og:audio" .../>`
+  audio: '...',
+  
+  // `<meta property="og:video" .../>`
+  video: '...',
+
+  // `<meta property="og:locale" .../>`
+  locale: location.query.language || 'ru_RU',
+
+  // `<meta name="og:locale:alternate" content="en_US"/>`
+  // `<meta name="og:locale:alternate" content="fr_FR"/>`
+  locale_other: ['en_US', 'fr_FR'],
+  
+  // `<meta property="og:url" .../>`
+  url: 'https://google.com/',
+  
+  // `<meta property="og:type" .../>`
+  type: 'profile',
+
+  // `<meta charset="utf-8"/>` tag is added automatically.
+  // The default "utf-8" encoding can be changed
+  // by passing custom `charset` parameter.
+  charset: 'utf-16',
+  
+  // `<meta name="viewport" content="width=device-width,
+  //   initial-scale=1.0, user-scalable=no"/>`
+  // tag is added automatically
+  // (prevents downscaling on mobile devices).
+  // This default behaviour can be changed
+  // by passing custom `viewport` parameter.
+  viewport: '...',
+
+  // All other properties will be transformed directly to 
+  // either `<meta property="{property_name}" content="{property_value}/>`
+  // or `<meta name="{property_name}" content="{property_value}/>`
+}))
+export default class Page extends React.Component {
+  ...
+}
 ```
 
 ### Handling asynchronous actions
@@ -631,88 +672,86 @@ Once one starts writing a lot of `http` calls in Redux actions it becomes obviou
 #### redux/blogPost.js
 
 ```js
-import { action, createHandler, stateConnector, eventName } from 'react-isomorphic-render'
+import { reduxModule, eventName } from 'react-isomorphic-render'
 // (`./react-isomorphic-render-async.js` settings file is described below)
 import settings from './react-isomorphic-render-async'
 
-const handler = createHandler(settings)
+const redux = reduxModule('BLOG_POST', settings)
 
 // Post comment Redux "action creator"
-export const postComment = action({
-  namespace: 'BLOG_POST',
-  event: 'POST_COMMENT',
-  // `action()` must return a `Promise`.
-  // Can be an `async` function
-  // (`async` functions always return a `Promise`).
-  // `http` argument is automatically appended by this library
-  // while the `userId`, `blogPostId` and `commentText` arguments
-  // must be passed to this action when calling it.
-  action(userId, blogPostId, commentText, http) {
-    return http.post(`/blog/posts/${blogPostId}/comment`, {
+export const postComment = redux.action(
+  'POST_COMMENT',
+  async ({ http }, userId, blogPostId, commentText) => {
+    // The last `{ http }` argument is automatically appended by this library.
+    // The original action call looks like:
+    // `dispatch(postComment(1, 12345, 'bump'))`
+    return await http.post(`/blog/posts/${blogPostId}/comment`, {
       userId: userId,
       text: commentText
     })
-  }
-},
-handler)
+  },
+  redux
+)
 
 // Get comments Redux "action creator"
-export const getComments = action({
-  namespace: 'BLOG_POST',
-  event: 'GET_COMMENTS',
-  // `action()` must return a `Promise`.
-  // Can be an `async` function
-  // (`async` functions always return a `Promise`).
-  // `http` argument is automatically appended by this library
-  // while the `blogPostId` argument
-  // must be passed to this action when calling it.
-  action(blogPostId, http) {
-    return http.get(`/blog/posts/${blogPostId}/comments`)
+export const getComments = redux.action(
+  'GET_COMMENTS',
+  async ({ http }, blogPostId) => {
+    return await http.get(`/blog/posts/${blogPostId}/comments`)
   },
-  // The fetched comments will be placed
-  // into the `comments` Redux state property.
-  result: 'comments'
-  // Or write it as a reducer:
-  // result: (state, result) => ({ ...state, comments: result })
-},
-handler)
+  {
+    // The fetched comments will be placed
+    // into the `comments` Redux state property.
+    result: 'comments'
+    // 
+    // Or write it like this:
+    // result: {
+    //   comments: result => result
+    // }
+    //
+    // Or write it as an "on result" reducer:
+    // result: (state, result) => ({ ...state, comments: result })
+  }
+)
 
 // A developer can additionally handle any other custom events
-handler.handle(eventName('BLOG_POST', 'CUSTOM_EVENT'), (state, action) => ({
+redux.on(eventName('BLOG_POST', 'CUSTOM_EVENT'), (state, action) => ({
   ...state,
-  customProperty: action.result
+  reduxStateProperty: action.result
 }))
 
 // This is for the Redux `@connect()` helper below.
 // Each property name specified here or
-// as a `result` parameter of an `action()` definition
+// as a `result` parameter of a `redux.action()` definition
 // will be made available inside Redux'es
-// `@connect(state => ({ ...connector(state.reducerName) }))`.
+// `@connect(state => properties(state.reducerName))`.
 // This is just to reduce boilerplate when `@connect()`ing
 // React Components to Redux state.
 // Alternatively, each required property from Redux state
 // can be specified manually inside `@connect()` mapper.
-handler.addStateProperties('customProperty')
+redux.property('reduxStateProperty')
 
 // A little helper for Redux `@connect()`
 // which reduces boilerplate when `@connect()`ing
-// React Components to Redux state.
-// `@connect(state => ({ ...connector(state.reducerName) }))`
-// Will add all (known) state properties from
-// Redux state to the React Component `props`.
-export const connector = stateConnector(handler)
+// React Components to Redux state:
+// `@connect(state => properties(state.reducerName))`
+// will add all (known) state properties from
+// Redux state to React Component `props`.
+// Alternatively, each required property from Redux state
+// can be specified manually inside `@connect()` mapper.
+export const properties = redux.getProperties
 
 // This is the Redux reducer which now
 // handles the asynchronous actions defined above
-// (and also the `handler.handle()` events).
-// Export it as part of the "root" reducer.
-export default handler.reducer()
+// (and also the `handler.on()` events).
+// Export it as part of the "main" reducer.
+export default redux.reducer()
 ```
 
 #### redux/reducer.js
 
 ```js
-// The "root" reducer composed of various reducers.
+// The "main" reducer composed of various reducers.
 export { default as blogPost } from './blogPost'
 ...
 ```
@@ -735,7 +774,7 @@ import { connector, getComments, postComment } from './redux/blogPost'
 // See `react-redux` documentation on `@connect()` decorator
 @connect((state) => ({
   userId: state.user.id,
-  // `...connector()` will populate the Redux `props`
+  // `...properties()` will populate the Redux `props`
   // with the (known) `state.blogPost` properties:
   //  * `postCommentPending`
   //  * `postCommentError`
@@ -743,7 +782,7 @@ import { connector, getComments, postComment } from './redux/blogPost'
   //  * `getCommentsError`
   //  * `comments`
   //  * `customProperty`
-  ...connector(state.blogPost)
+  ...properties(state.blogPost)
 }), {
   postComment
 })
@@ -841,11 +880,11 @@ Notice the extraction of these two configuration parameters (`asynchronousAction
 For synchronous actions it's the same as for asynchronous ones (as described above):
 
 ```js
-import { action, createHandler, stateConnector } from 'react-isomorphic-render'
+import { reduxModule } from 'react-isomorphic-render'
 // (`./react-isomorphic-render-async.js` settings file is described above)
 import settings from './react-isomorphic-render-async'
 
-const handler = createHandler(settings)
+const redux = reduxModule('NOTIFICATIONS', settings)
 
 // Displays a notification.
 //
@@ -866,31 +905,27 @@ const handler = createHandler(settings)
 //     message: action.message
 //   }
 //
-export const notify = action({
-  namespace : 'NOTIFICATIONS',
-  event     : 'NOTIFY',
-  payload   : message => ({ message }),
-  result    : (state, action) => ({ ...state, message: action.message })
-},
-handler)
+export const notify = redux.action('NOTIFY', {
+  // The Redux action payload (i.e. everything except `type`)
+  payload : (message) => ({ message }),
+  // The Redux state reducer for this action
+  result  : (state, action) => ({ ...state, message: action.message })
+})
 
 // Or, it could be simplified even further:
 //
-// export const notify = action({
-//   namespace : 'NOTIFICATIONS',
-//   event     : 'NOTIFY',
-//   result    : 'message'
-// },
-// handler)
+// export const notify = redux.action('NOTIFY', {
+//   result : 'message'
+// })
 //
-// Much cleaner.
+// Which is much cleaner.
 
-// A little helper for Redux `@connect()`
-export const connector = stateConnector(handler)
+// (optional) a little helper for Redux `@connect()`
+export const properties = redux.getProperties
 
 // This is the Redux reducer which now
 // handles the actions defined above.
-export default handler.reducer()
+export default redux.reducer()
 ```
 
 ### Locale detection

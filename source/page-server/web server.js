@@ -132,29 +132,19 @@ export default function start_webpage_rendering_server(settings, options)
 		}
 
 		// HTTP response status
-		if (status)
-		{
-			ctx.status = status
-		}
+		ctx.status = status || 200
 
-		// `String`s are written and `Stream`s are piped
-		if (Array.isArray(content))
-		{
-			const [ before, stream, after ] = content
+		// `String`s are written and `Stream` is piped
+		const [ before, stream, after ] = content
 
-			// https://medium.com/@aickin/whats-new-with-server-side-rendering-in-react-16-9b0d78585d67
-			ctx.res.write(before)
-			stream.pipe(ctx.res, { end: false })
-			stream.on('end', () =>
-			{
-				ctx.res.write(after)
-				ctx.res.end()
-			})
-		}
-		else
+		// https://medium.com/@aickin/whats-new-with-server-side-rendering-in-react-16-9b0d78585d67
+		ctx.res.write(before)
+		stream.pipe(ctx.res, { end: false })
+		stream.on('end', () =>
 		{
-			ctx.body = content
-		}
+			ctx.res.write(after)
+			ctx.res.end()
+		})
 
 		// Report page rendering stats
 		if (stats)

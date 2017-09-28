@@ -105,7 +105,7 @@ if (!JSON.date_parser)
 { fromString: true }).code
 
 // Just to be extra safe from XSS attacks
-if (define_json_date_parser.indexOf('</') !== -1)
+if (define_json_date_parser.indexOf('<') !== -1)
 {
 	throw new Error('JSON Date parser XSS vulnerability detected')
 }
