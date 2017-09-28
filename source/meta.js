@@ -104,19 +104,19 @@ export function update_meta(meta)
 	// Create new `<meta/>` tags
 	for (const [key, value] of new_meta_tags)
 	{
-		const meta_tag = document.createElement('meta')
-
 		const name = meta_tag_name(key)
+		const meta_tag = document.createElement('meta')
 
 		if (name.indexOf(':') >= 0)
 		{
-			update_meta_tag([meta_tag], 'property', name, 'content', value)
+			meta_tag.setAttribute('property', name)
 		}
 		else
 		{
-			update_meta_tag([meta_tag], 'name', name, 'content', value)
+			meta_tag.setAttribute('name', name)
 		}
 
+		meta_tag.setAttribute('content', value)
 		document.head.appendChild(meta_tag)
 	}
 }
