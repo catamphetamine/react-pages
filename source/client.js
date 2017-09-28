@@ -73,18 +73,9 @@ export default function client_side_render({ history, render, render_parameters 
 		// DOM element to which React markup will be rendered
 		const to = document.getElementById('react')
 
-		// // In dev mode, check that server-side rendering works correctly
-		// if (process.env.NODE_ENV !== 'production')
-		// {
-		// 	// For React DevTools
-		// 	window.React = React 
-		// }
+		render_react(wrapped_element, to)
 
-		return {
-			// Return React component for the rendered `element`.
-			component: render_react(wrapped_element, to),
-			...rest
-		}
+		return rest
 	}
 
 	// Render page (on the client side).

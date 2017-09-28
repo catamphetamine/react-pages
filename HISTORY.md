@@ -25,6 +25,8 @@
 
   * (breaking change) `stateConnector()` -> `redux.getProperties`
 
+  * (breaking change) `render()` client-side call used to return `{ component }` reference to the rendered React page component instance. Now it doesn't because `ReactDOM.render()` will no longer return component reference starting from React >= 17.
+
   * (breaking change) `<html lang>` is now removed because the UI translation language is not the same as the page content language. And even if the content language is known the UI translation language still could be different. Only when content language and UI translation language are the same `<html lang/>` could be set but since content language is unknown to the library it doesn't make any assumptions.
 
   * (breaking change) `@authorize()` decorator removed due to not being used
