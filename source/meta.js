@@ -5,18 +5,11 @@ import { get_display_name } from './utility'
 
 export const Meta_method_name = '__meta__'
 
-// `@preload()` decorator.
+// `@meta()` decorator used for adding `<title/>` and <meta/>` tags to a page.
 //
-// `preload` function must return a `Promise`.
-// `function preload({ dispatch, getState, location, parameters, server })`.
+// Receives `options`:
 //
-// The decorator also receives `options`:
-//
-// * `blocking` — if `false` then child `<Route/>` `@preload()`s
-//                will not wait for this `@preload()` to finish first
-//
-// * `client` — if `true` then this `@preload()` will be executed only on the client side
-//              including the moment when the page is initially loaded.
+// * `state` — Redux state
 //
 export default function meta(get_meta)
 {
