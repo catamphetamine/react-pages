@@ -139,8 +139,7 @@ export default function start_webpage_rendering_server(settings, options)
 
 		// https://medium.com/@aickin/whats-new-with-server-side-rendering-in-react-16-9b0d78585d67
 		ctx.res.write(before)
-		stream.pipe(ctx.res, { end: false })
-		stream.on('end', () =>
+		await pipe(stream, ctx.res, { end: false }).then(() =>
 		{
 			ctx.res.write(after)
 			ctx.res.end()
@@ -163,4 +162,16 @@ export default function start_webpage_rendering_server(settings, options)
 	})
 
 	return web
+}
+
+// Pipes `from` stream to `to` stream.
+// Returns a `Promise`.
+function pipe(from, to, options)
+{
+	return new Promise((resolve, reject) =>
+	{
+		from.pipe(to, options)
+		from.on('error', reject)
+		from.on('end', resolve)
+	})
 }
