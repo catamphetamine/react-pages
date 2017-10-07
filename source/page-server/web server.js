@@ -139,11 +139,9 @@ export default function start_webpage_rendering_server(settings, options)
 
 		// https://medium.com/@aickin/whats-new-with-server-side-rendering-in-react-16-9b0d78585d67
 		ctx.res.write(before)
-		await pipe(stream, ctx.res, { end: false }).then(() =>
-		{
-			ctx.res.write(after)
-			ctx.res.end()
-		})
+		await pipe(stream, ctx.res, { end: false })
+		ctx.res.write(after)
+		ctx.res.end()
 
 		// Report page rendering stats
 		if (stats)
