@@ -139,7 +139,7 @@ export default function start_webpage_rendering_server(settings, options)
 
 		// https://medium.com/@aickin/whats-new-with-server-side-rendering-in-react-16-9b0d78585d67
 		ctx.res.write(before)
-		stream.pipe(ctx.res, { end: false })
+		ctx.body = stream
 		stream.on('end', () =>
 		{
 			ctx.res.write(after)
