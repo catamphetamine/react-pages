@@ -1,4 +1,6 @@
 import koa from 'koa'
+import multi_stream from 'multistream'
+import string_stream from 'string-to-stream'
 
 import render_page from './render'
 import { get_preferred_locales } from './locale'
@@ -134,14 +136,12 @@ export default function start_webpage_rendering_server(settings, options)
 		// HTTP response status
 		ctx.status = status || 200
 
-		// `String`s are written and `Stream` is piped
+		// All parts are combined into one readable stream and passed to ctx.body
 		const [ before, stream, after ] = content
 
 		// https://medium.com/@aickin/whats-new-with-server-side-rendering-in-react-16-9b0d78585d67
-		ctx.res.write(before)
-		await pipe(stream, ctx.res, { end: false })
-		ctx.res.write(after)
-		ctx.res.end()
+		ctx.type = 'html';
+		ctx.body = multi_stream([string_stream(before), stream, string_stream(after)])
 
 		// Report page rendering stats
 		if (stats)
@@ -160,16 +160,4 @@ export default function start_webpage_rendering_server(settings, options)
 	})
 
 	return web
-}
-
-// Pipes `from` stream to `to` stream.
-// Returns a `Promise`.
-function pipe(from, to, options)
-{
-	return new Promise((resolve, reject) =>
-	{
-		from.pipe(to, options)
-		from.on('error', reject)
-		from.on('end', resolve)
-	})
 }
