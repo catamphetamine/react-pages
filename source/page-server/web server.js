@@ -140,7 +140,7 @@ export default function start_webpage_rendering_server(settings, options)
 		const [ before, stream, after ] = content
 
 		// https://medium.com/@aickin/whats-new-with-server-side-rendering-in-react-16-9b0d78585d67
-		ctx.type = 'html';
+		ctx.type = 'html'
 		ctx.body = multi_stream([string_stream(before), stream, string_stream(after)])
 
 		// Report page rendering stats
