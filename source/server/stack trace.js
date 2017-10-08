@@ -30,10 +30,10 @@ export default function render_stack_trace(error, options)
 	}
 
 	// If this error has a stack trace then it can be shown
-	const stack_trace = get_stack_trace(error)
+	const stack = get_stack_trace(error)
 
 	// If this error doesn't have a stack trace - do nothing
-	if (!stack_trace)
+	if (!stack)
 	{
 		return {}
 	}
@@ -41,7 +41,7 @@ export default function render_stack_trace(error, options)
 	try
 	{
 		return {
-			content : html({ stack: stack_trace }, options)
+			content : html({ stack }, options)
 		}
 	}
 	catch (error)
