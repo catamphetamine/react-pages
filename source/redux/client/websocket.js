@@ -1,5 +1,4 @@
 import RobustWebSocket from '../../client/robust-websocket'
-import CustomEvent from '../../client/custom event'
 
 // Sets up WebSocket connection.
 export default function websocket({ host, port, secure, store, autoDispatch })
