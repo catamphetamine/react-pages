@@ -1,9 +1,31 @@
-// https://github.com/appuri/robust-websocket/blob/master/robust-websocket.js
-// A copy from January 25th 2017.
-// 
-// Rewriting with a proper ES6 export
-// https://github.com/appuri/robust-websocket/issues/9
+// `robust-websocket` uses `CustomEvent`
+// which is not supported in Internet Explorer.
+import PolyfillCustomEvent from './CustomEvent'
 
+// Polyfill `CustomEvent` for Internet Explorer.
+//
+// `window` is `undefined` on server side.
+// This file will still be included on server side
+// because server side still uses common utilities like
+// `@meta()`, `@preload()`, `redirect()`, `goto()`, etc,
+// and therefore it does `require('react-isomorphic-render')`
+// which executes `react-isomorphic-render/index.common.js`
+// which in turn executes this `if` condition.
+//
+if (typeof window !== 'undefined')
+{
+  PolyfillCustomEvent()
+}
+
+// The code below is copy-pasted from `robust-websocket` library:
+// https://github.com/appuri/robust-websocket/blob/master/robust-websocket.js
+// A copy from October 9th 2017.
+// 
+// Rewrote it with a proper ES6 export
+// https://github.com/appuri/robust-websocket/issues/9
+//
+// Otherwise it would throw `navigator is undefined` on server side.
+//
 export default function RobustWebSocket(url, protocols, userOptions) {
   var realWs = { close: function() {} },
       connectTimeout,
@@ -34,8 +56,8 @@ export default function RobustWebSocket(url, protocols, userOptions) {
 
   function clearPendingReconnectIfNeeded() {
     if (pendingReconnect) {
-      pendingReconnect = null
       clearTimeout(pendingReconnect)
+      pendingReconnect = null
     }
   }
 
@@ -53,16 +75,16 @@ export default function RobustWebSocket(url, protocols, userOptions) {
 
   function detachConnectivityEvents() {
     if (connectivityEventsAttached) {
-      window.removeEventListener('online', ononline)
-      window.removeEventListener('offline', onoffline)
+      global.removeEventListener('online', ononline)
+      global.removeEventListener('offline', onoffline)
       connectivityEventsAttached = false
     }
   }
 
   function attachConnectivityEvents() {
     if (!connectivityEventsAttached) {
-      window.addEventListener('online', ononline)
-      window.addEventListener('offline', onoffline)
+      global.addEventListener('online', ononline)
+      global.addEventListener('offline', onoffline)
       connectivityEventsAttached = true
     }
   }
@@ -96,7 +118,7 @@ export default function RobustWebSocket(url, protocols, userOptions) {
   }
 
   function reconnect(event) {
-    if (event.code === 1000 || explicitlyClosed) {
+    if ((!opts.shouldReconnect.handle1000 && event.code === 1000) || explicitlyClosed) {
       attempts = 0
       return
     }
@@ -139,7 +161,7 @@ export default function RobustWebSocket(url, protocols, userOptions) {
 
   function newWebSocket() {
     pendingReconnect = null
-    realWs = new WebSocket(url, protocols)
+    realWs = new WebSocket(url, protocols || undefined)
     realWs.binaryType = self.binaryType
 
     attempts++
@@ -168,7 +190,9 @@ export default function RobustWebSocket(url, protocols, userOptions) {
       })
     })
 
-    attachConnectivityEvents()
+    if (!opts.ignoreConnectivityEvents) {
+      attachConnectivityEvents()
+    }
   }
 
   if (opts.automaticOpen) {
@@ -187,6 +211,10 @@ RobustWebSocket.defaultOptions = {
     if (event.code === 1008 || event.code === 1011) return
     return [0, 3000, 10000][ws.attempts]
   },
+
+  // Flag to control whether attachement to navigator online/offline events
+  // should be disabled.
+  ignoreConnectivityEvents: false,
 
   // Create and connect the WebSocket when the instance is instantiated.
   // Defaults to true to match standard WebSocket behavior
@@ -220,8 +248,6 @@ RobustWebSocket.prototype.dispatchEvent = function(event) {
   if (!(event.type in this.listeners)) {
     return
   }
-  // https://github.com/appuri/robust-websocket/issues/10
-  // event.currentTarget = this
   var stack = this.listeners[event.type]
   for (var i = 0, l = stack.length; i < l; i++) {
     stack[i].call(this, event)
