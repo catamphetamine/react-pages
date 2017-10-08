@@ -58,3 +58,19 @@ export default function match_routes_against_location({ routes, location, histor
 		})
 	})
 }
+
+// Returns a complete `react-router` path
+// for matched `react-router` `<Route/>` chain.
+// E.g. returns "/user/:user_id/post/:post_id"
+// for matched URL "/user/1/post/123?key=value".
+export function get_route_path(router_state)
+{
+	return router_state.routes
+		// Select `<Route/>`s having `path` React property set.
+		.filter(route => route.path)
+		// Trim leading and trailing slashes (`/`)
+		// from each `<Route/>` `path` React property.
+		.map(route => route.path.replace(/^\//, '').replace(/\/$/, ''))
+		// Join `<Route/>` `path`s with slashes (`/`).
+		.join('/') || '/'
+}

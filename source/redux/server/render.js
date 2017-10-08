@@ -5,8 +5,7 @@ import { location_url } from '../../location'
 import { get_location } from '../../history'
 import timer from '../../timer'
 import { preload_action } from '../actions'
-import match_routes_against_location from '../../react-router/match'
-import get_route_path from '../../react-router/get route path'
+import match_routes_against_location, { get_route_path } from '../../react-router/match'
 import { get_meta } from '../../meta'
 
 function timed_react_render_on_server(streaming, render_webpage, meta, page_element)
