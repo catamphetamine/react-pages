@@ -284,7 +284,7 @@ This is a handy way of dealing with "asynchronous actions" in Redux, e.g. HTTP r
 
 ### Autogenerate event names
 
-When you find yourself copy-pasting those `_PENDING`, `_SUCCESS` and `_ERROR` event names from one action creator to another then take a look at `asynchronousActionEventNaming` setting described in the [All `react-isomorphic-render.js` settings](https://github.com/catamphetamine/react-isomorphic-render/blob/master/README-ADVANCED.md#all-react-isomorphic-renderjs-settings) section of the "advanced" readme: it lets a developer just supply a "base" `event` name and then it generates the three lifecycle event names from that "base" `event` significantly reducing boilerplate.
+When you find yourself copy-pasting those `_PENDING`, `_SUCCESS` and `_ERROR` event names from one action creator to another then take a look at `reduxEventNaming` setting described in the [All `react-isomorphic-render.js` settings](https://github.com/catamphetamine/react-isomorphic-render/blob/master/README-ADVANCED.md#all-react-isomorphic-renderjs-settings) section of the "advanced" readme: it lets a developer just supply a "base" `event` name and then it generates the three lifecycle event names from that "base" `event` significantly reducing boilerplate.
 
 ### HTTP utility
 
@@ -667,7 +667,7 @@ export default class Page extends React.Component {
 
 ### Handling asynchronous actions
 
-Once one starts writing a lot of `http` calls in Redux actions it becomes obvious that there's **a lot** of copy-pasting involved. To reduce those tremendous amounts of copy-pasta an "asynchronous action handler" may be used:
+Once one starts writing a lot of `http` calls in Redux actions it becomes obvious that there's **a lot** of copy-pasting involved. To reduce those tremendous amounts of copy-pasta "redux module" tool may be used
 
 #### redux/blogPost.js
 
@@ -860,20 +860,20 @@ export default {
   // as part of an asynchronous Redux action
   // this will generate `events` from `event`
   // using this function.
-  asynchronousActionEventNaming: event => ([
+  reduxEventNaming: event => ([
     `${event}_PENDING`,
     `${event}_SUCCESS`,
     `${event}_ERROR`
   ]),
 
-  // When using "asynchronous action handlers" feature
+  // When using "redux module" tool
   // this function will generate a Redux state property name from an event name.
   // E.g. event `GET_USERS_ERROR` => state.`getUsersError`.
-  asynchronousActionHandlerStatePropertyNaming: underscoredToCamelCase,
+  reduxPropertyNaming: underscoredToCamelCase,
 }
 ```
 
-Notice the extraction of these two configuration parameters (`asynchronousActionEventNaming` and `asynchronousActionHandlerStatePropertyNaming`) into a separate file `react-isomorphic-render-async.js`: this is done to break circular dependency on `./react-isomorphic-render.js` file because the `routes` parameter inside `./react-isomorphic-render.js` is the `react-router` `./routes.js` file which `import`s React page components which in turn `import` action creators which in turn would import `./react-isomorphic-render.js` hence the circular (recursive) dependency (same goes for the `reducer` parameter inside `./react-isomorphic-render.js`).
+Notice the extraction of these two configuration parameters (`reduxEventNaming` and `reduxPropertyNaming`) into a separate file `react-isomorphic-render-async.js`: this is done to break circular dependency on `./react-isomorphic-render.js` file because the `routes` parameter inside `./react-isomorphic-render.js` is the `react-router` `./routes.js` file which `import`s React page components which in turn `import` action creators which in turn would import `./react-isomorphic-render.js` hence the circular (recursive) dependency (same goes for the `reducer` parameter inside `./react-isomorphic-render.js`).
 
 ### Handling synchronous actions
 

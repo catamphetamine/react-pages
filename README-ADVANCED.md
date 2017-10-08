@@ -363,17 +363,17 @@ try {
   // as part of an asynchronous Redux action
   // this will generate `events` from `event`
   // using this function.
-  asynchronousActionEventNaming: event => ([
+  reduxEventNaming: (event) => ([
     `${event}_PENDING`,
     `${event}_SUCCESS`,
     `${event}_ERROR`
   ])
 
   // (optional)
-  // When using asynchronous action handlers
+  // When using "redux module" tool
   // this function will generate a Redux state property name for an event name.
   // E.g. event `GET_USERS_ERROR` => state.`getUsersError`.
-  asynchronousActionHandlerStatePropertyNaming(event) {
+  reduxPropertyNaming(event) {
     // Converts `CAPS_LOCK_UNDERSCORED_NAMES` to `camelCasedNames`
     return event.split('_')
       .map((word, i) =>  {

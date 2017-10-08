@@ -1,5 +1,9 @@
-12.0.6 / 08.10.2017
+12.0.9 / 08.10.2017
 ===================
+
+  * `asynchronousActionEventNaming` -> `reduxEventNaming` (the older alias still works in this major version but will be removed in some future major version)
+
+  * `asynchronousActionHandlerStatePropertyNaming` -> `reduxPropertyNaming` (the older alias still works in this major version but will be removed in some future major version)
 
   * (v12 spring cleaning) Long-time deprecated `application` alias for `proxy` server-side option has been dropped
 

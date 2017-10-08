@@ -24,9 +24,8 @@ exports.PRELOAD_METHOD_NAME  = exports.Preload_method_name
 exports.Preload_options_name = preloading_middleware.Preload_options_name
 exports.PRELOAD_OPTIONS_NAME = exports.Preload_options_name
 
-exports.action = require('./build/redux/asynchronous action handler').action
-exports.redux_module = require('./build/redux/asynchronous action handler').create_redux_module
-exports.reduxModule = exports.redux_module
+exports.redux_module = require('./build/redux/redux module').default
+exports.reduxModule  = exports.redux_module
 
 exports.underscoredToCamelCase = require('./build/redux/naming').underscoredToCamelCase
 

@@ -44,18 +44,36 @@ export default function normalize_common_settings(settings, options = {})
 		}
 	}
 
-	// camelCase aliasing
+	// Legacy setting support for 12.x.
+	// Deprecated.
+	// Will be removed in some next major release.
 	if (settings.asynchronousActionEventNaming)
 	{
-		settings.asynchronous_action_event_naming = settings.asynchronousActionEventNaming
+		settings.reduxEventNaming = settings.asynchronousActionEventNaming
 		delete settings.asynchronousActionEventNaming
 	}
 
-	// camelCase aliasing
+	// Legacy setting support for 12.x.
+	// Deprecated.
+	// Will be removed in some next major release.
 	if (settings.asynchronousActionHandlerStatePropertyNaming)
 	{
-		settings.asynchronous_action_handler_state_property_naming = settings.asynchronousActionHandlerStatePropertyNaming
+		settings.reduxPropertyNaming = settings.asynchronousActionHandlerStatePropertyNaming
 		delete settings.asynchronousActionHandlerStatePropertyNaming
+	}
+
+	// camelCase aliasing
+	if (settings.reduxEventNaming)
+	{
+		settings.redux_event_naming = settings.reduxEventNaming
+		delete settings.reduxEventNaming
+	}
+
+	// camelCase aliasing
+	if (settings.reduxPropertyNaming)
+	{
+		settings.redux_property_naming = settings.reduxPropertyNaming
+		delete settings.reduxPropertyNaming
 	}
 
 	// camelCase aliasing

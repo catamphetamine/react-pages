@@ -15,7 +15,7 @@ export default function create_store(settings, data, get_history, http_client, o
 		routes,
 		redux_middleware,
 		redux_store_enhancers,
-		asynchronous_action_event_naming,
+		redux_event_naming,
 		preload,
 		http
 	}
@@ -46,7 +46,7 @@ export default function create_store(settings, data, get_history, http_client, o
 		asynchronous_middleware
 		(
 			http_client,
-			asynchronous_action_event_naming,
+			redux_event_naming,
 			server,
 			http.error,
 			http.errorState,

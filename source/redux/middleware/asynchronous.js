@@ -9,7 +9,7 @@ import { location_url } from '../../location'
 //
 // `dispatch()` call will return a `Promise`.
 //
-export default function asynchronous_middleware(http_client, asynchronous_action_event_naming, server, on_error, parseError = parse_error, get_history)
+export default function asynchronous_middleware(http_client, redux_event_naming, server, on_error, parseError = parse_error, get_history)
 {
 	return ({ dispatch, getState }) =>
 	{
@@ -30,7 +30,7 @@ export default function asynchronous_middleware(http_client, asynchronous_action
 			// Generate the three event names automatically based on a base event name
 			if (!events && typeof event === 'string')
 			{
-				events = asynchronous_action_event_naming(event)
+				events = redux_event_naming(event)
 			}
 
 			// Validate `events` property

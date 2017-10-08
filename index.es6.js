@@ -41,18 +41,10 @@ from './es6/redux/middleware/preload'
 
 export
 {
-	action,
-	create_redux_module as redux_module,
-	create_redux_module as reduxModule
+	default as redux_module,
+	default as reduxModule
 }
-from './es6/redux/asynchronous action handler'
-
-export
-{
-	default as asynchronous_action_handler,
-	default as asynchronousActionHandler
-}
-from './es6/redux/asynchronous action handler'
+from './es6/redux/redux module'
 
 export
 {
