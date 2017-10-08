@@ -2,7 +2,7 @@ import superagent from 'superagent'
 
 import { is_object, starts_with } from './helpers'
 import parse_dates from './date parser'
-import { get_cookie_in_a_browser } from './cookies'
+import { get_cookie } from './client/cookies'
 
 // This is an isomorphic (universal) HTTP client
 // which works both on Node.js and in the web browser,
@@ -107,7 +107,7 @@ export default class http_client
 			}
 
 			// A regular cookie which can be read by a web browser
-			return get_cookie_in_a_browser(name)
+			return get_cookie(name)
 		})
 
 		// `superagent` doesn't save cookies by default on the server side.

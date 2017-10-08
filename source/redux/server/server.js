@@ -1,7 +1,7 @@
 import UglifyJS from 'uglify-js'
 
 import { ISO_date_regexp } from '../../date parser'
-import { safe_json_stringify } from '../../page-server/html'
+import { safe_json_stringify } from '../../server/html'
 import render from './render'
 import create_store from '../store'
 import create_http_client from '../http client'

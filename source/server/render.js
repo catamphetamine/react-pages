@@ -14,6 +14,7 @@ import { render_before_content, render_after_content } from './html'
 import normalize_common_settings from '../redux/normalize'
 import timer from '../timer'
 import create_history from '../history'
+import redirect from './redirect'
 import { location_url, parse_location } from '../location'
 
 import redux_render, { initialize as redux_initialize } from '../redux/server/server'
@@ -83,6 +84,11 @@ export default async function(settings, { initialize, localize, assets, applicat
 	// Koa `request.url` is not really a URL,
 	// it's a URL without the `origin` (scheme, host, port).
 	history = create_history(createHistory, request.url, settings.history, parameters, true)
+
+	// Because History API won't work on the server side for navigation,
+	// instrument it with custom redirection handlers.
+	history.replace = redirect
+	history.push    = redirect
 
 	const location = history.getCurrentLocation()
 	const path     = location.pathname

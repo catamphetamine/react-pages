@@ -1,5 +1,5 @@
-import RobustWebSocket from '../../robust-websocket'
-import CustomEvent from '../../custom event'
+import RobustWebSocket from '../../client/robust-websocket'
+import CustomEvent from '../../client/custom event'
 
 // Sets up WebSocket connection.
 //

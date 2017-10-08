@@ -1,7 +1,8 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
 
-import client_side_render, { should_instrument_history_pop_state_listeners, create_history, get_protected_cookie_value } from '../../client'
+import client_side_render from '../../client/render'
+import create_history, { should_instrument_history_pop_state_listeners } from '../../client/history'
 import render from './render'
 import create_http_client from '../http client'
 import normalize_common_settings from '../normalize'
@@ -25,7 +26,7 @@ export default function set_up_and_render(settings, options = {})
 	let store
 
 	// Create HTTP client (Redux action creator `http` utility)
-	const http_client = create_http_client(settings, () => store, get_protected_cookie_value())
+	const http_client = create_http_client(settings, () => store, window._protected_cookie_value)
 	// E.g. for WebSocket message handlers, since they only run on the client side.
 	window._react_isomorphic_render_http_client = http_client
 

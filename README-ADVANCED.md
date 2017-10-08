@@ -626,8 +626,8 @@ Client-side `render` function returns a `Promise` resolving to an object
 
 ```js
 {
-  store,     // (Redux) store
-  rerender   // (Redux) rerender React application
+  store, // (Redux) store
+  render // Rerender React application (use it in development mode for hot reload)
 }
 ```
 

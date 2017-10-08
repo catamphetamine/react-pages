@@ -2,7 +2,6 @@ import React from 'react'
 import { Router, applyRouterMiddleware } from 'react-router'
 import { useScroll } from 'react-router-scroll'
 
-import react_render_on_client from '../../render on client'
 import { location_url } from '../../location'
 import { redirect_action } from '../actions'
 import match_routes_against_location from '../../react-router/match'
@@ -13,11 +12,11 @@ import match_routes_against_location from '../../react-router/match'
 // where `component` is the rendered React component
 // and `store` is the Redux store.
 //
-export default function render_on_client({ history, create_page_element, routes, store })
+export default async function render({ history, create_page_element, routes, store })
 {
 	// Performs `react-router` asynchronous match for current location
 	// (is required for asynchonous routes to work).
-	return match_routes_against_location
+	const { redirect, router_state } = await match_routes_against_location
 	({
 		// `react-router` `match()` internally uses this `history` to get current location.
 		// Could have just used `document.location` here,
@@ -25,33 +24,35 @@ export default function render_on_client({ history, create_page_element, routes,
 		history,
 		routes: typeof routes === 'function' ? routes(store) : routes
 	})
-	.then(({ redirect, router_state }) =>
+
+	// In case of a `react-router` `<Redirect/>`
+	if (redirect)
 	{
-		// In case of a `react-router` `<Redirect/>`
-		if (redirect)
-		{
-			window.location = location_url(redirect)
-			return Promise.reject(`[react-isomorphic-render] (Not an error) Redirecting to ${location_url(redirect)}`);
+		window.location = location_url(redirect)
+		throw new Error(`[react-isomorphic-render] (Not an error) Redirecting to ${location_url(redirect)}`)
 
-			// This kind of a redirect won't work because
-			// the `<Router/>` hasn't been rendered yet.
-			// return store.dispatch(redirect_action(redirect))
-		}
+		// This kind of a redirect won't work because
+		// the `<Router/>` hasn't been rendered yet.
+		// return store.dispatch(redirect_action(redirect))
+	}
 
-		const router_element = <Router
-			{ ...router_state }
-			createElement={ create_route_element }
-			history={ history }
-			render={ applyRouterMiddleware( useScroll(should_scroll) ) }/>
-
-		return {
-			element: router_element,
-			wrapper_props: { store },
-			store
-		}
-	})
+	return {
+		element: (
+			<Router
+				{ ...router_state }
+				createElement={ create_route_element }
+				history={ history }
+				render={ applyRouterMiddleware(useScroll(should_scroll)) }/>
+		),
+		wrapper_props: { store },
+		store
+	}
 }
 
+// `location` can set `scroll` to `false`
+// if it doesn't want scroll position
+// being restored on "Back"/"Forward" navigation
+// (this is used only in `replaceLocation()`).
 function should_scroll(previous_router_properties, new_router_properties)
 {
 	const { location } = new_router_properties

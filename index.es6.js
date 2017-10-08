@@ -101,10 +101,10 @@ from './es6/redux/client/websocket'
 
 export
 {
-	get_cookie_in_a_browser as get_cookie,
-	get_cookie_in_a_browser as getCookie
+	get_cookie,
+	get_cookie as getCookie
 }
-from './es6/cookies'
+from './es6/client/cookies'
 
 export
 {

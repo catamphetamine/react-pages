@@ -1,5 +1,5 @@
 // https://learn.javascript.ru/cookie
-export function get_cookie_in_a_browser(name)
+export function get_cookie(name)
 {
 	const matches = document.cookie.match(new RegExp
 	(

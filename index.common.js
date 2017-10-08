@@ -53,7 +53,7 @@ exports.IndexLink = require('./build/redux/IndexLink').default
 
 exports.websocket = require('./build/redux/client/websocket').default
 
-exports.get_cookie = require('./build/cookies').get_cookie_in_a_browser
+exports.get_cookie = require('./build/client/cookies').get_cookie
 exports.getCookie  = exports.get_cookie
 
 exports.replace_location = require('./build/react-router/set location').replace_location

@@ -1037,7 +1037,7 @@ For each page being rendered stats are reported if `stats()` parameter function 
 {
   ...
 
-  stats({ url, route, time: { initialize, preload, render, total } }) {
+  stats({ url, route, time: { initialize, preload, total } }) {
     if (total > 1000) { // in milliseconds
       db.query('insert into server_side_rendering_stats ...')
     }
@@ -1062,12 +1062,11 @@ Besides simply logging individual long-taking page renders one could also set up
 {
   ...
 
-  stats({ url, route, time: { initialize, preload, render, total } }) {
+  stats({ url, route, time: { initialize, preload, total } }) {
     statsd.increment('count')
 
     statsd.timing('initialize', initialize)
-    statsd.timing('preload', preload)
-    statsd.timing('render', render)
+    statsd.timing('@preload()', preload)
     statsd.timing('total', total)
 
     if (total > 1000) { // in milliseconds
@@ -1108,6 +1107,7 @@ HMR setup for Redux reducers is as simple as adding `store.hotReload()` (as show
 #### application.js
 
 ```js
+import { render } from 'react-isomorphic-render'
 import settings from './react-isomorphic-render'
 
 render(settings).then(({ store, rerender }) => {

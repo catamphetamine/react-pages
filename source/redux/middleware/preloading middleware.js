@@ -5,7 +5,7 @@ import deep_equal from 'deep-equal'
 import getRouteParams from 'react-router/lib/getRouteParams'
 
 import { location_url, strip_basename } from '../../location'
-import { server_redirect } from '../../history'
+import server_redirect from '../../server/redirect'
 import { Preload, Redirect, GoTo, redirect_action, goto_action, history_redirect_action, history_goto_action } from '../actions'
 import match_routes_against_location from '../../react-router/match'
 import get_route_path from '../../react-router/get route path'
@@ -302,7 +302,7 @@ export default function preloading_middleware(server, error_handler, preload_on_
 			// Otherwise just rethrow the error
 			// (always the case on the client side).
 			//
-			// This error will be handled in `web server` `catch` clause
+			// This error will be handled in `server/server.js` `catch` clause
 			// if this code is being run on the server side.
 			// On the client side it just outputs errors to console.
 			//

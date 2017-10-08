@@ -4,9 +4,9 @@
 import { render_on_client as render } from './render'
 import { exists } from '../helpers'
 
-import client_side_render from '../client'
+import client_side_render from '../client/render'
+import create_history from '../client/history'
 import normalize_common_settings from '../redux/normalize'
-import create_history from '../history'
 
 // Performs client-side rendering
 // along with varios stuff like loading localized messages.
