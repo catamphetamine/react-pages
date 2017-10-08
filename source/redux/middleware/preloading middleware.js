@@ -115,6 +115,7 @@ export default function preloading_middleware(server, error_handler, preload_on_
 				// but just in case.
 				if (server)
 				{
+					// Throws a special "redirection" error.
 					server_redirect(redirect)
 				}
 

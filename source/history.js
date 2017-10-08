@@ -17,7 +17,7 @@ export default function create_history(createHistory, location, history_settings
 	// For custom `history` wrappers, like `syncHistoryWithStore` from `react-router-redux`.
 	if (history_settings.wrap)
 	{
-		// `parameters` is `{ store }` for Redux use case
+		// `parameters` is `{ store }` if Redux is used.
 		history = history_settings.wrap(history, parameters)
 	}
 

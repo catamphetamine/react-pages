@@ -4,17 +4,13 @@
 import React from 'react'
 import ReactDOM from 'react-dom/server'
 
-import { Readable } from 'stream'
-
-// https://github.com/ReactTraining/react-router/issues/4023
-// Also adds `useBasename` and `useQueries`
-import createHistory from 'react-router/lib/createMemoryHistory'
+import string_stream from 'string-to-stream'
+import multi_stream from 'multistream'
 
 import { render_before_content, render_after_content } from './html'
 import normalize_common_settings from '../redux/normalize'
 import timer from '../timer'
-import create_history from '../history'
-import redirect from './redirect'
+import create_history from './history'
 import { location_url, parse_location } from '../location'
 
 import redux_render, { initialize as redux_initialize } from '../redux/server/server'
@@ -28,13 +24,8 @@ import { meta_tags } from '../meta'
 // Otherwise, `ReactDOM.renderToString()` is used.
 const streaming = ReactDOM.renderToNodeStream ? true : false
 
-// isomorphic (universal) rendering (middleware).
-// will be used in web_application.use(...)
-export default async function(settings, { initialize, localize, assets, application, proxy, request, render, loading, html = {}, cookies, beforeRender })
+export default async function render_page(settings, { initialize, localize, assets, proxy, request, render, loading, html = {}, cookies, beforeRender })
 {
-	// Legacy `application` option will be removed in a future major release
-	proxy = proxy || application
-	
 	settings = normalize_common_settings(settings)
 
 	const
@@ -80,15 +71,10 @@ export default async function(settings, { initialize, localize, assets, applicat
 
 	const normalize_result = (result) => _normalize_result(result, afterwards, settings)
 
-	// Create `history` (`true` indicates server-side usage).
 	// Koa `request.url` is not really a URL,
 	// it's a URL without the `origin` (scheme, host, port).
-	history = create_history(createHistory, request.url, settings.history, parameters, true)
-
-	// Because History API won't work on the server side for navigation,
-	// instrument it with custom redirection handlers.
-	history.replace = redirect
-	history.push    = redirect
+	// Koa `request.url` is basically a "relative URL".
+	history = create_history(request.url, settings.history, parameters)
 
 	const location = history.getCurrentLocation()
 	const path     = location.pathname
@@ -157,7 +143,7 @@ export default async function(settings, { initialize, localize, assets, applicat
 			streaming,
 			before_render: beforeRender,
 
-			create_page_element: (child_element, props) => 
+			create_page_element(child_element, props)
 			{
 				if (localize)
 				{
@@ -220,11 +206,13 @@ export default async function(settings, { initialize, localize, assets, applicat
 					server_side_rendering_enabled: render !== false
 				})
 
-				return [
-					before_content,
-					typeof content === 'string' ? text_stream(content) : content,
-					after_content
-				]
+				// All parts are combined into a single readable stream
+				return multi_stream
+				([
+					string_stream(before_content),
+					typeof content === 'string' ? string_stream(content) : content,
+					string_stream(after_content)
+				])
 			}
 		})
 
@@ -356,24 +344,3 @@ function render_react(element)
 
 	return ReactDOM.renderToString(element)
 }
-
-// Turns a `String` into a `Stream`
-function text_stream(string)
-{
-	const stream = new Readable()
-	stream.push(string)
-	stream.push(null)
-	return stream
-}
-
-// // Just in case
-// function read_stream(stream)
-// {
-// 	return new Promise((resolve, reject) =>
-// 	{
-// 		let result = ''
-// 		stream.on('data', chunk => result += chunk)
-// 		stream.on('end', () => resolve(result))
-// 		stream.on('error', reject)
-// 	})
-// }

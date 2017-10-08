@@ -1,3 +1,14 @@
+12.0.6 / 08.10.2017
+===================
+
+  * (v12 spring cleaning) Long-time deprecated `application` alias for `proxy` server-side option has been dropped
+
+  * (v12 spring cleaning) Long-time deprecated `token` websocket option has been dropped
+
+  * (v12 spring cleaning) Long-time deprecated `settings.preload.catch` and `settings.catch` aliases for `settings.error` has been dropped
+
+  * (v12 spring cleaning) Long-time deprecated `history` alias for `history.options` has been dropped
+  
 12.0.0 / 28.09.2017
 ===================
 

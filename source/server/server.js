@@ -1,6 +1,4 @@
 import koa from 'koa'
-import multi_stream from 'multistream'
-import string_stream from 'string-to-stream'
 
 import render_page from './render'
 import { get_preferred_locales } from './locale'
@@ -8,13 +6,13 @@ import render_stack_trace from './html stack trace'
 
 import timer from '../timer'
 
-export default function start_webpage_rendering_server(settings, options)
+export default function server(settings, options)
 {
 	const
 	{
 		assets,
 		localize,
-		application,
+		proxy,
 		authentication,
 		render,
 		loading,
@@ -24,19 +22,10 @@ export default function start_webpage_rendering_server(settings, options)
 	}
 	= options
 
-	let
-	{
-		proxy
-	}
-	= options
-
-	// Legacy `application` option will be removed in a future major release
-	proxy = proxy || application
-
-	const web = new koa()
+	const application = new koa()
 
 	// Handles errors
-	web.use(async (ctx, next) =>
+	application.use(async (ctx, next) =>
 	{
 		try
 		{
@@ -90,12 +79,12 @@ export default function start_webpage_rendering_server(settings, options)
 	{
 		for (let middleware of options.middleware)
 		{
-			web.use(middleware)
+			application.use(middleware)
 		}
 	}
 
 	// Isomorphic rendering
-	web.use(async (ctx) =>
+	application.use(async (ctx) =>
 	{
 		// Trims a question mark in the end (just in case)
 		const url = ctx.request.originalUrl.replace(/\?$/, '')
@@ -136,12 +125,11 @@ export default function start_webpage_rendering_server(settings, options)
 		// HTTP response status
 		ctx.status = status || 200
 
-		// All parts are combined into one readable stream and passed to ctx.body
-		const [ before, stream, after ] = content
-
-		// https://medium.com/@aickin/whats-new-with-server-side-rendering-in-react-16-9b0d78585d67
+		// HTTP response "Content-Type"
 		ctx.type = 'html'
-		ctx.body = multi_stream([string_stream(before), stream, string_stream(after)])
+
+		// Stream the rendered React page
+		ctx.body = content
 
 		// Report page rendering stats
 		if (stats)
@@ -159,5 +147,5 @@ export default function start_webpage_rendering_server(settings, options)
 		}
 	})
 
-	return web
+	return application
 }
