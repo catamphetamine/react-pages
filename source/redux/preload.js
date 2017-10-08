@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 import hoist_statics from 'hoist-non-react-statics'
 
 import { get_display_name } from '../utility'
-import { Preload_method_name, Preload_options_name } from './middleware/preloading middleware'
+import { Preload_method_name, Preload_options_name } from './middleware/preload'
 
 // `@preload()` decorator.
 //

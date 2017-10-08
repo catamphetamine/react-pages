@@ -1,9 +1,9 @@
 import { createStore, combineReducers, applyMiddleware, compose } from 'redux'
 import { composeWithDevTools } from 'redux-devtools-extension/logOnlyInProduction'
 
-import asynchronous_middleware from './middleware/asynchronous middleware'
-import preloading_middleware from './middleware/preloading middleware'
-import history_middleware from './middleware/history middleware'
+import asynchronous_middleware from './middleware/asynchronous'
+import preloading_middleware from './middleware/preload'
+import history_middleware from './middleware/history'
 
 import { LoadState } from './actions'
 

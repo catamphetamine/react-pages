@@ -11,7 +11,7 @@ exports.render        = require('./build/redux/client/client').default
 exports.getState      = require('./build/redux/client/client').getState
 exports.getHttpClient = require('./build/redux/client/client').getHttpClient
 
-var preloading_middleware = require('./build/redux/middleware/preloading middleware')
+var preloading_middleware = require('./build/redux/middleware/preload')
 
 exports.Preload_started      = preloading_middleware.Preload_started
 exports.PRELOAD_STARTED      = exports.Preload_started

@@ -37,7 +37,7 @@ export
 	Preload_options_name,
 	Preload_options_name as PRELOAD_OPTIONS_NAME
 }
-from './es6/redux/middleware/preloading middleware'
+from './es6/redux/middleware/preload'
 
 export
 {
