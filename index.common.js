@@ -5,7 +5,7 @@ exports.meta  = require('./build/meta').default
 // Redux
 
 exports.preload       = require('./build/redux/preload').default
-exports.onPageLoaded  = require('./build/redux/on page loaded').default
+exports.onPageLoaded  = require('./build/redux/onPageLoaded').default
 
 exports.render        = require('./build/redux/client/client').default
 exports.getState      = require('./build/redux/client/client').getState

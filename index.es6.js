@@ -14,7 +14,7 @@ export
 {
 	default as onPageLoaded
 }
-from './es6/redux/on page loaded'
+from './es6/redux/onPageLoaded'
 
 export
 {
