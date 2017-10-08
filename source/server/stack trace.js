@@ -1,4 +1,4 @@
-import { html as html_stack_trace } from 'print-error'
+import { html } from 'print-error'
 
 export default function render_stack_trace(error, options)
 {
@@ -41,7 +41,7 @@ export default function render_stack_trace(error, options)
 	try
 	{
 		return {
-			content : html_stack_trace({ stack: stack_trace }, options)
+			content : html({ stack: stack_trace }, options)
 		}
 	}
 	catch (error)
