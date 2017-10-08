@@ -56,8 +56,8 @@ exports.websocket = require('./build/redux/client/websocket').default
 exports.get_cookie = require('./build/client/cookies').get_cookie
 exports.getCookie  = exports.get_cookie
 
-exports.replace_location = require('./build/react-router/set location').replace_location
+exports.replace_location = require('./build/react-router/location').replace_location
 exports.replaceLocation  = exports.replace_location
 
-exports.push_location = require('./build/react-router/set location').push_location
+exports.push_location = require('./build/react-router/location').push_location
 exports.pushLocation  = exports.push_location

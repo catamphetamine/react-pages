@@ -113,4 +113,4 @@ export
 	push_location,
 	push_location as pushLocation
 }
-from './es6/react-router/set location'
+from './es6/react-router/location'
