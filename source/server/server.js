@@ -2,7 +2,7 @@ import koa from 'koa'
 
 import render_page from './render'
 import { get_preferred_locales } from './locale'
-import render_stack_trace from './html stack trace'
+import render_stack_trace from './stack trace'
 
 import timer from '../timer'
 
@@ -42,13 +42,13 @@ export default function server(settings, options)
 			{
 				try
 				{
-					const { response_status, response_body } = render_stack_trace(error, options.print_error)
+					const { status, content } = render_stack_trace(error, options.print_error)
 
-					if (response_body)
+					if (content)
 					{
-						ctx.status = response_status || 500
-						ctx.body = response_body
+						ctx.status = status || 500
 						ctx.type = 'html'
+						ctx.body = content
 
 						return
 					}

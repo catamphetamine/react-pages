@@ -2,10 +2,13 @@ import { html as html_stack_trace } from 'print-error'
 
 export default function render_stack_trace(error, options)
 {
-	// Supports custom `html` for an error
+	// Supports custom `html` for an `Error`
 	if (error.html)
 	{
-		return { response_status: error.status, response_body: error.html }
+		return {
+			status  : error.status,
+			content : error.html
+		}
 	}
 
 	// Handle `superagent` errors: if an error response was an html, then just render it
@@ -19,24 +22,15 @@ export default function render_stack_trace(error, options)
 			&& error.response.headers['content-type']
 			&& error.response.headers['content-type'].split(';')[0].trim() === 'text/html')
 		{
-			return { response_status: error.status, response_body: error.message }
+			return {
+				status  : error.status,
+				content : error.message
+			}
 		}
 	}
 
 	// If this error has a stack trace then it can be shown
-
-	let stack_trace
-
-	if (error.stack)
-	{
-		stack_trace = error.stack
-	}
-	// `superagent` errors have the `original` property 
-	// for storing the initial error
-	else if (error.original && error.original.stack)
-	{
-		stack_trace = error.original.stack
-	}
+	const stack_trace = get_stack_trace(error)
 
 	// If this error doesn't have a stack trace - do nothing
 	if (!stack_trace)
@@ -46,11 +40,33 @@ export default function render_stack_trace(error, options)
 
 	try
 	{
-		return { response_body: html_stack_trace({ stack: stack_trace }, options) }
+		return {
+			content : html_stack_trace({ stack: stack_trace }, options)
+		}
 	}
 	catch (error)
 	{
 		console.error(error)
-		return { response_status: 500, response_body: error.stack }
+
+		return {
+			content : error.stack
+		}
+	}
+}
+
+// Extracts stack trace from `Error`
+function get_stack_trace(error)
+{
+	// Standard javascript `Error` stack trace
+	if (error.stack)
+	{
+		return error.stack
+	}
+
+	// `superagent` errors have the `original` property 
+	// for storing the initial error
+	if (error.original && error.original.stack)
+	{
+		return error.original.stack
 	}
 }
