@@ -1,6 +1,8 @@
 12.0.9 / 08.10.2017
 ===================
 
+  * (internal breaking change) The internal `render()` function now returns not an array of 3 Strings but rather a Readable Stream. This change is breaking for those who used the internal `render()` function which is about a single man and that man most likely hasn't migrated to v12 yet, so it's not a major version bump.
+
   * `asynchronousActionEventNaming` -> `reduxEventNaming` (the older alias still works in this major version but will be removed in some future major version)
 
   * `asynchronousActionHandlerStatePropertyNaming` -> `reduxPropertyNaming` (the older alias still works in this major version but will be removed in some future major version)

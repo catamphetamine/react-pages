@@ -79,7 +79,7 @@ try {
   // Returns a Promise.
   //
   // status  - HTTP response status
-  // content - rendered HTML document (markup)
+  // content - rendered HTML document (a Node.js "Readable Stream")
   // redirect - redirection URL (in case of HTTP redirect)
   //
   const { status, content, redirect } = await render(settings, {
@@ -100,7 +100,7 @@ try {
   }
 
   response.status(status || 200)
-  response.send(content)
+  content.pipe(response)
 } catch (error) {
   response.status(500)
   response.send('Internal server error')
