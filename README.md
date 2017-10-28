@@ -665,7 +665,7 @@ export default class Page extends React.Component {
 }
 ```
 
-### Handling asynchronous actions
+### Asynchronous actions
 
 Once one starts writing a lot of `http` calls in Redux actions it becomes obvious that there's **a lot** of copy-pasting involved. To reduce those tremendous amounts of copy-pasta "redux module" tool may be used
 
