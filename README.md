@@ -875,7 +875,7 @@ export default {
 
 Notice the extraction of these two configuration parameters (`reduxEventNaming` and `reduxPropertyNaming`) into a separate file `react-isomorphic-render-async.js`: this is done to break circular dependency on `./react-isomorphic-render.js` file because the `routes` parameter inside `./react-isomorphic-render.js` is the `react-router` `./routes.js` file which `import`s React page components which in turn `import` action creators which in turn would import `./react-isomorphic-render.js` hence the circular (recursive) dependency (same goes for the `reducer` parameter inside `./react-isomorphic-render.js`).
 
-### Handling synchronous actions
+### Synchronous actions
 
 For synchronous actions it's the same as for asynchronous ones (as described above):
 
