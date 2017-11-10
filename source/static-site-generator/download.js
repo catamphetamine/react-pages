@@ -12,7 +12,7 @@ export default function download(url)
 
 			let response_body = ''
 			response.on('data', chunk => response_body += chunk)
-			response.on('end', () => resolve({ status: response.statusCode, content: responseBody }))
+			response.on('end', () => resolve({ status: response.statusCode, content: response_body }))
 		})
 
 		request.on('error', reject)
