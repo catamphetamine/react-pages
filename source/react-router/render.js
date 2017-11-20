@@ -6,8 +6,6 @@ import ReactDOM       from 'react-dom'
 import ReactDOMServer from 'react-dom/server'
 import { Router, RouterContext } from 'react-router'
 
-import react_render_on_client from '../render on client'
-
 // Renders `element` React element inside the `to` DOM element.
 //
 // returns a Promise resolving to the rendered React component.
