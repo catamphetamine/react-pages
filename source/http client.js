@@ -250,7 +250,7 @@ export default class http_client
 								return catch_to_retry(error, retry_count,
 								{
 									getCookie,
-									this
+									http: this
 								})
 								.then(perform_http_request)
 							}
