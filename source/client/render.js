@@ -93,4 +93,6 @@ function get_global_variable(name)
 	{
 		delete window[name]
 	}
+	
+	return variable
 }
