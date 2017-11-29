@@ -105,7 +105,7 @@ export default class Hyperlink extends Component
 
 	render()
 	{
-		const { instantBack, ...link_props } = this.props
+		const { instantBack, onNavigate, ...link_props } = this.props
 		const { to, target, children, ...rest_props } = link_props
 		const { router } = this.context
 
