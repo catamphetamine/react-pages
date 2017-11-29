@@ -56,7 +56,7 @@ export default class Hyperlink extends Component
 
 	on_click(event)
 	{
-		const { onClick, to, instantBack } = this.props
+		const { onClick, onNavigate, to, instantBack } = this.props
 		const { router, store } = this.context
 		
 		// Sanity check
@@ -92,6 +92,11 @@ export default class Hyperlink extends Component
 
 		// Cancel `react-router` navigation inside its own `<Link/>`
 		event.preventDefault()
+
+		if (onNavigate)
+		{
+			onNavigate()
+		}
 
 		// Firt preload the new page, then `history.push()` will be called,
 		// and `react-router` will detect that performing the route transition.
