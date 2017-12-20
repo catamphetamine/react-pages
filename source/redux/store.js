@@ -5,6 +5,8 @@ import asynchronous_middleware from './middleware/asynchronous'
 import preloading_middleware from './middleware/preload'
 import history_middleware from './middleware/history'
 
+import { reducer as preload_reducer } from './preload'
+
 import { LoadState } from './actions'
 
 export default function create_store(settings, data, get_history, http_client, options)
@@ -84,6 +86,15 @@ export default function create_store(settings, data, get_history, http_client, o
 	{
 		store_enhancers.push(...redux_store_enhancers())
 	}
+
+	// Check that `@preload()` status reducer name isn't occupied
+	if (reducer.preload)
+	{
+		throw new Error(`"preload" reducer name is reserved for react-application's "@preload()" status. Use a different name for your "preload" reducer.`)
+	}
+
+	// Add `@preload()` status reducer
+	reducer.preload = preload_reducer
 
 	// Create Redux store
 	const store = get_store_enhancers_composer(server, devtools)(...store_enhancers)(createStore)(create_reducer(reducer), data)

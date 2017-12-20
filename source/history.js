@@ -10,9 +10,9 @@ export default function create_history(createHistory, location, history_settings
 	// https://github.com/ReactTraining/react-router/blob/master/docs/guides/Histories.md#customize-your-history-further
 	//
 	// `entries` is used in `MemoryHistory` only (i.e. on server side)
-	// https://github.com/ReactTraining/history/blob/v3.x/modules/createMemoryHistory.js
+	// https://github.com/ReactTraining/history/blob/v3/modules/createMemoryHistory.js
 	//
-	let history = createHistory({ ...history_options, entries: [ location ] })
+	let history = createHistory({ ...history_options, entries: [location] })
 
 	// For custom `history` wrappers, like `syncHistoryWithStore` from `react-router-redux`.
 	if (history_settings.wrap)
@@ -27,19 +27,19 @@ export default function create_history(createHistory, location, history_settings
 
 export function get_location(history)
 {
-	// v4
+	// react-router v4
 	if (history.location)
 	{
 		return history.location
 	}
 
-	// v3
+	// react-router v3
 	if (history.getCurrentLocation)
 	{
 		return history.getCurrentLocation()
 	}
 
-	// v2
+	// react-router v2
 	let location
 	const unlisten = history.listen(x => location = x)
 	unlisten()

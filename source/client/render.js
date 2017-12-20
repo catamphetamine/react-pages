@@ -3,14 +3,14 @@ import ReactDOM from 'react-dom'
 
 // Performs client-side React application rendering.
 // Takes `render()` function which renders the actual page.
-// Then this rendered page is wrapped with a `wrapper`
+// Then this rendered page is rendered in a `container`
 // (e.g. Redux state `<Connector/>` and such).
 // This function is not exported and is not called directly in an application:
 // instead specific implementations call this function
 // providing their own `render()` logic
 // (e.g. Redux + React-router, React-router).
 //
-export default async function render({ render, render_parameters = {}, wrapper, translation, history })
+export default async function render({ render, render_parameters = {}, container, translation, history })
 {
 	// Protected cookie feature
 	const protected_cookie_value = get_global_variable('_protected_cookie_value')
@@ -19,19 +19,19 @@ export default async function render({ render, render_parameters = {}, wrapper, 
 	const locale   = get_global_variable('_locale')
 	const messages = get_global_variable('_locale_messages')
 
-	// Renders current React page (wrapped).
+	// Renders current React page (inside a container).
 	// Returns a Promise for an object holding
 	// `render` function for development mode hot reload,
 	// protected cookie value,
 	// and also `store` (if Redux is used).
-	async function render_wrapped_page()
+	async function render_page()
 	{
-		const { element, wrapper_props, ...rest } = await render(render_parameters)
+		const { element, container_props, ...rest } = await render(render_parameters)
 
 		// If internationalization feature is used
 		if (locale)
 		{
-			wrapper_props.locale = locale
+			container_props.locale = locale
 
 			// Preload language translation in development mode.
 			// `translation` loading function may be passed
@@ -39,15 +39,15 @@ export default async function render({ render, render_parameters = {}, wrapper, 
 			// in development mode for translated messages.
 			if (translation)
 			{
-				wrapper_props.messages = await translation(locale)
+				container_props.messages = await translation(locale)
 			} 
 		}
 
 		render_react_element
 		(
-			// Wrap page `element` into a wrapper element.
+			// Render page `element` inside a container element.
 			// E.g. Redux context `<Provider/>`, and others.
-			React.createElement(wrapper, wrapper_props, element),
+			React.createElement(container, container_props, element),
 
 			// DOM element to which React markup will be rendered
 			document.getElementById('react')
@@ -57,7 +57,7 @@ export default async function render({ render, render_parameters = {}, wrapper, 
 	}
 
 	// Render the page on the client side.
-	const result = await render_wrapped_page()
+	const result = await render_page()
 
 	return {
 		// Redux `store`, for example.
@@ -65,7 +65,7 @@ export default async function render({ render, render_parameters = {}, wrapper, 
 		// Client side code can then rerender the page any time
 		// by calling this `render()` function
 		// (makes hot reload work in development mode).
-		rerender: render_wrapped_page,
+		rerender: render_page,
 		// "Protected cookie" could be a JWT "refresh token".
 		protectedCookie: protected_cookie_value
 	}

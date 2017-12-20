@@ -10,7 +10,7 @@ export function add_instant_back(next_location, previous_location)
 
 		if (previous_location_index < 0)
 		{
-			console.error('[react-isomorphic-render] Error: previous location not found in an already existing instant back navigation chain', get_location_key(previous_location), instant_back)
+			console.error('[react-application] Error: previous location not found in an already existing instant back navigation chain', get_location_key(previous_location), instant_back)
 			return reset_instant_back()
 		}
 

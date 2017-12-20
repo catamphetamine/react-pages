@@ -1,5 +1,5 @@
 # testing package
-/react-isomorphic-render-*.tgz
+/react-application-*.tgz
 
 # test coverage folder
 /coverage/
@@ -27,7 +27,7 @@ npm-debug.log
 
 # webpack build target folder
 /build/
-/es6/
+/cjs/
 
 # NUL
 NUL

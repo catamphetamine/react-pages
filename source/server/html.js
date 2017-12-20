@@ -26,7 +26,7 @@ export function render_before_content({
 
 export function render_after_content({
 	assets,
-	server_side_rendering_enabled,
+	hollow,
 	locale,
 	locale_messages_json,
 	extension_javascript,
@@ -37,7 +37,7 @@ export function render_after_content({
 	return template_after_content.render
 	({
 		javascript_urls : assets.entries.map(entry => assets.javascript && assets.javascript[entry]).filter(url => url),
-		server_side_rendering_enabled,
+		hollow,
 		locale,
 		locale_messages_json,
 		extension_javascript,
@@ -108,7 +108,7 @@ const template_after_content = nunjucks.compile
 				It is used to determine whether to call
 				"ReactDOM.hydrate()" or "ReactDOM.render()".
 			#}
-			{% if server_side_rendering_enabled %}
+			{% if not hollow %}
 				<script>
 					window._server_side_rendered = true
 				</script>

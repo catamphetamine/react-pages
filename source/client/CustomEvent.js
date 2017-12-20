@@ -45,8 +45,8 @@ function CustomEvent(event_name, options)
 // This file will still be included on server side
 // because server side still uses common utilities like
 // `@meta()`, `@preload()`, `redirect()`, `goto()`, etc,
-// and therefore it does `require('react-isomorphic-render')`
-// which executes `react-isomorphic-render/index.common.js`
+// and therefore it does `require('react-application')`
+// which executes `react-application/index.common.js`
 // which in turn executes this `if` condition.
 if (typeof window !== 'undefined')
 {

@@ -16,9 +16,9 @@ export const Preload_method_name  = '__preload__'
 export const Preload_options_name = '__preload_options__'
 export const On_page_loaded_method_name = '__on_page_loaded__'
 
-export const Preload_started  = '@@react-isomorphic-render/redux/preload started'
-export const Preload_finished = '@@react-isomorphic-render/redux/preload finished'
-export const Preload_failed   = '@@react-isomorphic-render/redux/preload failed'
+export const Preload_started  = '@@react-application/redux/preload started'
+export const Preload_finished = '@@react-application/redux/preload finished'
+export const Preload_failed   = '@@react-application/redux/preload failed'
 
 export default function preloading_middleware(server, error_handler, preload_on_client_side_only, preload_helpers, routes, get_history, basename, report_stats, on_navigate)
 {
@@ -170,9 +170,6 @@ export default function preloading_middleware(server, error_handler, preload_on_
 				components,
 				getState,
 				preloader_dispatch(dispatch, preloading),
-				// Remove `get_history()` line in the next major version release
-				// due to this parameter being deprecated.
-				get_history(),
 				location,
 				params,
 				preload_on_client_side_only,
@@ -226,7 +223,7 @@ export default function preloading_middleware(server, error_handler, preload_on_
 					// Report stats to the web browser console
 					if (!server)
 					{
-						console.log(`[react-isomorphic-render] @preload() took ${preload_timer()} milliseconds for ${action.location.pathname}`)
+						console.log(`[react-application] @preload() took ${preload_timer()} milliseconds for ${action.location.pathname}`)
 					}
 
 					// If this navigation process was cancelled
@@ -382,14 +379,9 @@ function proceed_with_navigation(dispatch, action, server, get_history, previous
 //
 // If no preloading is needed, then returns nothing.
 //
-// * Remove the `history` argument in the next major version release
-//   due to it being deprecated.
-//
-const preloader = (initial_client_side_preload, server, routes, components, getState, dispatch, history, location, parameters, preload_on_client_side_only, preload_helpers, preloading) =>
+const preloader = (initial_client_side_preload, server, routes, components, getState, dispatch, location, parameters, preload_on_client_side_only, preload_helpers, preloading) =>
 {
-	// Remove the `history` parameter in the next major version release
-	// due to it being deprecated.
-	let preload_arguments = { dispatch, getState, history, location, parameters }
+	let preload_arguments = { dispatch, getState, location, parameters }
 
 	if (preload_helpers)
 	{

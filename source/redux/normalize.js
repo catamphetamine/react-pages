@@ -31,10 +31,10 @@ export default function normalize_common_settings(settings, options = {})
 		}
 	}
 
-	if (!settings.wrapper)
+	if (!settings.container)
 	{
-		// By default it wraps everything with Redux'es `<Provider/>`.
-		settings.wrapper = function Wrapper({ store, children })
+		// By default it wraps everything with Redux `<Provider/>`.
+		settings.container = function Container({ store, children })
 		{
 			return (
 				<Provider store={ store }>
@@ -42,26 +42,6 @@ export default function normalize_common_settings(settings, options = {})
 				</Provider>
 			)
 		}
-	}
-
-	// Legacy setting support for 12.x.
-	// Deprecated.
-	// Will be removed in some next major release.
-	if (settings.asynchronousActionEventNaming)
-	{
-		console.warn('[react-isomorphic-render] `asynchronousActionEventNaming` option has been renamed to `reduxEventNaming`')
-		settings.reduxEventNaming = settings.asynchronousActionEventNaming
-		delete settings.asynchronousActionEventNaming
-	}
-
-	// Legacy setting support for 12.x.
-	// Deprecated.
-	// Will be removed in some next major release.
-	if (settings.asynchronousActionHandlerStatePropertyNaming)
-	{
-		console.warn('[react-isomorphic-render] `asynchronousActionHandlerStatePropertyNaming` option has been renamed to `reduxPropertyNaming`')
-		settings.reduxPropertyNaming = settings.asynchronousActionHandlerStatePropertyNaming
-		delete settings.asynchronousActionHandlerStatePropertyNaming
 	}
 
 	// camelCase aliasing

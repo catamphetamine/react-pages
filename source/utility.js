@@ -1,4 +1,4 @@
-export function get_display_name(Wrapped)
+export function get_display_name(Component)
 {
-	return Wrapped.displayName || Wrapped.name || 'Component'
+	return Component.displayName || Component.name || 'Component'
 }

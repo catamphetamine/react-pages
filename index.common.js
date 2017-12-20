@@ -1,17 +1,17 @@
 // Helpers
 
-exports.meta  = require('./build/meta').default
+exports.meta  = require('./cjs/meta').default
 
 // Redux
 
-exports.preload       = require('./build/redux/preload').default
-exports.onPageLoaded  = require('./build/redux/onPageLoaded').default
+exports.preload       = require('./cjs/redux/preload').default
+exports.onPageLoaded  = require('./cjs/redux/onPageLoaded').default
 
-exports.render        = require('./build/redux/client/client').default
-exports.getState      = require('./build/redux/client/client').getState
-exports.getHttpClient = require('./build/redux/client/client').getHttpClient
+exports.render        = require('./cjs/redux/client/client').default
+exports.getState      = require('./cjs/redux/client/client').getState
+exports.getHttpClient = require('./cjs/redux/client/client').getHttpClient
 
-var preloading_middleware = require('./build/redux/middleware/preload')
+var preloading_middleware = require('./cjs/redux/middleware/preload')
 
 exports.Preload_started      = preloading_middleware.Preload_started
 exports.PRELOAD_STARTED      = exports.Preload_started
@@ -24,39 +24,39 @@ exports.PRELOAD_METHOD_NAME  = exports.Preload_method_name
 exports.Preload_options_name = preloading_middleware.Preload_options_name
 exports.PRELOAD_OPTIONS_NAME = exports.Preload_options_name
 
-exports.redux_module = require('./build/redux/redux module').default
+exports.redux_module = require('./cjs/redux/redux module').default
 exports.reduxModule  = exports.redux_module
 
-exports.underscoredToCamelCase = require('./build/redux/naming').underscoredToCamelCase
+exports.underscoredToCamelCase = require('./cjs/redux/naming').underscoredToCamelCase
 
-exports.event_name = require('./build/redux/naming').event_name
+exports.event_name = require('./cjs/redux/naming').event_name
 exports.eventName  = exports.event_name
 
-exports.goto       = require('./build/redux/actions').goto_action
-exports.redirect   = require('./build/redux/actions').redirect_action
-exports.load_state = require('./build/redux/actions').load_state_action
+exports.goto       = require('./cjs/redux/actions').goto_action
+exports.redirect   = require('./cjs/redux/actions').redirect_action
+exports.load_state = require('./cjs/redux/actions').load_state_action
 exports.loadState  = exports.load_state
 
-exports.PRELOAD    = require('./build/redux/actions').Preload
-exports.LoadState  = require('./build/redux/actions').LoadState
+exports.PRELOAD    = require('./cjs/redux/actions').Preload
+exports.LoadState  = require('./cjs/redux/actions').LoadState
 exports.LOAD_STATE = exports.LoadState  
-exports.GoTo       = require('./build/redux/actions').GoTo
+exports.GoTo       = require('./cjs/redux/actions').GoTo
 exports.GO_TO      = exports.GoTo  
-exports.Redirect   = require('./build/redux/actions').Redirect
+exports.Redirect   = require('./cjs/redux/actions').Redirect
 exports.REDIRECT   = exports.Redirect
-exports.Navigated  = require('./build/redux/actions').Navigated
+exports.Navigated  = require('./cjs/redux/actions').Navigated
 exports.NAVIGATED  = exports.Navigated
 
-exports.Link = require('./build/redux/Link').default
-exports.IndexLink = require('./build/redux/IndexLink').default
+exports.Link = require('./cjs/redux/Link').default
+exports.IndexLink = require('./cjs/redux/IndexLink').default
 
-exports.websocket = require('./build/redux/client/websocket').default
+exports.websocket = require('./cjs/redux/client/websocket').default
 
-exports.get_cookie = require('./build/client/cookies').get_cookie
+exports.get_cookie = require('./cjs/client/cookies').get_cookie
 exports.getCookie  = exports.get_cookie
 
-exports.replace_location = require('./build/react-router/location').replace_location
+exports.replace_location = require('./cjs/react-router/location').replace_location
 exports.replaceLocation  = exports.replace_location
 
-exports.push_location = require('./build/react-router/location').push_location
+exports.push_location = require('./cjs/react-router/location').push_location
 exports.pushLocation  = exports.push_location

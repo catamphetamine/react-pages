@@ -2,7 +2,14 @@ import React, { Component } from 'react'
 import hoist_statics from 'hoist-non-react-statics'
 
 import { get_display_name } from '../utility'
-import { Preload_method_name, Preload_options_name } from './middleware/preload'
+
+import {
+	Preload_method_name,
+	Preload_options_name,
+	Preload_started,
+	Preload_finished,
+	Preload_failed
+} from './middleware/preload'
 
 // `@preload()` decorator.
 //
@@ -19,21 +26,32 @@ import { Preload_method_name, Preload_options_name } from './middleware/preload'
 //
 export default function preload(preload, options)
 {
-	return function(Wrapped)
+	return function(Decorated_component)
 	{
 		class Preload extends Component
 		{
 			render()
 			{
-				return <Wrapped {...this.props} />
+				return <Decorated_component {...this.props} />
 			}
 		}
 
 		Preload[Preload_method_name]  = preload
 		Preload[Preload_options_name] = options
 
-		Preload.displayName = `Preload(${get_display_name(Wrapped)})`
+		Preload.displayName = `Preload(${get_display_name(Decorated_component)})`
 		
-		return hoist_statics(Preload, Wrapped)
+		return hoist_statics(Preload, Decorated_component)
+	}
+}
+
+export function reducer(state = {}, action = {})
+{
+	switch (action.type)
+	{
+		case Preload_started  : return { ...state, pending: true,  error: undefined }
+		case Preload_finished : return { ...state, pending: false }
+		case Preload_failed   : return { ...state, pending: false, error: action.error }
+		default               : return state
 	}
 }

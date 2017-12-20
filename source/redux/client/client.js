@@ -140,7 +140,7 @@ export default function set_up_and_render(settings, options = {})
 	return client_side_render
 	({
 		translation,
-		wrapper: settings.wrapper,
+		container: settings.container,
 		render,
 		render_parameters:
 		{

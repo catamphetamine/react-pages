@@ -2,21 +2,13 @@
 
 ## Motivation
 
-Server Side Rendering using `ReactDOM.renderToString()` method [takes about 100ms](https://codedump.io/share/xjW15JpT26nT/1/react-rendertostring-performance-and-caching-react-components) for a quite complex React page (having more than 1000 components). Add to this the time to query a database and [the recommended watermark of 200ms](https://developers.google.com/speed/docs/insights/Server) can be easily exceeded.
+React Server-Side Rendering takes some time, especially on complex pages. Add to this the time to query a database and [the recommended watermark of 200ms](https://developers.google.com/speed/docs/insights/Server) can be easily exceeded.
 
-Aside from getting lower ranking in Google search engine, this also means a naive approach would be able to handle roughly 10 server-side page renders per second, multiplied by the number of CPU cores. I'm explicitly saying "server-side page renders" because websites are Single Page Applications nowadays and all subsequent navigation will happen in the user's web browser and the page rendering server won't be involved.
-
-A hundred page renders per second (for a 10 Core CPU) would probably be acceptable for an average website, if it's getting about 100 * 60 * 60 * 24 = 10 million unique visitors per day. 10 million users per day is not that much though. For example, in China they would laugh out loud if someone said this is "highload" or ["web scale"](http://www.mongodb-is-web-scale.com/)...
-
-## Chinese folks read on
-
-Just kidding.
-
-Optimizing React server side rendering seemed like a challenging task for me so I spent some time thinking on ways to implement it.
+## Finding solutions
 
 In an ideal world, every HTTP request would just get a rendered page and [the web wouldn't be broken anymore](https://ponyfoo.com/articles/stop-breaking-the-web). All web pages would be true Documents (aka "Resources"), like in the good old days of the early World Wide Web.
 
-But, in reality, everything has a price, and as the load grows this price rises (think about a monthly bill for renting a 10 Core Intel server, for example). Which brings a question: is server-side rendering needed that much? And why is it needed?
+But, in reality, everything has a price, and as the load grows this price rises. Which brings a question: is server-side rendering needed that much? And why is it needed?
 
 Look at Facebook, for example. The founding fathers of React, they still respond with an empty page which is then fully rendered in the web browser. And they're not even interested in React server-side rendering that much.
 
@@ -64,4 +56,4 @@ Since `react-router` is used, a page's key could be inferred from the `<Route/>`
 
 ## Relative dates
 
-One more gotcha are relative dates and times (e.g. "an hour ago"). These obviously need to be rendered as absolute ones (e.g. "01.02.2016, 18:00") on the server-side, meaning that a special flag needs to be introduced (maybe a global variable, like `__SERVER__`, which is not that elegant; or maybe a Redux state property like `getState().render.server === true`).
+One more gotcha are relative dates and times (e.g. "an hour ago"). These most likely need to be rendered as absolute ones (e.g. "01.02.2016, 18:00") on the server-side, meaning that a special flag needs to be introduced (maybe a global variable, like `__SERVER__`, which is not that elegant; or maybe a Redux state property like `getState().render.server === true`).

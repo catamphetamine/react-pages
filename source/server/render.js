@@ -19,19 +19,14 @@ import { render_on_server as react_router_render } from '../react-router/render'
 import { Preload } from '../redux/actions'
 import { meta_tags } from '../meta'
 
-// `ReactDOM.renderToString()` is used here instead of
-// If React version is >= 16 then `ReactDOM.renderToNodeStream(element)` is used.
-// Otherwise, `ReactDOM.renderToString()` is used.
-const streaming = ReactDOM.renderToNodeStream ? true : false
-
-export default async function render_page(settings, { initialize, localize, assets, proxy, request, render, loading, html = {}, cookies, beforeRender })
+export default async function render_page(settings, { initialize, localize, assets, proxy, url, hollow, html = {}, cookies, beforeRender })
 {
 	settings = normalize_common_settings(settings)
 
 	const
 	{
 		routes,
-		wrapper,
+		container,
 		authentication
 	}
 	= settings
@@ -63,7 +58,6 @@ export default async function render_page(settings, { initialize, localize, asse
 	{
 		protected_cookie_value,
 		proxy,
-		request,
 		cookies,
 		initialize,
 		get_history
@@ -71,10 +65,10 @@ export default async function render_page(settings, { initialize, localize, asse
 
 	const normalize_result = (result) => _normalize_result(result, afterwards, settings)
 
-	// Koa `request.url` is not really a URL,
+	// `url` is not really a URL,
 	// it's a URL without the `origin` (scheme, host, port).
-	// Koa `request.url` is basically a "relative URL".
-	history = create_history(request.url, settings.history, parameters)
+	// `url` is basically a "relative URL", i.e. "relative path" + query.
+	history = create_history(parse_location(url), settings.history, parameters)
 
 	const location = history.getCurrentLocation()
 	const path     = location.pathname
@@ -137,10 +131,9 @@ export default async function render_page(settings, { initialize, localize, asse
 		const result = await render_page
 		({
 			...parameters,
-			disable_server_side_rendering: render === false,
+			hollow,
 			history,
 			routes,
-			streaming,
 			before_render: beforeRender,
 
 			create_page_element(child_element, props)
@@ -151,13 +144,13 @@ export default async function render_page(settings, { initialize, localize, asse
 					props.messages = messages
 				}
 
-				return React.createElement(wrapper, props, child_element)
+				return React.createElement(container, props, child_element)
 			},
 
-			render_webpage(react_element_tree, meta)
+			render(react_element_tree, meta)
 			{
 				// For Redux:
-				// `react_element_tree` is undefined if `render === false`.
+				// `react_element_tree` is undefined if `hollow === true`.
 				// Otherwise `react_element_tree` is `<Router>...</Router>`.
 
 				// `html` modifiers
@@ -191,9 +184,6 @@ export default async function render_page(settings, { initialize, localize, asse
 					body_start
 				})
 
-				// Render page content
-				const content = render === false ? render_to_a_string(loading) : render_react(react_element_tree)
-
 				// Render all HTML that goes after React markup
 				const after_content = render_after_content
 				({
@@ -203,16 +193,26 @@ export default async function render_page(settings, { initialize, localize, asse
 					locale_messages_json: messagesJSON,
 					body_end,
 					protected_cookie_value,
-					server_side_rendering_enabled: render !== false
+					hollow
 				})
 
 				// All parts are combined into a single readable stream
-				return multi_stream
-				([
+
+				const streams =
+				[
 					string_stream(before_content),
-					typeof content === 'string' ? string_stream(content) : content,
 					string_stream(after_content)
-				])
+				]
+
+				if (!hollow && react_element_tree)
+				{
+					// Render page content to a `Stream`
+					// inserting this stream in the middle of `streams` array.
+					// `array.splice(index, 0, element)` inserts `element` at `index`.
+					streams.splice(streams.length / 2, 0, ReactDOM.renderToNodeStream(react_element_tree))
+				}
+
+				return multi_stream(streams)
 			}
 		})
 
@@ -327,20 +327,4 @@ function _normalize_result(result, afterwards, settings)
 	result.afterwards = afterwards
 
 	return result
-}
-
-// Renders React element into a `String` or a stream.
-function render_react(element)
-{
-	if (!element)
-	{
-		return ''
-	}
-
-	if (streaming)
-	{
-		return ReactDOM.renderToNodeStream(element)
-	}
-
-	return ReactDOM.renderToString(element)
 }

@@ -2,7 +2,7 @@ This section contains advanced topics. This means that the features described he
 
 ## react-router-redux
 
-I didn't build [`react-router-redux`](https://github.com/reactjs/react-router-redux) functionality into this library because I thought that Redux state is actually not intended for storing router state. See [PHILOSOPHY](https://github.com/catamphetamine/react-isomorphic-render/blob/master/PHILOSOPHY.md).
+I didn't build [`react-router-redux`](https://github.com/reactjs/react-router-redux) functionality into this library because I thought that Redux state is actually not intended for storing router state. See [PHILOSOPHY](https://github.com/catamphetamine/react-application/blob/master/PHILOSOPHY.md).
 
 ## CSRF protection
 
@@ -16,14 +16,14 @@ So, **javascript is required** on the client side in order for this CSRF attacks
 
 ## `@preload()`
 
-`@preload()` decorator seems not working for no reason (though it definitely works) then try to place it on top of all other decorators. Internally it adds a special static method to your `Route`'s `component` and some 3rd party decorators on top of it may not retain that static method (though all proper decorators nowadays do retain static methods and variables of wrapped components using [`hoist-non-react-statics`](https://github.com/mridgway/hoist-non-react-statics)).
+`@preload()` decorator seems not working for no reason (though it definitely works) then try to place it on top of all other decorators. Internally it adds a special static method to your `Route`'s `component` and some 3rd party decorators on top of it may not retain that static method (though all proper decorators nowadays do retain static methods and variables of the decorated components using [`hoist-non-react-statics`](https://github.com/mridgway/hoist-non-react-statics)).
 
 ## `@onPageLoaded()`
 
 When using `{ client: true }` `@preload()`s it's sometimes required to perform some actions (e.g. adjust the current URL) after those `@preload()`s finish (and after the browser navigates to the preloaded page). While with regular `@preload()`s it could be done using `componentDidMount()` (though only on the client side) such an approach wouldn't work for `{ client: true }` `@preload()`s because they're called after `componentDidMount()`. The solution is `@onPageLoaded()` decorator which takes a function parameter, exactly as `@preload()` decorator does, with an extra `history` parameter.
 
 ```js
-import { onPageLoaded, replaceLocation } from 'react-isomorphic-render'
+import { onPageLoaded, replaceLocation } from 'react-application'
 
 @onPageLoaded(function({ dispatch, getState, history, location, parameters, server }) {
   if (isAnIdURL(location.pathname)) {
@@ -72,8 +72,8 @@ function autocompleteMatch(inputValue) {
 For some advanced use cases (though most likely no one's using this) the internal `render()` function is exposed.
 
 ```js
-import { render } from 'react-isomorphic-render/server'
-import settings from './react-isomorphic-render'
+import { render } from 'react-application/server'
+import settings from './react-application'
 
 try {
   // Returns a Promise.
@@ -107,7 +107,7 @@ try {
 }
 ```
 
-## All `react-isomorphic-render.js` settings
+## All `react-application.js` settings
 
 ```javascript
 {
@@ -122,17 +122,17 @@ try {
   
   // A React component.
   //
-  // Wraps React page component (`children` property)
-  // with arbitrary React components.
+  // React page component (`children` property)
+  // is rendered inside this "container" component.
   // (e.g. Redux `<Provider/>`,
   //  `react-hot-loader@3`'s `<AppContainer/>`
   //  and other "context providers")
   //
-  // By default it just wraps everything with Redux'es `<Provider/>`:
+  // By default it just wraps everything with Redux `<Provider/>`:
   //
   // export default ({ store, children }) => <Provider store={ store }>{ children }</Provider>
   //
-  wrapper: require('./src/client/wrapper')
+  container: require('./src/client/container')
 
   // (optional)
   // User can add custom Redux middleware
@@ -392,6 +392,9 @@ try {
 
 ```javascript
 {
+  // Specify `secure: true` flag to use `https` protocol instead of `http`.
+  // secure: true
+
   // This setting is for people using a proxy server
   // to query their API by relative URLs
   // using the `http` utility in Redux "action creators".
@@ -456,13 +459,6 @@ try {
   },
 
   // (optional)
-  // Custom Koa middleware (an array of middlewares).
-  // Inserted before page rendering middleware.
-  // (if anyone needs that for extending
-  //  page rendering service with extra functionality)
-  middleware: [...]
-
-  // (optional)
   // HTML code injection
   html:
   {
@@ -490,13 +486,9 @@ try {
   //
   // If defined, this function must return an object
   // which is gonna be the initial Redux state.
-  // 
-  // `request` is the original HTTP request for the webpage.
-  // It can be used, for example, to load the currently
-  // logged in user info (user name, user picture, etc).
   //
-  initialize: async (httpClient, { request }) => ({})
-  // (or same without `async`: (httpClient, { request }) => Promise.resolve({})
+  initialize: async (httpClient) => ({})
+  // (or same without `async`: (httpClient) => Promise.resolve({})
 
   // (optional)
   //
@@ -542,12 +534,6 @@ try {
   // (optional)
   // Is called after all `@preload()`s finish and before React renders.
   beforeRender: async ({ dispatch, getState }) => {}
-
-  // (optional)
-  // Markup for "loading" screen
-  // (when server-side rendering is disabled).
-  // Can be a String, or a React.Element, or an array of React.Elements
-  loading: <div className="loading">Loading...</div>
 
   // (optional)
   // A custom `log`

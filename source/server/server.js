@@ -1,151 +1,109 @@
-import koa from 'koa'
+import http from 'http'
+import https from 'https'
+import cookie from 'cookie'
 
-import render_page from './render'
+import render from './render'
+import render_error from './render error'
 import { get_preferred_locales } from './locale'
-import render_stack_trace from './stack trace'
-
 import timer from '../timer'
 
 export default function server(settings, options)
 {
+	return (options.secure ? https : http).createServer((request, response) =>
+	{
+		// Render the page (and handle errors, if any)
+		render_page(request, response, settings, options)
+			.catch((error) => render_error(error, response, options))
+	})
+}
+
+// Renders a webpage
+async function render_page(request, response, settings, options)
+{
 	const
 	{
+		secure,
+		proxy,
 		assets,
 		localize,
-		proxy,
 		authentication,
-		render,
-		loading,
-		stats,
+		initialize,
+		hollow,
 		html,
-		initialize
+		stats
 	}
 	= options
 
-	const application = new koa()
+	const url = request.url
+	const cookies = request.headers.cookie ? cookie.parse(request.headers.cookie) : {}
 
-	// Handles errors
-	application.use(async (ctx, next) =>
+	const total_timer = timer()
+
+	const { status, content, redirect, route, time, set_cookies } = await render(settings,
 	{
-		try
-		{
-			await next()
-		}
-		catch (error)
-		{
-			// if the error is caught here it means that `catch`
-			// (error handler parameter) didn't resolve it
-			// (or threw it)
-
-			// show error stack trace in development mode for easier debugging
-			if (process.env.NODE_ENV !== 'production')
-			{
-				try
-				{
-					const { status, content } = render_stack_trace(error, options.print_error)
-
-					if (content)
-					{
-						ctx.status = status || 500
-						ctx.type = 'html'
-						ctx.body = content
-
-						return
-					}
-				}
-				catch (error)
-				{
-					console.log('(couldn\'t render error stack trace)')
-					console.log(error.stack || error)
-				}
-			}
-
-			// log the error
-			console.log('[react-isomorphic-render] Webpage rendering server error')
-
-			if (options.log)
-			{
-				options.log.error(error)
-			}
-
-			ctx.status = typeof error.status === 'number' ? error.status : 500
-			ctx.message = error.message || 'Internal error'
-		}
+		proxy,
+		assets,
+		localize : localize ? (parameters) => localize(parameters, get_preferred_locales(request.headers, cookies)) : undefined,
+		authentication,
+		initialize,
+		hollow,
+		html,
+		url,
+		// Cookies for protected cookie value retrieval
+		cookies: request.headers.cookie ? cookie.parse(request.headers.cookie) : {}
 	})
 
-	// Custom Koa middleware extension point
-	// (if someone ever needs this)
-	if (options.middleware)
+	// Can add `Set-Cookie` headers, for example.
+	if (set_cookies)
 	{
-		for (let middleware of options.middleware)
+		// `set_cookies` is a `Set`, not an `Array`,
+		// hence the `for` loop.
+		for (const cookie of set_cookies)
 		{
-			application.use(middleware)
+			response.setHeader('Set-Cookie', cookie)
 		}
 	}
 
-	// Isomorphic rendering
-	application.use(async (ctx) =>
+	// If a redirect happened perform an HTTP redirect
+	if (redirect)
 	{
-		// Trims a question mark in the end (just in case)
-		const url = ctx.request.originalUrl.replace(/\?$/, '')
+		let redirect_url = redirect
 
-		const total_timer = timer()
-
-		const { status, content, redirect, route, time, afterwards } = await render_page(settings,
+		// Convert relative URL to an absolute one
+		if (redirect_url[0] === '/')
 		{
-			proxy,
-			assets,
-			initialize,
-			localize: localize ? parameters => localize(parameters, get_preferred_locales(ctx)) : undefined,
-			render,
-			loading,
-			html,
-			authentication,
+			redirect_url = `${secure ? 'https' : 'http'}://${request.headers.host}${redirect_url}`;
+		}
 
-			// The original HTTP request can be required
-			// for inspecting cookies in `preload` function
-			request: ctx.req,
-
-			// Cookies for protected cookie value retrieval
-			cookies: ctx.cookies
+		response.writeHead(302,
+		{
+			Location: redirect_url
 		})
 
-		// Can add `Set-Cookie` headers, for example.
-		if (afterwards)
-		{
-			afterwards(ctx)
-		}
+		return response.end()
+	}
 
-		// If a redirect happened perform an HTTP redirect
-		if (redirect)
-		{
-			return ctx.redirect(redirect)
-		}
-
-		// HTTP response status
-		ctx.status = status || 200
-
-		// HTTP response "Content-Type"
-		ctx.type = 'html'
-
-		// Stream the rendered React page
-		ctx.body = content
-
-		// Report page rendering stats
-		if (stats)
-		{
-			stats
-			({
-				url: ctx.path + (ctx.querystring ? `?${ctx.querystring}` : ''),
-				route,
-				time:
-				{
-					...time,
-					total: total_timer()
-				}
-			})
-		}
+	// HTTP response status and "Content-Type"
+	response.writeHead(status || 200,
+	{
+		'Content-Type': 'text/html'
 	})
 
-	return application
+	// Stream the rendered React page
+	content.pipe(response)
+
+	// Report page rendering stats
+	if (stats)
+	{
+		stats
+		({
+			url,
+			route,
+			time:
+			{
+				...time,
+				total: total_timer()
+			}
+		})
+	}
 }

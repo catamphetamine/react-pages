@@ -1,13 +1,13 @@
 import superagent from 'superagent'
 
-import { is_object, starts_with } from './helpers'
-import parse_dates from './date parser'
+import { starts_with } from './helpers'
 import { get_cookie } from './client/cookies'
+import HTTP_Request, { get_cookie_key_value } from './http request'
 
 // This is an isomorphic (universal) HTTP client
 // which works both on Node.js and in the web browser,
 // and therefore can be used in Redux actions (for HTTP requests)
-export default class http_client
+export default class HTTP_Client
 {
 	// `Set-Cookie` HTTP headers
 	// (in case any cookies are set)
@@ -22,7 +22,6 @@ export default class http_client
 		{
 			proxy,
 			headers,
-			clone_request,
 			cookies,
 			protected_cookie,
 			protected_cookie_value,
@@ -45,7 +44,7 @@ export default class http_client
 		// `options.transform_url` because the rendered page content
 		// is placed before the `options` are even defined (inside webpack bundle).
 		//
-		// Once `http_client` instance is created, the `protected_cookie_value` variable
+		// Once `HTTP_Client` instance is created, the `protected_cookie_value` variable
 		// is erased from everywhere except the closures of HTTP methods defined below,
 		// and the protected cookie value is therefore unable to be read directly by an attacker.
 		//
@@ -60,10 +59,9 @@ export default class http_client
 
 		// Clone HTTP request cookies on the server-side
 		// (to make authentication work)
-		if (clone_request)
+		if (cookies)
 		{
 			this.server = true
-			this.cookies_raw = clone_request.headers.cookie
 		}
 		
 		this.proxy = proxy
@@ -89,13 +87,13 @@ export default class http_client
 			{
 				if (cookie_raw.indexOf(`${name}=`) === 0)
 				{
-					const key_value = cookie_raw_key_value(cookie_raw).split('=')
-					return key_value[1]
+					const [key, value] = get_cookie_key_value(cookie_raw)
+					return value
 				}
 			}
 
 			// Return the original request cookie
-			return cookies.get(name)
+			return cookies[name]
 		})
 		:
 		((name) =>
@@ -125,7 +123,7 @@ export default class http_client
 				// and HTTP authentication headers to a third party.
 				if (!is_relative_url(path) && !allow_absolute_urls)
 				{
-					throw new Error(`You requested an absolute URL using "http" utility: "${path}". Use relative URLs instead (e.g. "/api/item/3") – this is cleaner and safer. To transform relative URLs into absolute ones configure the "http.url(relativeURL) -> absoluteURL" parameter function in "react-isomorphic-render.js". Example: (path) => \`https://api.server.com\${path}\`. Alternatively, set "http.allowAbsoluteURLs" setting to "true" (for those rare cases when it is justifiable).`)
+					throw new Error(`You requested an absolute URL using "http" utility: "${path}". Use relative URLs instead (e.g. "/api/item/3") – this is cleaner and safer. To transform relative URLs into absolute ones configure the "http.url(relativeURL) -> absoluteURL" parameter function in "react-application.js". Example: (path) => \`https://api.server.com\${path}\`. Alternatively, set "http.allowAbsoluteURLs" setting to "true" (for those rare cases when it is justifiable).`)
 				}
 
 				// `url` will be absolute for server-side
@@ -139,22 +137,22 @@ export default class http_client
 				const perform_http_request = () =>
 				{
 					// Create Http request
-					const request = new Http_request(method, url, data,
+					const request = new HTTP_Request(method, url, data,
 					{
 						agent,
 						parse_json_dates,
 						on_response_headers : options.onResponseHeaders,
 						headers : { ...headers, ...options.headers },
-						new_cookies : (new_cookies) =>
+						new_cookies_added : (cookies) =>
 						{
 							if (this.server)
 							{
 								// Cookies will be duplicated here
 								// because `superagent.agent()` persists
 								// `Set-Cookie`s between subsequent requests
-								// (i.e. for the same `http_client` instance).
+								// (i.e. for the same `HTTP_Client` instance).
 								// Therefore using a `Set` instead of an array.
-								for (const cookie of new_cookies)
+								for (const cookie of cookies)
 								{
 									this.set_cookies.add(cookie)
 								}
@@ -177,7 +175,7 @@ export default class http_client
 					// (copies user authentication cookies to retain session specific data)
 					if (this.server && is_relative_url(path))
 					{
-						request.add_cookies(this.cookies_raw, this.set_cookies)
+						request.add_cookies(cookies, this.set_cookies)
 					}
 
 					// Allows customizing HTTP requests
@@ -210,7 +208,7 @@ export default class http_client
 						}
 
 						// // One could store the `request` to later `.abort()` it.
-						// // https://github.com/catamphetamine/react-isomorphic-render/issues/46
+						// // https://github.com/catamphetamine/react-application/issues/46
 						// if (options.onRequest)
 						// {
 						// 	options.onRequest(request.request)
@@ -284,331 +282,4 @@ export default class http_client
 function is_relative_url(path)
 {
 	return starts_with(path, '/') && !starts_with(path, '//')
-}
-
-function has_binary_data(data)
-{
-	if (!is_object(data))
-	{
-		return false
-	}
-
-	for (const key of Object.keys(data))
-	{
-		const parameter = data[key]
-
-		if (typeof HTMLInputElement !== 'undefined' && parameter instanceof HTMLInputElement)
-		{
-			return true
-		}
-
-		if (typeof FileList !== 'undefined' && parameter instanceof FileList)
-		{
-			return true
-		}
-
-		// `File` is a subclass of `Blob`
-		// https://developer.mozilla.org/en-US/docs/Web/API/Blob
-		if (typeof Blob !== 'undefined' && parameter instanceof Blob)
-		{
-			return true
-		}
-	}
-}
-
-function construct_form_data(data)
-{
-	// Just in case (who knows)
-	if (typeof FormData === 'undefined')
-	{
-		// Silent fallback
-		return data
-	}
-
-	const form_data = new FormData()
-
-	for (const key of Object.keys(data))
-	{
-		let parameter = data[key]
-
-		// For an `<input type="file"/>` DOM element just take its `.files`
-		if (typeof HTMLInputElement !== 'undefined' && parameter instanceof HTMLInputElement)
-		{
-			parameter = parameter.files
-		}
-
-		// For a `FileList` parameter (e.g. `multiple` file upload),
-		// iterate the `File`s in the `FileList`
-		// and add them to the form data as a `[File]` array.
-		if (typeof FileList !== 'undefined' && parameter instanceof FileList)
-		{
-			let i = 0
-			while (i < parameter.length)
-			{
-				form_data.append(key, parameter[i])
-				i++
-			}
-			continue
-		}
-
-		form_data.append(key, parameter)
-	}
-
-	return form_data
-}
-
-class Http_request
-{
-	constructor(method, url, data, options)
-	{
-		const
-		{
-			agent,
-			headers,
-			parse_json_dates,
-			new_cookies,
-			on_response_headers
-		}
-		= options
-
-		this.new_cookies = new_cookies
-
-		// Create Http request.
-		this.request = agent[method](url)
-
-		// Attach data to the outgoing HTTP request
-		if (data)
-		{
-			switch (method)
-			{
-				case 'get':
-					this.request.query(data)
-					break
-
-				case 'post':
-				case 'put':
-				case 'patch':
-				case 'head':
-				case 'options':
-					this.request.send(has_binary_data(data) ? construct_form_data(data) : data)
-					break
-
-				case 'delete':
-					throw new Error(`"data" supplied for HTTP DELETE request: ${JSON.stringify(data)}`)
-
-				default:
-					throw new Error(`Unknown HTTP method: ${method}`)
-			}
-		}
-
-		// Apply HTTP headers
-		this.request.set(headers)
-
-		// `true`/`false`
-		this.parse_json_dates = parse_json_dates
-
-		// Can be used for examining HTTP response headers
-		// (e.g. Amazon S3 file upload)
-		this.on_response_headers = on_response_headers
-	}
-
-	// Sets `Authorization: Bearer ${token}` in HTTP request header
-	add_authentication(authentication_token_header, authentication, get_access_token, getCookie, url, path)
-	{
-		let token
-
-		if (typeof authentication === 'string')
-		{
-			token = authentication
-		}
-		else if (get_access_token)
-		{
-			token = get_access_token(getCookie, { url, path })
-		}
-
-		if (token && authentication !== false)
-		{
-			this.request.set(authentication_token_header || 'Authorization', `Bearer ${token}`)
-		}
-	}
-
-	// Server side only
-	// (copies user authentication cookies to retain session specific data)
-	add_cookies(cookies_raw = '', set_cookies)
-	{
-		// Merge `cookies_raw` and `set_cookies` (a `Set`)
-		if (set_cookies.size > 0)
-		{
-			const cookies = {}
-
-			for (let key_value of cookies_raw.split(';'))
-			{
-				key_value = key_value.trim().split('=')
-				cookies[key_value[0]] = key_value[1]
-			}
-
-			for (const cookie_raw of set_cookies)
-			{
-				const key_value = cookie_raw_key_value(cookie_raw).split('=')
-				cookies[key_value[0]] = key_value[1]
-			}
-
-			cookies_raw = Object.keys(cookies).map(key => `${key}=${cookies[key]}`).join(';')
-		}
-
-		if (cookies_raw)
-		{
-			this.request.set('cookie', cookies_raw)
-		}
-	}
-
-	// File upload progress metering
-	// https://developer.mozilla.org/en/docs/Web/API/XMLHttpRequest/Using_XMLHttpRequest
-	progress(progress)
-	{
-		this.request.on('progress', function(event)
-		{
-			if (event.direction !== 'upload')
-			{
-				// Only interested in file upload progress metering
-				return
-			}
-
-			if (!event.lengthComputable)
-			{
-				// Unable to compute progress information since the total size is unknown
-				return
-			}
-
-			progress(event.percent, event)
-		})
-	}
-
-	send()
-	{
-		return new Promise((resolve, reject) =>
-		{
-			this.request.end((error, response) =>
-			{
-				if (response)
-				{
-					if (this.on_response_headers)
-					{
-						this.on_response_headers(response.headers)
-					}
-
-					// If any cookies were set then track them (for later)
-					if (response.headers['set-cookie'])
-					{
-						this.new_cookies(response.headers['set-cookie'])
-					}
-				}
-
-				if (error)
-				{
-					// Infer additional `error` properties from the HTTP response
-					if (response)
-					{
-						this.populate_error_data(error, response)
-					}
-
-					return reject(error)
-				}
-
-				// If HTTP response status is "204 - No content"
-				// (e.g. PUT, DELETE)
-				// then resolve with an empty result.
-				if (response.statusCode === 204)
-				{
-					return resolve()
-				}
-
-				resolve(this.get_response_data(response))
-			})
-		})
-	}
-
-	populate_error_data(error, response)
-	{
-		// Set `error.status` to HTTP response status code
-		error.status = response.statusCode
-
-		const response_data = this.get_response_data(response)
-
-		switch (response.type)
-		{
-			// Set error `data` from response body,
-			case 'application/json':
-			// http://jsonapi.org/
-			case 'application/vnd.api+json':
-				error.data = response_data
-
-				// Set the more meaningful message for the error (if available)
-				if (error.data.message)
-				{
-					error.message = error.data.message
-				}
-
-				break
-
-			// If the HTTP response was not a JSON object,
-			// but rather a text or an HTML page,
-			// then include that information in the `error`
-			// for future reference (e.g. easier debugging).
-
-			case 'text/plain':
-				error.message = response_data
-				break
-
-			case 'text/html':
-				error.html = response_data
-
-				// Recover the original error message (if any)
-				if (response.headers['x-error-message'])
-				{
-					error.message = response.headers['x-error-message']
-				}
-
-				// Recover the original error stack trace (if any)
-				if (response.headers['x-error-stack-trace'])
-				{
-					error.stack = JSON.parse(response.headers['x-error-stack-trace'])
-				}
-
-				break
-		}
-	}
-
-	get_response_data(response)
-	{
-		switch (response.type)
-		{
-			case 'application/json':
-			// http://jsonapi.org/
-			case 'application/vnd.api+json':
-				if (this.parse_json_dates)
-				{
-					return parse_dates(response.body)
-				}
-				return response.body
-
-			// case 'text/plain':
-			// case 'text/html':
-			default:
-				return response.text
-		}
-	}
-}
-
-// Leaves just `key=value` from the cookie string
-function cookie_raw_key_value(cookie_raw)
-{
-	const semicolon_index = cookie_raw.indexOf(';')
-
-	if (semicolon_index >= 0)
-	{
-		cookie_raw = cookie_raw.slice(0, semicolon_index)
-	}
-
-	return cookie_raw.trim()
 }

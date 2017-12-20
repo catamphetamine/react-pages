@@ -31,7 +31,7 @@ export default function set_up_and_render(settings, options = {})
 	return client_side_render
 	({
 		translation,
-		wrapper: common.wrapper,
+		container: common.container,
 		render,
 		render_parameters:
 		{

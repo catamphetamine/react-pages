@@ -29,7 +29,7 @@ export default class Hyperlink extends Component
 		// when navigating "Back"
 		instantBack : PropTypes.bool.isRequired,
 
-		// Wrapped components
+		// Content
 		children : PropTypes.node
 	}
 

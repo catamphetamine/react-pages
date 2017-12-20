@@ -1,6 +1,6 @@
 import { readState, saveState } from 'history/lib/DOMStateStorage'
 
-const STATE_KEY_PREFIX = '@@react-isomorphic-render/'
+const STATE_KEY_PREFIX = '@@react-application/'
 
 export function get_from_history(prefix, key)
 {

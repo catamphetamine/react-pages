@@ -10,20 +10,20 @@ import { On_page_loaded_method_name } from './middleware/preload'
 //
 export default function onPageLoaded(on_page_loaded, options)
 {
-	return function(Wrapped)
+	return function(Decorated_component)
 	{
 		class OnPageLoaded extends Component
 		{
 			render()
 			{
-				return <Wrapped {...this.props} />
+				return <Decorated_component {...this.props} />
 			}
 		}
 
 		OnPageLoaded[On_page_loaded_method_name] = on_page_loaded
 
-		OnPageLoaded.displayName = `OnPageLoaded(${get_display_name(Wrapped)})`
+		OnPageLoaded.displayName = `OnPageLoaded(${get_display_name(Decorated_component)})`
 		
-		return hoist_statics(OnPageLoaded, Wrapped)
+		return hoist_statics(OnPageLoaded, Decorated_component)
 	}
 }

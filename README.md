@@ -1,61 +1,99 @@
-# react-isomorphic-render
+# react-application
 
-[![npm version](https://img.shields.io/npm/v/react-isomorphic-render.svg?style=flat-square)](https://www.npmjs.com/package/react-isomorphic-render)
-[![npm downloads](https://img.shields.io/npm/dm/react-isomorphic-render.svg?style=flat-square)](https://www.npmjs.com/package/react-isomorphic-render)
+[![npm version](https://img.shields.io/npm/v/react-application.svg?style=flat-square)](https://www.npmjs.com/package/react-application)
+[![npm downloads](https://img.shields.io/npm/dm/react-application.svg?style=flat-square)](https://www.npmjs.com/package/react-application)
 
-Server Side Rendering for `React + React-router v3 + Redux` stack.
+A complete solution for building a React/Redux application
 
- * Asynchronously preloads pages before performing client-side navigation
- * Provides an isomorphic HTTP client for calling REST API in Redux ["action creators"](http://redux.js.org/docs/basics/Actions.html)
- * Supports Webpack "hot reload" (aka "Hot Module Replacement")
- * Provides supplementary utilities: locale detection for internationalization, easy setting page `<title/>` and `<meta/>`, programmatic redirects, 100% correct handling of HTTP Cookies, etc
+* Routing
+* Page preloading
+* (optional) Server-side rendering
+* Asynchronous HTTP requests
+* Extremely reduced Redux verbosity
+* Document metadata (`<title/>`, `<meta/>`, social network sharing)
+* Internationalization
+* Webpack "hot reload"
+* HTTP Cookies
+* etc
 
-# Why Server Side Rendering
+# Introduction
 
-### World-Wide Web Concepts
-
-The original concept of the web was one of a network of "resources" interconnected with "hyperlinks": a user could query a "resource" by a "Universal Resource Link" (URL) and then travel to any of the connected "resources" just by navigating the corresponding hyperlinks, and then it would all repeat recursively therefore interconnecting each and every "resource" into a giant interconnected web (hence the name). The "resources" were meant to be "documents", like reports, articles, papers, news, books, etc.
-
-The web wasn't meant at all for "applications". At first javascript was only used to bring some naive interactivity to static "documents", like following the cursor with a sprinkle, or adding christmas snow to a page, or applying some effect to a picture upon mouseover. Initially javascript was never meant to be a means of operating on the page's "content". It was just for "presentation" ("view"), not the "content".
-
-Ajax wasn't originally meant for "content" too: it was just for tiny utility things like hitting a "Like" button without needlessly refreshing the whole freaking page, but it was then too turned into a machinery for fetching a page's "content".
-
-And so [the Web became broken](https://ponyfoo.com/articles/stop-breaking-the-web). And to completely fix that and make the Web 100% pure again total Server Side Rendering for each dynamic website is the only way to go. This is still a purely esthetical argument and nobody would really care (except purists and perfectionists) if it didn't come to being able to be indexed by Google...
-
-### Search engines
-
-Search engine crawlers like Google bot won't wait for a page to make its Ajax calls to an API server for data: they would simply abort all **asynchronous** javascript and index the page as is. Don't mistake it for web crawlers not being able to execute javascript — they're [perfectly fine](http://andrewhfarmer.com/react-seo/) with doing that ([watch out though](https://blog.codaxy.com/debugging-googlebot-crawl-errors-for-javascript-applications-5d9134c06ee7) for using the latest and greatest and always use polyfills for the older browsers since web crawlers may be using those under the hood).
-
-So the only thing preventing a dynamic website from being indexed by a crawler is Ajax, not javascript. This therefore brings two solutions: one is to perform everything (routing, data fetching, rendering) on the server side and the other is to perform routing and data fetching on the server side leaving rendering to the client's web browser. Both these approaches work with web crawlers. And this is what this library provides.
-
-While the first approach is more elegant and pure, currently it is a very CPU intensive task to render a moderately complex React page using `ReactDOM.renderToString()` (takes about 100 milliseconds of blocking CPU single core time for complex pages having more than 1000 components, as of 2016). Facebook doesn't use Server Side Rendering itself so optimizing this part of the React library is not a priority for them. So until this (if ever possible) Server Side Rendering performance issue is fixed I prefer the second approach: performing routing and page preloading on the server side while leaving page rendering to the client. This is achieved by using `render: false` flag (described much further in this document).
-
-### Page loading time
-
-The final argument in favour of Server Side Rendering is that even if a website doesn't need search engine indexing it would still benefit from employing Server Side Rendering because that would save that additional HTTP roundtrip from the web browser to the API server for fetching the page's data. And no matter how fast the API server is, [latency is unbeatable](https://www.igvita.com/2012/07/19/latency-the-new-web-performance-bottleneck/) being about 100ms. So, by performing routing and page preloading on the server side one can speed up website loading by about 100ms. Not that it mattered that much for non-perfectionists but still why not do it when it's so simple to implement.
-
-# Usage
+## Getting started
 
 See [webpack-react-redux-isomorphic-render-example](https://github.com/catamphetamine/webpack-react-redux-isomorphic-render-example/tree/master/client/src)
 
 ```bash
-$ npm install react-isomorphic-render --save
+$ npm install react-application --save
 ```
 
 Start by creating a settings file (it configures both client side and server side)
 
-#### react-isomorphic-render.js
+#### react-application.js
 
 ```javascript
-export default {
-  // React-router v3 routes
-  routes: require('./src/client/routes'),
+// React-router v3 routes
+import routes from './src/client/routes'
 
-  // Redux reducers
-  // (they will be combined into the
-  //  root reducer via `combineReducers()`)
-  reducer: require('./src/client/redux/reducers')
+// Redux reducers
+// (they will be combined into the
+//  root Redux reducer via `combineReducers()`)
+import reducers from './src/client/redux/reducers'
+
+export default {
+  routes,
+  reducers
 }
+```
+
+#### ./src/client/routes.js
+
+```js
+import React from 'react'
+// `react-router@3`
+import { Route, IndexRoute } from 'react-router'
+
+import App from './App'
+import Home from './pages/Home'
+import About from './pages/About'
+
+export default (
+  <Route path="/" component={ App }>
+    <IndexRoute component={ Home }/>
+    <Route path="about" component={ About }/>
+  </Route>
+)
+```
+
+#### ./src/client/App.js
+
+```js
+import React from 'react'
+import { Link } from 'react-application'
+
+export default ({ children }) => (
+  <div>
+    <h1> Web Application </h1>
+    <Link to="/"> Home </Link>
+    <Link to="/about"> About </Link>
+    { children }
+  </div>
+)
+```
+
+#### ./src/client/pages/Home.js
+
+```js
+import React from 'react'
+
+export default () => <div> This is a home page </div>
+```
+
+#### ./src/client/pages/About.js
+
+```js
+import React from 'react'
+
+export default () => <div> Made using `react-application` </div>
 ```
 
 #### ./src/client/redux/reducers/index.js
@@ -68,11 +106,11 @@ export { default as pageTwo } from './pageTwoReducer'
 
 Then call `render()` in the main client-side javascript file.
 
-#### ./src/client/application.js
+#### ./src/client/index.js
 
 ```javascript
-import { render } from 'react-isomorphic-render'
-import settings from './react-isomorphic-render'
+import { render } from 'react-application'
+import settings from './react-application'
 
 // Render the page in web browser
 render(settings)
@@ -83,7 +121,7 @@ And the `index.html` would look like this:
 ```html
 <html>
   <head>
-    <title>react-isomorphic-render</title>
+    <title>react-application</title>
   </head>
   <body>
     <div id="react"></div>
@@ -92,32 +130,52 @@ And the `index.html` would look like this:
 </html>
 ```
 
-Where `bundle.js` is the `./src/client/application.js` file built with Webpack (or you could use any other javascript bundler).
+Where `bundle.js` is the `./src/client/index.js` file built with Webpack (or you could use any other javascript bundler).
 
-Now, `index.html` and `bundle.js` files must be served over HTTP. If you're using Webpack then place `index.html` to Webpack's `configuration.output.path` folder and run [`webpack-dev-server`](https://webpack.js.org/guides/development/#webpack-dev-server): it will serve `index.html` from disk and `bundle.js` from memory.
+Now, `index.html` and `bundle.js` files must be served over HTTP(S). If you're using Webpack then place `index.html` to Webpack's `configuration.output.path` folder and run [`webpack-dev-server`](https://webpack.js.org/guides/development/#webpack-dev-server): it will serve `index.html` from disk and `bundle.js` from memory.
 
-Now go to `localhost:8080`. It should respond with the contents of the `index.html` file. Client-side rendering should work now. The whole setup can be deployed as-is being uploaded to a cloud and served statically (which is very cheap).
+Now go to `localhost:8080`. It should respond with a rendered home page. The application should work now and can be deployed as-is being uploaded to a cloud and served statically (which is very cheap).
 
-### Server side
+## Server Side Rendering
 
-Adding Server Side Rendering to the setup is quite simple though requiring a running Node.js process therefore the website is no longer just statics served from the cloud but is both statics and a Node.js rendering process running somewhere (say, in a Docker container).
+### Search engines
 
-`index.html` will be generated on-the-fly by page rendering server for each incoming HTTP request, so the `index.html` file may be deleted as it's of no use now.
+Search engine crawlers like Google bot won't wait for a page to make its asynchronous HTTP calls to an API server for data: they would simply abort all **asynchronous** javascript and index the page as is. Don't mistake it for web crawlers not being able to execute javascript — they're [perfectly fine](http://andrewhfarmer.com/react-seo/) with doing that ([watch out though](https://blog.codaxy.com/debugging-googlebot-crawl-errors-for-javascript-applications-5d9134c06ee7) for using the latest javascript language features and always use polyfills for the older browsers since web crawlers may be using those under the hood).
+
+So the only thing preventing a dynamic website from being indexed by a crawler is asynchronous HTTP queries for data, not javascript itself. This therefore brings two solutions: one is to perform everything (routing, data fetching, rendering) on the server side and the other is to perform routing and data fetching on the server side leaving rendering to the client's web browser. Both these approaches work with web crawlers. And this is what this library provides.
+
+While the first approach is more elegant and pure, currently it is a CPU intensive task to render a complex React page (takes about 30 milliseconds of blocking CPU single core time for complex pages having more than 1000 components, as of 2017). Therefore I myself prefer the second approach: performing routing and page preloading on the server side while leaving page rendering to the client. This mode is activated by passing `hollow: true` flag (described later in this document).
+
+### Page loading time
+
+Another argument in favour of Server-Side Rendering is that even if a website doesn't need search engine indexing it could still benefit from saving that additional asynchronous HTTP roundtrip from the web browser to the API server for fetching the page's data. And no matter how fast the API server is, [latency is unbeatable](https://www.igvita.com/2012/07/19/latency-the-new-web-performance-bottleneck/) being about 100ms. So, by performing routing and page preloading on the server side one can speed up website loading by about 100ms.
+
+### Adding server-side rendering
+
+Not everyone needs server-side rendering for their apps. E.g. if search engine indexing is not a priority, or if a website is a "static" one, like a "promosite" or a "personal portfolio" (just build it with a bundler and host it as a bunch of files in a cloud).
+
+Adding server-side rendering to the setup is quite simple though requiring a Node.js process running somewhere (say, in a Docker container in a cloud) which increases hosting costs a bit.
+
+In this case `index.html` will be generated on-the-fly by page rendering server for each incoming HTTP request, so the `index.html` file may be deleted as it's of no use now.
 
 ```javascript
-import webpageServer from 'react-isomorphic-render/server'
-import settings from './react-isomorphic-render'
+import webpageServer from 'react-application/server'
+import settings from './react-application'
 
 // Create webpage rendering server
 const server = webpageServer(settings, {
+  // Pass `secure: true` for HTTPS.
+  //
   // These are the URLs of the "static" javascript and CSS files
   // which are injected in the resulting Html webpage
   // as <script src="..."/> and <link rel="style" href="..."/>.
   // (this is for the main application JS and CSS bundles only,
   //  for injecting 3rd party JS and CSS use `html` settings instead:
-  //  https://github.com/catamphetamine/react-isomorphic-render/blob/master/README-ADVANCED.md#all-webpage-rendering-server-options)
+  //  https://github.com/catamphetamine/react-application/blob/master/README-ADVANCED.md#all-webpage-rendering-server-options)
   assets() {
     return {
+      // Assuming that it's being tested on a local computer first
+      // therefore using "localhost" URLs.
       javascript: 'http://localhost:8080/bundle.js',
       style: 'http://localhost:8080/bundle.css'
     }
@@ -136,71 +194,18 @@ server.listen(3000, function(error) {
 
 Now [disable javascript in Chrome DevTools](http://stackoverflow.com/questions/13405383/how-to-disable-javascript-in-chrome-developer-tools), go to `localhost:3000` and the server should respond with a server-side-rendered page.
 
-The `server` variable in the example above is just a [Koa](http://koajs.com/) application, so alternatively it could be started like this:
-
-```js
-import http from 'http'
-// import https from 'https'
-import webpageServer from 'react-isomorphic-render/server'
-const server = webpageServer(settings, {...})
-http.createServer(server.callback()).listen(80, (error) => ...)
-// https.createServer(options, server.callback()).listen(443, (error) => ...)
-```
-
 ### Serving assets and API
 
-In the examples above "static" files (assets) are served by `webpack-dev-server` on `localhost:8080`. But it's for local development only. For production these "static" files must be served by someone else, be it a dedicated proxy server like NginX, a simple homemade Node.js application or (recommended) a cloud-based solution like Amazon S3.
+In the examples above "static" files (assets) are served by `webpack-dev-server` on `localhost:8080`. It's for local development only. For production these "static" files must be served by someone else, be it a dedicated proxy server like NginX or (recommended) a cloud-based solution like Amazon S3.
 
-Also, a real-world website most likely has some kind of an API, which, again, could be either a dedicated API server (e.g. written in Golang), a simple Node.js application or a modern "serverless" API like Amazon Lambda hosted in the cloud.
+Also, a real-world website most likely has some kind of an API, which, again, could be either a dedicated API server (e.g. written in Golang), a simple Node.js application or a modern "serverless" API like [Amazon Lambda](https://aws.amazon.com/lambda) deployed using [`apex`](https://github.com/apex/apex) and hosted in the cloud.
 
-The following 3 sections illustrate each one of these 3 approaches.
-
-### The simplest approach
-
-This section illustrates the "simple homemade Node.js application" approach. It's not the approach I'd use for a real-world website but it's the simplest one so it's for illustration purposes only.
-
-So, a Node.js process is already running for page rendering, so it could also be employed to perform other tasks like serving "static" files (`webpack-dev-server` is not running in production) or hosting a REST API.
-
-```javascript
-import webpageServer from 'react-isomorphic-render/server'
-import settings from './react-isomorphic-render'
-
-import path from 'path'
-// `npm install koa-static koa-mount --save`
-import statics from 'koa-static'
-import mount from 'koa-mount'
-
-// Create webpage rendering server
-const server = webpageServer(settings, {
-  assets: ...,
-
-  // (optional)
-  // This parameter is specified here for the example purpose only.
-  // Any custom Koa middlewares go here.
-  // They are `.use()`d before page rendering middleware.
-  middleware: [
-    // Serves "static files" on `/assets` URL path from the `../build` folder
-    // (the Webpack `configuration.output.path` folder).
-    mount('/assets', statics(path.join(__dirname, '../build'), {
-      // Cache assets in the web browser for 1 year
-      maxAge: 365 * 24 * 60 * 60
-    })),
-    // Hosts REST API on `/api` URL path.
-    mount('/api', async (ctx, next) => {
-      ctx.type = 'application/json'
-      ctx.body = '{"data":[1,2,3]}'
-    })
-  ]
-})
-
-// Start webpage rendering server on port 3000
-...
-```
-
-### The old-school way
+#### The old-school way
 
 The old-school way is to set up a "proxy server" like [NginX](https://www.sep.com/sep-blog/2014/08/20/hosting-the-node-api-in-nginx-with-a-reverse-proxy/) dispatching all incoming HTTP requests: serving "static" files, redirecting to the API server for `/api` calls, etc.
 
+<details>
+  <summary>The old-school way</summary>
 ```nginx
 server {
   # Web server listens on port 80
@@ -224,7 +229,7 @@ server {
 }
 ```
 
-Or, alternatively, a quick Node.js proxy server could be made up for development purposes using [http-proxy](https://github.com/nodejitsu/node-http-proxy) library
+A quick Node.js proxy server could also be made up for development purposes using [http-proxy](https://github.com/nodejitsu/node-http-proxy) library.
 
 ```js
 const path = require('path')
@@ -251,16 +256,19 @@ app.use(function(request, response) {
 // Web server listens on port `80`
 app.listen(80)
 ```
+</details>
 
-### The modern way
+#### The modern way
 
-Finally, the modern way is not using any "proxy servers" at all. Instead everything is distributed and decentralized. Webpack-built assets are uploaded to the cloud (e.g. Amazon S3) and webpack configuration option `.output.publicPath` is set to something like `https://s3-ap-southeast-1.amazonaws.com/my-bucket/folder-1/` (your CDN URL) so now serving "static" files is not your job – your only job is to upload them to the cloud after Webpack build finishes. API is dealt with in a similar way: CORS headers are set up to allow querying directly from a web browser by an absolute URL and the API is either hosted as a standalone API server or run "serverless"ly, say, on Amazon Lambda, and is queried by an absolute URL, like `https://at9y1jpex0.execute-api.us-east-1.amazonaws.com/develop/users/list`.
+The modern way is not using any "proxy servers" at all. Instead everything is distributed and decentralized. Webpack-built assets are uploaded to the cloud (e.g. Amazon S3) and webpack configuration option `.output.publicPath` is set to something like `https://s3-ap-southeast-1.amazonaws.com/my-bucket/folder-1/` (your CDN URL) so now serving "static" files is not your job – your only job is to upload them to the cloud after Webpack build finishes. API is dealt with in a similar way: CORS headers are set up to allow querying directly from a web browser by an absolute URL and the API is either hosted as a standalone API server or run "serverless"ly, say, on Amazon Lambda, and is queried by an absolute URL, like `https://at9y1jpex0.execute-api.us-east-1.amazonaws.com/master/users/list`.
 
 This concludes the introductory part of the README and the rest is the description of the various (useful) tools which come prepackaged with this library.
 
-# Tools
+# Usage
 
-## Making HTTP Requests
+## Asynchronous actions
+
+### Promise
 
 If a Redux action creator returns an object with a `promise` (function) and `events` (array) then this action is assumed asynchronous.
 
@@ -284,7 +292,7 @@ This is a handy way of dealing with "asynchronous actions" in Redux, e.g. HTTP r
 
 ### Autogenerate event names
 
-When you find yourself copy-pasting those `_PENDING`, `_SUCCESS` and `_ERROR` event names from one action creator to another then take a look at `reduxEventNaming` setting described in the [All `react-isomorphic-render.js` settings](https://github.com/catamphetamine/react-isomorphic-render/blob/master/README-ADVANCED.md#all-react-isomorphic-renderjs-settings) section of the "advanced" readme: it lets a developer just supply a "base" `event` name and then it generates the three lifecycle event names from that "base" `event` significantly reducing boilerplate.
+When you find yourself copy-pasting those `_PENDING`, `_SUCCESS` and `_ERROR` event names from one action creator to another then take a look at `reduxEventNaming` setting described in the [All `react-application.js` settings](https://github.com/catamphetamine/react-application/blob/master/README-ADVANCED.md#all-react-applicationjs-settings) section of the "advanced" readme: it lets a developer just supply a "base" `event` name and then it generates the three lifecycle event names from that "base" `event` significantly reducing boilerplate.
 
 ### HTTP utility
 
@@ -321,360 +329,23 @@ The possible `options` (the third argument of all `http` methods) are
 
 <!--
   (removed)
-  * `onRequest(request)` – for capturing `superagent` request (there was [a feature request](https://github.com/catamphetamine/react-isomorphic-render/issues/46) to provide a way for aborting running HTTP requests via `request.abort()`)
+  * `onRequest(request)` – for capturing `superagent` request (there was [a feature request](https://github.com/catamphetamine/react-application/issues/46) to provide a way for aborting running HTTP requests via `request.abort()`)
 -->
 
 <!--
 `http` utility is also available from anywhere on the client side via an exported `getHttpClient()` function (e.g. for bootstrapping).
 -->
 
-### HTTP utility authentication token
+### Asynchronous actions (better approach)
 
-In order for `http` utility calls to send an authentication token as part of an HTTP request (the `Authorization: Bearer ${token}` HTTP header) the `authentication.accessToken()` function must be specified in `react-isomorphic-render.js`.
-
-```js
-{
-  authentication: {
-    accessToken(getCookie, { store, path, url }) {
-      // (make sure the access token is not leaked to a third party)
-      return getCookie('accessToken')
-      return localStorage.getItem('accessToken')
-      return store.getState().authentication.accessToken
-    }
-  }
-}
-```
-
-### HTTP utility and URLs
-
-All URLs queried via `http` utility must be relative ones (e.g. `/api/users/list`). In order to transform these relative URLs into absolute ones there are two approaches.
-
-The first approach is for people using a proxy server (minority). In this case all client-side HTTP requests will still query relative URLs which are gonna hit the proxy server and the proxy server will route them to their proper destination. And the server side is gonna query the proxy server directly (there is no notion of "relative URLs" on the server side) therefore the proxy `host` and `port` need to be configured in webpage rendering service options.
-
-```js
-const server = webpageServer(settings, {
-  proxy: {
-    host: '192.168.0.1',
-    port: 3000,
-    // (enable for HTTPS protocol)
-    // secure: true
-  }
-})
-```
-
-The second approach is for everyone else (majority). In this case all URLs are transformed from relative ones into absolute ones by the `http.url(path)` function parameter configured in `react-isomorphic-render.js`.
-
-```js
-{
-  http: {
-    url: path => `https://api.server.com${path}`
-  }
-}
-```
-
-### File upload
-
-The `http` utility will also upload files if they're passed as part of `parameters` (example below). Any of these types of file `parameters` are accepted:
-
-* In case of a [`File`](https://developer.mozilla.org/en-US/docs/Web/API/File) parameter it will be a single file upload.
-* In case of a [`FileList`](https://developer.mozilla.org/en-US/docs/Web/API/FileList) parameter with a single `File` inside it would be treated as a single `File`.
-* In case of a `FileList` parameter with multiple `File`s inside multiple file upload will be performed.
-* In case of an `<input type="file"/>` DOM element parameter its `.files` will be taken as a `FileList` parameter.
-
-Progress can be metered by passing `progress` option as part of the `options` argument.
-
-```js
-// React component
-class ItemPage extends React.Component {
-  render() {
-    return (
-      <div>
-        ...
-        <input type="file" onChange={this.onFileSelected}/>
-      </div>
-    )
-  }
-
-  // Make sure to `.bind()` this handler
-  onFileSelected(event) {
-    const file = event.target.files[0]
-
-    // Could also pass just `event.target.files` as `file`
-    dispatch(uploadItemPhoto(itemId, file))
-
-    // Reset the selected file
-    // so that onChange would trigger again
-    // even with the same file.
-    event.target.value = null
-  }
-}
-
-// Redux action creator
-function uploadItemPhoto(itemId, file) {
-  return {
-    promise: ({ http }) => http.post(
-      '/item/photo',
-      { itemId, file },
-      { progress(percent) { console.log(percent) } }
-    ),
-    events: ['UPLOAD_ITEM_PHOTO_PENDING', 'UPLOAD_ITEM_PHOTO_SUCCESS', 'UPLOAD_ITEM_PHOTO_FAILURE']
-  }
-}
-```
-
-### JSON Date parsing
-
-By default, when using `http` utility all JSON responses get parsed for javascript `Date`s which are then automatically converted from `String`s to `Date`s. This is convenient, and also safe because such date `String`s have to be in a very specific ISO format in order to get parsed (`year-month-dayThours:minutes:seconds[timezone]`), but if someone still prefers to disable this feature and have their `String`ified `Date`s back then there's the `parseDates: false` flag in the configuration to opt-out of this feature.
-
-## Page preloading
-
-For page preloading consider using `@preload()` helper to load the neccessary data before the page is rendered.
-
-```javascript
-import { connect } from 'react-redux'
-import { meta, preload } from 'react-isomorphic-render'
-
-// fetches the list of users from the server
-function fetchUsers() {
-  return {
-    promise: ({ http }) => http.get('/api/users'),
-    events: ['GET_USERS_PENDING', 'GET_USERS_SUCCESS', 'GET_USERS_FAILURE']
-  }
-}
-
-@preload(({ dispatch }) => dispatch(fetchUsers))
-@meta(({ state }) => ({ title: 'Users' }))
-@connect(
-  state => ({ users: state.users.users }),
-  // `bindActionCreators()` for Redux action creators
-  { fetchUsers }
-)
-export default class Page extends Component {
-  render() {
-    const { users, fetchUsers } = this.props
-    return (
-      <div>
-        <ul>{ users.map(user => <li>{ user.name }</li>) }</ul>
-        <button onClick={ fetchUsers }>Refresh</button>
-      </div>
-    )
-  }
-}
-```
-
-In the example above `@preload()` helper is called to preload a web page before it is displayed, i.e. before the page is rendered (both on server side and on client side).
-
-[`@preload()` decorator](https://github.com/catamphetamine/react-isomorphic-render/blob/master/source/redux/preload.js) takes a function which must return a `Promise`:
-
-```javascript
-@preload(function({ dispatch, getState, location, parameters, server }) {
-  return Promise.resolve()
-})
-```
-
-Alternatively, `async/await` syntax may be used:
-
-```javascript
-@preload(async ({ dispatch, getState, location, parameters, server }) => {
-  await fetchWhatever(parameters.id)
-})
-```
-
-When `dispatch` is called with a special "asynchronous" action (having `promise` and `events` properties, as discussed above) then such a `dispatch()` call will return a `Promise`, that's why in the example above it's written simply as:
-
-```js
-@preload(({ dispatch }) => dispatch(fetchUsers))
-```
-
-Note: `transform-decorators-legacy` Babel plugin is needed at the moment to make decorators work in Babel:
-
-```sh
-npm install babel-plugin-transform-decorators-legacy --save
-```
-
-#### .babelrc
-
-```js
-{
-  "presets": [
-    ...
-  ],
-  "plugins": [
-    "transform-decorators-legacy"
-  ]
-}
-```
-
-On the client side, in order for `@preload` to work all `<Link/>`s imported from `react-router` **must** be instead imported from `react-isomorphic-render`. Upon a click on a `<Link/>` first it waits for the next page to preload, and then, when the next page is fully loaded, it is displayed to the user and the URL in the address bar is updated.
-
-`@preload()` also works for Back/Forward web browser buttons navigation. If one `@preload()` is in progress and another `@preload()` starts (e.g. Back/Forward browser buttons) the first `@preload()` will be cancelled if `bluebird` `Promise`s are used in the project and also if `bluebird` is configured for [`Promise` cancellation](http://bluebirdjs.com/docs/api/cancellation.html) (this is an advanced feature and is not required for operation). `@preload()` can be disabled for certain "Back" navigation cases by passing `instantBack` property to a `<Link/>` (e.g. for links on search results pages).
-
-To run `@preload()` only on client side pass the second `{ client: true }` options argument to it
-
-```js
-@preload(({ dispatch }) => dispatch(loadContent()), { client: true })
-```
-
-For example, a web application could be hosted entirely statically in a cloud like Amazon S3 and fetch data using a separately hosted API like Amazon Lambda. This kind of setup is quite popular due to being simple and cheap. Yes, it's not a true isomorphic approach because the user is given a blank page first and then some `main.js` script fetches the page data in the browser. But, as being said earlier, this kind of setup is rediculously simple to build and cheap to maintain so why not. Yes, Google won't index such websites, but if searchability is not a requirement (yet) then it's the way to go (e.g. "MVP"s).
-
-Specifying `{ client: true }` option for each `@preload()` would result in a lot of copy-pasta so there's a [special configuration option](https://github.com/catamphetamine/react-isomorphic-render/blob/master/README-ADVANCED.md#all-react-isomorphic-renderjs-settings) for that: `{ preload: { client: true } }`.
-
-### `@preload()` indicator
-
-Sometimes preloading a page can take some time to finish so one may want to (and actually should) add some kind of a "spinner" to inform the user that the application isn't frozen and the navigation process needs some more time to finish. This can be achieved by adding a Redux reducer listening to these three Redux events:
-
-```javascript
-import { PRELOAD_STARTED, PRELOAD_FINISHED, PRELOAD_FAILED } from 'react-isomorphic-render'
-
-export default function(state = {}, action = {}) {
-  switch (action.type) {
-    case PRELOAD_STARTED  : return { ...state, pending: true,  error: false }
-    case PRELOAD_FINISHED : return { ...state, pending: false }
-    case PRELOAD_FAILED   : return { ...state, pending: false, error: action.error }
-    default               : return state
-  }
-}
-```
-
-And a "spinner" component would look like
-
-```javascript
-import React, { Component } from 'react'
-import { connect } from 'react-redux'
-import { ActivityIndicator } from 'react-responsive-ui'
-
-@connect(state => ({ pending: state.preload.pending }))
-export default class Preload extends Component {
-  render() {
-    const { pending } = this.props
-    return (
-      <div className={ `preloading ${pending ? 'preloading--shown' : ''}` }>
-        <ActivityIndicator className="preloading__spinner"/>
-      </div>
-    );
-  }
-}
-```
-
-```css
-.preloading {
-  position: fixed;
-  top    : 0;
-  left   : 0;
-  right  : 0;
-  bottom : 0;
-  background-color: rgba(0, 0, 0, 0.1);
-  z-index: 0;
-  opacity: 0;
-  transition: opacity 100ms ease-out, z-index 100ms step-end;
-}
-
-.preloading--shown {
-  z-index: 1;
-  opacity: 1;
-  transition: opacity 600ms ease-out 500ms, z-index 0ms step-start;
-  cursor: wait;
-}
-
-.preloading__spinner {
-  position: absolute;
-  left: calc(50% - 2rem);
-  top: calc(50% - 2rem);
-  width: 4rem;
-  height: 4rem;
-  color: white;
-}
-```
-
-## Page HTTP response status code
-
-To set a custom HTTP response status code for a specific route set the `status` property of that `<Route/>`.
-
-```javascript
-export default (
-  <Route path="/" component={Layout}>
-    <IndexRoute component={Home}/>
-    <Route path="blog"  component={Blog}/>
-    <Route path="about" component={About}/>
-    <Route path="*"     component={PageNotFound} status={404}/>
-  </Route>
-)
-```
-
-## Utilities
-
-### Setting <title/> and <meta/> tags
-
-Use `@meta(state => ...)` decorator for adding `<title/>` and `<meta/>` tags:
-
-```js
-import { meta } from 'react-isomorphic-render'
-
-@meta(({ state, location, parameters }) => ({
-  // `<meta property="og:site_name" .../>`
-  site_name: 'International Bodybuilders Club',
-
-  // Webpage `<title/>` will be replaced with this one
-  // and also `<meta property="og:title" .../>` will be added.
-  title: `${state.user.name}`,
-
-  // `<meta property="og:description" .../>`
-  description: 'Muscles',
-  
-  // `<meta property="og:image" .../>`
-  image: 'https://cdn.google.com/logo.png',
-  
-  // `<meta property="og:audio" .../>`
-  audio: '...',
-  
-  // `<meta property="og:video" .../>`
-  video: '...',
-
-  // `<meta property="og:locale" .../>`
-  locale: location.query.language || 'ru_RU',
-
-  // `<meta name="og:locale:alternate" content="en_US"/>`
-  // `<meta name="og:locale:alternate" content="fr_FR"/>`
-  locale_other: ['en_US', 'fr_FR'],
-  
-  // `<meta property="og:url" .../>`
-  url: 'https://google.com/',
-  
-  // `<meta property="og:type" .../>`
-  type: 'profile',
-
-  // `<meta charset="utf-8"/>` tag is added automatically.
-  // The default "utf-8" encoding can be changed
-  // by passing custom `charset` parameter.
-  charset: 'utf-16',
-  
-  // `<meta name="viewport" content="width=device-width,
-  //   initial-scale=1.0, user-scalable=no"/>`
-  // tag is added automatically
-  // (prevents downscaling on mobile devices).
-  // This default behaviour can be changed
-  // by passing custom `viewport` parameter.
-  viewport: '...',
-
-  // All other properties will be transformed directly to 
-  // either `<meta property="{property_name}" content="{property_value}/>`
-  // or `<meta name="{property_name}" content="{property_value}/>`
-}))
-export default class Page extends React.Component {
-  ...
-}
-```
-
-### Asynchronous actions
-
-Once one starts writing a lot of `http` calls in Redux actions it becomes obvious that there's **a lot** of copy-pasting involved. To reduce those tremendous amounts of copy-pasta "redux module" tool may be used
+Once one starts writing a lot of `http` calls in Redux actions it becomes obvious that there's **a lot** of copy-pasting and verbosity involved. To reduce those tremendous amounts of copy-pasta "redux module" tool may be used
 
 #### redux/blogPost.js
 
 ```js
-import { reduxModule, eventName } from 'react-isomorphic-render'
-// (`./react-isomorphic-render-async.js` settings file is described below)
-import settings from './react-isomorphic-render-async'
+import { reduxModule, eventName } from 'react-application'
+// (`./react-application-async.js` settings file is described below)
+import settings from './react-application-async'
 
 const redux = reduxModule('BLOG_POST', settings)
 
@@ -761,7 +432,7 @@ The React Component would look like this
 ```js
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
-import { preload } from 'react-isomorphic-render'
+import { preload } from 'react-application'
 import { connector, getComments, postComment } from './redux/blogPost'
 
 // Preload comments before showing the page
@@ -838,10 +509,10 @@ export default class BlogPostPage extends Component {
 
 And the additional configuration would be:
 
-#### react-isomorphic-render.js
+#### react-application.js
 
 ```js
-import asyncSettings from './react-isomorphic-render-async'
+import asyncSettings from './react-application-async'
 
 export default {
   // All the settings as before
@@ -850,10 +521,10 @@ export default {
 }
 ```
 
-#### react-isomorphic-render-async.js
+#### react-application-async.js
 
 ```js
-import { underscoredToCamelCase } from 'react-isomorphic-render'
+import { underscoredToCamelCase } from 'react-application'
 
 export default {
   // When supplying `event` instead of `events`
@@ -873,16 +544,16 @@ export default {
 }
 ```
 
-Notice the extraction of these two configuration parameters (`reduxEventNaming` and `reduxPropertyNaming`) into a separate file `react-isomorphic-render-async.js`: this is done to break circular dependency on `./react-isomorphic-render.js` file because the `routes` parameter inside `./react-isomorphic-render.js` is the `react-router` `./routes.js` file which `import`s React page components which in turn `import` action creators which in turn would import `./react-isomorphic-render.js` hence the circular (recursive) dependency (same goes for the `reducer` parameter inside `./react-isomorphic-render.js`).
+Notice the extraction of these two configuration parameters (`reduxEventNaming` and `reduxPropertyNaming`) into a separate file `react-application-async.js`: this is done to break circular dependency on `./react-application.js` file because the `routes` parameter inside `./react-application.js` is the `react-router` `./routes.js` file which `import`s React page components which in turn `import` action creators which in turn would import `./react-application.js` hence the circular (recursive) dependency (same goes for the `reducer` parameter inside `./react-application.js`).
 
 ### Synchronous actions
 
 For synchronous actions it's the same as for asynchronous ones (as described above):
 
 ```js
-import { reduxModule } from 'react-isomorphic-render'
-// (`./react-isomorphic-render-async.js` settings file is described above)
-import settings from './react-isomorphic-render-async'
+import { reduxModule } from 'react-application'
+// (`./react-application-async.js` settings file is described above)
+import settings from './react-application-async'
 
 const redux = reduxModule('NOTIFICATIONS', settings)
 
@@ -928,15 +599,350 @@ export const properties = redux.getProperties
 export default redux.reducer()
 ```
 
+### HTTP utility authentication token
+
+In order for `http` utility calls to send an authentication token as part of an HTTP request (the `Authorization: Bearer ${token}` HTTP header) the `authentication.accessToken()` function must be specified in `react-application.js`.
+
+```js
+{
+  authentication: {
+    accessToken(getCookie, { store, path, url }) {
+      // (make sure the access token is not leaked to a third party)
+      return getCookie('accessToken')
+      return localStorage.getItem('accessToken')
+      return store.getState().authentication.accessToken
+    }
+  }
+}
+```
+
+### HTTP utility and URLs
+
+All URLs queried via `http` utility must be relative ones (e.g. `/api/users/list`). In order to transform these relative URLs into absolute ones there are two approaches.
+
+The first approach is for people using a proxy server (minority, old-school way). In this case all client-side HTTP requests will still query relative URLs which are gonna hit the proxy server and the proxy server will route them to their proper destination. And the server side is gonna query the proxy server directly (there is no notion of "relative URLs" on the server side) therefore the proxy `host` and `port` need to be configured in webpage rendering service options.
+
+```js
+const server = webpageServer(settings, {
+  proxy: {
+    host: '192.168.0.1',
+    port: 3000,
+    // (enable for HTTPS protocol)
+    // secure: true
+  }
+})
+```
+
+The second approach is for everyone else (majority, the modern way). In this case all URLs are transformed from relative ones into absolute ones by the `http.url(path)` function parameter configured in `react-application.js`.
+
+```js
+{
+  http: {
+    url: path => `https://api.server.com${path}`
+  }
+}
+```
+
+### File upload
+
+The `http` utility will also upload files if they're passed as part of `parameters` (example below). Any of these types of file `parameters` are accepted:
+
+* In case of a [`File`](https://developer.mozilla.org/en-US/docs/Web/API/File) parameter it will be a single file upload.
+* In case of a [`FileList`](https://developer.mozilla.org/en-US/docs/Web/API/FileList) parameter with a single `File` inside it would be treated as a single `File`.
+* In case of a `FileList` parameter with multiple `File`s inside multiple file upload will be performed.
+* In case of an `<input type="file"/>` DOM element parameter its `.files` will be taken as a `FileList` parameter.
+
+Progress can be metered by passing `progress` option as part of the `options` argument.
+
+```js
+// React component
+class ItemPage extends React.Component {
+  render() {
+    return (
+      <div>
+        ...
+        <input type="file" onChange={this.onFileSelected}/>
+      </div>
+    )
+  }
+
+  // Make sure to `.bind()` this handler
+  onFileSelected(event) {
+    const file = event.target.files[0]
+
+    // Could also pass just `event.target.files` as `file`
+    dispatch(uploadItemPhoto(itemId, file))
+
+    // Reset the selected file
+    // so that onChange would trigger again
+    // even with the same file.
+    event.target.value = null
+  }
+}
+
+// Redux action creator
+function uploadItemPhoto(itemId, file) {
+  return {
+    promise: ({ http }) => http.post(
+      '/item/photo',
+      { itemId, file },
+      { progress(percent) { console.log(percent) } }
+    ),
+    events: ['UPLOAD_ITEM_PHOTO_PENDING', 'UPLOAD_ITEM_PHOTO_SUCCESS', 'UPLOAD_ITEM_PHOTO_FAILURE']
+  }
+}
+```
+
+### JSON Date parsing
+
+By default, when using `http` utility all JSON responses get parsed for javascript `Date`s which are then automatically converted from `String`s to `Date`s. This is convenient, and also safe because such date `String`s have to be in a very specific ISO format in order to get parsed (`year-month-dayThours:minutes:seconds[timezone]`), but if someone still prefers to disable this feature and have their `String`ified `Date`s back then there's the `parseDates: false` flag in the configuration to opt-out of this feature.
+
+## Page preloading
+
+For page preloading consider using `@preload()` helper to load the neccessary data before the page is rendered.
+
+```javascript
+import { connect } from 'react-redux'
+import { meta, preload } from 'react-application'
+
+// fetches the list of users from the server
+function fetchUsers() {
+  return {
+    promise: ({ http }) => http.get('/api/users'),
+    events: ['GET_USERS_PENDING', 'GET_USERS_SUCCESS', 'GET_USERS_FAILURE']
+  }
+}
+
+@preload(({ dispatch }) => dispatch(fetchUsers))
+@meta(({ state }) => ({ title: 'Users' }))
+@connect(
+  state => ({ users: state.users.users }),
+  // `bindActionCreators()` for Redux action creators
+  { fetchUsers }
+)
+export default class Page extends Component {
+  render() {
+    const { users, fetchUsers } = this.props
+    return (
+      <div>
+        <ul>{ users.map(user => <li>{ user.name }</li>) }</ul>
+        <button onClick={ fetchUsers }>Refresh</button>
+      </div>
+    )
+  }
+}
+```
+
+In the example above `@preload()` helper is called to preload a web page before it is displayed, i.e. before the page is rendered (both on server side and on client side).
+
+[`@preload()` decorator](https://github.com/catamphetamine/react-application/blob/master/source/redux/preload.js) takes a function which must return a `Promise`:
+
+```javascript
+@preload(function({ dispatch, getState, location, parameters, server }) {
+  return Promise.resolve()
+})
+```
+
+Alternatively, `async/await` syntax may be used:
+
+```javascript
+@preload(async ({ dispatch, getState, location, parameters, server }) => {
+  await fetchWhatever(parameters.id)
+})
+```
+
+When `dispatch` is called with a special "asynchronous" action (having `promise` and `events` properties, as discussed above) then such a `dispatch()` call will return a `Promise`, that's why in the example above it's written simply as:
+
+```js
+@preload(({ dispatch }) => dispatch(fetchUsers))
+```
+
+Note: `transform-decorators-legacy` Babel plugin is needed at the moment to make decorators work in Babel:
+
+```sh
+npm install babel-plugin-transform-decorators-legacy --save
+```
+
+#### .babelrc
+
+```js
+{
+  "presets": [
+    ...
+  ],
+  "plugins": [
+    "transform-decorators-legacy"
+  ]
+}
+```
+
+On the client side, in order for `@preload` to work all `<Link/>`s imported from `react-router` **must** be instead imported from `react-application`. Upon a click on a `<Link/>` first it waits for the next page to preload, and then, when the next page is fully loaded, it is displayed to the user and the URL in the address bar is updated.
+
+`@preload()` also works for Back/Forward web browser buttons navigation. If one `@preload()` is in progress and another `@preload()` starts (e.g. Back/Forward browser buttons) the first `@preload()` will be cancelled if `bluebird` `Promise`s are used in the project and also if `bluebird` is configured for [`Promise` cancellation](http://bluebirdjs.com/docs/api/cancellation.html) (this is an advanced feature and is not required for operation). `@preload()` can be disabled for certain "Back" navigation cases by passing `instantBack` property to a `<Link/>` (e.g. for links on search results pages).
+
+To run `@preload()` only on client side pass the second `{ client: true }` options argument to it
+
+```js
+@preload(({ dispatch }) => dispatch(loadContent()), { client: true })
+```
+
+For example, a web application could be hosted entirely statically in a cloud like Amazon S3 and fetch data using a separately hosted API like Amazon Lambda. This kind of setup is quite popular due to being simple and cheap. Yes, it's not a true isomorphic approach because the user is given a blank page first and then some `main.js` script fetches the page data in the browser. But, as being said earlier, this kind of setup is rediculously simple to build and cheap to maintain so why not. Yes, Google won't index such websites, but if searchability is not a requirement (yet) then it's the way to go (e.g. "MVP"s).
+
+Specifying `{ client: true }` option for each `@preload()` would result in a lot of copy-pasta so there's a [special configuration option](https://github.com/catamphetamine/react-application/blob/master/README-ADVANCED.md#all-react-applicationjs-settings) for that: `{ preload: { client: true } }`.
+
+### `@preload()` indicator
+
+Sometimes preloading a page can take some time to finish so one may want to (and actually should) add some kind of a "spinner" to inform the user that the application isn't frozen and the navigation process needs some more time to finish. This can be achieved by adding a Redux reducer listening to these three Redux events:
+
+```javascript
+import { PRELOAD_STARTED, PRELOAD_FINISHED, PRELOAD_FAILED } from 'react-application'
+
+export default function(state = {}, action = {}) {
+  switch (action.type) {
+    case PRELOAD_STARTED  : return { ...state, pending: true,  error: false }
+    case PRELOAD_FINISHED : return { ...state, pending: false }
+    case PRELOAD_FAILED   : return { ...state, pending: false, error: action.error }
+    default               : return state
+  }
+}
+```
+
+And a "spinner" component would look like
+
+```javascript
+import React, { Component } from 'react'
+import { connect } from 'react-redux'
+import { ActivityIndicator } from 'react-responsive-ui'
+
+@connect(state => ({ pending: state.preload.pending }))
+export default class Preload extends Component {
+  render() {
+    const { pending } = this.props
+    return (
+      <div className={ `preloading ${pending ? 'preloading--shown' : ''}` }>
+        <ActivityIndicator className="preloading__spinner"/>
+      </div>
+    );
+  }
+}
+```
+
+```css
+.preloading {
+  position: fixed;
+  top    : 0;
+  left   : 0;
+  right  : 0;
+  bottom : 0;
+  background-color: rgba(0, 0, 0, 0.1);
+  z-index: 0;
+  opacity: 0;
+  transition: opacity 100ms ease-out, z-index 100ms step-end;
+}
+
+.preloading--shown {
+  z-index: 1;
+  opacity: 1;
+  transition: opacity 600ms ease-out 500ms, z-index 0ms step-start;
+  cursor: wait;
+}
+
+.preloading__spinner {
+  position: absolute;
+  left: calc(50% - 2rem);
+  top: calc(50% - 2rem);
+  width: 4rem;
+  height: 4rem;
+  color: white;
+}
+```
+
+## Page HTTP response status code
+
+To set a custom HTTP response status code for a specific route set the `status` property of that `<Route/>`.
+
+```javascript
+export default (
+  <Route path="/" component={Layout}>
+    <IndexRoute component={Home}/>
+    <Route path="blog"  component={Blog}/>
+    <Route path="about" component={About}/>
+    <Route path="*"     component={PageNotFound} status={404}/>
+  </Route>
+)
+```
+
+### Setting <title/> and <meta/> tags
+
+Use `@meta(state => ...)` decorator for adding `<title/>` and `<meta/>` tags:
+
+```js
+import { meta } from 'react-application'
+
+@meta(({ state, location, parameters }) => ({
+  // `<meta property="og:site_name" .../>`
+  site_name: 'International Bodybuilders Club',
+
+  // Webpage `<title/>` will be replaced with this one
+  // and also `<meta property="og:title" .../>` will be added.
+  title: `${state.user.name}`,
+
+  // `<meta property="og:description" .../>`
+  description: 'Muscles',
+  
+  // `<meta property="og:image" .../>`
+  image: 'https://cdn.google.com/logo.png',
+  
+  // `<meta property="og:audio" .../>`
+  audio: '...',
+  
+  // `<meta property="og:video" .../>`
+  video: '...',
+
+  // `<meta property="og:locale" .../>`
+  locale: location.query.language || 'ru_RU',
+
+  // `<meta name="og:locale:alternate" content="en_US"/>`
+  // `<meta name="og:locale:alternate" content="fr_FR"/>`
+  locale_other: ['en_US', 'fr_FR'],
+  
+  // `<meta property="og:url" .../>`
+  url: 'https://google.com/',
+  
+  // `<meta property="og:type" .../>`
+  type: 'profile',
+
+  // `<meta charset="utf-8"/>` tag is added automatically.
+  // The default "utf-8" encoding can be changed
+  // by passing custom `charset` parameter.
+  charset: 'utf-16',
+  
+  // `<meta name="viewport" content="width=device-width,
+  //   initial-scale=1.0, user-scalable=no"/>`
+  // tag is added automatically
+  // (prevents downscaling on mobile devices).
+  // This default behaviour can be changed
+  // by passing custom `viewport` parameter.
+  viewport: '...',
+
+  // All other properties will be transformed directly to 
+  // either `<meta property="{property_name}" content="{property_value}/>`
+  // or `<meta name="{property_name}" content="{property_value}/>`
+}))
+export default class Page extends React.Component {
+  ...
+}
+```
+
 ### Locale detection
 
 This library performs the following locale detection steps for each webpage rendering HTTP request:
 
- * Checks the `locale` query parameter (if it's an HTTP GET request)
+<!--  * Checks the `locale` query parameter (if it's an HTTP GET request) -->
  * Checks the `locale` cookie
  * Checks the `Accept-Language` HTTP header
  
-The resulting locales array is passed as `preferredLocales` argument into `localize()` function parameter of the webpage rendering server which then should return `{ locale, messages }` object in order for `locale` and `messages` to be available as part of the `props` passed to the `wrapper` component which can then pass those to `<IntlProvider/>` in case of using [`react-intl`](https://github.com/yahoo/react-intl) for internationalization.
+The resulting locales array is passed as `preferredLocales` argument into `localize()` function parameter of the webpage rendering server which then should return `{ locale, messages }` object in order for `locale` and `messages` to be available as part of the `props` passed to the `container` component which can then pass those to `<IntlProvider/>` in case of using [`react-intl`](https://github.com/yahoo/react-intl) for internationalization.
 
 ```js
 import React, { Component } from 'react'
@@ -944,7 +950,7 @@ import { Provider }         from 'react-redux'
 import { IntlProvider }     from 'react-intl'
 import { AppContainer }     from 'react-hot-loader'
 
-export default function Wrapper(props) {
+export default function Container(props) {
   const { store, locale, messages, children } = props
   return (
     <AppContainer>
@@ -986,7 +992,7 @@ export default class Component extends React.Component {
 These two helper Redux actions change the current location (both on client and server).
 
 ```javascript
-import { goto, redirect } from 'react-isomorphic-render'
+import { goto, redirect } from 'react-application'
 import { connect } from 'react-redux'
 
 // Usage example
@@ -1007,7 +1013,7 @@ A sidenote: these two functions aren't supposed to be used inside `onEnter` and 
 Alternatively, if the current location needs to be changed while still staying at the same page (e.g. a checkbox has been ticked and the corresponding URL query parameter must be added), then use `pushLocation(location, history)` or `replaceLocation(location, history)`.
 
 ```javascript
-import { pushLocation, replaceLocation } from 'react-isomorphic-render'
+import { pushLocation, replaceLocation } from 'react-application'
 import { withRouter } from 'react-router'
 
 @withRouter
@@ -1027,7 +1033,7 @@ class Page extends Component {
 
 ## Performance and Caching
 
-React Server Side Rendering is quite slow, so I prefer setting `render: false` flag to move all React rendering to the web browser. This approach has virtually no complications. There are still numerous (effective) approaches to speeding up React Server Side Rendering like leveraging component markup caching and swapping the default React renderer with a much faster stripped down custom one. [Read more](https://github.com/catamphetamine/react-isomorphic-render/blob/master/PERFORMANCE.md).
+React Server-Side Rendering can be CPU intensive, so I prefer setting `hollow: true` flag to move all React rendering to the web browser. This approach has virtually no complications. There are still numerous (effective) approaches to speeding up React Server Side Rendering like leveraging component markup caching or even swapping the default React renderer with a faster stripped down custom one. [Read more](https://github.com/catamphetamine/react-application/blob/master/PERFORMANCE.md).
 
 ## Monitoring
 
@@ -1081,7 +1087,6 @@ Where the metrics collected are
  * `count` — rendered pages count
  * `initialize` — server side `initialize()` function execution time (if defined)
  * `preload` — page preload time
- * `render` — page React rendering time
  * `time` - total time spent preloading and rendering the page
 
 Speaking of StatsD itself, one could either install the conventional StatsD + Graphite bundle or, for example, use something like [Telegraf](https://github.com/influxdata/telegraf) + [InfluxDB](https://www.influxdata.com/) + [Grafana](http://grafana.org/).
@@ -1107,23 +1112,23 @@ HMR setup for Redux reducers is as simple as adding `store.hotReload()` (as show
 #### application.js
 
 ```js
-import { render } from 'react-isomorphic-render'
-import settings from './react-isomorphic-render'
+import { render } from 'react-application'
+import settings from './react-application'
 
 render(settings).then(({ store, rerender }) => {
   if (module.hot) {
-    module.hot.accept('./react-isomorphic-render', () => {
+    module.hot.accept('./react-application', () => {
       rerender()
       // Update reducer (for Webpack 2 ES6)
       store.hotReload(settings.reducer)
       // Update reducer (for Webpack 1)
-      // store.hotReload(require('./react-isomorphic-render').reducer)
+      // store.hotReload(require('./react-application').reducer)
     })
   }
 })
 ```
 
-#### wrapper.js
+#### container.js
 
 ```js
 import React from 'react'
@@ -1131,7 +1136,7 @@ import { Provider } from 'react-redux'
 // `react-hot-loader@3`'s `<AppContainer/>`
 import { AppContainer } from 'react-hot-loader'
 
-export default function Wrapper({ store, children }) {
+export default function Container({ store, children }) {
   return (
     <AppContainer>
       <Provider store={ store }>
@@ -1173,7 +1178,7 @@ export default {
 
       'webpack-hot-middleware/client?http://localhost:8080',
       'webpack/hot/only-dev-server',
-      './src/application.js'
+      './src/client/index.js'
     ]
   },
   plugins: [
@@ -1184,7 +1189,7 @@ export default {
 }
 ```
 
-P.S.: Currently it says `Warning: [react-router] You cannot change <Router routes>; it will be ignored` in the browser console. I'm just ignoring this for now, maybe I'll find a proper fix later. Currently I'm using this hacky workaround in `./src/client/application.js`:
+P.S.: Currently it says `Warning: [react-router] You cannot change <Router routes>; it will be ignored` in the browser console. I'm just ignoring this for now, maybe I'll find a proper fix later. Currently I'm using this hacky workaround in `./src/client/index.js`:
 
 ```js
 /**
@@ -1212,7 +1217,7 @@ if (module.hot) {
 `websocket()` helper sets up a WebSocket connection. 
 
 ```js
-import { render, websocket } from 'react-isomorphic-render'
+import { render, websocket } from 'react-application'
 
 render(settings).then(({ store, protectedCookie }) => {
   websocket({
@@ -1383,7 +1388,7 @@ function reducer(state, action) {
 
 ## Static site generation
 
-In those rare cases when website's content doesn't change at all (or changes very rarely, e.g. a blog) it may be beneficial to host a statically generated version of such a website on a CDN as opposed to hosting a full-blown Node.js application just for the purpose of real-time webpage rendering. In such cases one may choose to generate a static version of the website by snapshotting it on a local machine and then host it in a cloud at virtually zero cost.
+In those rare cases when website pages query data asynchronously via HTTP but that data doesn't change at all (or changes very rarely, e.g. a blog) it may be beneficial to host a statically generated version of such a website on a CDN as opposed to hosting a full-blown Node.js application just for the purpose of real-time webpage rendering. In such cases one may choose to generate a static version of the website by snapshotting it on a local machine and then host it in a cloud at virtually zero cost.
 
 First run the website in production (it can be run locally, for example).
 
@@ -1395,10 +1400,10 @@ npm install s3 --save
 ```
 
 ```js
-// The following code hasn't been tested so create an issue in case of a bug
+// The following code hasn't been tested but it used to work
 
 import path from 'path'
-import { snapshot, upload, S3Uploader, copy, download } from 'react-isomorphic-render/static-site-generator'
+import { snapshot, upload, S3Uploader, copy, download } from 'react-application/static-site-generator'
 
 import configuration from '../configuration'
 
@@ -1463,7 +1468,7 @@ If you're using Webpack then make sure you either build your server-side code wi
 
 ## Advanced
 
-At some point in time this README became huge so I extracted some less relevant parts of it into [README-ADVANCED](https://github.com/catamphetamine/react-isomorphic-render/blob/master/README-ADVANCED.md) (including the list of all possible settings and options). If you're a first timer then just skip that one.
+At some point in time this README became huge so I extracted some less relevant parts of it into [README-ADVANCED](https://github.com/catamphetamine/react-application/blob/master/README-ADVANCED.md) (including the list of all possible settings and options). If you're a first timer then just skip that one.
 
 ## Contributing
 

@@ -1,6 +1,6 @@
 // Helpers
 
-export { default as meta } from './es6/meta'
+export { default as meta } from './build/meta'
 
 // Redux
 
@@ -8,13 +8,13 @@ export
 {
 	default as preload
 }
-from './es6/redux/preload'
+from './build/redux/preload'
 
 export
 {
 	default as onPageLoaded
 }
-from './es6/redux/onPageLoaded'
+from './build/redux/onPageLoaded'
 
 export
 {
@@ -22,7 +22,7 @@ export
 	getState,
 	getHttpClient
 }
-from './es6/redux/client/client'
+from './build/redux/client/client'
 
 export
 {
@@ -37,14 +37,14 @@ export
 	Preload_options_name,
 	Preload_options_name as PRELOAD_OPTIONS_NAME
 }
-from './es6/redux/middleware/preload'
+from './build/redux/middleware/preload'
 
 export
 {
 	default as redux_module,
 	default as reduxModule
 }
-from './es6/redux/redux module'
+from './build/redux/redux module'
 
 export
 {
@@ -52,7 +52,7 @@ export
 	event_name,
 	event_name as eventName
 }
-from './es6/redux/naming'
+from './build/redux/naming'
 
 export
 {
@@ -71,32 +71,32 @@ export
 	Navigated,
 	Navigated as NAVIGATED
 }
-from './es6/redux/actions'
+from './build/redux/actions'
 
 export
 {
 	default as Link
 }
-from './es6/redux/Link'
+from './build/redux/Link'
 
 export
 {
 	default as IndexLink
 }
-from './es6/redux/IndexLink'
+from './build/redux/IndexLink'
 
 export
 {
 	default as websocket
 }
-from './es6/redux/client/websocket'
+from './build/redux/client/websocket'
 
 export
 {
 	get_cookie,
 	get_cookie as getCookie
 }
-from './es6/client/cookies'
+from './build/client/cookies'
 
 export
 {
@@ -105,4 +105,4 @@ export
 	push_location,
 	push_location as pushLocation
 }
-from './es6/react-router/location'
+from './build/react-router/location'

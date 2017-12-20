@@ -15,7 +15,7 @@ export default function _render(options)
 	})
 }
 
-export async function initialize(settings, { protected_cookie_value, proxy, request, cookies, initialize, get_history })
+export async function initialize(settings, { protected_cookie_value, proxy, cookies, initialize, get_history })
 {
 	// Redux store
 	let store
@@ -24,7 +24,6 @@ export async function initialize(settings, { protected_cookie_value, proxy, requ
 	const http_client = create_http_client(settings, () => store, protected_cookie_value,
 	{
 		proxy,
-		clone_request : request,
 		cookies
 	})
 
@@ -37,7 +36,7 @@ export async function initialize(settings, { protected_cookie_value, proxy, requ
 	// (for example to authenticate the user and retrieve user selected language)
 	if (initialize)
 	{
-		store_data = await initialize(http_client, { request })
+		store_data = await initialize(http_client)
 	}
 
 	// Create Redux store
@@ -71,15 +70,11 @@ export async function initialize(settings, { protected_cookie_value, proxy, requ
 		return extension_javascript
 	}
 
-	function afterwards(ctx)
-	{
-		for (const cookie of http_client.set_cookies)
-		{
-			ctx.set('Set-Cookie', cookie)
-		}
+	return {
+		store,
+		extension_javascript,
+		set_cookies: http_client.set_cookies
 	}
-
-	return { store, extension_javascript, afterwards }
 }
 
 // JSON date deserializer
