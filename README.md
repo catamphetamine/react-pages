@@ -679,9 +679,12 @@ In order for `http` utility calls to send an authentication token as part of an 
 
 ### HTTP utility and URLs
 
-All URLs queried via `http` utility must be relative ones (e.g. `/api/users/list`). In order to transform these relative URLs into absolute ones there are two approaches.
+All URLs queried via `http` utility are supposed to be relative ones (e.g. `/api/users/list`) for convenience. In order to transform these convenient relative URLs into real ones there are two approaches built-in.
 
-The first approach is for people using a proxy server (minority, old-school way). In this case all client-side HTTP requests will still query relative URLs which are gonna hit the proxy server and the proxy server will route them to their proper destination. And the server side is gonna query the proxy server directly (there is no notion of "relative URLs" on the server side) therefore the proxy `host` and `port` need to be configured in webpage rendering service options.
+<details>
+<summary>The old-school approach is for people using a proxy server.</summary>
+
+In this case all client-side HTTP requests will still query relative URLs which are gonna hit the proxy server and the proxy server will route them to the API service. And on server side it's gonna query the proxy server by an absolute URL (there is no notion of "relative URLs" on the server side) therefore the proxy `host` and `port` need to be configured in webpage rendering service options.
 
 ```js
 const server = webpageServer(settings, {
@@ -693,13 +696,14 @@ const server = webpageServer(settings, {
   }
 })
 ```
+</details>
 
-The second approach is for everyone else (majority, the modern way). In this case all URLs are transformed from relative ones into absolute ones by the `http.url(path)` function parameter configured in `react-website.js`.
+The modern approach is to query API by an absolute URL (through CORS) in a cloud. In this case all URLs are transformed from relative ones into absolute ones by the `http.url(path)` parameter configured in `react-website.js`.
 
 ```js
 {
   http: {
-    url: path => `https://api.server.com${path}`
+    url: path => `https://api-service.cloud-provider.com${path}`
   }
 }
 ```
