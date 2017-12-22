@@ -1421,11 +1421,14 @@ function reducer(state, action) {
 
 ## Static site generation
 
-In those rare cases when website pages query data asynchronously via HTTP but that data doesn't change at all (or changes very rarely, e.g. a blog) it may be beneficial to host a statically generated version of such a website on a CDN as opposed to hosting a full-blown Node.js application just for the purpose of real-time webpage rendering. In such cases one may choose to generate a static version of the website by snapshotting it on a local machine and then host it in a cloud at virtually zero cost.
+In those rare cases when website pages query data asynchronously via HTTP but that data doesn't change at all (or changes very rarely, e.g. a personal blog) it may be beneficial (much cheaper and faster) to host a statically generated version of such a website on a CDN as opposed to hosting a Node.js application just for the purpose of real-time webpage rendering. In such cases one may choose to generate a static version of the website by snapshotting it on a local machine and then host it in a cloud at virtually zero cost.
 
-First run the website in production (it can be run locally, for example).
+<details>
+<summary>Snapshotting instructions</summary>
 
-Then run the following Node.js script which is gonna snapshot the currently running website and put it in a folder which can be then hosted anywhere.
+First run the website in production mode (for example, on `localhost`).
+
+Then run the following Node.js script which is gonna snapshot the currently running website and put it in a folder which can then be hosted anywhere.
 
 ```sh
 # If the website will be hosted on Amazon S3
@@ -1494,6 +1497,7 @@ run().catch((error) =>
   process.exit(1)
 })
 ```
+</details>
 
 ## Bundlers
 
