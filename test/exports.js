@@ -40,7 +40,9 @@ import
 	replace_location,
 	replaceLocation,
 	push_location,
-	pushLocation
+	pushLocation,
+	loading,
+	Loading
 }
 from '../index.es6'
 
@@ -49,6 +51,8 @@ describe(`exports`, function()
 	it(`should export ES6`, () =>
 	{
 		meta.should.be.a('function')
+		loading.should.be.a('function')
+		Loading.should.be.a('function')
 
 		render.should.be.a('function')
 		getState.should.be.a('function')
@@ -105,6 +109,8 @@ describe(`exports`, function()
 		const _ = require('../index.common')
 
 		_.meta.should.be.a('function')
+		_.loading.should.be.a('function')
+		_.Loading.should.be.a('function')
 
 		// Combined Redux exports
 

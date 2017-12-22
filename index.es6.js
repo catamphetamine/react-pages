@@ -6,7 +6,8 @@ export { default as meta } from './build/meta'
 
 export
 {
-	default as preload
+	default as preload,
+	indicate_loading as loading
 }
 from './build/redux/preload'
 
@@ -15,6 +16,12 @@ export
 	default as onPageLoaded
 }
 from './build/redux/onPageLoaded'
+
+export
+{
+	default as Loading
+}
+from './build/components/Loading'
 
 export
 {

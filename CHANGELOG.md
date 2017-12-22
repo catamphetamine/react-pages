@@ -6,7 +6,7 @@
   * (breaking change) Removed `koa` entirely (for simplicity).
   * (breaking change) Added `secure` flag to page rendering service options for HTTPS.
   * (breaking change) `wrapper` parameter renamed to `container`.
-  * (breaking change) `preload` reducer is now added by default and "preload" reducer name is now reserved for it.
+  * (breaking change) `preload` reducer is now added by default and "preload" reducer name is now reserved for it. `<Loading/>` component is also now built-in into the library and can be `import`ed from it.
   * (breaking change) Removed `request` from rendering service `initialize()` parameters (may be added back, upon request).
   * (breaking change) Removed `loading` from rendering service parameters (seems that it was never used).
   * (breaking change) `render: false` parameter renamed to `hollow: true`

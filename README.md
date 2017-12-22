@@ -752,70 +752,25 @@ Specifying `{ client: true }` option for each `@preload()` would result in a lot
 
 ### `@preload()` indicator
 
-Sometimes preloading a page can take some time to finish so one may want to (and actually should) add some kind of a "spinner" to inform the user that the application isn't frozen and the navigation process needs some more time to finish. This can be achieved by adding a Redux reducer listening to these three Redux events:
+Sometimes preloading a page can take some time so one may want to (and actually should) add some kind of a "spinner" to inform the user that the application isn't frozen and that the navigation process needs some more time to finish. This can be achieved by adding the built-in `<Loading/>` component on a page:
 
 ```javascript
-import { PRELOAD_STARTED, PRELOAD_FINISHED, PRELOAD_FAILED } from 'react-website'
+import { Loading } from 'react-website'
+// Using Webpack CSS loader
+import 'react-website/components/Loading.css'
+import 'react-website/components/LoadingIndicator.css'
 
-export default function(state = {}, action = {}) {
-  switch (action.type) {
-    case PRELOAD_STARTED  : return { ...state, pending: true,  error: false }
-    case PRELOAD_FINISHED : return { ...state, pending: false }
-    case PRELOAD_FAILED   : return { ...state, pending: false, error: action.error }
-    default               : return state
-  }
+export default function Application() {
+  return (
+    <div>
+      ....
+      <Loading/>
+    </div>
+  )
 }
 ```
 
-And a "spinner" component would look like
-
-```javascript
-import React, { Component } from 'react'
-import { connect } from 'react-redux'
-import { ActivityIndicator } from 'react-responsive-ui'
-
-@connect(state => ({ pending: state.preload.pending }))
-export default class Preload extends Component {
-  render() {
-    const { pending } = this.props
-    return (
-      <div className={ `preloading ${pending ? 'preloading--shown' : ''}` }>
-        <ActivityIndicator className="preloading__spinner"/>
-      </div>
-    );
-  }
-}
-```
-
-```css
-.preloading {
-  position: fixed;
-  top    : 0;
-  left   : 0;
-  right  : 0;
-  bottom : 0;
-  background-color: rgba(0, 0, 0, 0.1);
-  z-index: 0;
-  opacity: 0;
-  transition: opacity 100ms ease-out, z-index 100ms step-end;
-}
-
-.preloading--shown {
-  z-index: 1;
-  opacity: 1;
-  transition: opacity 600ms ease-out 500ms, z-index 0ms step-start;
-  cursor: wait;
-}
-
-.preloading__spinner {
-  position: absolute;
-  left: calc(50% - 2rem);
-  top: calc(50% - 2rem);
-  width: 4rem;
-  height: 4rem;
-  color: white;
-}
-```
+The `<Loading/>` component takes an optional `indicator` property which can be a React component accepting a `className` property and which is a white circular spinner by default.
 
 ## Page HTTP response status code
 

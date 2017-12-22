@@ -1,0 +1,56 @@
+.rrui__activity-indicator
+{
+	width  : 2em;
+	height : 2em;
+
+	stroke : currentColor;
+
+	line-height : 0;
+}
+
+.rrui__activity-indicator-circle-container
+{
+	animation        : rrui-spinner-rotate 2s linear infinite;
+	transform-origin : center center;
+}
+
+.rrui__activity-indicator-circle
+{
+	/* IE can not animate SVG. */
+	/* Only Microsoft Edge supports SVG CSS Transitions and Animation. */
+	/* Could use `stroke-dasharray: 89,200` and `stroke-dashoffset: -35` here */
+	/* to show an indicator in IE but the aethetics is better othewise so screw IE. */
+	stroke-dasharray  : 1,200;
+	stroke-dashoffset : 0;
+	animation         : rrui-spinner-extent 1.5s ease-in-out infinite;
+	stroke-linecap    : round;
+}
+
+@keyframes rrui-spinner-rotate
+{
+	100%
+	{
+		transform: rotate(360deg);
+	}
+}
+
+@keyframes rrui-spinner-extent
+{
+	0%
+	{
+		stroke-dasharray  : 1,200;
+		stroke-dashoffset : 0;
+	}
+
+	50%
+	{
+		stroke-dasharray  : 89,200;
+		stroke-dashoffset : -35;
+	}
+
+	100%
+	{
+		stroke-dasharray  : 89,200;
+		stroke-dashoffset : -124;
+	}
+}

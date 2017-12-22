@@ -45,13 +45,24 @@ export default function preload(preload, options)
 	}
 }
 
-export function reducer(state = {}, action = {})
+export function reducer(state = { pending : false, immediate : false }, action = {})
 {
 	switch (action.type)
 	{
-		case Preload_started  : return { ...state, pending: true,  error: undefined }
-		case Preload_finished : return { ...state, pending: false }
-		case Preload_failed   : return { ...state, pending: false, error: action.error }
+		case Preload_started  : return { ...state, pending: true,  immediate : action.immediate, error: undefined }
+		case Preload_finished : return { ...state, pending: false, immediate : false }
+		case Preload_failed   : return { ...state, pending: false, immediate : false, error: action.error }
 		default               : return state
 	}
 }
+
+export const indicate_loading = () =>
+({
+  type      : Preload_started,
+  immediate : true
+})
+
+// export const preload_finished = () =>
+// ({
+//   type : Preload_finished
+// })

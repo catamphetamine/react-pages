@@ -5,7 +5,10 @@ exports.meta  = require('./cjs/meta').default
 // Redux
 
 exports.preload       = require('./cjs/redux/preload').default
+exports.loading       = require('./cjs/redux/preload').indicate_loading
 exports.onPageLoaded  = require('./cjs/redux/onPageLoaded').default
+
+exports.Loading       = require('./cjs/components/Loading').default
 
 exports.render        = require('./cjs/redux/client/client').default
 exports.getState      = require('./cjs/redux/client/client').getState

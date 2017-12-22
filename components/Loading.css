@@ -1,0 +1,53 @@
+.react-website__loading
+{
+	position : fixed;
+
+	top    : 0;
+	left   : 0;
+	right  : 0;
+	bottom : 0;
+
+	background-color : rgba(0, 0, 0, 0.08);
+
+	z-index : 0;
+	opacity : 0;
+
+	transition : opacity 100ms ease-out, z-index 100ms step-end;
+}
+
+.react-website__loading-spinner
+{
+	position : absolute;
+	left     : calc(50% - 2rem);
+	top      : calc(50% - 2rem);
+	width    : 4rem;
+	height   : 4rem;
+	color    : white;
+}
+
+.react-website__loading--shown
+{
+	z-index : 1000;
+	opacity : 1;
+
+	transition : opacity 600ms ease-out 500ms, z-index 0ms step-start;
+
+	cursor : wait;
+}
+
+.react-website__loading--immediate
+{
+	transition-delay : 0ms;
+}
+
+.react-website__loading--shown .rrui__activity-indicator-circle-container,
+.react-website__loading--shown .rrui__activity-indicator-circle
+{
+	animation-delay : 500ms;
+}
+
+.react-website__loading--immediate .rrui__activity-indicator-circle-container,
+.react-website__loading--immediate .rrui__activity-indicator-circle
+{
+	animation-delay : 0ms;
+}
