@@ -765,7 +765,7 @@ function uploadItemPhoto(itemId, file) {
 
 ### JSON Date parsing
 
-By default, when using `http` utility all JSON responses get parsed for javascript `Date`s which are then automatically converted from `String`s to `Date`s. This is convenient, and also safe because such date `String`s have to be in a very specific ISO format in order to get parsed (`year-month-dayThours:minutes:seconds[timezone]`), but if someone still prefers to disable this feature and have their `String`ified `Date`s back then there's the `parseDates: false` flag in the configuration to opt-out of this feature.
+By default, when using `http` utility all JSON responses get parsed for javascript `Date`s which are then automatically converted from `String`s to `Date`s. This is convenient, and also safe because such date `String`s have to be in a very specific ISO format in order to get parsed (`year-month-dayThours:minutes:seconds[timezone]`, e.g. `2017-12-22T23:03:48.912Z`), but if someone still prefers to disable this feature and have their stringified dates untouched then there's the `parseDates: false` flag in the configuration to opt-out of this feature.
 
 ## Page preloading
 
