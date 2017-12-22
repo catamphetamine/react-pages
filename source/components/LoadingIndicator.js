@@ -13,12 +13,13 @@ const svg_canvas_dimensions = `0 0 ${svg_circe_center * 2} ${svg_circe_center * 
 // https://developer.mozilla.org/docs/Web/SVG/Attribute/stroke-miterlimit
 const svg_stroke_miter_limit = radius / 2
 
-export default function ActivityIndicator({ className, style })
+export default function ActivityIndicator(props)
 {
+	const { className } = props
+
 	return (
 		<div
 			{ ...props }
-			style={ style }
 			className={ classNames('rrui__activity-indicator', className) }>
 			<svg
 				viewBox={ svg_canvas_dimensions }
@@ -39,8 +40,5 @@ export default function ActivityIndicator({ className, style })
 ActivityIndicator.propTypes =
 {
 	// CSS class
-	className : PropTypes.string,
-
-	// CSS style object
-	style     : PropTypes.object
+	className : PropTypes.string
 }
