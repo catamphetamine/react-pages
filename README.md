@@ -779,7 +779,7 @@ For page preloading use the `@preload()` helper to load the neccessary data befo
 
 ```javascript
 import { connect } from 'react-redux'
-import { meta, preload } from 'react-website'
+import { preload } from 'react-website'
 
 // Fetches the list of users from the server
 function fetchUsers() {
@@ -790,7 +790,6 @@ function fetchUsers() {
 }
 
 @preload(async ({ dispatch }) => await dispatch(fetchUsers))
-@meta(({ state }) => ({ title: 'Users' }))
 @connect(
   state => ({ users: state.users.users }),
   // `bindActionCreators()` for Redux action creators
