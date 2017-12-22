@@ -718,8 +718,10 @@ The `http` utility will also upload files if they're passed as part of `paramete
 * In case of a `FileList` with multiple `File`s inside a multiple file upload will be performed.
 * In case of an `<input type="file"/>` DOM element all its `.files` will be taken as a `FileList` parameter.
 
+File upload progress can be metered by passing `progress` option as part of the `options` .
+
 <details>
-<summary>Progress can be metered by passing `progress` option as part of the `options` argument.</summary>
+<summary>See example</summary>
 
 ```js
 // React component
