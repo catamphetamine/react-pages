@@ -2,6 +2,7 @@ import React from 'react'
 import { Provider } from 'react-redux'
 
 import { clone } from '../helpers'
+import { underscoredToCamelCase } from './naming'
 
 // Normalizes common settings
 export default function normalize_common_settings(settings, options = {})
@@ -51,11 +52,35 @@ export default function normalize_common_settings(settings, options = {})
 		delete settings.reduxEventNaming
 	}
 
+	// Default Redux event naming
+	if (!settings.redux_event_naming)
+	{
+		// When supplying `event` instead of `events`
+		// as part of an asynchronous Redux action
+		// this will generate `events` from `event`
+		// using this function.
+		settings.redux_event_naming = (event) =>
+		([
+			`${event}_PENDING`,
+			`${event}_SUCCESS`,
+			`${event}_ERROR`
+		])
+	}
+
 	// camelCase aliasing
 	if (settings.reduxPropertyNaming)
 	{
 		settings.redux_property_naming = settings.reduxPropertyNaming
 		delete settings.reduxPropertyNaming
+	}
+
+	// Default Redux property naming
+	if (!settings.redux_property_naming)
+	{
+		// When using "redux module" feature
+		// this function will generate a Redux state property name from an event name.
+		// E.g. event `GET_USERS_ERROR` => state.`getUsersError`.
+		settings.redux_property_naming = underscoredToCamelCase
 	}
 
 	// camelCase aliasing

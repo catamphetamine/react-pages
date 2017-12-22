@@ -67,6 +67,57 @@ function autocompleteMatch(inputValue) {
 
 `react-router`'s `onEnter` hook is being called twice both on server and client because `react-router`'s `match()` is called before preloading and then the actual navigation happens which triggers the second `match()` call (internally inside `react-router`). This is not considered a blocker because in this library `@preload()` substitutes `onEnter` hooks so just use `@preload()` instead. Double `onEnter` can be fixed using `<RouterContext/>` instead of `<Router/>` but I see no reason to implement such a fix since `onEnter` is simply not used.
 
+## Redux module event and property naming
+
+By default it generates `"_PENDING"`, `"_SUCCESS"` and `"_ERROR"` Redux events along with the corresponding camelCase properties in Redux state. One can customize that by supplying custom `reduxEventNaming` and `reduxPropertyNaming` functions.
+
+#### react-website.js
+
+```js
+import reduxSettings from './react-website-redux'
+
+export default {
+  // All the settings as before
+
+  ...reduxSettings
+}
+```
+
+#### react-website-redux.js
+
+```js
+import { underscoredToCamelCase } from 'react-website'
+
+export default {
+  // When supplying `event` instead of `events`
+  // as part of an asynchronous Redux action
+  // this will generate `events` from `event`
+  // using this function.
+  reduxEventNaming: (event) => ([
+    `${event}_PENDING`,
+    `${event}_SUCCESS`,
+    `${event}_ERROR`
+  ]),
+
+  // When using "redux module" tool
+  // this function will generate a Redux state property name from an event name.
+  // By default it's: event `GET_USERS_ERROR` => state.`getUsersError`.
+  reduxPropertyNaming: underscoredToCamelCase
+}
+```
+
+#### redux/blogPost.js
+
+```js
+import { reduxModule, eventName } from 'react-website'
+import settings from './react-website-redux'
+
+const redux = reduxModule('BLOG_POST', settings)
+...
+```
+
+Notice the extraction of these two configuration parameters (`reduxEventNaming` and `reduxPropertyNaming`) into a separate file `react-website-redux.js`: this is done to break circular dependency on `./react-website.js` file because the `routes` parameter inside `./react-website.js` is the `react-router` `./routes.js` file which `import`s React page components which in turn `import` action creators which in turn would import `./react-website.js` hence the circular (recursive) dependency (same goes for the `reducer` parameter inside `./react-website.js`).
+
 ## Internal `render()` function
 
 For some advanced use cases (though most likely no one's using this) the internal `render()` function is exposed.

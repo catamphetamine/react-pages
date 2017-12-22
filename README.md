@@ -338,14 +338,17 @@ The possible `options` (the third argument of all `http` methods) are
 
 ### Asynchronous actions (better approach)
 
-Once one starts writing a lot of `http` calls in Redux actions it becomes obvious that there's **a lot** of copy-pasting and verbosity involved. To reduce those tremendous amounts of copy-pasta "redux module" tool may be used
+Once one starts writing a lot of `http` calls in Redux actions it becomes obvious that there's **a lot** of copy-pasting and verbosity involved. To reduce those tremendous amounts of copy-pasta "redux module" tool may be used which:
+
+* Autogenerates Redux action status event names ("pending", "success", "error")
+* Automatically populates the corresponding action status properties ("pending", "success", "error") in Redux state
 
 #### redux/blogPost.js
 
 ```js
 import { reduxModule, eventName } from 'react-website'
-// (`./react-website-async.js` settings file is described below)
-import settings from './react-website-async'
+// (`./react-website-redux.js` settings file is described below)
+import settings from './react-website'
 
 const redux = reduxModule('BLOG_POST', settings)
 
@@ -507,53 +510,13 @@ export default class BlogPostPage extends Component {
 }
 ```
 
-And the additional configuration would be:
-
-#### react-website.js
-
-```js
-import asyncSettings from './react-website-async'
-
-export default {
-  // All the settings as before
-
-  ...asyncSettings
-}
-```
-
-#### react-website-async.js
-
-```js
-import { underscoredToCamelCase } from 'react-website'
-
-export default {
-  // When supplying `event` instead of `events`
-  // as part of an asynchronous Redux action
-  // this will generate `events` from `event`
-  // using this function.
-  reduxEventNaming: event => ([
-    `${event}_PENDING`,
-    `${event}_SUCCESS`,
-    `${event}_ERROR`
-  ]),
-
-  // When using "redux module" tool
-  // this function will generate a Redux state property name from an event name.
-  // E.g. event `GET_USERS_ERROR` => state.`getUsersError`.
-  reduxPropertyNaming: underscoredToCamelCase,
-}
-```
-
-Notice the extraction of these two configuration parameters (`reduxEventNaming` and `reduxPropertyNaming`) into a separate file `react-website-async.js`: this is done to break circular dependency on `./react-website.js` file because the `routes` parameter inside `./react-website.js` is the `react-router` `./routes.js` file which `import`s React page components which in turn `import` action creators which in turn would import `./react-website.js` hence the circular (recursive) dependency (same goes for the `reducer` parameter inside `./react-website.js`).
-
 ### Synchronous actions
 
 For synchronous actions it's the same as for asynchronous ones (as described above):
 
 ```js
 import { reduxModule } from 'react-website'
-// (`./react-website-async.js` settings file is described above)
-import settings from './react-website-async'
+import settings from './react-website'
 
 const redux = reduxModule('NOTIFICATIONS', settings)
 
