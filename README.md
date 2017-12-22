@@ -602,7 +602,7 @@ export default class BlogPostPage extends Component {
 ```
 </details>
 
-
+<br/>
 Redux module can also handle synchronous actions along with asynchronous ones
 
 ```js
