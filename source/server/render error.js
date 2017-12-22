@@ -34,7 +34,7 @@ export default function render_error(error, response, options)
 	}
 
 	// log the error
-	console.log('[react-application] Rendering service error')
+	console.log('[react-website] Rendering service error')
 
 	if (options.log)
 	{

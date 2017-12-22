@@ -2,7 +2,7 @@ This section contains advanced topics. This means that the features described he
 
 ## react-router-redux
 
-I didn't build [`react-router-redux`](https://github.com/reactjs/react-router-redux) functionality into this library because I thought that Redux state is actually not intended for storing router state. See [PHILOSOPHY](https://github.com/catamphetamine/react-application/blob/master/PHILOSOPHY.md).
+I didn't build [`react-router-redux`](https://github.com/reactjs/react-router-redux) functionality into this library because I thought that Redux state is actually not intended for storing router state. See [PHILOSOPHY](https://github.com/catamphetamine/react-website/blob/master/PHILOSOPHY.md).
 
 ## CSRF protection
 
@@ -23,7 +23,7 @@ So, **javascript is required** on the client side in order for this CSRF attacks
 When using `{ client: true }` `@preload()`s it's sometimes required to perform some actions (e.g. adjust the current URL) after those `@preload()`s finish (and after the browser navigates to the preloaded page). While with regular `@preload()`s it could be done using `componentDidMount()` (though only on the client side) such an approach wouldn't work for `{ client: true }` `@preload()`s because they're called after `componentDidMount()`. The solution is `@onPageLoaded()` decorator which takes a function parameter, exactly as `@preload()` decorator does, with an extra `history` parameter.
 
 ```js
-import { onPageLoaded, replaceLocation } from 'react-application'
+import { onPageLoaded, replaceLocation } from 'react-website'
 
 @onPageLoaded(function({ dispatch, getState, history, location, parameters, server }) {
   if (isAnIdURL(location.pathname)) {
@@ -72,8 +72,8 @@ function autocompleteMatch(inputValue) {
 For some advanced use cases (though most likely no one's using this) the internal `render()` function is exposed.
 
 ```js
-import { render } from 'react-application/server'
-import settings from './react-application'
+import { render } from 'react-website/server'
+import settings from './react-website'
 
 try {
   // Returns a Promise.
@@ -107,7 +107,7 @@ try {
 }
 ```
 
-## All `react-application.js` settings
+## All `react-website.js` settings
 
 ```javascript
 {

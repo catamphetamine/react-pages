@@ -8,7 +8,7 @@
 		{
 			"follow_symlinks": true,
 			"path": ".",
-			"folder_exclude_patterns": ["react-application/node_modules", "react-application/coverage", "react-application/build", "react-application/build", "react-application/cjs", "react-application/project.sublime-workspace"]
+			"folder_exclude_patterns": ["react-website/node_modules", "react-website/coverage", "react-website/build", "react-website/build", "react-website/cjs", "react-website/project.sublime-workspace"]
 		}
 	]
 }

@@ -90,7 +90,7 @@ export default function create_store(settings, data, get_history, http_client, o
 	// Check that `@preload()` status reducer name isn't occupied
 	if (reducer.preload)
 	{
-		throw new Error(`"preload" reducer name is reserved for react-application's "@preload()" status. Use a different name for your "preload" reducer.`)
+		throw new Error(`"preload" reducer name is reserved for react-website's "@preload()" status. Use a different name for your "preload" reducer.`)
 	}
 
 	// Add `@preload()` status reducer

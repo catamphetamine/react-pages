@@ -16,9 +16,9 @@ export const Preload_method_name  = '__preload__'
 export const Preload_options_name = '__preload_options__'
 export const On_page_loaded_method_name = '__on_page_loaded__'
 
-export const Preload_started  = '@@react-application/redux/preload started'
-export const Preload_finished = '@@react-application/redux/preload finished'
-export const Preload_failed   = '@@react-application/redux/preload failed'
+export const Preload_started  = '@@react-website/redux/preload started'
+export const Preload_finished = '@@react-website/redux/preload finished'
+export const Preload_failed   = '@@react-website/redux/preload failed'
 
 export default function preloading_middleware(server, error_handler, preload_on_client_side_only, preload_helpers, routes, get_history, basename, report_stats, on_navigate)
 {
@@ -223,7 +223,7 @@ export default function preloading_middleware(server, error_handler, preload_on_
 					// Report stats to the web browser console
 					if (!server)
 					{
-						console.log(`[react-application] @preload() took ${preload_timer()} milliseconds for ${action.location.pathname}`)
+						console.log(`[react-website] @preload() took ${preload_timer()} milliseconds for ${action.location.pathname}`)
 					}
 
 					// If this navigation process was cancelled

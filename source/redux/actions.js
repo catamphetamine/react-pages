@@ -1,10 +1,10 @@
 import { parse_location } from '../location'
 
-export const Redirect  = '@@react-application/redirect'
-export const GoTo      = '@@react-application/goto'
-export const Navigated = '@@react-application/navigated'
-export const Preload   = '@@react-application/preload'
-export const LoadState = '@@react-application/redux/state/replace'
+export const Redirect  = '@@react-website/redirect'
+export const GoTo      = '@@react-website/goto'
+export const Navigated = '@@react-website/navigated'
+export const Preload   = '@@react-website/preload'
+export const LoadState = '@@react-website/redux/state/replace'
 
 // Before page preloading started
 export const redirect_action = location => preload_action(location, true)

@@ -29,7 +29,7 @@ export default async function render({ history, create_page_element, routes, sto
 	if (redirect)
 	{
 		window.location = location_url(redirect)
-		throw new Error(`[react-application] (Not an error) Redirecting to ${location_url(redirect)}`)
+		throw new Error(`[react-website] (Not an error) Redirecting to ${location_url(redirect)}`)
 
 		// This kind of a redirect won't work because
 		// the `<Router/>` hasn't been rendered yet.

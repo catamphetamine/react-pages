@@ -123,7 +123,7 @@ export default class HTTP_Client
 				// and HTTP authentication headers to a third party.
 				if (!is_relative_url(path) && !allow_absolute_urls)
 				{
-					throw new Error(`You requested an absolute URL using "http" utility: "${path}". Use relative URLs instead (e.g. "/api/item/3") – this is cleaner and safer. To transform relative URLs into absolute ones configure the "http.url(relativeURL) -> absoluteURL" parameter function in "react-application.js". Example: (path) => \`https://api.server.com\${path}\`. Alternatively, set "http.allowAbsoluteURLs" setting to "true" (for those rare cases when it is justifiable).`)
+					throw new Error(`You requested an absolute URL using "http" utility: "${path}". Use relative URLs instead (e.g. "/api/item/3") – this is cleaner and safer. To transform relative URLs into absolute ones configure the "http.url(relativeURL) -> absoluteURL" parameter function in "react-website.js". Example: (path) => \`https://api.server.com\${path}\`. Alternatively, set "http.allowAbsoluteURLs" setting to "true" (for those rare cases when it is justifiable).`)
 				}
 
 				// `url` will be absolute for server-side
@@ -208,7 +208,7 @@ export default class HTTP_Client
 						}
 
 						// // One could store the `request` to later `.abort()` it.
-						// // https://github.com/catamphetamine/react-application/issues/46
+						// // https://github.com/catamphetamine/react-website/issues/46
 						// if (options.onRequest)
 						// {
 						// 	options.onRequest(request.request)

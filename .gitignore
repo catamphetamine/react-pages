@@ -1,5 +1,5 @@
 # testing package
-/react-application-*.tgz
+/react-website-*.tgz
 
 # test coverage folder
 /coverage/

@@ -1,6 +1,6 @@
 import { readState, saveState } from 'history/lib/DOMStateStorage'
 
-const STATE_KEY_PREFIX = '@@react-application/'
+const STATE_KEY_PREFIX = '@@react-website/'
 
 export function get_from_history(prefix, key)
 {

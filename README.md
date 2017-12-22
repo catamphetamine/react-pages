@@ -1,7 +1,7 @@
-# react-application
+# react-website
 
-[![npm version](https://img.shields.io/npm/v/react-application.svg?style=flat-square)](https://www.npmjs.com/package/react-application)
-[![npm downloads](https://img.shields.io/npm/dm/react-application.svg?style=flat-square)](https://www.npmjs.com/package/react-application)
+[![npm version](https://img.shields.io/npm/v/react-website.svg?style=flat-square)](https://www.npmjs.com/package/react-website)
+[![npm downloads](https://img.shields.io/npm/dm/react-website.svg?style=flat-square)](https://www.npmjs.com/package/react-website)
 
 A complete solution for building a React/Redux application
 
@@ -23,12 +23,12 @@ A complete solution for building a React/Redux application
 See [webpack-react-redux-isomorphic-render-example](https://github.com/catamphetamine/webpack-react-redux-isomorphic-render-example/tree/master/client/src)
 
 ```bash
-$ npm install react-application --save
+$ npm install react-website --save
 ```
 
 Start by creating a settings file (it configures both client side and server side)
 
-#### react-application.js
+#### react-website.js
 
 ```javascript
 // React-router v3 routes
@@ -68,7 +68,7 @@ export default (
 
 ```js
 import React from 'react'
-import { Link } from 'react-application'
+import { Link } from 'react-website'
 
 export default ({ children }) => (
   <div>
@@ -93,7 +93,7 @@ export default () => <div> This is a home page </div>
 ```js
 import React from 'react'
 
-export default () => <div> Made using `react-application` </div>
+export default () => <div> Made using `react-website` </div>
 ```
 
 #### ./src/client/redux/reducers/index.js
@@ -109,8 +109,8 @@ Then call `render()` in the main client-side javascript file.
 #### ./src/client/index.js
 
 ```javascript
-import { render } from 'react-application'
-import settings from './react-application'
+import { render } from 'react-website'
+import settings from './react-website'
 
 // Render the page in web browser
 render(settings)
@@ -121,7 +121,7 @@ And the `index.html` would look like this:
 ```html
 <html>
   <head>
-    <title>react-application</title>
+    <title>react-website</title>
   </head>
   <body>
     <div id="react"></div>
@@ -159,8 +159,8 @@ Adding server-side rendering to the setup is quite simple though requiring a Nod
 In this case `index.html` will be generated on-the-fly by page rendering server for each incoming HTTP request, so the `index.html` file may be deleted as it's of no use now.
 
 ```javascript
-import webpageServer from 'react-application/server'
-import settings from './react-application'
+import webpageServer from 'react-website/server'
+import settings from './react-website'
 
 // Create webpage rendering server
 const server = webpageServer(settings, {
@@ -171,7 +171,7 @@ const server = webpageServer(settings, {
   // as <script src="..."/> and <link rel="style" href="..."/>.
   // (this is for the main application JS and CSS bundles only,
   //  for injecting 3rd party JS and CSS use `html` settings instead:
-  //  https://github.com/catamphetamine/react-application/blob/master/README-ADVANCED.md#all-webpage-rendering-server-options)
+  //  https://github.com/catamphetamine/react-website/blob/master/README-ADVANCED.md#all-webpage-rendering-server-options)
   assets() {
     return {
       // Assuming that it's being tested on a local computer first
@@ -292,7 +292,7 @@ This is a handy way of dealing with "asynchronous actions" in Redux, e.g. HTTP r
 
 ### Autogenerate event names
 
-When you find yourself copy-pasting those `_PENDING`, `_SUCCESS` and `_ERROR` event names from one action creator to another then take a look at `reduxEventNaming` setting described in the [All `react-application.js` settings](https://github.com/catamphetamine/react-application/blob/master/README-ADVANCED.md#all-react-applicationjs-settings) section of the "advanced" readme: it lets a developer just supply a "base" `event` name and then it generates the three lifecycle event names from that "base" `event` significantly reducing boilerplate.
+When you find yourself copy-pasting those `_PENDING`, `_SUCCESS` and `_ERROR` event names from one action creator to another then take a look at `reduxEventNaming` setting described in the [All `react-website.js` settings](https://github.com/catamphetamine/react-website/blob/master/README-ADVANCED.md#all-react-websitejs-settings) section of the "advanced" readme: it lets a developer just supply a "base" `event` name and then it generates the three lifecycle event names from that "base" `event` significantly reducing boilerplate.
 
 ### HTTP utility
 
@@ -329,7 +329,7 @@ The possible `options` (the third argument of all `http` methods) are
 
 <!--
   (removed)
-  * `onRequest(request)` – for capturing `superagent` request (there was [a feature request](https://github.com/catamphetamine/react-application/issues/46) to provide a way for aborting running HTTP requests via `request.abort()`)
+  * `onRequest(request)` – for capturing `superagent` request (there was [a feature request](https://github.com/catamphetamine/react-website/issues/46) to provide a way for aborting running HTTP requests via `request.abort()`)
 -->
 
 <!--
@@ -343,9 +343,9 @@ Once one starts writing a lot of `http` calls in Redux actions it becomes obviou
 #### redux/blogPost.js
 
 ```js
-import { reduxModule, eventName } from 'react-application'
-// (`./react-application-async.js` settings file is described below)
-import settings from './react-application-async'
+import { reduxModule, eventName } from 'react-website'
+// (`./react-website-async.js` settings file is described below)
+import settings from './react-website-async'
 
 const redux = reduxModule('BLOG_POST', settings)
 
@@ -432,7 +432,7 @@ The React Component would look like this
 ```js
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
-import { preload } from 'react-application'
+import { preload } from 'react-website'
 import { connector, getComments, postComment } from './redux/blogPost'
 
 // Preload comments before showing the page
@@ -509,10 +509,10 @@ export default class BlogPostPage extends Component {
 
 And the additional configuration would be:
 
-#### react-application.js
+#### react-website.js
 
 ```js
-import asyncSettings from './react-application-async'
+import asyncSettings from './react-website-async'
 
 export default {
   // All the settings as before
@@ -521,10 +521,10 @@ export default {
 }
 ```
 
-#### react-application-async.js
+#### react-website-async.js
 
 ```js
-import { underscoredToCamelCase } from 'react-application'
+import { underscoredToCamelCase } from 'react-website'
 
 export default {
   // When supplying `event` instead of `events`
@@ -544,16 +544,16 @@ export default {
 }
 ```
 
-Notice the extraction of these two configuration parameters (`reduxEventNaming` and `reduxPropertyNaming`) into a separate file `react-application-async.js`: this is done to break circular dependency on `./react-application.js` file because the `routes` parameter inside `./react-application.js` is the `react-router` `./routes.js` file which `import`s React page components which in turn `import` action creators which in turn would import `./react-application.js` hence the circular (recursive) dependency (same goes for the `reducer` parameter inside `./react-application.js`).
+Notice the extraction of these two configuration parameters (`reduxEventNaming` and `reduxPropertyNaming`) into a separate file `react-website-async.js`: this is done to break circular dependency on `./react-website.js` file because the `routes` parameter inside `./react-website.js` is the `react-router` `./routes.js` file which `import`s React page components which in turn `import` action creators which in turn would import `./react-website.js` hence the circular (recursive) dependency (same goes for the `reducer` parameter inside `./react-website.js`).
 
 ### Synchronous actions
 
 For synchronous actions it's the same as for asynchronous ones (as described above):
 
 ```js
-import { reduxModule } from 'react-application'
-// (`./react-application-async.js` settings file is described above)
-import settings from './react-application-async'
+import { reduxModule } from 'react-website'
+// (`./react-website-async.js` settings file is described above)
+import settings from './react-website-async'
 
 const redux = reduxModule('NOTIFICATIONS', settings)
 
@@ -601,7 +601,7 @@ export default redux.reducer()
 
 ### HTTP utility authentication token
 
-In order for `http` utility calls to send an authentication token as part of an HTTP request (the `Authorization: Bearer ${token}` HTTP header) the `authentication.accessToken()` function must be specified in `react-application.js`.
+In order for `http` utility calls to send an authentication token as part of an HTTP request (the `Authorization: Bearer ${token}` HTTP header) the `authentication.accessToken()` function must be specified in `react-website.js`.
 
 ```js
 {
@@ -633,7 +633,7 @@ const server = webpageServer(settings, {
 })
 ```
 
-The second approach is for everyone else (majority, the modern way). In this case all URLs are transformed from relative ones into absolute ones by the `http.url(path)` function parameter configured in `react-application.js`.
+The second approach is for everyone else (majority, the modern way). In this case all URLs are transformed from relative ones into absolute ones by the `http.url(path)` function parameter configured in `react-website.js`.
 
 ```js
 {
@@ -703,7 +703,7 @@ For page preloading consider using `@preload()` helper to load the neccessary da
 
 ```javascript
 import { connect } from 'react-redux'
-import { meta, preload } from 'react-application'
+import { meta, preload } from 'react-website'
 
 // fetches the list of users from the server
 function fetchUsers() {
@@ -735,7 +735,7 @@ export default class Page extends Component {
 
 In the example above `@preload()` helper is called to preload a web page before it is displayed, i.e. before the page is rendered (both on server side and on client side).
 
-[`@preload()` decorator](https://github.com/catamphetamine/react-application/blob/master/source/redux/preload.js) takes a function which must return a `Promise`:
+[`@preload()` decorator](https://github.com/catamphetamine/react-website/blob/master/source/redux/preload.js) takes a function which must return a `Promise`:
 
 ```javascript
 @preload(function({ dispatch, getState, location, parameters, server }) {
@@ -776,7 +776,7 @@ npm install babel-plugin-transform-decorators-legacy --save
 }
 ```
 
-On the client side, in order for `@preload` to work all `<Link/>`s imported from `react-router` **must** be instead imported from `react-application`. Upon a click on a `<Link/>` first it waits for the next page to preload, and then, when the next page is fully loaded, it is displayed to the user and the URL in the address bar is updated.
+On the client side, in order for `@preload` to work all `<Link/>`s imported from `react-router` **must** be instead imported from `react-website`. Upon a click on a `<Link/>` first it waits for the next page to preload, and then, when the next page is fully loaded, it is displayed to the user and the URL in the address bar is updated.
 
 `@preload()` also works for Back/Forward web browser buttons navigation. If one `@preload()` is in progress and another `@preload()` starts (e.g. Back/Forward browser buttons) the first `@preload()` will be cancelled if `bluebird` `Promise`s are used in the project and also if `bluebird` is configured for [`Promise` cancellation](http://bluebirdjs.com/docs/api/cancellation.html) (this is an advanced feature and is not required for operation). `@preload()` can be disabled for certain "Back" navigation cases by passing `instantBack` property to a `<Link/>` (e.g. for links on search results pages).
 
@@ -788,14 +788,14 @@ To run `@preload()` only on client side pass the second `{ client: true }` optio
 
 For example, a web application could be hosted entirely statically in a cloud like Amazon S3 and fetch data using a separately hosted API like Amazon Lambda. This kind of setup is quite popular due to being simple and cheap. Yes, it's not a true isomorphic approach because the user is given a blank page first and then some `main.js` script fetches the page data in the browser. But, as being said earlier, this kind of setup is rediculously simple to build and cheap to maintain so why not. Yes, Google won't index such websites, but if searchability is not a requirement (yet) then it's the way to go (e.g. "MVP"s).
 
-Specifying `{ client: true }` option for each `@preload()` would result in a lot of copy-pasta so there's a [special configuration option](https://github.com/catamphetamine/react-application/blob/master/README-ADVANCED.md#all-react-applicationjs-settings) for that: `{ preload: { client: true } }`.
+Specifying `{ client: true }` option for each `@preload()` would result in a lot of copy-pasta so there's a [special configuration option](https://github.com/catamphetamine/react-website/blob/master/README-ADVANCED.md#all-react-websitejs-settings) for that: `{ preload: { client: true } }`.
 
 ### `@preload()` indicator
 
 Sometimes preloading a page can take some time to finish so one may want to (and actually should) add some kind of a "spinner" to inform the user that the application isn't frozen and the navigation process needs some more time to finish. This can be achieved by adding a Redux reducer listening to these three Redux events:
 
 ```javascript
-import { PRELOAD_STARTED, PRELOAD_FINISHED, PRELOAD_FAILED } from 'react-application'
+import { PRELOAD_STARTED, PRELOAD_FINISHED, PRELOAD_FAILED } from 'react-website'
 
 export default function(state = {}, action = {}) {
   switch (action.type) {
@@ -877,7 +877,7 @@ export default (
 Use `@meta(state => ...)` decorator for adding `<title/>` and `<meta/>` tags:
 
 ```js
-import { meta } from 'react-application'
+import { meta } from 'react-website'
 
 @meta(({ state, location, parameters }) => ({
   // `<meta property="og:site_name" .../>`
@@ -992,7 +992,7 @@ export default class Component extends React.Component {
 These two helper Redux actions change the current location (both on client and server).
 
 ```javascript
-import { goto, redirect } from 'react-application'
+import { goto, redirect } from 'react-website'
 import { connect } from 'react-redux'
 
 // Usage example
@@ -1013,7 +1013,7 @@ A sidenote: these two functions aren't supposed to be used inside `onEnter` and 
 Alternatively, if the current location needs to be changed while still staying at the same page (e.g. a checkbox has been ticked and the corresponding URL query parameter must be added), then use `pushLocation(location, history)` or `replaceLocation(location, history)`.
 
 ```javascript
-import { pushLocation, replaceLocation } from 'react-application'
+import { pushLocation, replaceLocation } from 'react-website'
 import { withRouter } from 'react-router'
 
 @withRouter
@@ -1033,7 +1033,7 @@ class Page extends Component {
 
 ## Performance and Caching
 
-React Server-Side Rendering can be CPU intensive, so I prefer setting `hollow: true` flag to move all React rendering to the web browser. This approach has virtually no complications. There are still numerous (effective) approaches to speeding up React Server Side Rendering like leveraging component markup caching or even swapping the default React renderer with a faster stripped down custom one. [Read more](https://github.com/catamphetamine/react-application/blob/master/PERFORMANCE.md).
+React Server-Side Rendering can be CPU intensive, so I prefer setting `hollow: true` flag to move all React rendering to the web browser. This approach has virtually no complications. There are still numerous (effective) approaches to speeding up React Server Side Rendering like leveraging component markup caching or even swapping the default React renderer with a faster stripped down custom one. [Read more](https://github.com/catamphetamine/react-website/blob/master/PERFORMANCE.md).
 
 ## Monitoring
 
@@ -1112,17 +1112,17 @@ HMR setup for Redux reducers is as simple as adding `store.hotReload()` (as show
 #### application.js
 
 ```js
-import { render } from 'react-application'
-import settings from './react-application'
+import { render } from 'react-website'
+import settings from './react-website'
 
 render(settings).then(({ store, rerender }) => {
   if (module.hot) {
-    module.hot.accept('./react-application', () => {
+    module.hot.accept('./react-website', () => {
       rerender()
       // Update reducer (for Webpack 2 ES6)
       store.hotReload(settings.reducer)
       // Update reducer (for Webpack 1)
-      // store.hotReload(require('./react-application').reducer)
+      // store.hotReload(require('./react-website').reducer)
     })
   }
 })
@@ -1217,7 +1217,7 @@ if (module.hot) {
 `websocket()` helper sets up a WebSocket connection. 
 
 ```js
-import { render, websocket } from 'react-application'
+import { render, websocket } from 'react-website'
 
 render(settings).then(({ store, protectedCookie }) => {
   websocket({
@@ -1403,7 +1403,7 @@ npm install s3 --save
 // The following code hasn't been tested but it used to work
 
 import path from 'path'
-import { snapshot, upload, S3Uploader, copy, download } from 'react-application/static-site-generator'
+import { snapshot, upload, S3Uploader, copy, download } from 'react-website/static-site-generator'
 
 import configuration from '../configuration'
 
@@ -1468,7 +1468,7 @@ If you're using Webpack then make sure you either build your server-side code wi
 
 ## Advanced
 
-At some point in time this README became huge so I extracted some less relevant parts of it into [README-ADVANCED](https://github.com/catamphetamine/react-application/blob/master/README-ADVANCED.md) (including the list of all possible settings and options). If you're a first timer then just skip that one.
+At some point in time this README became huge so I extracted some less relevant parts of it into [README-ADVANCED](https://github.com/catamphetamine/react-website/blob/master/README-ADVANCED.md) (including the list of all possible settings and options). If you're a first timer then just skip that one.
 
 ## Contributing
 
