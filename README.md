@@ -291,6 +291,8 @@ function asynchronousAction() {
 }
 ```
 
+`dispatch(asynchronousAction())` call returns the `Promise` itself.
+
 ### HTTP utility
 
 Because in almost all cases dispatching an "asynchronous action" means "making an HTTP request", the `promise` function described above always takes an `http` utility parameter: `promise: ({ http }) => ...`.
@@ -321,7 +323,8 @@ function fetchFriends(personId, gender) {
 }
 ```
 
-Or using plain `Promise`s (for those who prefer)
+<details>
+<summary>Or using plain `Promise`s (for those who prefer)</summary>
 
 ```js
 function fetchFriends(personId, gender) {
@@ -331,6 +334,9 @@ function fetchFriends(personId, gender) {
   }
 }
 ```
+</details>
+
+####
 
 The possible `options` (the third argument of all `http` methods) are
 
@@ -769,13 +775,13 @@ By default, when using `http` utility all JSON responses get parsed for javascri
 
 ## Page preloading
 
-For page preloading consider using `@preload()` helper to load the neccessary data before the page is rendered.
+For page preloading use the `@preload()` helper to load the neccessary data before the page is rendered.
 
 ```javascript
 import { connect } from 'react-redux'
 import { meta, preload } from 'react-website'
 
-// fetches the list of users from the server
+// Fetches the list of users from the server
 function fetchUsers() {
   return {
     promise: ({ http }) => http.get('/api/users'),
@@ -783,7 +789,7 @@ function fetchUsers() {
   }
 }
 
-@preload(({ dispatch }) => dispatch(fetchUsers))
+@preload(async ({ dispatch }) => await dispatch(fetchUsers))
 @meta(({ state }) => ({ title: 'Users' }))
 @connect(
   state => ({ users: state.users.users }),
@@ -805,26 +811,20 @@ export default class Page extends Component {
 
 In the example above `@preload()` helper is called to preload a web page before it is displayed, i.e. before the page is rendered (both on server side and on client side).
 
-[`@preload()` decorator](https://github.com/catamphetamine/react-website/blob/master/source/redux/preload.js) takes a function which must return a `Promise`:
+[`@preload()` decorator](https://github.com/catamphetamine/react-website/blob/master/source/redux/preload.js) takes an `async`/`await` function:
+
+```javascript
+@preload(async ({ dispatch, getState, location, parameters, server }) => {
+  await dispatch(fetchWhatever(parameters.id))
+})
+```
+
+Alternatively, pure `Promise`s can be used (for those who prefer):
 
 ```javascript
 @preload(function({ dispatch, getState, location, parameters, server }) {
   return Promise.resolve()
 })
-```
-
-Alternatively, `async/await` syntax may be used:
-
-```javascript
-@preload(async ({ dispatch, getState, location, parameters, server }) => {
-  await fetchWhatever(parameters.id)
-})
-```
-
-When `dispatch` is called with a special "asynchronous" action (having `promise` and `events` properties, as discussed above) then such a `dispatch()` call will return a `Promise`, that's why in the example above it's written simply as:
-
-```js
-@preload(({ dispatch }) => dispatch(fetchUsers))
 ```
 
 Note: `transform-decorators-legacy` Babel plugin is needed at the moment to make decorators work in Babel:
@@ -846,7 +846,7 @@ npm install babel-plugin-transform-decorators-legacy --save
 }
 ```
 
-On the client side, in order for `@preload` to work all `<Link/>`s imported from `react-router` **must** be instead imported from `react-website`. Upon a click on a `<Link/>` first it waits for the next page to preload, and then, when the next page is fully loaded, it is displayed to the user and the URL in the address bar is updated.
+On the client side, in order for `@preload` to work all `<Link/>`s imported from `react-router` **must** be instead imported from `react-website` package. Upon a click on a `<Link/>` first it waits for the next page to preload, and then, when the next page is fully loaded, it is displayed to the user and the URL in the address bar is updated.
 
 `@preload()` also works for Back/Forward web browser buttons navigation. If one `@preload()` is in progress and another `@preload()` starts (e.g. Back/Forward browser buttons) the first `@preload()` will be cancelled if `bluebird` `Promise`s are used in the project and also if `bluebird` is configured for [`Promise` cancellation](http://bluebirdjs.com/docs/api/cancellation.html) (this is an advanced feature and is not required for operation). `@preload()` can be disabled for certain "Back" navigation cases by passing `instantBack` property to a `<Link/>` (e.g. for links on search results pages).
 
