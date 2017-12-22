@@ -603,9 +603,10 @@ export default class BlogPostPage extends Component {
 </details>
 
 <br/>
-Redux module can also handle synchronous actions along with asynchronous ones
-<br/>
-<br/>
+Redux module can also handle synchronous actions along with asynchronous ones:
+
+<details>
+<summary>See how</summary>
 
 ```js
 import { reduxModule } from 'react-website'
@@ -631,6 +632,8 @@ const redux = reduxModule('NOTIFICATIONS')
 //     message: action.message
 //   }
 //
+// Call it as `dispatch(notify(message))`.
+//
 export const notify = redux.action('NOTIFY', {
   // The Redux action payload (i.e. everything except `type`)
   payload : (message) => ({ message }),
@@ -653,6 +656,7 @@ export const properties = redux.getProperties
 // handles the actions defined above.
 export default redux.reducer()
 ```
+</details>
 
 ### HTTP utility authentication token
 
