@@ -324,7 +324,7 @@ function fetchFriends(personId, gender) {
 ```
 
 <details>
-<summary>Or using plain `Promise`s (for those who prefer)</summary>
+<summary>Or using plain Promises (for those who prefer)</summary>
 
 ```js
 function fetchFriends(personId, gender) {
@@ -665,7 +665,7 @@ export default redux.reducer()
 ```
 </details>
 
-### HTTP utility authentication token
+### HTTP authentication
 
 In order for `http` utility calls to send an authentication token as part of an HTTP request (the `Authorization: Bearer ${token}` HTTP header) the `authentication.accessToken()` function must be specified in `react-website.js`.
 
@@ -682,7 +682,7 @@ In order for `http` utility calls to send an authentication token as part of an 
 }
 ```
 
-### HTTP utility and URLs
+### HTTP request URLs
 
 All URLs queried via `http` utility are supposed to be relative ones (e.g. `/api/users/list`) for convenience. In order to transform these convenient relative URLs into real ones there are two approaches built-in.
 
@@ -819,13 +819,17 @@ In the example above `@preload()` helper is called to preload a web page before 
 })
 ```
 
-Alternatively, pure `Promise`s can be used (for those who prefer):
+<details>
+<summary>Or using plain Promises (for those who prefer)</summary>
 
 ```javascript
 @preload(function({ dispatch, getState, location, parameters, server }) {
   return Promise.resolve()
 })
 ```
+</details>
+
+####
 
 Note: `transform-decorators-legacy` Babel plugin is needed at the moment to make decorators work in Babel:
 
@@ -848,17 +852,25 @@ npm install babel-plugin-transform-decorators-legacy --save
 
 On the client side, in order for `@preload` to work all `<Link/>`s imported from `react-router` **must** be instead imported from `react-website` package. Upon a click on a `<Link/>` first it waits for the next page to preload, and then, when the next page is fully loaded, it is displayed to the user and the URL in the address bar is updated.
 
-`@preload()` also works for Back/Forward web browser buttons navigation. If one `@preload()` is in progress and another `@preload()` starts (e.g. Back/Forward browser buttons) the first `@preload()` will be cancelled if `bluebird` `Promise`s are used in the project and also if `bluebird` is configured for [`Promise` cancellation](http://bluebirdjs.com/docs/api/cancellation.html) (this is an advanced feature and is not required for operation). `@preload()` can be disabled for certain "Back" navigation cases by passing `instantBack` property to a `<Link/>` (e.g. for links on search results pages).
+`@preload()` also works for Back/Forward web browser buttons navigation.
 
 To run `@preload()` only on client side pass the second `{ client: true }` options argument to it
 
 ```js
-@preload(({ dispatch }) => dispatch(loadContent()), { client: true })
+@preload(async ({ dispatch }) => await dispatch(loadContent()), { client: true })
 ```
 
-For example, a web application could be hosted entirely statically in a cloud like Amazon S3 and fetch data using a separately hosted API like Amazon Lambda. This kind of setup is quite popular due to being simple and cheap. Yes, it's not a true isomorphic approach because the user is given a blank page first and then some `main.js` script fetches the page data in the browser. But, as being said earlier, this kind of setup is rediculously simple to build and cheap to maintain so why not. Yes, Google won't index such websites, but if searchability is not a requirement (yet) then it's the way to go (e.g. "MVP"s).
+For example, a web application could be hosted entirely statically in a cloud like Amazon S3 and fetch data using an API hosted separately in a cloud like Amazon Lambda. This kind of setup is quite popular due to being simple and cheap. Yes, it's not a true Server-Side Rendered approach because the user is given a blank page first and then some `main.js` script fetches the page data in the browser. But, as being said earlier, this kind of setup is rediculously simple to build and cheap to maintain. Google won't index such websites, but if searchability is not a requirement (yet) then it's the way to go (e.g. startup "MVP"s).
 
-Specifying `{ client: true }` option for each `@preload()` would result in a lot of copy-pasta so there's a [special configuration option](https://github.com/catamphetamine/react-website/blob/master/README-ADVANCED.md#all-react-websitejs-settings) for that: `{ preload: { client: true } }`.
+Specifying `{ client: true }` option for each `@preload()` would result in a lot of copy-pasta so there's a [special configuration option](https://github.com/catamphetamine/react-website/blob/master/README-ADVANCED.md#all-react-websitejs-settings) for that:
+
+```js
+{
+  preload: {
+    client: true
+  }
+}
+```
 
 ### `@preload()` indicator
 
@@ -993,12 +1005,6 @@ export default function Container(props) {
 
 ```js
 import React from 'react'
-
-// `withRouter` is available in `react-router@3.0`.
-//
-// For `2.x` versions just use `this.context.router` property:
-// static contextTypes = { router: PropTypes.func.isRequired }
-//
 import { withRouter } from 'react-router'
 
 // Using `babel-plugin-transform-decorators-legacy`
@@ -1056,13 +1062,9 @@ class Page extends Component {
 }
 ```
 
-## Performance and Caching
-
-React Server-Side Rendering can be CPU intensive, so I prefer setting `hollow: true` flag to move all React rendering to the web browser. This approach has virtually no complications. There are still numerous (effective) approaches to speeding up React Server Side Rendering like leveraging component markup caching or even swapping the default React renderer with a faster stripped down custom one. [Read more](https://github.com/catamphetamine/react-website/blob/master/PERFORMANCE.md).
-
 ## Monitoring
 
-For each page being rendered stats are reported if `stats()` parameter function is passed as part of the rendering service settings.
+For each page being rendered stats are reported if `stats()` parameter is passed as part of the rendering service settings.
 
 ```js
 {
@@ -1082,12 +1084,12 @@ The arguments for the `stats()` function are:
  * `route` — `react-router` route string (e.g. `/user/:userId/post/:postId`)
  * `time.initialize` — server side `initialize()` function execution time (if defined)
  * `time.preload` — page preload time
- * `time.render` — page React rendering time
  * `time.total` — total time spent preloading and rendering the page
 
-Rendering a complex React page (having more than 1000 components) takes about 100ms (`time.render`). This is quite slow but that's how React Server Side Rendering currently is.
+Rendering a complex React page (having more than 1000 components) takes about 30ms (as of 2017).
 
-Besides simply logging individual long-taking page renders one could also set up an overall Server Side Rendering performance monitoring using, for example, [StatsD](http://docs.datadoghq.com/guides/dogstatsd/)
+<details>
+<summary>One could also set up overall Server Side Rendering performance monitoring using, for example, <a href="http://docs.datadoghq.com/guides/dogstatsd/">StatsD</a></summary>
 
 ```js
 {
@@ -1127,6 +1129,7 @@ telegraf -input-filter statsd -output-filter file config > telegraf.conf
 telegraf -config telegraf.conf
 # Request a webpage and see rendering stats being output to the terminal.
 ```
+</details>
 
 ## Webpack HMR
 
@@ -1489,7 +1492,7 @@ run().catch((error) =>
 
 ## Bundlers
 
-If you're using Webpack then make sure you either build your server-side code with Webpack too (so that asset `require()` calls (images, styles, fonts, etc) inside React components work, see [universal-webpack](https://github.com/catamphetamine/universal-webpack)) or use something like [webpack-isomorphic-tools](https://github.com/catamphetamine/webpack-isomorphic-tools).
+If you're using Webpack then make sure you either build your server-side code with Webpack too (so that asset `require()` calls (images, styles, fonts, etc) inside React components work, see [universal-webpack](https://github.com/catamphetamine/universal-webpack)).
 
 ## Advanced
 
