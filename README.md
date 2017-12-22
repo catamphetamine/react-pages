@@ -269,16 +269,16 @@ This concludes the introductory part of the README and the rest is the descripti
 
 ## Asynchronous actions
 
-### Promise
+### Pure Promises
 
-If a Redux action creator returns an object with a `promise` (function) and `events` (array) then this action is assumed asynchronous.
+This is a low-level approach to asynchronous actions. It is described here just for academic purposes and most likely won't be used directly in any app.
+
+If a Redux "action creator" returns an object with a `promise` (function) and `events` (array) then `dispatch()`ing such an action results in the following steps:
 
  * An event of `type = events[0]` is dispatched
  * `promise` function gets called and returns a `Promise`
  * If the `Promise` succeeds then an event of `type = events[1]` is dispatched having `result` property set to the `Promise` result
  * If the `Promise` fails then an event of `type = events[2]` is dispatched having `error` property set to the `Promise` error
-
-Example:
 
 ```js
 function asynchronousAction() {
@@ -289,17 +289,26 @@ function asynchronousAction() {
 }
 ```
 
-This is a handy way of dealing with "asynchronous actions" in Redux, e.g. HTTP requests for a server-side HTTP REST API (see the "HTTP utility" section below).
-
-### Autogenerate event names
-
-When you find yourself copy-pasting those `_PENDING`, `_SUCCESS` and `_ERROR` event names from one action creator to another then take a look at `reduxEventNaming` setting described in the [All `react-website.js` settings](https://github.com/catamphetamine/react-website/blob/master/README-ADVANCED.md#all-react-websitejs-settings) section of the "advanced" readme: it lets a developer just supply a "base" `event` name and then it generates the three lifecycle event names from that "base" `event` significantly reducing boilerplate.
-
 ### HTTP utility
 
-For convenience, the argument of the `promise` function parameter of "asynchronous actions" described above is always the built-in `http` utility having methods `get`, `head`, `post`, `put`, `patch`, `delete`, each returning a `Promise` and taking three arguments: the `url` of the HTTP request, `parameters` object, and an `options` object. It can be used to easily query HTTP REST API endpoints in Redux action creators.
+Because in almost all cases dispatching an "asynchronous action" means "making an HTTP request", the `promise` function described above always takes an `http` utility parameter: `promise: ({ http }) => ...`.
 
-Using ES6 `async/await`:
+The `http` utility has the following methods:
+
+* `head`
+* `get`
+* `post`
+* `put`
+* `patch`
+* `delete`
+
+Each of these methods returns a `Promise` and takes three arguments:
+
+* the `url` of the HTTP request
+* `parameters` object (e.g. HTTP GET `query` or HTTP POST `body`)
+* `options` (described further)
+
+So, API endpoints can be queried using `http` and ES6 `async/await` like so:
 
 ```js
 function fetchFriends(personId, gender) {
@@ -316,7 +325,7 @@ Or using plain `Promise`s (for those who prefer)
 function fetchFriends(personId, gender) {
   return {
     promise: ({ http }) => http.get(`/api/person/${personId}/friends`, { gender }),
-    events: ['GET_FRIENDS_PENDING', 'GET_FRIENDS_SUCCESS', 'GET_FRIENDS_FAILURE']
+    events: ['FETCH_FRIENDS_PENDING', 'FETCH_FRIENDS_SUCCESS', 'FETCH_FRIENDS_FAILURE']
   }
 }
 ```
@@ -339,10 +348,87 @@ The possible `options` (the third argument of all `http` methods) are
 
 ### Asynchronous actions (better approach)
 
-Once one starts writing a lot of `http` calls in Redux actions it becomes obvious that there's **a lot** of copy-pasting and verbosity involved. To reduce those tremendous amounts of copy-pasta "redux module" tool may be used which:
+Once one starts writing a lot of `promise`/`http` Redux actions it becomes obvious that there's **a lot** of copy-pasting and verbosity involved. To reduce those tremendous amounts of copy-pasta "redux module" tool may be used which:
 
+* Also gives access to `http`
 * Autogenerates Redux action status event names ("pending", "success", "error")
 * Automatically populates the corresponding action status properties ("pending", "success", "error") in Redux state
+* Automatically adds Redux reducers for the action status events
+
+For example, the `fetchFriends()` action from the previous section can be rewritten as:
+
+Before:
+
+```js
+// ./actions/friends.js
+function fetchFriends(personId, gender) {
+  return {
+    promise: ({ http }) => http.get(`/api/person/${personId}/friends`, { gender }),
+    events: ['FETCH_FRIENDS_PENDING', 'FETCH_FRIENDS_SUCCESS', 'FETCH_FRIENDS_FAILURE']
+  }
+}
+
+// ./reducers/friends.js
+export default function(state = {}, action = {}) {
+  switch (action.type) {
+    case 'FETCH_FRIENDS_PENDING':
+      return {
+        ...state,
+        fetchFriendsPending: true,
+        fetchFriendsError: null
+      }
+    case 'FETCH_FRIENDS_SUCCESS':
+      return {
+        ...state,
+        fetchFriendsPending: false,
+        friends: action.result
+      }
+    case 'FETCH_FRIENDS_ERROR':
+      return {
+        ...state,
+        fetchFriendsPending: false,
+        fetchFriendsError: action.error
+      }
+    default
+      return state
+  }
+}
+```
+
+After:
+
+```js
+import { reduxModule, eventName } from 'react-website'
+
+const redux = reduxModule('FRIENDS')
+
+export const fetchFriends = redux.action(
+  'FETCH_FRIENDS',
+  async ({ http }, personId, gender) => {
+    return await http.get(`/api/person/${personId}/friends`, { gender })
+  },
+  {
+    // The fetched friends list will be placed
+    // into the `friends` Redux state property.
+    result: 'friends'
+    // 
+    // Or write it like this:
+    // result: {
+    //   friends: result => result
+    // }
+    //
+    // Or write it as an "on result" reducer:
+    // result: (state, result) => ({ ...state, friends: result })
+  }
+)
+```
+
+Much cleaner.
+
+<details>
+<summary>
+  Here's a more complex example: a comments page for a blog post.
+</summary>
 
 #### redux/blogPost.js
 
@@ -508,6 +594,7 @@ export default class BlogPostPage extends Component {
   }
 }
 ```
+</details>
 
 ### Synchronous actions
 
