@@ -810,7 +810,7 @@ export default class Page extends Component {
 
 In the example above `@preload()` helper is called to preload a web page before it is displayed, i.e. before the page is rendered (both on server side and on client side).
 
-[`@preload()` decorator](https://github.com/catamphetamine/react-website/blob/master/source/redux/preload.js) takes an `async`/`await` function:
+`@preload()` decorator takes an `async`/`await` function:
 
 ```javascript
 @preload(async ({ dispatch, getState, location, parameters, server }) => {
@@ -859,7 +859,7 @@ To run `@preload()` only on client side pass the second `{ client: true }` optio
 @preload(async ({ dispatch }) => await dispatch(loadContent()), { client: true })
 ```
 
-For example, a web application could be hosted entirely statically in a cloud like Amazon S3 and fetch data using an API hosted separately in a cloud like Amazon Lambda. This kind of setup is quite popular due to being simple and cheap. Yes, it's not a true Server-Side Rendered approach because the user is given a blank page first and then some `main.js` script fetches the page data in the browser. But, as being said earlier, this kind of setup is rediculously simple to build and cheap to maintain. Google won't index such websites, but if searchability is not a requirement (yet) then it's the way to go (e.g. startup "MVP"s).
+For example, a web application could be hosted entirely statically in a cloud like Amazon S3 and fetch data using an API hosted separately in a cloud like Amazon Lambda. This kind of setup is quite popular due to being simple and cheap. Yes, it's not a Server-Side Rendered approach because the user is given a blank page first and then some `bundle.js` script loads in the browser and fetches the data for the page. But, as said earlier, this kind of setup is simple to build and cheap to maintain. Google won't index such websites, but if searchability is not a requirement (yet) then it's the way to go (e.g. startup "MVP"s). Server-Side Rendering can be easily added to such setup should the need arise.
 
 Specifying `{ client: true }` option for each `@preload()` would result in a lot of copy-pasta so there's a [special configuration option](https://github.com/catamphetamine/react-website/blob/master/README-ADVANCED.md#all-react-websitejs-settings) for that:
 
