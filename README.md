@@ -711,14 +711,15 @@ The modern approach is to query API by an absolute URL (through CORS) in a cloud
 
 ### File upload
 
-The `http` utility will also upload files if they're passed as part of `parameters` (example below). Any of these types of file `parameters` are accepted:
+The `http` utility will also upload files if they're passed as part of `parameters` (see example below). The files passed inside `parameters` must have one of the following types:
 
-* In case of a [`File`](https://developer.mozilla.org/en-US/docs/Web/API/File) parameter it will be a single file upload.
-* In case of a [`FileList`](https://developer.mozilla.org/en-US/docs/Web/API/FileList) parameter with a single `File` inside it would be treated as a single `File`.
-* In case of a `FileList` parameter with multiple `File`s inside multiple file upload will be performed.
-* In case of an `<input type="file"/>` DOM element parameter its `.files` will be taken as a `FileList` parameter.
+* In case of a [`File`](https://developer.mozilla.org/en-US/docs/Web/API/File) it will be a single file upload.
+* In case of a [`FileList`](https://developer.mozilla.org/en-US/docs/Web/API/FileList) with a single `File` inside it would be treated as a single `File`.
+* In case of a `FileList` with multiple `File`s inside a multiple file upload will be performed.
+* In case of an `<input type="file"/>` DOM element all its `.files` will be taken as a `FileList` parameter.
 
-Progress can be metered by passing `progress` option as part of the `options` argument.
+<details>
+<summary>Progress can be metered by passing `progress` option as part of the `options` argument.</summary>
 
 ```js
 // React component
@@ -758,6 +759,7 @@ function uploadItemPhoto(itemId, file) {
   }
 }
 ```
+</details>
 
 ### JSON Date parsing
 
