@@ -603,7 +603,9 @@ export default class BlogPostPage extends Component {
 </details>
 
 <br/>
-Redux module can also handle synchronous actions along with asynchronous ones:
+Redux module can also handle synchronous actions along with asynchronous ones, should the need arise.
+<br/>
+<br/>
 
 <details>
 <summary>See how</summary>
