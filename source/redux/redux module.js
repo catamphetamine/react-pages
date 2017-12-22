@@ -21,7 +21,7 @@ class Redux_module
 	handlers = {}
 	registered_state_properties = []
 
-	constructor(namespace, settings)
+	constructor(namespace, settings = {})
 	{
 		// Sanity check
 		if (typeof namespace !== 'string')
