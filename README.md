@@ -1261,6 +1261,9 @@ render(settings).then(({ store, protectedCookie }) => {
 
 If `token` parameter is specified then it will be sent as part of every message (providing support for user authentication).
 
+<details>
+<summary>How to use WebSocket</summary>
+
 WebSocket will autoreconnect (with ["exponential backoff"](https://en.wikipedia.org/wiki/Exponential_backoff)) emitting `open` event every time it does.
 
 After the `websocket()` call a global `websocket` variable is created exposing the following methods:
@@ -1414,6 +1417,7 @@ function reducer(state, action) {
   }
 }
 ```
+</details>
 
 ## Static site generation
 
