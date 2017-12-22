@@ -1146,14 +1146,17 @@ render(settings).then(({ store, rerender }) => {
   if (module.hot) {
     module.hot.accept('./react-website', () => {
       rerender()
-      // Update reducer (for Webpack 2 ES6)
+      // Update reducer
       store.hotReload(settings.reducer)
-      // Update reducer (for Webpack 1)
-      // store.hotReload(require('./react-website').reducer)
     })
   }
 })
 ```
+
+<!--
+// Update reducer (for Webpack 1)
+// store.hotReload(require('./react-website').reducer)
+-->
 
 #### container.js
 
