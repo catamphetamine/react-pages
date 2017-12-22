@@ -1505,43 +1505,7 @@ If you're using Webpack then make sure you either build your server-side code wi
 
 ## Advanced
 
-At some point in time this README became huge so I extracted some less relevant parts of it into [README-ADVANCED](https://github.com/catamphetamine/react-website/blob/master/README-ADVANCED.md) (including the list of all possible settings and options). If you're a first timer then just skip that one.
-
-## Contributing
-
-After cloning this repo, ensure dependencies are installed by running:
-
-```sh
-npm install
-```
-
-This module is written in ES6 and uses [Babel](http://babeljs.io/) for ES5
-transpilation. Widely consumable JavaScript can be produced by running:
-
-```sh
-npm run build
-```
-
-Once `npm run build` has run, you may `import` or `require()` directly from
-node.
-
-After developing, the full test suite can be evaluated by running:
-
-```sh
-npm test
-```
-
-When you're ready to test your new functionality on a real project, you can run
-
-```sh
-npm pack
-```
-
-It will `build`, `test` and then create a `.tgz` archive which you can then install in your project folder
-
-```sh
-npm install [module name with version].tar.gz
-```
+At some point in time this README became huge so I extracted some less relevant parts of it into [README-ADVANCED](https://github.com/catamphetamine/react-website/blob/master/README-ADVANCED.md) (including the list of all possible settings and options). If you're a first timer then just skip that one - you don't need it for sure.
 
 ## License
 
