@@ -269,9 +269,11 @@ This concludes the introductory part of the README and the rest is the descripti
 
 ## Asynchronous actions
 
+Implementing synchronous actions in Redux is straightforward. But what about asynchronous actions like HTTP requests? Redux itself doesn't provide any built-in solution for that leaving it to 3rd party middlewares. Therefore this library provides one.
+
 ### Pure Promises
 
-This is a low-level approach to asynchronous actions. It is described here just for academic purposes and most likely won't be used directly in any app.
+This is the lowest-level approach to asynchronous actions. It is described here just for academic purposes and most likely won't be used directly in any app.
 
 If a Redux "action creator" returns an object with a `promise` (function) and `events` (array) then `dispatch()`ing such an action results in the following steps:
 
