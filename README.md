@@ -23,7 +23,7 @@ A complete solution for building a React/Redux application
 See [webpack-react-redux-isomorphic-render-example](https://github.com/catamphetamine/webpack-react-redux-isomorphic-render-example/tree/master/client/src)
 
 ```bash
-$ npm install react-website --save
+$ npm install react-website redux react-router@3 --save
 ```
 
 Start by creating a settings file (it configures both client side and server side)
