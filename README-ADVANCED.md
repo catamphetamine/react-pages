@@ -110,9 +110,9 @@ export default {
 
 ```js
 import { reduxModule, eventName } from 'react-website'
-import settings from './react-website-redux'
+import reduxSettings from './react-website-redux'
 
-const redux = reduxModule('BLOG_POST', settings)
+const redux = reduxModule('BLOG_POST', reduxSettings)
 ...
 ```
 

@@ -26,7 +26,7 @@ class Redux_module
 		// Sanity check
 		if (typeof namespace !== 'string')
 		{
-			throw new Error("`namespace: String` argument not passed to `reduxModule(namespace, settings)`")
+			throw new Error("`namespace: String` argument not passed to `reduxModule(namespace, [settings])`")
 		}
 
 		// This is later being read by `action()`s to reduce copy-pasta

@@ -347,10 +347,8 @@ Once one starts writing a lot of `http` calls in Redux actions it becomes obviou
 
 ```js
 import { reduxModule, eventName } from 'react-website'
-// (`./react-website-redux.js` settings file is described below)
-import settings from './react-website'
 
-const redux = reduxModule('BLOG_POST', settings)
+const redux = reduxModule('BLOG_POST')
 
 // Post comment Redux "action creator"
 export const postComment = redux.action(
@@ -516,9 +514,8 @@ For synchronous actions it's the same as for asynchronous ones (as described abo
 
 ```js
 import { reduxModule } from 'react-website'
-import settings from './react-website'
 
-const redux = reduxModule('NOTIFICATIONS', settings)
+const redux = reduxModule('NOTIFICATIONS')
 
 // Displays a notification.
 //
