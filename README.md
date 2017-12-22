@@ -800,8 +800,8 @@ export default class Page extends Component {
     const { users, fetchUsers } = this.props
     return (
       <div>
-        <ul>{ users.map(user => <li>{ user.name }</li>) }</ul>
-        <button onClick={ fetchUsers }>Refresh</button>
+        <ul> { users.map(user => <li> { user.name } </li>) } </ul>
+        <button onClick={ fetchUsers }> Refresh </button>
       </div>
     )
   }
