@@ -1183,11 +1183,7 @@ export default function Container({ store, children }) {
 {
   "presets": [
     "react",
-    // For Webpack 2 ES6:
-    ["es2015", { modules: false }],
-    // For Webpack 1:
-    // "es2015",
-    "stage-2"
+    ["env", { modules: false }],
   ],
 
   "plugins": [
@@ -1203,11 +1199,10 @@ export default function Container({ store, children }) {
 export default {
   entry: {
     main: [
+      'webpack-hot-middleware/client?path=http://localhost:8080/__webpack_hmr',
+      'babel-polyfill',
       // This line is required for `react-hot-loader@3`
       'react-hot-loader/patch',
-
-      'webpack-hot-middleware/client?http://localhost:8080',
-      'webpack/hot/only-dev-server',
       './src/client/index.js'
     ]
   },
@@ -1219,7 +1214,10 @@ export default {
 }
 ```
 
-P.S.: Currently it says `Warning: [react-router] You cannot change <Router routes>; it will be ignored` in the browser console. I'm just ignoring this for now, maybe I'll find a proper fix later. Currently I'm using this hacky workaround in `./src/client/index.js`:
+P.S.: Currently it says `Warning: [react-router] You cannot change <Router routes>; it will be ignored` in the browser console. I'm just ignoring this for now, maybe I'll find a proper fix later.
+
+<details>
+<summary>Currently I'm using this hacky workaround in <code>./src/client/index.js</code></summary>
 
 ```js
 /**
@@ -1241,6 +1239,7 @@ if (module.hot) {
   };
 }
 ```
+</details>
 
 ## WebSocket
 
