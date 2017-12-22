@@ -206,6 +206,7 @@ The old-school way is to set up a "proxy server" like [NginX](https://www.sep.co
 
 <details>
   <summary>The old-school way</summary>
+
 ```nginx
 server {
   # Web server listens on port 80
