@@ -310,7 +310,7 @@ Each of these methods returns a `Promise` and takes three arguments:
 * `parameters` object (e.g. HTTP GET `query` or HTTP POST `body`)
 * `options` (described further)
 
-So, API endpoints can be queried using `http` and ES6 `async/await` like so:
+So, API endpoints can be queried using `http` and ES6 `async/await` syntax like so:
 
 ```js
 function fetchFriends(personId, gender) {
@@ -348,9 +348,9 @@ The possible `options` (the third argument of all `http` methods) are
 `http` utility is also available from anywhere on the client side via an exported `getHttpClient()` function (e.g. for bootstrapping).
 -->
 
-### Asynchronous actions (better approach)
+### Redux module
 
-Once one starts writing a lot of `promise`/`http` Redux actions it becomes obvious that there's **a lot** of copy-pasting and verbosity involved. To reduce those tremendous amounts of copy-pasta "redux module" tool may be used which:
+Once one starts writing a lot of `promise`/`http` Redux actions it becomes obvious that there's a lot of copy-pasting and verbosity involved. To reduce those tremendous amounts of copy-pasta "redux module" tool may be used which:
 
 * Also gives access to `http`
 * Autogenerates Redux action status event names ("pending", "success", "error")
@@ -400,7 +400,7 @@ export default function(state = {}, action = {}) {
 After:
 
 ```js
-import { reduxModule, eventName } from 'react-website'
+import { reduxModule } from 'react-website'
 
 const redux = reduxModule('FRIENDS')
 
@@ -423,13 +423,17 @@ export const fetchFriends = redux.action(
     // result: (state, result) => ({ ...state, friends: result })
   }
 )
+
+// This is the Redux reducer which now
+// handles the asynchronous action defined above.
+export default redux.reducer()
 ```
 
 Much cleaner.
 
 <details>
 <summary>
-  Here's a more complex example: a comments page for a blog post.
+  Here's a more complex example: a comments section for a blog post page.
 </summary>
 
 #### redux/blogPost.js
@@ -598,9 +602,7 @@ export default class BlogPostPage extends Component {
 ```
 </details>
 
-### Synchronous actions
-
-For synchronous actions it's the same as for asynchronous ones (as described above):
+Redux module can also handle synchronous actions along with asynchronous ones
 
 ```js
 import { reduxModule } from 'react-website'
