@@ -698,7 +698,8 @@ const server = webpageServer(settings, {
 ```
 </details>
 
-<br/>
+####
+
 The modern approach is to query API by an absolute URL (through CORS) in a cloud. In this case all URLs are transformed from relative ones into absolute ones by the `http.url(path)` parameter configured in `react-website.js`.
 
 ```js
