@@ -605,6 +605,7 @@ export default class BlogPostPage extends Component {
 <br/>
 Redux module can also handle synchronous actions along with asynchronous ones
 <br/>
+<br/>
 
 ```js
 import { reduxModule } from 'react-website'
