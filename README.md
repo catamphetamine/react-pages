@@ -1501,7 +1501,7 @@ run().catch((error) =>
 
 ## Bundlers
 
-If you're using Webpack then make sure you either build your server-side code with Webpack too (so that asset `require()` calls (images, styles, fonts, etc) inside React components work, see [universal-webpack](https://github.com/catamphetamine/universal-webpack)).
+If you're using Webpack then make sure you either build your server-side code with Webpack too so that asset `require()` calls (images, styles, fonts, etc) inside React components work (see [universal-webpack](https://github.com/catamphetamine/universal-webpack), for example).
 
 ## Advanced
 
