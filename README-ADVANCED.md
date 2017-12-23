@@ -170,10 +170,10 @@ try {
   // (either a `<Route/>` element or a
   //  `function({ dispatch, getState })`
   //  returning a `<Route/>` element)
-  routes: require('./src/client/routes')
+  routes: require('./src/routes')
 
   // Redux reducers (an object)
-  reducer: require('./src/client/redux/reducers')
+  reducer: require('./src/redux/index')
   
   // A React component.
   //
@@ -187,7 +187,7 @@ try {
   //
   // export default ({ store, children }) => <Provider store={ store }>{ children }</Provider>
   //
-  container: require('./src/client/container')
+  container: require('./src/Container')
 
   // (optional)
   // User can add custom Redux middleware

@@ -32,12 +32,12 @@ Start by creating a settings file (it configures both client side and server sid
 
 ```javascript
 // React-router v3 routes
-import routes from './src/client/routes'
+import routes from './src/routes'
 
 // Redux reducers
 // (they will be combined into the
 //  root Redux reducer via `combineReducers()`)
-import reducers from './src/client/redux/reducers'
+import reducers from './src/redux/index'
 
 export default {
   routes,
@@ -45,7 +45,7 @@ export default {
 }
 ```
 
-#### ./src/client/routes.js
+#### ./src/routes.js
 
 ```js
 import React from 'react'
@@ -64,7 +64,7 @@ export default (
 )
 ```
 
-#### ./src/client/App.js
+#### ./src/App.js
 
 ```js
 import React from 'react'
@@ -80,7 +80,7 @@ export default ({ children }) => (
 )
 ```
 
-#### ./src/client/pages/Home.js
+#### ./src/pages/Home.js
 
 ```js
 import React from 'react'
@@ -88,7 +88,7 @@ import React from 'react'
 export default () => <div> This is a home page </div>
 ```
 
-#### ./src/client/pages/About.js
+#### ./src/pages/About.js
 
 ```js
 import React from 'react'
@@ -96,7 +96,7 @@ import React from 'react'
 export default () => <div> Made using `react-website` </div>
 ```
 
-#### ./src/client/redux/reducers/index.js
+#### ./src/redux/index.js
 
 ```js
 export { default as pageOne } from './pageOneReducer'
@@ -106,7 +106,7 @@ export { default as pageTwo } from './pageTwoReducer'
 
 Then call `render()` in the main client-side javascript file.
 
-#### ./src/client/index.js
+#### ./src/index.js
 
 ```javascript
 import { render } from 'react-website'
@@ -130,7 +130,7 @@ And the `index.html` would look like this:
 </html>
 ```
 
-Where `bundle.js` is the `./src/client/index.js` file built with Webpack (or you could use any other javascript bundler).
+Where `bundle.js` is the `./src/index.js` file built with Webpack (or you could use any other javascript bundler).
 
 Now, `index.html` and `bundle.js` files must be served over HTTP(S). If you're using Webpack then place `index.html` to Webpack's `configuration.output.path` folder and run [`webpack-dev-server`](https://webpack.js.org/guides/development/#webpack-dev-server): it will serve `index.html` from disk and `bundle.js` from memory.
 
@@ -1158,7 +1158,7 @@ render(settings).then(({ store, rerender }) => {
 // store.hotReload(require('./react-website').reducer)
 -->
 
-#### container.js
+#### Container.js
 
 ```js
 import React from 'react'
@@ -1203,7 +1203,7 @@ export default {
       'babel-polyfill',
       // This line is required for `react-hot-loader@3`
       'react-hot-loader/patch',
-      './src/client/index.js'
+      './src/index.js'
     ]
   },
   plugins: [
@@ -1217,7 +1217,7 @@ export default {
 P.S.: Currently it says `Warning: [react-router] You cannot change <Router routes>; it will be ignored` in the browser console. I'm just ignoring this for now, maybe I'll find a proper fix later.
 
 <details>
-<summary>Currently I'm using this hacky workaround in <code>./src/client/index.js</code></summary>
+<summary>Currently I'm using this hacky workaround in <code>./src/index.js</code></summary>
 
 ```js
 /**
