@@ -231,6 +231,7 @@ function fetchUsers() {
   // Queries the HTTP API for a list of users.
   // The result is placed in the `users` property
   // of the `usersPage` reducer.
+  ...
 }
 
 @preload(async ({ dispatch }) => {
