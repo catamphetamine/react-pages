@@ -234,7 +234,7 @@ function fetchUsers() {
 }
 
 @preload(async ({ dispatch }) => {
-  // HTTP request sent
+  // Send HTTP request
   dispatch(fetchUsers())
   // Wait for HTTP response
   await ...
