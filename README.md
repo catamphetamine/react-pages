@@ -233,7 +233,12 @@ function fetchUsers() {
   // of the `usersPage` reducer.
 }
 
-@preload(async ({ dispatch }) => await dispatch(fetchUsers()))
+@preload(async ({ dispatch }) => {
+  // HTTP request sent
+  dispatch(fetchUsers())
+  // Wait for HTTP response
+  await ...
+})
 @connect(
   (state) => ({ users: state.usersPage.users }),
   // Calls `bindActionCreators()`
