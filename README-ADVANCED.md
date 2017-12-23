@@ -122,6 +122,75 @@ Notice the extraction of these two configuration parameters (`reduxEventNaming` 
 
 If one `@preload()` is in progress and another `@preload()` starts (e.g. Back/Forward browser buttons) the first `@preload()` will be cancelled if `bluebird` `Promise`s are used in the project and also if `bluebird` is configured for [`Promise` cancellation](http://bluebirdjs.com/docs/api/cancellation.html) (this is an advanced feature and is not required for operation). `@preload()` can be disabled for certain "Back" navigation cases by passing `instantBack` property to a `<Link/>` (e.g. for links on search results pages).
 
+### Serving assets and API
+
+In the introductory part of the README "static" files (assets) are served by `webpack-dev-server` on `localhost:8080`. It's for local development only. For production these "static" files must be served by someone else, be it a dedicated proxy server like NginX or (recommended) a cloud-based solution like Amazon S3.
+
+Also, a real-world website most likely has some kind of an API, which, again, could be either a dedicated API server (e.g. written in Golang), a simple Node.js application or a modern "serverless" API like [Amazon Lambda](https://aws.amazon.com/lambda) deployed using [`apex`](https://github.com/apex/apex) and hosted in the cloud.
+
+#### The old-school way
+
+The old-school way is to set up a "proxy server" like [NginX](https://www.sep.com/sep-blog/2014/08/20/hosting-the-node-api-in-nginx-with-a-reverse-proxy/) dispatching all incoming HTTP requests: serving "static" files, redirecting to the API server for `/api` calls, etc.
+
+<details>
+  <summary>The old-school way</summary>
+
+```nginx
+server {
+  # Web server listens on port 80
+  listen 80;
+
+  # Serving "static" files (assets)
+  location /assets/ {
+    root "/filesystem/path/to/static/files";
+  }
+
+  # By default everything goes to the page rendering service
+  location / {
+    proxy_pass http://localhost:3001;
+  }
+
+  # Redirect "/api" requests to API service
+  location /api {
+    rewrite ^/api/?(.*) /$1 break;
+    proxy_pass http://localhost:3000;
+  }
+}
+```
+
+A quick Node.js proxy server could also be made up for development purposes using [http-proxy](https://github.com/nodejitsu/node-http-proxy) library.
+
+```js
+const path = require('path')
+const express = require('express')
+const httpProxy = require('http-proxy')
+
+// Use Express or Koa, for example
+const app = express()
+const proxy = httpProxy.createProxyServer({})
+
+// Serve static files
+app.use('/assets', express.static(path.join(__dirname, '../build')))
+
+// Proxy `/api` calls to the API service
+app.use('/api', function(request, response) {
+  proxy.web(request, response, { target: 'http://localhost:3001' })
+})
+
+// Proxy all other HTTP requests to webpage rendering service
+app.use(function(request, response) {
+  proxy.web(request, response, { target: 'http://localhost:3000' })
+})
+
+// Web server listens on port `80`
+app.listen(80)
+```
+</details>
+
+#### The modern way
+
+The modern way is not using any "proxy servers" at all. Instead everything is distributed and decentralized. Webpack-built assets are uploaded to the cloud (e.g. Amazon S3) and webpack configuration option `.output.publicPath` is set to something like `https://s3-ap-southeast-1.amazonaws.com/my-bucket/folder-1/` (your CDN URL) so now serving "static" files is not your job – your only job is to upload them to the cloud after Webpack build finishes. API is dealt with in a similar way: CORS headers are set up to allow querying directly from a web browser by an absolute URL and the API is either hosted as a standalone API server or run "serverless"ly, say, on Amazon Lambda, and is queried by an absolute URL, like `https://at9y1jpex0.execute-api.us-east-1.amazonaws.com/master/users/list`.
+
 ## Internal `render()` function
 
 For some advanced use cases (though most likely no one's using this) the internal `render()` function is exposed.
@@ -323,12 +392,6 @@ try {
     {
       helper: require('./helper')
     }
-
-    // Sets `{ client: true }` option for all `@preload()`s.
-    // Should be set when the application is client-side only
-    // (e.g. hosted entirely on an Amazon S3 cloud).
-    client: true
-    // (is `false` by default)
   }
 
   // (optional)

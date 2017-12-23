@@ -20,13 +20,13 @@ A complete solution for building a React/Redux application
 
 ## Getting started
 
-See [webpack-react-redux-isomorphic-render-example](https://github.com/catamphetamine/webpack-react-redux-isomorphic-render-example/tree/master/client/src)
-
 ```bash
-$ npm install react-website redux react-router@3 --save
+$ npm install react-website --save
+$ npm install redux react-redux --save
+$ npm install react-router@3 --save
 ```
 
-Start by creating a settings file (it configures both client side and server side)
+Start by creating the configuration file
 
 #### react-website.js
 
@@ -68,13 +68,15 @@ export default (
 
 ```js
 import React from 'react'
-import { Link } from 'react-website'
+import { IndexLink, Link } from 'react-website'
 
 export default ({ children }) => (
   <div>
     <h1> Web Application </h1>
-    <Link to="/"> Home </Link>
-    <Link to="/about"> About </Link>
+    <ul>
+      <li> <IndexLink> Home </IndexLink> </li>
+      <li> <Link to="/about"> About </Link> </li>
+    </ul>
     { children }
   </div>
 )
@@ -99,8 +101,10 @@ export default () => <div> Made using `react-website` </div>
 #### ./src/redux/index.js
 
 ```js
-export { default as pageOne } from './pageOneReducer'
-export { default as pageTwo } from './pageTwoReducer'
+// For those who're unfamiliar with Redux,
+// a reducer is a function `(state, action) => state`.
+export { default as homePage } from './homePageReducer'
+export { default as aboutPage } from './aboutPageReducer'
 ...
 ```
 
@@ -132,9 +136,11 @@ And the `index.html` would look like this:
 
 Where `bundle.js` is the `./src/index.js` file built with Webpack (or you could use any other javascript bundler).
 
-Now, `index.html` and `bundle.js` files must be served over HTTP(S). If you're using Webpack then place `index.html` to Webpack's `configuration.output.path` folder and run [`webpack-dev-server`](https://webpack.js.org/guides/development/#webpack-dev-server): it will serve `index.html` from disk and `bundle.js` from memory.
+Now, `index.html` and `bundle.js` files must be served over HTTP(S). If you're using Webpack then place `index.html` to Webpack's `configuration.output.path` folder and run [`webpack-dev-server`](https://webpack.js.org/guides/development/#webpack-dev-server) in a terminal: it will serve `index.html` from disk and `bundle.js` from memory.
 
-Now go to `localhost:8080`. It should respond with a rendered home page. The application should work now and can be deployed as-is being uploaded to a cloud and served statically (which is very cheap).
+Now go to `localhost:8080`. It should respond with a fully working website.
+
+The application (`index.html`, `bundle.js`) can now be deployed as-is in a cloud (e.g. on Amazon S3) and served statically for a very low price. The API can be hosted "serverlessly" in a cloud (e.g. Amazon Lambda) which is also considered cheap. No running Node.js server is required. Yes, it's not a Server-Side Rendered approach because a user is given a blank page first, then `bundle.js` script is loaded by the web browser, then this script is executed and it fetches the data for the page from the API, and only then the page is rendered (in the browser). Google won't index such websites, but if searchability is not a requirement (at all or yet) then that would be the way to go (e.g. startup "MVP"s or "internal applications"). Server-Side Rendering can be easily added to such setup should the need arise.
 
 ## Server Side Rendering
 
@@ -144,7 +150,7 @@ Search engine crawlers like Google bot won't wait for a page to make its asynchr
 
 So the only thing preventing a dynamic website from being indexed by a crawler is asynchronous HTTP queries for data, not javascript itself. This therefore brings two solutions: one is to perform everything (routing, data fetching, rendering) on the server side and the other is to perform routing and data fetching on the server side leaving rendering to the client's web browser. Both these approaches work with web crawlers. And this is what this library provides.
 
-While the first approach is more elegant and pure, while also delivering the fastest "time to first byte", currently it is a CPU intensive task to render a complex React page (takes about 30 milliseconds of blocking CPU single core time for complex pages having more than 1000 components, as of 2017). Therefore one may prefer the second approach: performing routing and page preloading on the server side while leaving page rendering to the client. This means that the user won't see any content until the javascript bundle is downloaded (which takes some time, especially with large applications not using "code splitting"), but it also means that the server's CPU is freed from rendering React. This mode is activated by passing `hollow: true` flag (described later in this document).
+While the first approach is more elegant and pure, while also delivering the fastest "time to first byte", currently it is a CPU intensive task to render a complex React page (takes about 30 milliseconds of blocking CPU single core time for complex pages having more than 1000 components, as of 2017). Therefore one may prefer the second approach: performing routing and page preloading on the server side while leaving page rendering to the client. This means that the user won't see any content until the javascript bundle is downloaded (which takes some time, especially with large applications not using "code splitting"), but it also means that the server's CPU is freed from rendering React. This mode is activated by passing `hollow: true` flag to the rendering server.
 
 ### Page loading time
 
@@ -154,9 +160,11 @@ Another argument in favour of Server-Side Rendering is that even if a website do
 
 Not everyone needs server-side rendering for their apps. E.g. if search engine indexing is not a priority, or if a website is a "static" one, like a "promosite" or a "personal portfolio" (just build it with a bundler and host it as a bunch of files in a cloud).
 
-Adding server-side rendering to the setup is quite simple though requiring a Node.js process running somewhere (say, in a Docker container in a cloud) which increases hosting costs a bit.
+Adding server-side rendering to the setup is quite simple though requiring a Node.js process running which increases hosting costs and maintenance complexity.
 
-In this case `index.html` will be generated on-the-fly by page rendering server for each incoming HTTP request, so the `index.html` file may be deleted as it's of no use now.
+In case of server-side rendering `index.html` is being generated on-the-fly by page rendering server for each incoming HTTP request, so the `index.html` file may be deleted as it's of no use now.
+
+#### ./rendering-server.js
 
 ```javascript
 import webpageServer from 'react-website/server'
@@ -192,80 +200,112 @@ server.listen(3000, function(error) {
 })
 ```
 
-Now [disable javascript in Chrome DevTools](http://stackoverflow.com/questions/13405383/how-to-disable-javascript-in-chrome-developer-tools), go to `localhost:3000` and the server should respond with a server-side-rendered page.
+Run the rendering server:
 
-### Serving assets and API
+```
+$ npm install npx --global
+$ npm install babel-node
+$ npx babel-node rendering-server.js
+```
 
-In the examples above "static" files (assets) are served by `webpack-dev-server` on `localhost:8080`. It's for local development only. For production these "static" files must be served by someone else, be it a dedicated proxy server like NginX or (recommended) a cloud-based solution like Amazon S3.
+Now [disable javascript in Chrome DevTools](http://stackoverflow.com/questions/13405383/how-to-disable-javascript-in-chrome-developer-tools), go to `localhost:3000` and the server should respond with a fully server-side-rendered page.
 
-Also, a real-world website most likely has some kind of an API, which, again, could be either a dedicated API server (e.g. written in Golang), a simple Node.js application or a modern "serverless" API like [Amazon Lambda](https://aws.amazon.com/lambda) deployed using [`apex`](https://github.com/apex/apex) and hosted in the cloud.
+## Conclusion
 
-#### The old-school way
+This concludes the introductory part of the README and the rest is the description of the various tools and techniques which come prepackaged with this library.
 
-The old-school way is to set up a "proxy server" like [NginX](https://www.sep.com/sep-blog/2014/08/20/hosting-the-node-api-in-nginx-with-a-reverse-proxy/) dispatching all incoming HTTP requests: serving "static" files, redirecting to the API server for `/api` calls, etc.
+A working example illustrating Server-Side Rendering and all other things can be found here: [webpack-react-redux-isomorphic-render-example](https://github.com/catamphetamine/webpack-react-redux-isomorphic-render-example/tree/master/client/src).
 
-<details>
-  <summary>The old-school way</summary>
+# Documentation
 
-```nginx
-server {
-  # Web server listens on port 80
-  listen 80;
+## Preloading pages
 
-  # Serving "static" files (assets)
-  location /assets/ {
-    root "/filesystem/path/to/static/files";
-  }
+For page preloading use the `@preload()` decorator to load the neccessary data before the page is rendered.
 
-  # By default everything goes to the page rendering service
-  location / {
-    proxy_pass http://localhost:3001;
-  }
+```javascript
+import { connect } from 'react-redux'
+import { preload } from 'react-website'
 
-  # Redirect "/api" requests to API service
-  location /api {
-    rewrite ^/api/?(.*) /$1 break;
-    proxy_pass http://localhost:3000;
+// Redux action creator
+function fetchUsers() {
+  // Queries the HTTP API for a list of users.
+  // The result is placed in the `users` property
+  // of the `usersPage` reducer.
+}
+
+@preload(async ({ dispatch }) => await dispatch(fetchUsers()))
+@connect(
+  (state) => ({ users: state.usersPage.users }),
+  // Calls `bindActionCreators()`
+  // for the specified Redux action creators.
+  { fetchUsers }
+)
+export default class UsersPage extends Component {
+  render() {
+    const { users, fetchUsers } = this.props
+    return (
+      <div>
+        <ul> { users.map(user => <li> { user.name } </li>) } </ul>
+        <button onClick={ fetchUsers }> Refresh </button>
+      </div>
+    )
   }
 }
 ```
 
-A quick Node.js proxy server could also be made up for development purposes using [http-proxy](https://github.com/nodejitsu/node-http-proxy) library.
+In this example the `@preload()` decorator is used to preload a page before it is displayed, i.e. before the page is rendered (both on server side and on client side).
+
+`@preload()` decorator takes an `async`/`await` function:
+
+```javascript
+@preload(async ({ dispatch, getState, location, parameters, server }) => {
+  await dispatch(fetchWhatever(parameters.id))
+})
+```
+
+Note: `transform-decorators-legacy` Babel plugin is needed at the moment to make decorators work with Babel:
+
+```sh
+npm install babel-plugin-transform-decorators-legacy --save
+```
+
+#### .babelrc
 
 ```js
-const path = require('path')
-const express = require('express')
-const httpProxy = require('http-proxy')
-
-// Use Express or Koa, for example
-const app = express()
-const proxy = httpProxy.createProxyServer({})
-
-// Serve static files
-app.use('/assets', express.static(path.join(__dirname, '../build')))
-
-// Proxy `/api` calls to the API service
-app.use('/api', function(request, response) {
-  proxy.web(request, response, { target: 'http://localhost:3001' })
-})
-
-// Proxy all other HTTP requests to webpage rendering service
-app.use(function(request, response) {
-  proxy.web(request, response, { target: 'http://localhost:3000' })
-})
-
-// Web server listens on port `80`
-app.listen(80)
+{
+  ...
+  "plugins": [
+    "transform-decorators-legacy",
+    ...
+  ]
+}
 ```
-</details>
 
-#### The modern way
+On the client side, in order for `@preload` to work all `<Link/>`s imported from `react-router` **must** be instead imported from `react-website`. Upon a click on a `<Link/>` first it waits for the next page to preload, and then, when the next page is fully loaded, `react-router` navigation itself takes place.
 
-The modern way is not using any "proxy servers" at all. Instead everything is distributed and decentralized. Webpack-built assets are uploaded to the cloud (e.g. Amazon S3) and webpack configuration option `.output.publicPath` is set to something like `https://s3-ap-southeast-1.amazonaws.com/my-bucket/folder-1/` (your CDN URL) so now serving "static" files is not your job – your only job is to upload them to the cloud after Webpack build finishes. API is dealt with in a similar way: CORS headers are set up to allow querying directly from a web browser by an absolute URL and the API is either hosted as a standalone API server or run "serverless"ly, say, on Amazon Lambda, and is queried by an absolute URL, like `https://at9y1jpex0.execute-api.us-east-1.amazonaws.com/master/users/list`.
+`@preload` also works for Back/Forward navigation.
 
-This concludes the introductory part of the README and the rest is the description of the various (useful) tools which come prepackaged with this library.
+## `@preload()` indicator
 
-# Usage
+Sometimes preloading a page can take some time so one may want to (and actually should) add some kind of a "spinner" to inform the user that the application isn't frozen and that the navigation process needs some more time to finish. This can be achieved by adding the built-in `<Loading/>` component on a page:
+
+```javascript
+import { Loading } from 'react-website'
+// Using Webpack CSS loader
+import 'react-website/components/Loading.css'
+import 'react-website/components/LoadingIndicator.css'
+
+export default function Application() {
+  return (
+    <div>
+      ....
+      <Loading/>
+    </div>
+  )
+}
+```
+
+The `<Loading/>` component takes an optional `indicator` property which can be a React component accepting a `className` property and which is a white circular spinner by default.
 
 ## Asynchronous actions
 
@@ -291,7 +331,11 @@ function asynchronousAction() {
 }
 ```
 
-`dispatch(asynchronousAction())` call returns the `Promise` itself.
+`dispatch(asynchronousAction())` call returns the `Promise` itself:
+
+```js
+await dispatch(asynchronousAction())
+```
 
 ### HTTP utility
 
@@ -322,19 +366,6 @@ function fetchFriends(personId, gender) {
   }
 }
 ```
-
-<details>
-<summary>Or using plain Promises (for those who prefer)</summary>
-
-```js
-function fetchFriends(personId, gender) {
-  return {
-    promise: ({ http }) => http.get(`/api/person/${personId}/friends`, { gender }),
-    events: ['FETCH_FRIENDS_PENDING', 'FETCH_FRIENDS_SUCCESS', 'FETCH_FRIENDS_FAILURE']
-  }
-}
-```
-</details>
 
 ####
 
@@ -537,10 +568,10 @@ import { connector, getComments, postComment } from './redux/blogPost'
 
 // Preload comments before showing the page
 // (see "Page preloading" section of this document)
-@preload(({ dispatch, getState, parameters }) => {
+@preload(async ({ dispatch, parameters }) => {
   // `parameters` are the URL parameters populated by `react-router`:
   // `<Route path="/blog/:blogPostId"/>`.
-  return dispatch(getComments(parameters.blogPostId))
+  await dispatch(getComments(parameters.blogPostId))
 })
 // See `react-redux` documentation on `@connect()` decorator
 @connect((state) => ({
@@ -773,125 +804,108 @@ function uploadItemPhoto(itemId, file) {
 
 By default, when using `http` utility all JSON responses get parsed for javascript `Date`s which are then automatically converted from `String`s to `Date`s. This is convenient, and also safe because such date `String`s have to be in a very specific ISO format in order to get parsed (`year-month-dayThours:minutes:seconds[timezone]`, e.g. `2017-12-22T23:03:48.912Z`), but if someone still prefers to disable this feature and have their stringified dates untouched then there's the `parseDates: false` flag in the configuration to opt-out of this feature.
 
-## Page preloading
+## Snapshotting
 
-For page preloading use the `@preload()` helper to load the neccessary data before the page is rendered.
+Server-Side Rendering is good for search engine indexing but it's also heavy on CPU not to mention the bother of setting up a Node.js server itself and keeping it running.
 
-```javascript
-import { connect } from 'react-redux'
-import { preload } from 'react-website'
-
-// Fetches the list of users from the server
-function fetchUsers() {
-  return {
-    promise: ({ http }) => http.get('/api/users'),
-    events: ['GET_USERS_PENDING', 'GET_USERS_SUCCESS', 'GET_USERS_FAILURE']
-  }
-}
-
-@preload(async ({ dispatch }) => await dispatch(fetchUsers))
-@connect(
-  state => ({ users: state.users.users }),
-  // `bindActionCreators()` for Redux action creators
-  { fetchUsers }
-)
-export default class Page extends Component {
-  render() {
-    const { users, fetchUsers } = this.props
-    return (
-      <div>
-        <ul> { users.map(user => <li> { user.name } </li>) } </ul>
-        <button onClick={ fetchUsers }> Refresh </button>
-      </div>
-    )
-  }
-}
-```
-
-In the example above `@preload()` helper is called to preload a web page before it is displayed, i.e. before the page is rendered (both on server side and on client side).
-
-`@preload()` decorator takes an `async`/`await` function:
-
-```javascript
-@preload(async ({ dispatch, getState, location, parameters, server }) => {
-  await dispatch(fetchWhatever(parameters.id))
-})
-```
+In many cases data on a website is "static" (doesn't change between redeployments), e.g. a personal blog or a portfolio website, so in these cases it will be beneficial (much cheaper and faster) to host a statically generated version a website on a CDN as opposed to hosting a Node.js application just for the purpose of real-time webpage rendering. In such cases one should generate a static version of the website by snapshotting it on a local machine and then host the snapshotted pages in a cloud (e.g. Amazon S3) for a very low price.
 
 <details>
-<summary>Or using plain Promises (for those who prefer)</summary>
+<summary>Snapshotting instructions</summary>
 
-```javascript
-@preload(function({ dispatch, getState, location, parameters, server }) {
-  return Promise.resolve()
+First run the website in production mode (for example, on `localhost`).
+
+Then run the following Node.js script which is gonna snapshot the currently running website and put it in a folder which can then be hosted anywhere.
+
+```sh
+# If the website will be hosted on Amazon S3
+npm install s3 --save
+```
+
+```js
+// The following code hasn't been tested but it used to work
+
+import path from 'path'
+import { snapshot, upload, S3Uploader, copy, download } from 'react-website/static-site-generator'
+
+import configuration from '../configuration'
+
+// Index page is added by default
+let pages =
+[
+  '/about',
+
+  { url: '/unauthenticated', status: 401 },
+  { url: '/unauthorized', status: 403 },
+  { url: '/not-found', status: 404 },
+  { url: '/error', status: 500 }
+]
+
+async function run()
+{
+  const { status, content } = JSON.parse(await download(`https://example.com/api/items`))
+
+  if (status !== 200)
+  {
+    throw new Error('Couldn\'t load items')
+  }
+
+  const items = JSON.parse(content)
+
+  pages = pages.concat(items.map(item => `/items/${item.id}`))
+
+  const output = path.resolve(__dirname, '../static-site')
+
+  // Snapshot the website
+  await snapshot
+  ({
+    host: configuration.host,
+    port: configuration.port,
+    pages,
+    output
+  })
+
+  // Copy assets (built by Webpack)
+  await copy(path.resolve(__dirname, '../build/assets'), path.resolve(output, 'assets'))
+
+  // Upload the website to Amazon S3
+  await upload(output, S3Uploader
+  ({
+    bucket,
+    accessKeyId,
+    secretAccessKey,
+    region
+  }))
+}
+
+run().catch((error) =>
+{
+  console.error(error)
+  process.exit(1)
 })
 ```
 </details>
 
 ####
 
-Note: `transform-decorators-legacy` Babel plugin is needed at the moment to make decorators work in Babel:
+The snapshotting approach works not only for classical web "documents" (a blog, a book, a portfolio, a showcase) but also for dynamic applications. Consider an online education portal where users (students) can search for online courses and the prices are different for each user (student) based on their institution. Now, an online course description itself is static (must be indexed by Google) and the actual course price is dynamic (must not be indexed by Google).
 
-```sh
-npm install babel-plugin-transform-decorators-legacy --save
-```
-
-#### .babelrc
+<details>
+<summary>The solution is to add two <code>@preload()</code>s for the course page: one for static data (which runs while snapshotting) and another for dynamic data (which runs in a user's web browser after the snapshotted page has been downloaded from the cloud).
 
 ```js
-{
-  "presets": [
-    ...
-  ],
-  "plugins": [
-    "transform-decorators-legacy"
-  ]
+import React, { Component } from 'react'
+import { preload, preloadClient } from 'react-website'
+
+@preload(async ({ dispatch }) => await dispatch(loadCourseInfo()))
+@preloadClient(async ({ dispatch }) => await dispatch(loadCoursePrice()))
+export default class Course extends Component {
+  ...
 }
 ```
 
-On the client side, in order for `@preload` to work all `<Link/>`s imported from `react-router` **must** be instead imported from `react-website` package. Upon a click on a `<Link/>` first it waits for the next page to preload, and then, when the next page is fully loaded, it is displayed to the user and the URL in the address bar is updated.
-
-`@preload()` also works for Back/Forward web browser buttons navigation.
-
-To run `@preload()` only on client side pass the second `{ client: true }` options argument to it
-
-```js
-@preload(async ({ dispatch }) => await dispatch(loadContent()), { client: true })
-```
-
-For example, a web application could be hosted entirely statically in a cloud like Amazon S3 and fetch data using an API hosted separately in a cloud like Amazon Lambda. This kind of setup is quite popular due to being simple and cheap. Yes, it's not a Server-Side Rendered approach because the user is given a blank page first and then some `bundle.js` script loads in the browser and fetches the data for the page. But, as said earlier, this kind of setup is simple to build and cheap to maintain. Google won't index such websites, but if searchability is not a requirement (yet) then it's the way to go (e.g. startup "MVP"s). Server-Side Rendering can be easily added to such setup should the need arise.
-
-Specifying `{ client: true }` option for each `@preload()` would result in a lot of copy-pasta so there's a [special configuration option](https://github.com/catamphetamine/react-website/blob/master/README-ADVANCED.md#all-react-websitejs-settings) for that:
-
-```js
-{
-  preload: {
-    client: true
-  }
-}
-```
-
-### `@preload()` indicator
-
-Sometimes preloading a page can take some time so one may want to (and actually should) add some kind of a "spinner" to inform the user that the application isn't frozen and that the navigation process needs some more time to finish. This can be achieved by adding the built-in `<Loading/>` component on a page:
-
-```javascript
-import { Loading } from 'react-website'
-// Using Webpack CSS loader
-import 'react-website/components/Loading.css'
-import 'react-website/components/LoadingIndicator.css'
-
-export default function Application() {
-  return (
-    <div>
-      ....
-      <Loading/>
-    </div>
-  )
-}
-```
-
-The `<Loading/>` component takes an optional `indicator` property which can be a React component accepting a `className` property and which is a white circular spinner by default.
+In this example `loadCourseInfo()` will be executed while snapshotting and therefore course info will be present on the snapshotted page. But course price won't be present on the snapshotted page because it's being loaded inside `@preloadClient()` which only gets called in a user's web browser. When a user opens the course page in his web browser it will show the snapshotted page with course info with a "loading" spinner on top of it as it is loading the course price. After the course price has been loaded the "loading" spinner disappears and the user sees the fully rendered course page.
+</summary>
 
 ## Page HTTP response status code
 
@@ -1416,86 +1430,6 @@ function reducer(state, action) {
       return state
   }
 }
-```
-</details>
-
-## Static site generation
-
-In those rare cases when website pages query data asynchronously via HTTP but that data doesn't change at all (or changes very rarely, e.g. a personal blog) it may be beneficial (much cheaper and faster) to host a statically generated version of such a website on a CDN as opposed to hosting a Node.js application just for the purpose of real-time webpage rendering. In such cases one may choose to generate a static version of the website by snapshotting it on a local machine and then host it in a cloud at virtually zero cost.
-
-<details>
-<summary>Snapshotting instructions</summary>
-
-First run the website in production mode (for example, on `localhost`).
-
-Then run the following Node.js script which is gonna snapshot the currently running website and put it in a folder which can then be hosted anywhere.
-
-```sh
-# If the website will be hosted on Amazon S3
-npm install s3 --save
-```
-
-```js
-// The following code hasn't been tested but it used to work
-
-import path from 'path'
-import { snapshot, upload, S3Uploader, copy, download } from 'react-website/static-site-generator'
-
-import configuration from '../configuration'
-
-// Index page is added by default
-let pages =
-[
-  '/about',
-
-  { url: '/unauthenticated', status: 401 },
-  { url: '/unauthorized', status: 403 },
-  { url: '/not-found', status: 404 },
-  { url: '/error', status: 500 }
-]
-
-async function run()
-{
-  const { status, content } = JSON.parse(await download(`https://example.com/api/items`))
-
-  if (status !== 200)
-  {
-    throw new Error('Couldn\'t load items')
-  }
-
-  const items = JSON.parse(content)
-
-  pages = pages.concat(items.map(item => `/items/${item.id}`))
-
-  const output = path.resolve(__dirname, '../static-site')
-
-  // Snapshot the website
-  await snapshot
-  ({
-    host: configuration.host,
-    port: configuration.port,
-    pages,
-    output
-  })
-
-  // Copy assets (built by Webpack)
-  await copy(path.resolve(__dirname, '../build/assets'), path.resolve(output, 'assets'))
-
-  // Upload the website to Amazon S3
-  await upload(output, S3Uploader
-  ({
-    bucket,
-    accessKeyId,
-    secretAccessKey,
-    region
-  }))
-}
-
-run().catch((error) =>
-{
-  console.error(error)
-  process.exit(1)
-})
 ```
 </details>
 

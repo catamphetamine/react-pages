@@ -1,5 +1,11 @@
+1.0.4 / 24.12.2017
+==================
+
+  * `@preload(..., { client: true })` -> `@preloadClient(...)`
+  * Removed `{ preload: { client: true/false } }` setting in favour of detecting it internally
+
 1.0.0 / 19.12.2017
-===================
+==================
 
   * (breaking change) Renamed `react-isomorphic-render` to `react-website` since the project outgrew its initial name and it's now more about building a React application rather than just isomorphic React rendering.
   * (breaking change) Dropped old React support, now supports React >= 16 only.
