@@ -339,7 +339,9 @@ function asynchronousAction() {
 `dispatch(asynchronousAction())` call returns the `Promise` itself:
 
 ```js
-await dispatch(asynchronousAction())
+@preload(async ({ dispatch }) => {
+  await dispatch(asynchronousAction())
+})
 ```
 
 ### HTTP utility
