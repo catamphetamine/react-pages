@@ -267,9 +267,21 @@ In this example the `@preload()` decorator is used to preload a page before it i
 
 ```javascript
 @preload(async ({ dispatch, getState, location, parameters, server }) => {
-  await dispatch(fetchWhatever(parameters.id))
+  // `parameters` is `react-router` URL `params`
+  dispatch(fetchPageData(parameters.id))
+  await ...
 })
 ```
+
+<details>
+<summary>The decorator also receives an optional `options` argument (advanced topic)</summary>
+
+* `client` — If `true` then the `@preload()` will be executed only on client side. If `false` then this `@preload()` will be executed normally: if part of initial page preloading then on server side and if part of subsequent preloading (e.g. navigation) then on client side. `false` is the default value unless overridden by `preload.client` configuration parameter.
+
+* `blocking` — If `false` then child `<Route/>`'s  `@preload()`s will not wait for this `@preload()` to finish in order to get executed (`blocking` is `true` by default in such cases). As for the same `<Route/>`'s `@preload()`s, the behaviour is opposite: it's `false` by default. The reason is several `@preload()`s are added when they're being differentiated by the `{ client: false }` / `{ client: true }` flag, and in those cases it makes sense to execute them simultaneously.
+</details>
+
+####
 
 Note: `transform-decorators-legacy` Babel plugin is needed at the moment to make decorators work with Babel:
 
