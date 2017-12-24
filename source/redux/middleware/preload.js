@@ -452,10 +452,10 @@ const preloader = (initial_client_side_preload, server, routes, components, getS
 	// (they will be executed in parallel)
 	function get_preloaders()
 	{
-		// find all `preload` methods on the React-Router component chain
-		return components
+		// Find all static `preload` methods on the React-Router component chain
+		const preloaders = components
 			.filter(component => component && component[Preload_method_name])
-			.map(component =>
+			.map((component) =>
 			({
 				preload: () =>
 				{
@@ -489,6 +489,18 @@ const preloader = (initial_client_side_preload, server, routes, components, getS
 					...component[Preload_options_name]
 				}
 			}))
+
+		// If Server-Side Rendering is not being used at all
+		// then all `@preload()`s must be marked as client-side ones.
+		if (!server && !window._server_side_render)
+		{
+			for (const preloader of preloaders)
+			{
+				preloader.options.client = true
+			}
+		}
+
+		return preloaders
 	}
 
 	// Get all `preload` methods on the React-Router component chain

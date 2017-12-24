@@ -75,7 +75,7 @@ export default async function render({ render, render_parameters = {}, container
 function render_react_element(element, to)
 {
 	// If using React >= 16 and the content is Server-Side Rendered.
-	if (ReactDOM.hydrate && window._server_side_rendered)
+	if (ReactDOM.hydrate && window._server_side_render && !window._hollow_server_side_render)
 	{
 		// New API introduced in React 16
 		// for "hydrating" Server-Side Rendered markup.

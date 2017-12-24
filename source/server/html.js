@@ -104,15 +104,16 @@ const template_after_content = nunjucks.compile
 (`</div>
 
 			{#
-				Server Side Rendering enabled flag.
+				Server-Side Rendering "hollow" flag.
 				It is used to determine whether to call
 				"ReactDOM.hydrate()" or "ReactDOM.render()".
 			#}
-			{% if not hollow %}
-				<script>
-					window._server_side_rendered = true
-				</script>
-			{% endif %}
+			<script>
+				window._server_side_render = true
+				{% if hollow %}
+					window._hollow_server_side_render = true
+				{% endif %}
+			</script>
 
 			{#
 				Locale for international messages
