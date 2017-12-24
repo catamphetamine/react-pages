@@ -20,7 +20,7 @@ export const Preload_started  = '@@react-website/redux/preload started'
 export const Preload_finished = '@@react-website/redux/preload finished'
 export const Preload_failed   = '@@react-website/redux/preload failed'
 
-export default function preloading_middleware(server, error_handler, preload_on_client_side_only, preload_helpers, routes, get_history, basename, report_stats, on_navigate)
+export default function preloading_middleware(server, error_handler, preload_on_client_by_default, preload_helpers, routes, get_history, basename, report_stats, on_navigate)
 {
 	return ({ getState, dispatch }) => next => action =>
 	{
@@ -172,7 +172,7 @@ export default function preloading_middleware(server, error_handler, preload_on_
 				preloader_dispatch(dispatch, preloading),
 				location,
 				params,
-				preload_on_client_side_only,
+				preload_on_client_by_default,
 				preload_helpers,
 				preloading
 			)
@@ -379,7 +379,7 @@ function proceed_with_navigation(dispatch, action, server, get_history, previous
 //
 // If no preloading is needed, then returns nothing.
 //
-const preloader = (initial_client_side_preload, server, routes, components, getState, dispatch, location, parameters, preload_on_client_side_only, preload_helpers, preloading) =>
+const preloader = (initial_client_side_preload, server, routes, components, getState, dispatch, location, parameters, preload_on_client_by_default, preload_helpers, preloading) =>
 {
 	let preload_arguments = { dispatch, getState, location, parameters }
 
@@ -485,7 +485,7 @@ const preloader = (initial_client_side_preload, server, routes, components, getS
 				},
 				options:
 				{
-					client: preload_on_client_side_only,
+					client: preload_on_client_by_default,
 					...component[Preload_options_name]
 				}
 			}))

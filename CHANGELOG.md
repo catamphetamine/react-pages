@@ -1,9 +1,3 @@
-1.0.4 / 24.12.2017
-==================
-
-  * `@preload(..., { client: true })` -> `@preloadClient(...)`
-  * Removed `{ preload: { client: true/false } }` setting in favour of detecting it internally
-
 1.0.0 / 19.12.2017
 ==================
 
