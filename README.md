@@ -28,7 +28,7 @@ $ npm install react-router@3 --save
 
 Start by creating the configuration file
 
-#### react-website.js
+#### ./react-website.js
 
 ```javascript
 // React-router v3 routes
