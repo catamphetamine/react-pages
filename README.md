@@ -186,6 +186,7 @@ const server = webpageServer(settings, {
       // Assuming that it's being tested on a local computer first
       // therefore using "localhost" URLs.
       javascript: 'http://localhost:8080/bundle.js',
+      // (optional) If using a separate CSS bundle:
       style: 'http://localhost:8080/bundle.css'
     }
   }
