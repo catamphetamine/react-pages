@@ -22,9 +22,9 @@ A complete solution for building a React/Redux application
 ## Getting started
 
 ```bash
-$ npm install react-website --save
 $ npm install redux react-redux --save
 $ npm install react-router@3 --save
+$ npm install react-website --save
 ```
 
 Start by creating the configuration file
