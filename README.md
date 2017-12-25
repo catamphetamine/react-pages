@@ -216,7 +216,7 @@ Now [disable javascript in Chrome DevTools](http://stackoverflow.com/questions/1
 
 This concludes the introductory part of the README and the rest is the description of the various tools and techniques which come prepackaged with this library.
 
-A working example illustrating Server-Side Rendering and all other things can be found here: [webpack-react-redux-isomorphic-render-example](https://github.com/catamphetamine/webpack-react-redux-isomorphic-render-example/tree/master/client/src).
+A working example illustrating Server-Side Rendering and all other things can be found here: [webpack-react-redux-isomorphic-render-example](https://github.com/catamphetamine/webpack-react-redux-isomorphic-render-example).
 
 # Documentation
 
