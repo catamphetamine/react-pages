@@ -7,7 +7,7 @@ import render from './render'
 import create_http_client from '../http client'
 import normalize_common_settings from '../normalize'
 import create_store from '../store'
-import { preload_action } from '../actions'
+import { start_preload } from '../preload/actions'
 // import { load_state_action } from '../actions'
 import { is_instant_transition, reset_instant_back } from './instant back'
 import { location_url } from '../../location'
@@ -70,7 +70,7 @@ export default function set_up_and_render(settings, options = {})
 		}
 
 		// Preload the page but don't navigate to it just yet
-		store.dispatch(preload_action(location, undefined, false)).then((result) =>
+		store.dispatch(start_preload(location, undefined, false)).then((result) =>
 		{
 			// Navigate to the page
 			listener(event)
@@ -152,7 +152,7 @@ export default function set_up_and_render(settings, options = {})
 	.then((result) =>
 	{
 		// Execute all client-side-only `@preload()`s.
-		return store.dispatch(preload_action(current_location, undefined, false, true)).then(() => result)
+		return store.dispatch(start_preload(current_location, undefined, false, true)).then(() => result)
 	})
 }
 

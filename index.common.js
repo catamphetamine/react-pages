@@ -4,9 +4,20 @@ exports.meta  = require('./cjs/meta').default
 
 // Redux
 
-exports.preload       = require('./cjs/redux/preload').default
-exports.loading       = require('./cjs/redux/preload').indicate_loading
-exports.onPageLoaded  = require('./cjs/redux/onPageLoaded').default
+var preload_actions   = require('./cjs/redux/preload/actions')
+
+exports.Preload_started      = preload_actions.Preload_started
+exports.PRELOAD_STARTED      = exports.Preload_started
+exports.Preload_finished     = preload_actions.Preload_finished
+exports.PRELOAD_FINISHED     = exports.Preload_finished
+exports.Preload_failed       = preload_actions.Preload_failed
+exports.PRELOAD_FAILED       = exports.Preload_failed
+
+var preload_decorator = require('./cjs/redux/preload/decorator')
+
+exports.preload       = preload_decorator.default
+exports.loading       = preload_actions.indicate_loading
+exports.onPageLoaded  = require('./cjs/redux/preload/onPageLoaded').default
 
 exports.Loading       = require('./cjs/components/Loading').default
 
@@ -14,17 +25,9 @@ exports.render        = require('./cjs/redux/client/client').default
 exports.getState      = require('./cjs/redux/client/client').getState
 exports.getHttpClient = require('./cjs/redux/client/client').getHttpClient
 
-var preloading_middleware = require('./cjs/redux/middleware/preload')
-
-exports.Preload_started      = preloading_middleware.Preload_started
-exports.PRELOAD_STARTED      = exports.Preload_started
-exports.Preload_finished     = preloading_middleware.Preload_finished
-exports.PRELOAD_FINISHED     = exports.Preload_finished
-exports.Preload_failed       = preloading_middleware.Preload_failed
-exports.PRELOAD_FAILED       = exports.Preload_failed
-exports.Preload_method_name  = preloading_middleware.Preload_method_name
+exports.Preload_method_name  = preload_decorator.Preload_method_name
 exports.PRELOAD_METHOD_NAME  = exports.Preload_method_name
-exports.Preload_options_name = preloading_middleware.Preload_options_name
+exports.Preload_options_name = preload_decorator.Preload_options_name
 exports.PRELOAD_OPTIONS_NAME = exports.Preload_options_name
 
 exports.redux_module = require('./cjs/redux/redux module').default
@@ -40,7 +43,7 @@ exports.redirect   = require('./cjs/redux/actions').redirect_action
 exports.load_state = require('./cjs/redux/actions').load_state_action
 exports.loadState  = exports.load_state
 
-exports.PRELOAD    = require('./cjs/redux/actions').Preload
+exports.PRELOAD    = require('./cjs/redux/preload/actions').Preload
 exports.LoadState  = require('./cjs/redux/actions').LoadState
 exports.LOAD_STATE = exports.LoadState  
 exports.GoTo       = require('./cjs/redux/actions').GoTo

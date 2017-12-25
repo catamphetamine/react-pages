@@ -1,7 +1,3 @@
-// Not part of package.json
-// import querystring from 'query-string'
-// import deep_equal from 'deep-equal'
-
 export function location_url(location, options = {})
 {
 	if (typeof location === 'string')

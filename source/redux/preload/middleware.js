@@ -1,26 +1,46 @@
 // Makes @preload() decorator work.
 // (preloads data required for displaying a page before actually navigating to it)
 
-import deep_equal from 'deep-equal'
-import getRouteParams from 'react-router/lib/getRouteParams'
-
 import { location_url, strip_basename } from '../../location'
 import server_redirect from '../../server/redirect'
-import { Preload, Redirect, GoTo, redirect_action, goto_action, history_redirect_action, history_goto_action } from '../actions'
+
+import {
+	Redirect,
+	GoTo,
+	redirect_action,
+	goto_action,
+	history_redirect_action,
+	history_goto_action
+} from '../actions'
+
+import {
+	Preload
+} from './actions'
+
 import match_routes_against_location, { get_route_path } from '../../react-router/match'
 import { add_instant_back, reset_instant_back } from '../client/instant back'
 import timer from '../../timer'
 import { get_meta, update_meta } from '../../meta'
 
-export const Preload_method_name  = '__preload__'
-export const Preload_options_name = '__preload_options__'
-export const On_page_loaded_method_name = '__on_page_loaded__'
+import { On_page_loaded_method_name } from './onPageLoaded'
 
-export const Preload_started  = '@@react-website/redux/preload started'
-export const Preload_finished = '@@react-website/redux/preload finished'
-export const Preload_failed   = '@@react-website/redux/preload failed'
+import generate_preload_chain from './collect'
 
-export default function preloading_middleware(server, error_handler, preload_on_client_by_default, preload_helpers, routes, get_history, basename, report_stats, on_navigate)
+import {
+	Preload_started,
+	Preload_finished,
+	Preload_failed
+} from './actions'
+
+export default function preloading_middleware(
+	server,
+	error_handler,
+	routes,
+	get_history,
+	basename,
+	report_stats,
+	on_navigate
+)
 {
 	return ({ getState, dispatch }) => next => action =>
 	{
@@ -162,7 +182,7 @@ export default function preloading_middleware(server, error_handler, preload_on_
 			}
 
 			// Preload all the required data for this route (page)
-			const preload = preloader
+			const preload = generate_preload_chain
 			(
 				action.initial,
 				server,
@@ -172,8 +192,6 @@ export default function preloading_middleware(server, error_handler, preload_on_
 				preloader_dispatch(dispatch, preloading),
 				location,
 				params,
-				preload_on_client_by_default,
-				preload_helpers,
 				preloading
 			)
 
@@ -371,221 +389,6 @@ function proceed_with_navigation(dispatch, action, server, get_history, previous
 	else
 	{
 		reset_instant_back()
-	}
-}
-
-// Returns function returning a Promise 
-// which resolves when all the required preload()s are resolved.
-//
-// If no preloading is needed, then returns nothing.
-//
-const preloader = (initial_client_side_preload, server, routes, components, getState, dispatch, location, parameters, preload_on_client_by_default, preload_helpers, preloading) =>
-{
-	let preload_arguments = { dispatch, getState, location, parameters }
-
-	if (preload_helpers)
-	{
-		preload_arguments = { ...preload_arguments, ...preload_helpers }
-	}
-
-	// A minor optimization for skipping `@preload()`s
-	// for those parent `<Route/>`s which haven't changed
-	// as a result of a client-side navigation.
-	//
-	// On the client side:
-	//
-	// Take the previous route components
-	// (along with their parameters) 
-	// and the next route components
-	// (along with their parameters),
-	// and compare them side-by-side
-	// filtering out the same top level components
-	// (both having the same component classes
-	//  and having the same parameters).
-	//
-	// Therefore @preload() methods could be skipped
-	// for those top level components which remain
-	// the same (and in the same state).
-	// This would be an optimization.
-	//
-	// (e.g. the main <Route/> could be @preload()ed only once - on the server side)
-	//
-	// At the same time, at least one component should be preloaded:
-	// even if navigating to the same page it still kinda makes sense to reload it.
-	// (assuming it's not an "anchor" hyperlink navigation)
-	//
-	// Parameters for each `<Route/>` component can be found using this helper method:
-	// https://github.com/ReactTraining/react-router/blob/master/modules/getRouteParams.js
-	//
-	// Also, GET query parameters would also need to be compared, I guess.
-	// But, I guess, it would make sense to assume that GET parameters
-	// only affect the last <Route/> component in the chain.
-	// And, in general, GET query parameters should be avoided,
-	// but that's not the case for example with search forms.
-	// So here we assume that GET query parameters only
-	// influence the last <Route/> component in the chain
-	// which is gonna be reloaded anyway.
-	//
-	if (!server)
-	{
-		if (window._previous_routes)
-		{
-			const previous_routes     = window._previous_routes
-			const previous_parameters = window._previous_route_parameters
-		
-			let i = 0
-			while (i < routes.length - 1 && 
-				previous_routes[i].component === routes[i].component &&
-				deep_equal(getRouteParams(previous_routes[i], previous_parameters), getRouteParams(routes[i], parameters)))
-			{
-				i++
-			}
-		
-			components = components.slice(i)
-		}
-		
-		window._previous_routes           = routes
-		window._previous_route_parameters = parameters
-	}
-
-	// finds all `preload` (or `preload_deferred`) methods 
-	// (they will be executed in parallel)
-	function get_preloaders()
-	{
-		// Find all static `preload` methods on the React-Router component chain
-		const preloaders = components
-			.filter(component => component && component[Preload_method_name])
-			.map((component) =>
-			({
-				preload: () =>
-				{
-					try
-					{
-						// `preload()` returns a Promise
-						let promise = component[Preload_method_name](preload_arguments)
-
-						// Convert `array`s into `Promise.all(array)`
-						if (Array.isArray(promise))
-						{
-							promise = Promise.all(promise)
-						}
-
-						// Sanity check
-						if (!promise || typeof promise.then !== 'function')
-						{
-							return Promise.reject(`Preload function must return a Promise. Got:`, promise)
-						}
-
-						return promise
-					}
-					catch (error)
-					{
-						return Promise.reject(error)
-					}
-				},
-				options:
-				{
-					client: preload_on_client_by_default,
-					...component[Preload_options_name]
-				}
-			}))
-
-		// If Server-Side Rendering is not being used at all
-		// then all `@preload()`s must be marked as client-side ones.
-		if (!server && !window._server_side_render)
-		{
-			for (const preloader of preloaders)
-			{
-				preloader.options.client = true
-			}
-		}
-
-		return preloaders
-	}
-
-	// Get all `preload` methods on the React-Router component chain
-	const preloads = get_preloaders()
-
-	// Construct `preload` chain
-
-	let chain = []
-	let parallel = []
-
-	for (const preloader of get_preloaders())
-	{
-		// Don't execute client-side-only `@preload()`s on server side
-		if (preloader.options.client && server)
-		{
-			continue
-		}
-
-		// If it's initial client side preload (after the page has been loaded),
-		// then only execute those `@preload()`s marked as "client-side-only".
-		if (initial_client_side_preload && !preloader.options.client)
-		{
-			continue
-		}
-
-		if (preloader.options.blocking === false)
-		{
-			parallel.push(preloader.preload)
-			continue
-		}
-
-		// Copy-pasta
-		if (parallel.length > 0)
-		{
-			parallel.push(preloader.preload)
-			chain.push(parallel)
-			parallel = []
-		}
-		else
-		{
-			chain.push(preloader.preload)
-		}
-	}
-
-	// Finalize trailing parallel `preload`s
-	if (parallel.length > 0)
-	{
-		chain.push(parallel.length > 1 ? parallel : parallel[0])
-	}
-
-	// Convert `preload` chain into `Promise` chain
-
-	if (chain.length === 0)
-	{
-		return
-	}
-
-	return function()
-	{
-		return chain.reduce((promise, link) =>
-		{
-			if (Array.isArray(link))
-			{
-				return promise.then(() =>
-				{
-					if (preloading.cancelled)
-					{
-						return
-					}
-
-					return Promise.all(link.map(thread => thread()))
-				})
-			}
-
-			return promise.then(() =>
-			{
-				if (preloading.cancelled)
-				{
-					return
-				}
-
-				return link()
-			})
-		},
-		Promise.resolve())
 	}
 }
 

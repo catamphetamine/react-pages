@@ -7,15 +7,30 @@ export { default as meta } from './build/meta'
 export
 {
 	default as preload,
+	Preload_method_name,
+	Preload_method_name as PRELOAD_METHOD_NAME,
+	Preload_options_name,
+	Preload_options_name as PRELOAD_OPTIONS_NAME
+}
+from './build/redux/preload/decorator'
+
+export
+{
+	Preload_started,
+	Preload_started as PRELOAD_STARTED,
+	Preload_finished,
+	Preload_finished as PRELOAD_FINISHED,
+	Preload_failed,
+	Preload_failed as PRELOAD_FAILED,
 	indicate_loading as loading
 }
-from './build/redux/preload'
+from './build/redux/preload/actions'
 
 export
 {
 	default as onPageLoaded
 }
-from './build/redux/onPageLoaded'
+from './build/redux/preload/onPageLoaded'
 
 export
 {
@@ -30,21 +45,6 @@ export
 	getHttpClient
 }
 from './build/redux/client/client'
-
-export
-{
-	Preload_started,
-	Preload_started as PRELOAD_STARTED,
-	Preload_finished,
-	Preload_finished as PRELOAD_FINISHED,
-	Preload_failed,
-	Preload_failed as PRELOAD_FAILED,
-	Preload_method_name,
-	Preload_method_name as PRELOAD_METHOD_NAME,
-	Preload_options_name,
-	Preload_options_name as PRELOAD_OPTIONS_NAME
-}
-from './build/redux/middleware/preload'
 
 export
 {
@@ -68,7 +68,6 @@ export
 	load_state_action as load_state,
 	load_state_action as loadState,
 	
-	Preload as PRELOAD,
 	LoadState,
 	LoadState as LOAD_STATE,
 	GoTo,
@@ -79,6 +78,12 @@ export
 	Navigated as NAVIGATED
 }
 from './build/redux/actions'
+
+export
+{
+	Preload as PRELOAD
+}
+from './build/redux/preload/actions'
 
 export
 {

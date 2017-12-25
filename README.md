@@ -228,19 +228,18 @@ For page preloading use the `@preload()` decorator to load the neccessary data b
 import { connect } from 'react-redux'
 import { preload } from 'react-website'
 
-// Redux action creator
+// Redux "asynchronous action", 
+// explained later in this document.
 function fetchUsers() {
-  // Queries the HTTP API for a list of users.
-  // The result is placed in the `users` property
-  // of the `usersPage` reducer.
-  ...
+  return {
+    promise: ({ http }) => http.get('/api/users'),
+    events: ['FETCH_USERS_PENDING', 'FETCH_USERS_SUCCESS', 'FETCH_USERS_FAILURE']
+  }
 }
 
 @preload(async ({ dispatch }) => {
-  // Send HTTP request
-  dispatch(fetchUsers())
-  // Wait for HTTP response
-  await ...
+  // Send HTTP request and wait for response
+  await dispatch(fetchUsers())
 })
 @connect(
   (state) => ({ users: state.usersPage.users }),
@@ -263,22 +262,42 @@ export default class UsersPage extends Component {
 
 In this example the `@preload()` decorator is used to preload a page before it is displayed, i.e. before the page is rendered (both on server side and on client side).
 
-`@preload()` decorator takes an `async`/`await` function:
+`@preload()` decorator takes an `async`/`await` function which takes an object of arguments:
 
 ```javascript
-@preload(async ({ dispatch, getState, location, parameters, server }) => {
-  // `parameters` is `react-router` URL `params`
-  dispatch(fetchPageData(parameters.id))
-  await ...
+@preload(async (preloadArguments) => {
+  const = {
+    // Redux `dispatch()`
+    dispatch,
+    // Get Redux state
+    getState,
+    // Current page location
+    location,
+    // `react-router` URL `params`
+    // (e.g. '/users/:id')
+    parameters,
+    // Is this server side rendering
+    server,
+    // Is this the initial page preload in a web browser
+    initial
+  }
+  = preloadArguments
+  
+  // Send HTTP request and wait for response.
+  await dispatch(fetchPageData(parameters.id))
 })
 ```
 
 <details>
 <summary>The decorator also receives an optional `options` argument (advanced topic)</summary>
 
+* `blocking` — If `false` then child `<Route/>`'s  `@preload()`s will not wait for this `@preload()` to finish in order to get executed (`blocking` is `true` by default).
+
+* `blockingSibling` — If `true` then all further adjacent (sibling) `@preload()`s for the same `<Route/>`'s component will wait for this `@preload()` to finish in order to get executed. (is `false` by default).
+
 * `client` — If `true` then the `@preload()` will be executed only on client side. If `false` then this `@preload()` will be executed normally: if part of initial page preloading then on server side and if part of subsequent preloading (e.g. navigation) then on client side. `false` is the default value unless overridden by `preload.client` configuration parameter.
 
-* `blocking` — If `false` then child `<Route/>`'s  `@preload()`s will not wait for this `@preload()` to finish in order to get executed (`blocking` is `true` by default in such cases). As for the same `<Route/>`'s `@preload()`s, the behaviour is opposite: it's `false` by default. The reason is several `@preload()`s are added when they're being differentiated by the `{ client: false }` / `{ client: true }` flag, and in those cases it makes sense to execute them simultaneously.
+* `server` — If `true` then the `@preload()` will be executed only on server side. If `false` then this `@preload()` will be executed normally: if part of initial page preloading then on server side and if part of subsequent preloading (e.g. navigation) then on client side. `false` is the default value unless overridden by `preload.client` configuration parameter.
 </details>
 
 ####
@@ -913,13 +932,13 @@ run().catch((error) =>
 The snapshotting approach works not only for classical web "documents" (a blog, a book, a portfolio, a showcase) but also for dynamic applications. Consider an online education portal where users (students) can search for online courses and the prices are different for each user (student) based on their institution. Now, an online course description itself is static (must be indexed by Google) and the actual course price is dynamic (must not be indexed by Google).
 
 <details>
-<summary>The solution is to add two <code>@preload()</code>s for the course page: one for static data (which runs while snapshotting) and another for dynamic data (which runs in a user's web browser after the snapshotted page has been downloaded from the cloud).
+<summary>The solution is to add two <code>@preload()</code>s for the course page: one for static data (which runs while snapshotting) and another for dynamic data (which runs only in a user's web browser).
 
 ```js
 import React, { Component } from 'react'
 import { preload } from 'react-website'
 
-@preload(async ({ dispatch }) => await dispatch(loadCourseInfo()), { client: false })
+@preload(async ({ dispatch }) => await dispatch(loadCourseInfo()))
 @preload(async ({ dispatch }) => await dispatch(loadCoursePrice()), { client: true })
 export default class Course extends Component {
   ...
@@ -927,20 +946,6 @@ export default class Course extends Component {
 ```
 
 In this example `loadCourseInfo()` will be executed while snapshotting and therefore course info will be present on the snapshotted page. But course price won't be present on the snapshotted page because it's being loaded inside `@preloadClient()` which only gets called in a user's web browser. When a user opens the course page in his web browser it will show the snapshotted page with course info with a "loading" spinner on top of it as it is loading the course price. After the course price has been loaded the "loading" spinner disappears and the user sees the fully rendered course page.
-
-The default value for the `client` option is `false`. It can be changed via a global `preload.client` configuration parameter:
-
-#### ./react-website.js
-
-```js
-{
-  ...
-  preload: {
-    client: true
-  }
-}
-```
-
 </summary>
 
 ## Page HTTP response status code

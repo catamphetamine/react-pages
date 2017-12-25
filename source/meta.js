@@ -17,21 +17,21 @@ export const Meta_method_name = '__meta__'
 //
 export default function meta(get_meta)
 {
-	return function(Decorated_component)
+	return function(DecoratedComponent)
 	{
 		class Meta extends Component
 		{
 			render()
 			{
-				return <Decorated_component {...this.props} />
+				return <DecoratedComponent {...this.props} />
 			}
 		}
 
 		Meta[Meta_method_name] = get_meta
 
-		Meta.displayName = `Meta(${get_display_name(Decorated_component)})`
+		Meta.displayName = `Meta(${get_display_name(DecoratedComponent)})`
 		
-		return hoist_statics(Meta, Decorated_component)
+		return hoist_statics(Meta, DecoratedComponent)
 	}
 }
 

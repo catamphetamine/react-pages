@@ -4,7 +4,7 @@ import { Router } from 'react-router'
 import { location_url } from '../../location'
 import { get_location } from '../../history'
 import timer from '../../timer'
-import { preload_action } from '../actions'
+import { start_preload } from '../preload/actions'
 import match_routes_against_location, { get_route_path } from '../../react-router/match'
 import { get_meta } from '../../meta'
 
@@ -40,7 +40,7 @@ export default async function render_on_server({ history, hollow, create_page_el
 		const preload_timer = timer()
 
 		// After the page has finished preloading, render it
-		await store.dispatch(preload_action(get_location(history)))
+		await store.dispatch(start_preload(get_location(history)))
 	
 		time.preload = preload_timer()
 

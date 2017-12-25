@@ -3,7 +3,7 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import { Link } from 'react-router'
-import { preload_action } from './actions'
+import { start_preload } from './preload/actions'
 
 export default class Hyperlink extends Component
 {
@@ -100,7 +100,7 @@ export default class Hyperlink extends Component
 
 		// Firt preload the new page, then `history.push()` will be called,
 		// and `react-router` will detect that performing the route transition.
-		store.dispatch(preload_action(resolveToLocation(to, router), undefined, undefined, undefined, instantBack))
+		store.dispatch(start_preload(resolveToLocation(to, router), undefined, undefined, undefined, instantBack))
 	}
 
 	render()

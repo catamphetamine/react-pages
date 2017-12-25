@@ -386,20 +386,6 @@ try {
   }
 
   // (optional)
-  // `@preload()` customization
-  preload:
-  {
-    // (optional)
-    // For those coming from `redux-connect`, the same `helpers` parameter.
-    // All properties of this object will be available as named arguments
-    // inside `@preload({ dispatch, ..., helper })` decorator
-    helpers:
-    {
-      helper: require('./helper')
-    }
-  }
-
-  // (optional)
   // Can handle errors occurring inside `@preload()`.
   // For example, if `@preload()` throws a `new Error("Unauthorized")`
   // then a redirect to "/unauthorized" page can be made here.

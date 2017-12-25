@@ -1,62 +1,41 @@
 import { parse_location } from '../location'
+import { start_preload } from './preload/actions'
 
 export const Redirect  = '@@react-website/redirect'
 export const GoTo      = '@@react-website/goto'
 export const Navigated = '@@react-website/navigated'
-export const Preload   = '@@react-website/preload'
 export const LoadState = '@@react-website/redux/state/replace'
 
 // Before page preloading started
-export const redirect_action = location => preload_action(location, true)
+export const redirect_action = location => start_preload(location, true)
 
 // Before page preloading started
-export const goto_action = location => preload_action(location)
+export const goto_action = location => start_preload(location)
 
 // After page preloading finished
 export const navigated_action = (location) =>
 ({
-	type: Navigated,
-	location: parse_location(location)
-})
-
-// Starts `location` page preloading.
-//
-// If `redirect` is `true` then will perform
-// `history.replace()` instead of `history.push()`.
-//
-// If `navigate` is `false` then the actual navigation won't take place.
-// This is used for the server side.
-//
-// If `initial_client_side_preload` is `true`
-// then just client-side-only `@preload()`s will be executed.
-//
-export const preload_action = (location, redirect, navigate = true, initial_client_side_preload, instant_back) =>
-({
-	type: Preload,
-	location: parse_location(location),
-	redirect,
-	navigate,
-	initial: initial_client_side_preload,
-	instant_back
+	type     : Navigated,
+	location : parse_location(location)
 })
 
 // After page preloading finished
 export const history_redirect_action = (location) =>
 ({
-	type: Redirect,
-	location: parse_location(location)
+	type     : Redirect,
+	location : parse_location(location)
 })
 
 // After page preloading finished
 export const history_goto_action = (location) =>
 ({
-	type: GoTo,
-	location: parse_location(location)
+	type     : GoTo,
+	location : parse_location(location)
 })
 
 // Replaces Redux state (e.g. for instant "Back" button feature)
 export const load_state_action = (state) =>
 ({
-	type: LoadState,
+	type : LoadState,
 	state
 })

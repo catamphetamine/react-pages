@@ -2,10 +2,10 @@ import { createStore, combineReducers, applyMiddleware, compose } from 'redux'
 import { composeWithDevTools } from 'redux-devtools-extension/logOnlyInProduction'
 
 import asynchronous_middleware from './middleware/asynchronous'
-import preloading_middleware from './middleware/preload'
 import history_middleware from './middleware/history'
 
-import { reducer as preload_reducer } from './preload'
+import preloading_middleware from './preload/middleware'
+import preload_reducer from './preload/reducer'
 
 import { LoadState } from './actions'
 
@@ -60,8 +60,6 @@ export default function create_store(settings, data, get_history, http_client, o
 		(
 			server,
 			settings.error,
-			preload && preload.client,
-			preload && preload.helpers,
 			routes,
 			get_history,
 			settings.history.options.basename,
