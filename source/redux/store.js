@@ -91,9 +91,6 @@ export default function create_store(settings, data, get_history, http_client, o
 		throw new Error(`"preload" reducer name is reserved for react-website's "@preload()" status. Use a different name for your "preload" reducer.`)
 	}
 
-	// Add `@preload()` status reducer
-	reducer.preload = preload_reducer
-
 	// Create Redux store
 	const store = get_store_enhancers_composer(server, devtools)(...store_enhancers)(createStore)(create_reducer(reducer), data)
 
@@ -102,14 +99,7 @@ export default function create_store(settings, data, get_history, http_client, o
 	if (!server)
 	{
 		// `hot_reload` helper function gives the web application means to hot reload its Redux reducers
-		store.hot_reload = (reducer) =>
-		{
-			// Add `@preload()` status reducer
-			reducer.preload = preload_reducer
-			// Update reducer
-			store.replaceReducer(create_reducer(reducer))
-		}
-
+		store.hot_reload = reducer => store.replaceReducer(create_reducer(reducer))
 		// Add camelCase alias
 		store.hotReload = store.hot_reload
 	}
@@ -120,6 +110,9 @@ export default function create_store(settings, data, get_history, http_client, o
 
 function create_reducer(reducers)
 {
+	// Add `@preload()` status reducer
+	reducers.preload = preload_reducer
+	// Create reducer
 	return replaceable_state(combineReducers(reducers), LoadState)
 }
 
