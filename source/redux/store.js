@@ -102,7 +102,14 @@ export default function create_store(settings, data, get_history, http_client, o
 	if (!server)
 	{
 		// `hot_reload` helper function gives the web application means to hot reload its Redux reducers
-		store.hot_reload = reducer => store.replaceReducer(create_reducer(reducer))
+		store.hot_reload = (reducer) =>
+		{
+			// Add `@preload()` status reducer
+			reducer.preload = preload_reducer
+			// Update reducer
+			store.replaceReducer(create_reducer(reducer))
+		}
+
 		// Add camelCase alias
 		store.hotReload = store.hot_reload
 	}
