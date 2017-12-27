@@ -222,6 +222,20 @@ function create_action(event, action, options, redux)
 	// Asynchronous action
 	if (action)
 	{
+
+	// Normalize `result` reducer into a function
+	if (typeof result === 'string')
+	{
+		payload = parameter => ({ parameter })
+
+		const property = result
+		result = (state, action) =>
+		({
+			...state,
+			[property]: action.parameter
+		})
+	}
+
 		// Normalize `result` argument into a function
 
 		let result_property_name
@@ -245,15 +259,18 @@ function create_action(event, action, options, redux)
 			const property_getters = result
 			result = (state, result) =>
 			{
-				let updated_properties = {}
+				const updated_properties = {}
 
 				for (const property of Object.keys(property_getters))
 				{
-					updated_properties =
-					{
-						...updated_properties,
-						...property_getters[property](result)
-					}
+					updated_properties[property] = property_getters[property](result)
+
+					// Don't know why did I previously write it like:	
+					// updated_properties =
+					// {
+					// 	...updated_properties,
+					// 	...property_getters[property](result)
+					// }
 				}
 
 				return {
