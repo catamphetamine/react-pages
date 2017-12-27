@@ -715,7 +715,7 @@ const redux = reduxModule('NOTIFICATIONS')
 //
 export const notify = redux.action('NOTIFY', {
   // The Redux action payload (i.e. everything except `type`)
-  payload : (message) => ({ message: formatMessage(message) }),
+  payload : (text) => ({ message: formatMessage(text) }),
   // The Redux state reducer for this action
   result  : (state, action) => ({ ...state, message: action.message })
 })
