@@ -1,3 +1,10 @@
+2.0.0 / 28.12.2017
+==================
+
+  * (breaking change) `result` parameter of Redux module has been moved from `options` argument to an argument itself. Migration guide: `reduxModule.action(event, action, { result })` -> `reduxModule.action(event, action, result, options = {})`.
+
+  * Synchronous action `payload()` parameter of Redux module has been renamed to `action()` along with passing `sync: true` flag: `reduxModule.action(event, { payload, result })` -> `reduxModule.action(event, action, result, { sync: true })`. The old name still works but is deprecated.
+
 1.0.0 / 19.12.2017
 ==================
 

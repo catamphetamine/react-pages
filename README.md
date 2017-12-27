@@ -487,19 +487,15 @@ export const fetchFriends = redux.action(
   async ({ http }, personId, gender) => {
     return await http.get(`/api/person/${personId}/friends`, { gender })
   },
-  {
-    // The fetched friends list will be placed
-    // into the `friends` Redux state property.
-    result: 'friends'
-    // 
-    // Or write it like this:
-    // result: {
-    //   friends: result => result
-    // }
-    //
-    // Or write it as an "on result" reducer:
-    // result: (state, result) => ({ ...state, friends: result })
-  }
+  // The fetched friends list will be placed
+  // into the `friends` Redux state property.
+  'friends'
+  // 
+  // Or write it like this:
+  // { friends: result => result }
+  //
+  // Or write it as a Redux reducer:
+  // (state, result) => ({ ...state, friends: result })
 )
 
 // This is the Redux reducer which now
@@ -532,8 +528,7 @@ export const postComment = redux.action(
       userId: userId,
       text: commentText
     })
-  },
-  redux
+  }
 )
 
 // Get comments Redux "action creator"
@@ -542,19 +537,15 @@ export const getComments = redux.action(
   async ({ http }, blogPostId) => {
     return await http.get(`/blog/posts/${blogPostId}/comments`)
   },
-  {
-    // The fetched comments will be placed
-    // into the `comments` Redux state property.
-    result: 'comments'
-    // 
-    // Or write it like this:
-    // result: {
-    //   comments: result => result
-    // }
-    //
-    // Or write it as an "on result" reducer:
-    // result: (state, result) => ({ ...state, comments: result })
-  }
+  // The fetched comments will be placed
+  // into the `comments` Redux state property.
+  'comments'
+  // 
+  // Or write it like this:
+  // { comments: result => result }
+  //
+  // Or write it as a Redux reducer:
+  // (state, result) => ({ ...state, comments: result })
 )
 
 // A developer can additionally handle any other custom events
@@ -565,7 +556,7 @@ redux.on(eventName('BLOG_POST', 'CUSTOM_EVENT'), (state, action) => ({
 
 // This is for the Redux `@connect()` helper below.
 // Each property name specified here or
-// as a `result` parameter of a `redux.action()` definition
+// as a `result : String` argument of a `redux.action()` call
 // will be made available inside Redux'es
 // `@connect(state => properties(state.reducerName))`.
 // This is just to reduce boilerplate when `@connect()`ing
@@ -696,10 +687,10 @@ const redux = reduxModule('NOTIFICATIONS')
 //
 // The Redux "action" creator is gonna be:
 //
-// function(message) {
+// function(text) {
 //   return {
-//     type: 'NOTIFICATIONS:NOTIFY',
-//     message
+//     type    : 'NOTIFICATIONS:NOTIFY',
+//     message : formatMessage(text)
 //   }
 // }
 //
@@ -711,22 +702,17 @@ const redux = reduxModule('NOTIFICATIONS')
 //     message: action.message
 //   }
 //
-// Call it as `dispatch(notify(message))`.
+// Call it as `dispatch(notify(text))`.
 //
-export const notify = redux.action('NOTIFY', {
-  // The Redux action payload (i.e. everything except `type`)
-  payload : (text) => ({ message: formatMessage(text) }),
+export const notify = redux.action(
+  'NOTIFY',
+  // The Redux action properties (i.e. everything except `type`)
+  (text) => ({ message: formatMessage(text) }),
   // The Redux state reducer for this action
-  result  : (state, action) => ({ ...state, message: action.message })
-})
-
-// Or, it could be simplified even further:
-//
-// export const notify = redux.action('NOTIFY', {
-//   result : 'message'
-// })
-//
-// Which is much cleaner.
+  (state, action) => ({ ...state, message: action.message }),
+  // Indicates this is a "synchronous" action (not "asynchronous")
+  { sync : true }
+)
 
 // (optional) a little helper for Redux `@connect()`
 export const properties = redux.getProperties

@@ -55,9 +55,14 @@ class Redux_module
 		this.handlers[event].push(handler)
 	}
 
-	action(...parameters)
+	action(event, action, result, options = {})
 	{
-		return create_action(...parameters, this)
+		if (typeof action !== 'function')
+		{
+			throw new Error('[react-website] One must pass an `action()` argument (the second one) to Redux module action creator: `reduxModule(event, action, result, options = {})`.')
+		}
+
+		return create_action(event, action, result, options, this)
 	}
 
 	// Returns Redux action creator for resetting error.
@@ -158,50 +163,17 @@ class Redux_module
 }
 
 // Returns Redux action creator.
-// `promise` is for backwards compatibility:
-// it has been renamed to `action` since `9.0.8`.
-function create_action(event, action, options, redux)
+function create_action(event, action, result, options, redux)
 {
-	// If it's not an asynchronous action
-	// but rather a generic Redux action
-	// then `action` argument doesn't get passed.
-	if (typeof action === 'object')
-	{
-		redux = options
-		options = action
-		action = undefined
-	}
-	// If no options were specified
-	// when creating this asynchronous action
-	// then correct the arguments accordingly.
-	else if (!redux)
-	{
-		redux = options
-		options = {}
-	}
-
 	const namespace = redux.namespace
 
 	const
 	{
-		type,
-		reset,
+		sync,
+		// reset,
 		cancelPrevious
 	}
 	= options
-
-	let
-	{
-		payload,
-		result
-	}
-	= options
-
-	// For those who still prefer `type` over `event`
-	if (!event && type)
-	{
-		event = type
-	}
 
 	// If `result` is a property name,
 	// then add that property to the `connector`.
@@ -220,51 +192,11 @@ function create_action(event, action, options, redux)
 	result = result || (state => state)
 
 	// Asynchronous action
-	if (action)
+	if (!sync)
 	{
 		// Normalize `result` argument into a function
 
-		let result_property_name
-
-		// If `result` is a property name,
-		// then the reducer will write action result
-		// to that property of Redux state.
-		if (typeof result === 'string')
-		{
-			result_property_name = result
-			result = (state, result) =>
-			({
-				...state,
-				[result_property_name]: result
-			})
-		}
-		// If `result` is an object of property getters
-		// then those properties will be added to Redux state.
-		else if (typeof result === 'object')
-		{
-			const property_getters = result
-			result = (state, result) =>
-			{
-				const updated_properties = {}
-
-				for (const property of Object.keys(property_getters))
-				{
-					updated_properties[property] = property_getters[property](result)
-
-					// Don't know why did I previously write it like:	
-					// updated_properties =
-					// {
-					// 	...updated_properties,
-					// 	...property_getters[property](result)
-					// }
-				}
-
-				return {
-					...state,
-					...updated_properties
-				}
-			}
-		}
+		// let result_property_name
 
 		// Adds Redux reducers handling events:
 		//
@@ -272,7 +204,7 @@ function create_action(event, action, options, redux)
 		//   * success
 		//   * error
 		//
-		create_redux_handlers(redux, namespace, event, result, result_property_name, reset)
+		create_redux_handlers(redux, namespace, event, get_action_result_reducer(result, result => result)) // , result_property_name, reset
 
 		// Redux "action creator"
 		return (...parameters) =>
@@ -285,17 +217,9 @@ function create_action(event, action, options, redux)
 
 	// Synchronous action
 
-	// Normalize `result` reducer into a function
-	if (typeof result === 'string')
+	if (typeof result !== 'function')
 	{
-		payload = parameter => ({ parameter })
-
-		const property = result
-		result = (state, action) =>
-		({
-			...state,
-			[property]: action.parameter
-		})
+		throw new Error('Redux module action `result` argument must be a function for synchronous actions.')
 	}
 
 	// Reducer
@@ -303,10 +227,11 @@ function create_action(event, action, options, redux)
 
 	// Redux "action creator"
 	return (...parameters) =>
-	({
-		type : event_name(namespace, event),
-		...(payload ? payload.apply(this, parameters) : undefined)
-	})
+	{
+		const redux_action = action.apply(this, parameters)
+		redux_action.type = event_name(namespace, event)
+		return redux_action
+	}
 }
 
 // Adds handlers for:
@@ -316,7 +241,7 @@ function create_action(event, action, options, redux)
 //   * failed
 //   * reset error
 //
-function create_redux_handlers(redux, namespace, event, on_result, result_property_name, reset)
+function create_redux_handlers(redux, namespace, event, on_result) // , result_property_name, reset
 {
 	if (!redux.settings.redux_event_naming)
 	{
@@ -348,12 +273,12 @@ function create_redux_handlers(redux, namespace, event, on_result, result_proper
 		// This will be the new Redux state.
 		let new_state = { ...state }
 
-		// Clearing the old `result` variable
-		// when fetching of a new one starts.
-		if (result_property_name && reset)
-		{
-			new_state = on_result(state, handler.initial_state[result_property_name])
-		}
+		// // Clearing the old `result` variable
+		// // when fetching of a new one starts.
+		// if (result_property_name && reset)
+		// {
+		// 	new_state = on_result(state, handler.initial_state[result_property_name])
+		// }
 
 		// Set `pending` flag
 		new_state[pending_property_name] = true
@@ -386,4 +311,50 @@ function create_redux_handlers(redux, namespace, event, on_result, result_proper
 		[pending_property_name] : false,
 		[error_property_name] : error
 	}))
+}
+
+// Returns a function
+function get_action_result_reducer(result, get_action_result)
+{
+	// If `result` is a property name,
+	// then the reducer will write action result
+	// to that property of Redux state.
+	if (typeof result === 'string')
+	{
+		return (state, action) =>
+		({
+			...state,
+			[result]: get_action_result(action)
+		})
+	}
+
+	// If `result` is an object of property getters
+	// then those properties will be added to Redux state.
+	if (typeof result === 'object')
+	{
+		return (state, action) =>
+		{
+			const updated_properties = {}
+
+			for (const property of Object.keys(result))
+			{
+				updated_properties[property] = result[property](get_action_result(action))
+
+				// Don't know why did I previously write it like:	
+				// updated_properties =
+				// {
+				// 	...updated_properties,
+				// 	...result[property](get_action_result(action))
+				// }
+			}
+
+			return {
+				...state,
+				...updated_properties
+			}
+		}
+	}
+
+	// Otherwise result is `(state, action) => ...`
+	return result
 }
