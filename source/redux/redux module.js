@@ -222,20 +222,6 @@ function create_action(event, action, options, redux)
 	// Asynchronous action
 	if (action)
 	{
-
-	// Normalize `result` reducer into a function
-	if (typeof result === 'string')
-	{
-		payload = parameter => ({ parameter })
-
-		const property = result
-		result = (state, action) =>
-		({
-			...state,
-			[property]: action.parameter
-		})
-	}
-
 		// Normalize `result` argument into a function
 
 		let result_property_name
