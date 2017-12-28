@@ -1,6 +1,8 @@
 import { event_name } from './naming'
 import normalize_common_settings from './normalize'
 
+import { RESULT_ACTION_PROPERTY, ERROR_ACTION_PROPERTY } from './middleware/asynchronous'
+
 // Creates Redux module object
 // (which will eventually be transformed into a reducer)
 export default function create_redux_module(namespace, settings)
@@ -121,14 +123,14 @@ class Redux_module
 
 			let handler_argument = action_data
 
-			// if (action_data.result !== undefined)
-			if (Object.prototype.hasOwnProperty.call(action_data, 'result'))
+			// if (action_data.value !== undefined)
+			if (Object.prototype.hasOwnProperty.call(action_data, RESULT_ACTION_PROPERTY))
 			{
-				handler_argument = action_data.result
+				handler_argument = action_data[RESULT_ACTION_PROPERTY]
 			}
-			else if (action_data.error !== undefined)
+			else if (action_data[ERROR_ACTION_PROPERTY] !== undefined)
 			{
-				handler_argument = action_data.error
+				handler_argument = action_data[ERROR_ACTION_PROPERTY]
 			}
 			// This proved to be not that convenient
 			// // When only `type` of a Redux "action" is set
@@ -170,7 +172,6 @@ function create_action(event, action, result, options, redux)
 	const
 	{
 		sync,
-		// reset,
 		cancelPrevious
 	}
 	= options
@@ -191,47 +192,37 @@ function create_action(event, action, result, options, redux)
 	// Default "on result" handler is a reducer that does nothing
 	result = result || (state => state)
 
-	// Asynchronous action
-	if (!sync)
+	// Synchronous action
+	if (sync)
 	{
-		// Normalize `result` argument into a function
-
-		// let result_property_name
-
-		// Adds Redux reducers handling events:
-		//
-		//   * pending
-		//   * success
-		//   * error
-		//
-		create_redux_handlers(redux, namespace, event, get_action_result_reducer(result, result => result)) // , result_property_name, reset
+		// Reducer
+		redux.on(event_name(namespace, event), get_action_value_reducer(result))
 
 		// Redux "action creator"
 		return (...parameters) =>
 		({
-			event   : event_name(namespace, event),
-			promise : (utility) => action.apply(this, [utility].concat(parameters)),
-			cancelPrevious
+			type : event_name(namespace, event),
+			[RESULT_ACTION_PROPERTY] : action.apply(this, parameters)
 		})
 	}
 
-	// Synchronous action
+	// Asynchronous action
 
-	if (typeof result !== 'function')
-	{
-		throw new Error('Redux module action `result` argument must be a function for synchronous actions.')
-	}
-
-	// Reducer
-	redux.on(event_name(namespace, event), result)
+	// Add Redux reducers handling events:
+	//
+	//   * pending
+	//   * success
+	//   * error
+	//
+	add_asynchronous_action_reducers(redux, namespace, event, get_action_value_reducer(result))
 
 	// Redux "action creator"
 	return (...parameters) =>
-	{
-		const redux_action = action.apply(this, parameters)
-		redux_action.type = event_name(namespace, event)
-		return redux_action
-	}
+	({
+		event   : event_name(namespace, event),
+		promise : (utility) => action.apply(this, [utility].concat(parameters)),
+		cancelPrevious
+	})
 }
 
 // Adds handlers for:
@@ -241,7 +232,7 @@ function create_action(event, action, result, options, redux)
 //   * failed
 //   * reset error
 //
-function create_redux_handlers(redux, namespace, event, on_result) // , result_property_name, reset
+function add_asynchronous_action_reducers(redux, namespace, event, result_reducer)
 {
 	if (!redux.settings.redux_event_naming)
 	{
@@ -268,33 +259,25 @@ function create_redux_handlers(redux, namespace, event, on_result) // , result_p
 	redux.add_state_properties(pending_property_name, error_property_name)
 
 	// When Promise is created: reset result variable, clear `error`, set `pending` flag.
-	redux.on(event_name(namespace, pending_event_name), (state, result) =>
+	redux.on(event_name(namespace, pending_event_name), (state) =>
 	{
 		// This will be the new Redux state.
-		let new_state = { ...state }
+		return {
+			...state,
 
-		// // Clearing the old `result` variable
-		// // when fetching of a new one starts.
-		// if (result_property_name && reset)
-		// {
-		// 	new_state = on_result(state, handler.initial_state[result_property_name])
-		// }
+			// Set `pending` flag
+			[pending_property_name]: true,
 
-		// Set `pending` flag
-		new_state[pending_property_name] = true
-
-		// Clear `error`
-		new_state[error_property_name] = undefined
-
-		// Return the new Redux state
-		return new_state
+			// Clear `error`
+			[error_property_name]: undefined
+		}
 	})
 
 	// When Promise succeeds: clear `pending` flag, set result variable.
 	redux.on(event_name(namespace, success_event_name), (state, result) =>
 	{
 		// This will be the new Redux state
-		const new_state = on_result(state, result)
+		const new_state = result_reducer(state, result)
 
 		// Clear `pending` flag
 		new_state[pending_property_name] = false
@@ -314,37 +297,37 @@ function create_redux_handlers(redux, namespace, event, on_result) // , result_p
 }
 
 // Returns a function
-function get_action_result_reducer(result, get_action_result)
+function get_action_value_reducer(reducer)
 {
-	// If `result` is a property name,
-	// then the reducer will write action result
+	// If `reducer` is a property name,
+	// then the reducer will write action value
 	// to that property of Redux state.
-	if (typeof result === 'string')
+	if (typeof reducer === 'string')
 	{
-		return (state, action) =>
+		return (state, value) =>
 		({
 			...state,
-			[result]: get_action_result(action)
+			[reducer]: value
 		})
 	}
 
-	// If `result` is an object of property getters
+	// If `reducer` is an object of property getters
 	// then those properties will be added to Redux state.
-	if (typeof result === 'object')
+	if (typeof reducer === 'object')
 	{
-		return (state, action) =>
+		return (state, value) =>
 		{
 			const updated_properties = {}
 
-			for (const property of Object.keys(result))
+			for (const property of Object.keys(reducer))
 			{
-				updated_properties[property] = result[property](get_action_result(action))
+				updated_properties[property] = reducer[property](value)
 
 				// Don't know why did I previously write it like:	
 				// updated_properties =
 				// {
 				// 	...updated_properties,
-				// 	...result[property](get_action_result(action))
+				// 	...reducer[property](value)
 				// }
 			}
 
@@ -355,6 +338,6 @@ function get_action_result_reducer(result, get_action_result)
 		}
 	}
 
-	// Otherwise result is `(state, action) => ...`
-	return result
+	// Otherwise `reducer` is `(state, value) => ...`
+	return reducer
 }

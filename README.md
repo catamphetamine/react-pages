@@ -461,7 +461,7 @@ export default function(state = {}, action = {}) {
       return {
         ...state,
         fetchFriendsPending: false,
-        friends: action.result
+        friends: action.value
       }
     case 'FETCH_FRIENDS_ERROR':
       return {
@@ -551,7 +551,7 @@ export const getComments = redux.action(
 // A developer can additionally handle any other custom events
 redux.on(eventName('BLOG_POST', 'CUSTOM_EVENT'), (state, action) => ({
   ...state,
-  reduxStateProperty: action.result
+  reduxStateProperty: action.value
 }))
 
 // This is for the Redux `@connect()` helper below.
@@ -707,9 +707,11 @@ const redux = reduxModule('NOTIFICATIONS')
 export const notify = redux.action(
   'NOTIFY',
   // The Redux action properties (i.e. everything except `type`)
-  (text) => ({ message: formatMessage(text) }),
+  (text) => formatMessage(text),
   // The Redux state reducer for this action
-  (state, action) => ({ ...state, message: action.message }),
+  (state, result) => ({ ...state, message: result }),
+  // The Redux reducer above could be also defined as
+  // 'message',
   // Indicates this is a "synchronous" action (not "asynchronous")
   { sync : true }
 )

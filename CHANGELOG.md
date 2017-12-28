@@ -1,7 +1,11 @@
 2.0.0 / 28.12.2017
 ==================
 
+  * (could possibly be a breaking change for someone, but that's unlikely) Asynchronous middleware `action.result` property of "success" action renamed to `action.value`.
+
   * (breaking change) `result` parameter of Redux module has been moved from `options` argument to an argument itself. Migration guide: `reduxModule.action(event, action, { result })` -> `reduxModule.action(event, action, result, options = {})`.
+
+  * (breaking change) Redux module synchronous actions' `result` is now `(state, result) => ...` instead of `(state, action) => ...` where `result` is what's being returned from `action`.
 
   * Synchronous action `payload()` parameter of Redux module has been renamed to `action()` along with passing `sync: true` flag: `reduxModule.action(event, { payload, result })` -> `reduxModule.action(event, action, result, { sync: true })`. The old name still works but is deprecated.
 

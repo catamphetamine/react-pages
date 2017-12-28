@@ -2,6 +2,9 @@ import { exists, is_object } from '../../helpers'
 import { goto_action } from '../actions'
 import { location_url } from '../../location'
 
+export const RESULT_ACTION_PROPERTY = 'value'
+export const ERROR_ACTION_PROPERTY = 'error'
+
 // Asynchronous middleware (e.g. for HTTP Ajax calls).
 //
 // Takes effect only if the `dispatch`ed action has 
@@ -85,8 +88,8 @@ export default function asynchronous_middleware(http_client, redux_event_naming,
 					dispatch
 					({
 						...rest,
-						result,
-						type : Success
+						type : Success,
+						[RESULT_ACTION_PROPERTY] : result
 					})
 
 					// The Promise returned from `dispatch()` call
@@ -109,8 +112,8 @@ export default function asynchronous_middleware(http_client, redux_event_naming,
 					dispatch
 					({
 						...rest,
-						error : parseError(error),
-						type  : Failure
+						type : Failure,
+						[ERROR_ACTION_PROPERTY] : parseError(error)
 					})
 
 					// The Promise returned from `dispatch()` call
