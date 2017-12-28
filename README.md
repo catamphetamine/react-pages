@@ -706,10 +706,10 @@ const redux = reduxModule('NOTIFICATIONS')
 //
 export const notify = redux.action(
   'NOTIFY',
-  // The Redux action properties (i.e. everything except `type`)
+  // The action
   (text) => formatMessage(text),
-  // The Redux state reducer for this action
-  (state, result) => ({ ...state, message: result }),
+  // The Redux state reducer for the action's return value
+  (state, message) => ({ ...state, message }),
   // The Redux reducer above could be also defined as
   // 'message',
   // Indicates this is a "synchronous" action (not "asynchronous")
