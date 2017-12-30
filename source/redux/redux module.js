@@ -177,13 +177,13 @@ function create_action(event, action, result, options, redux)
 	= options
 
 	// If `result` is a property name,
-	// then add that property to the `connector`.
+	// then add that property to `connectXxx()`.
 	if (typeof result === 'string')
 	{
 		redux.add_state_properties(result)
 	}
 	// If `result` is an object of property getters,
-	// then add those properties to the `connector`.
+	// then add those properties to `connectXxx()`.
 	else if (typeof result === 'object')
 	{
 		redux.add_state_properties(...Object.keys(result))

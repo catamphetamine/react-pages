@@ -558,7 +558,7 @@ redux.on(eventName('BLOG_POST', 'CUSTOM_EVENT'), (state, action) => ({
 // Each property name specified here or
 // as a `result : String` argument of a `redux.action()` call
 // will be made available inside Redux'es
-// `@connect(state => properties(state.reducerName))`.
+// `@connect(state => connectComments(state.reducerName))`.
 // This is just to reduce boilerplate when `@connect()`ing
 // React Components to Redux state.
 // Alternatively, each required property from Redux state
@@ -568,12 +568,12 @@ redux.property('reduxStateProperty')
 // A little helper for Redux `@connect()`
 // which reduces boilerplate when `@connect()`ing
 // React Components to Redux state:
-// `@connect(state => properties(state.reducerName))`
+// `@connect(state => connectComments(state.reducerName))`
 // will add all (known) state properties from
 // Redux state to React Component `props`.
 // Alternatively, each required property from Redux state
 // can be specified manually inside `@connect()` mapper.
-export const properties = redux.getProperties
+export const connectComments = redux.getProperties
 
 // This is the Redux reducer which now
 // handles the asynchronous actions defined above
@@ -596,7 +596,7 @@ The React Component would look like this
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
 import { preload } from 'react-website'
-import { connector, getComments, postComment } from './redux/blogPost'
+import { connectComments, getComments, postComment } from './redux/blogPost'
 
 // Preload comments before showing the page
 // (see "Page preloading" section of this document)
@@ -608,15 +608,15 @@ import { connector, getComments, postComment } from './redux/blogPost'
 // See `react-redux` documentation on `@connect()` decorator
 @connect((state) => ({
   userId: state.user.id,
-  // `...properties()` will populate the Redux `props`
-  // with the (known) `state.blogPost` properties:
+  // `...connectComments(...)` will populate `this.props`
+  // with the (known) Redux `state.blogPost` properties:
   //  * `postCommentPending`
   //  * `postCommentError`
   //  * `getCommentsPending`
   //  * `getCommentsError`
   //  * `comments`
   //  * `customProperty`
-  ...properties(state.blogPost)
+  ...connectComments(state.blogPost)
 }), {
   postComment
 })
