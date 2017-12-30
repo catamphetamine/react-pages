@@ -1462,9 +1462,9 @@ function reducer(state, action) {
 ```
 </details>
 
-## Bundlers
+## Server-Side Rendering and bundlers
 
-If you're using Webpack then make sure you either build your server-side code with Webpack too so that asset `require()` calls (images, styles, fonts, etc) inside React components work (see [universal-webpack](https://github.com/catamphetamine/universal-webpack), for example).
+If the application is being built with a bundler (most likely Webpack) and Server-Side Rendering is enabled then make sure to build the server-side code with the bundler too so that `require()` calls for assets (images, styles, fonts, etc) inside React components don't break (see [universal-webpack](https://github.com/catamphetamine/universal-webpack), for example).
 
 ## Advanced
 
