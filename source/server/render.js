@@ -171,7 +171,7 @@ export default async function render_page(settings, { initialize, localize, asse
 				// Sanity check
 				if (!assets.entries)
 				{
-					throw new Error(`"assets.entries" array parameter is required as of version 10.1.0. E.g. "{ ... entries: ['main'] ... }"`)
+					throw new Error(`"assets.entries[]" page rendering service configuration parameter is required: it lists all Webpack "entries" for which javascripts and styles must be included on a server-side rendered page. If you didn't set up any "entries" in Webpack configuration then the default Webpack entry is called "main", in which case pass "{ assets: { entries: ['main'], ... } }" configuration to page rendering service.`)
 				}
 
 				// Render all HTML that goes before React markup.
