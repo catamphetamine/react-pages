@@ -547,11 +547,10 @@ try {
     return {
       // Webpack "entry points" to be included
       // on a page for this URL `path`.
-      // Can be used for "code splitting"
-      // by returning different entries based on the `path`.
-      // Since in this example there's no code splitting
-      // involved then there's only one entry point: "main".
-      entries: ['main'],
+      // Defaults to `["main"]`:
+      // If no "entry points" are configured in Webpack configuration
+      // then Webpack creates a single "main" entry point.
+      // entries: [...],
 
       // Javascripts for the `entries`.
       javascript: {
