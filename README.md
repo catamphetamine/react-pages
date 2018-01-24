@@ -206,7 +206,7 @@ Run the rendering server:
 
 ```
 $ npm install npx --global
-$ npm install babel-node
+$ npm install babel-cli
 $ npx babel-node rendering-server.js
 ```
 
