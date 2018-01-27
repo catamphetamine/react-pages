@@ -39,7 +39,7 @@ async function render_page(request, response, settings, options)
 
 	const total_timer = timer()
 
-	const { status, content, redirect, route, time, set_cookies } = await render(settings,
+	const { status, content, redirect, route, time, cookies: set_cookies } = await render(settings,
 	{
 		proxy,
 		assets,
@@ -49,8 +49,11 @@ async function render_page(request, response, settings, options)
 		hollow,
 		html,
 		url,
+		// // HTTP headers.
+		// // Some people use them to get things like `window.navigator` on server side.
+		// headers: request.headers,
 		// Cookies for protected cookie value retrieval
-		cookies: request.headers.cookie ? cookie.parse(request.headers.cookie) : {}
+		cookies
 	})
 
 	// Can add `Set-Cookie` headers, for example.

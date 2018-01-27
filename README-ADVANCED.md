@@ -211,21 +211,20 @@ try {
   // content - rendered HTML document (a Node.js "Readable Stream")
   // redirect - redirection URL (in case of HTTP redirect)
   //
-  const { status, content, redirect } = await render(settings, {
-    // Takes the same parameters as webpage server
+  const { status, content, redirect, cookies } = await render(settings, {
+    // See the source code for the list of parameters:
+    // https://github.com/catamphetamine/react-website/blob/master/source/server/server.js#L42-L54
     ...
-
-    // Original HTTP request, which is used for
-    // getting URL, cloning cookies, and inside `initialize`.
-    request,
-
-    // Cookies object having `.get(name)` function
-    // (only needed if using `authentication` cookie feature)
-    cookies
   })
 
   if (redirect) {
     return redirect_to(redirect)
+  }
+
+  if (cookies) {
+    for (const cookie of cookies) {
+      response.setHeader('Set-Cookie', cookie)
+    }
   }
 
   response.status(status || 200)
@@ -582,13 +581,11 @@ try {
     // Markup inserted to the start of the server rendered webpage's <body/>.
     // Can be either a function returning a value or just a value.
     bodyStart: (path, { store }) => String, or React.Element, or an array of React.Elements
-    // (aka `body_start`)
 
     // (optional)
     // Markup inserted to the end of the server rendered webpage's <body/>.
     // Can be either a function returning a value or just a value.
     bodyEnd: (path, { store }) => String, or React.Element, or an array of React.Elements
-    // (aka `body_end`)
   }
 
   // (optional)
@@ -641,10 +638,6 @@ try {
   // (as a performance optimization) by setting it to `false`.
   //
   render: `true`/`false`
-
-  // (optional)
-  // Is called after all `@preload()`s finish and before React renders.
-  beforeRender: async ({ dispatch, getState }) => {}
 
   // (optional)
   // A custom `log`

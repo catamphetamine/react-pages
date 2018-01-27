@@ -9,7 +9,7 @@ export function render_before_content({
 	locale,
 	meta,
 	head,
-	body_start
+	bodyStart
 })
 {
 	return template_before_content.render
@@ -19,7 +19,7 @@ export function render_before_content({
 		locale,
 		meta,
 		head,
-		body_start,
+		bodyStart,
 		get_language_from_locale
 	})
 }
@@ -31,7 +31,7 @@ export function render_after_content({
 	locale_messages_json,
 	extension_javascript,
 	protected_cookie_value,
-	body_end
+	bodyEnd
 })
 {
 	return template_after_content.render
@@ -42,7 +42,7 @@ export function render_after_content({
 		locale_messages_json,
 		extension_javascript,
 		protected_cookie_value,
-		body_end,
+		bodyEnd,
 		safe_json_stringify
 	})
 }
@@ -89,7 +89,7 @@ const template_before_content = nunjucks.compile
 
 		<body>
 			{# Supports adding arbitrary markup to <body/> start #}
-			{{ body_start | safe }}
+			{{ bodyStart | safe }}
 
 			{# 
 				React page content.
@@ -176,7 +176,7 @@ const template_after_content = nunjucks.compile
 			{% endfor %}
 
 			{# Supports adding arbitrary markup to <body/> end #}
-			{{ body_end | safe }}
+			{{ bodyEnd | safe }}
 		</body>
 	</html>
 `

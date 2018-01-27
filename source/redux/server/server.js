@@ -73,7 +73,7 @@ export async function initialize(settings, { protected_cookie_value, proxy, cook
 	return {
 		store,
 		extension_javascript,
-		set_cookies: http_client.set_cookies
+		cookies: http_client.set_cookies
 	}
 }
 

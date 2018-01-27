@@ -1,3 +1,10 @@
+2.0.3 / 26.01.2018
+==================
+
+  * Removed deprecated underscored configuration option names: `body_start`, `body_end`.
+  * Removed the unused `beforeRender()` server-side configuration parameter. Can be added back upon request.
+  * Server-side `render()` function: renamed `set_cookies` parameter to `cookies`.
+
 2.0.0 / 28.12.2017
 ==================
 

@@ -10,7 +10,7 @@ import { get_meta } from '../../meta'
 
 // Returns a Promise resolving to { status, content, redirect }.
 //
-export default async function render_on_server({ history, hollow, create_page_element, render, store, routes, before_render })
+export default async function render_on_server({ history, hollow, create_page_element, render, store, routes })
 {
 	// Routing only takes a couple of milliseconds
 	// const routing_timer = timer()
@@ -43,11 +43,6 @@ export default async function render_on_server({ history, hollow, create_page_el
 		await store.dispatch(start_preload(get_location(history)))
 	
 		time.preload = preload_timer()
-
-		if (before_render)
-		{
-			await before_render(store)
-		}
 
 		// Gather `<title/>` and `<meta/>` tags for this route path
 		const { components, location, params } = router_state

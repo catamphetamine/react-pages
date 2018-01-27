@@ -19,9 +19,14 @@ import { render_on_server as react_router_render } from '../react-router/render'
 import { Preload } from '../redux/actions'
 import { meta_tags } from '../meta'
 
-export default async function render_page(settings, { initialize, localize, assets, proxy, url, hollow, html = {}, cookies, beforeRender })
+export default async function render_page(settings, { initialize, localize, assets, proxy, url, hollow, html = {}, cookies })
 {
 	settings = normalize_common_settings(settings)
+
+	if (html.body_start || html.body_end)
+	{
+		throw new Error('`html.body_start` and `html.body_end` configuration parameters are deprecated. Use camelCase names instead.')
+	}
 
 	const
 	{
@@ -131,10 +136,10 @@ export default async function render_page(settings, { initialize, localize, asse
 		const result = await render_page
 		({
 			...parameters,
+
 			hollow,
 			history,
 			routes,
-			before_render: beforeRender,
 
 			create_page_element(child_element, props)
 			{
@@ -154,16 +159,12 @@ export default async function render_page(settings, { initialize, localize, asse
 				// Otherwise `react_element_tree` is `<Router>...</Router>`.
 
 				// `html` modifiers
-
-				let { head } = html
-				// camelCase support for those who prefer it
-				let body_start = html.body_start || html.bodyStart
-				let body_end   = html.body_end   || html.bodyEnd
+				let { head, bodyStart, bodyEnd } = html
 
 				// Normalize `html` parameters
-				head       = render_to_a_string(typeof head       === 'function' ? head      (path, parameters) : head)
-				body_start = render_to_a_string(typeof body_start === 'function' ? body_start(path, parameters) : body_start)
-				body_end   = render_to_a_string(typeof body_end   === 'function' ? body_end  (path, parameters) : body_end)
+				head      = render_to_a_string(typeof head      === 'function' ? head     (path, parameters) : head)
+				bodyStart = render_to_a_string(typeof bodyStart === 'function' ? bodyStart(path, parameters) : bodyStart)
+				bodyEnd   = render_to_a_string(typeof bodyEnd   === 'function' ? bodyEnd  (path, parameters) : bodyEnd)
 
 				// Normalize assets
 				assets = typeof assets === 'function' ? assets(path, parameters) : assets
@@ -189,7 +190,7 @@ export default async function render_page(settings, { initialize, localize, asse
 					locale,
 					meta: meta_tags(meta).join(''),
 					head,
-					body_start
+					bodyStart
 				})
 
 				// Render all HTML that goes after React markup
@@ -199,7 +200,7 @@ export default async function render_page(settings, { initialize, localize, asse
 					assets,
 					locale,
 					locale_messages_json: messagesJSON,
-					body_end,
+					bodyEnd,
 					protected_cookie_value,
 					hollow
 				})
