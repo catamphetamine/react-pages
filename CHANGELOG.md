@@ -3,7 +3,8 @@
 
   * Removed deprecated underscored configuration option names: `body_start`, `body_end`.
   * Removed the unused `beforeRender()` server-side configuration parameter. Can be added back upon request.
-  * Server-side `render()` function: renamed `set_cookies` parameter to `cookies`.
+  * Server-side `render()` function: it now takes 4 arguments instead of 2. And the object being returned also changed. See README-ADVANCED for more info.
+  * Now also exporting `renderError(error, options)` which can be used in pair with the exported `render()` server-side function. See README-ADVANCED for more info.
 
 2.0.0 / 28.12.2017
 ==================

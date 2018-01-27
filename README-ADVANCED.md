@@ -204,35 +204,31 @@ For some advanced use cases (though most likely no one's using this) the interna
 import { render } from 'react-website/server'
 import settings from './react-website'
 
-try {
-  // Returns a Promise.
-  //
-  // status  - HTTP response status
-  // content - rendered HTML document (a Node.js "Readable Stream")
-  // redirect - redirection URL (in case of HTTP redirect)
-  //
-  const { status, content, redirect, cookies } = await render(settings, {
-    // See the source code for the list of parameters:
-    // https://github.com/catamphetamine/react-website/blob/master/source/server/server.js#L42-L54
-    ...
-  })
+// Returns a Promise.
+//
+// redirect - redirection URL (in case of an HTTP redirect).
+// cookies - a `Set` of HTTP cookies to be set (`response.setHeader('Set-Cookie', cookie)` for each of them).
+// status  - HTTP response status.
+// content - rendered HTML document (a Node.js "Readable Stream").
+//
+const { redirect, cookies, status, content } = await render(
+  request.url,
+  request.headers,
+  settings,
+  serverSideConfiguration
+)
+```
 
-  if (redirect) {
-    return redirect_to(redirect)
-  }
+The `await render()` function call can be wrapped in a `try/catch` block and for the `catch` block there's also the exported `renderError(error)` function.
 
-  if (cookies) {
-    for (const cookie of cookies) {
-      response.setHeader('Set-Cookie', cookie)
-    }
-  }
+```js
+import { renderError } from 'react-website/server'
 
-  response.status(status || 200)
-  content.pipe(response)
-} catch (error) {
-  response.status(500)
-  response.send('Internal server error')
-}
+// status  - HTTP response status.
+// content - rendered error (a string).
+// contentType - HTTP `Content-Type` header (either `text/html` or `text/plain`).
+//
+const { status, content, contentType } = renderError(error)
 ```
 
 ## All `react-website.js` settings

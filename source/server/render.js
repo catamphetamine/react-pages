@@ -59,7 +59,14 @@ export default async function render_page(settings, { initialize, localize, asse
 	const initialize_timer = timer()
 
 	// `parameters` are used for `assets`, `html` modifiers and also for `localize()` call.
-	const { extension_javascript, afterwards, ...parameters } = await redux_initialize(settings,
+	// , afterwards
+	const
+	{
+		cookies: set_cookies,
+		extension_javascript,
+		...parameters
+	}
+	= await redux_initialize(settings,
 	{
 		protected_cookie_value,
 		proxy,
@@ -68,7 +75,7 @@ export default async function render_page(settings, { initialize, localize, asse
 		get_history
 	})
 
-	const normalize_result = (result) => _normalize_result(result, afterwards, settings)
+	const normalize_result = (result) => _normalize_result(result, settings) // , afterwards
 
 	// `url` is not really a URL,
 	// it's a URL without the `origin` (scheme, host, port).
@@ -230,6 +237,8 @@ export default async function render_page(settings, { initialize, localize, asse
 			result.time.initialize = initialize_time
 		}
 
+		result.cookies = set_cookies
+
 		return normalize_result(result)
 	}
 	catch (error)
@@ -323,17 +332,20 @@ function redirecting_dispatch(dispatch, redirect)
 	}
 }
 
-function _normalize_result(result, afterwards, settings)
+function _normalize_result(result, settings) // , afterwards
 {
 	// Stringify `redirect` location
 	if (result.redirect)
 	{
 		// Prepend `basename` to relative URLs for server-side redirect.
-		result.redirect = location_url(result.redirect, { basename: settings.history.options.basename })
+		result.redirect = location_url(result.redirect,
+		{
+			basename: settings.history.options.basename
+		})
 	}
 
-	// Add `afterwards`
-	result.afterwards = afterwards
+	// // Add `afterwards`
+	// result.afterwards = afterwards
 
 	return result
 }

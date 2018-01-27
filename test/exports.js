@@ -170,5 +170,6 @@ describe(`exports`, function()
 
 		server.should.be.a('function')
 		server.render.should.be.a('function')
+		server.renderError.should.be.a('function')
 	})
 })

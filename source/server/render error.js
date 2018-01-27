@@ -1,7 +1,7 @@
 import { html } from 'print-error'
 
 // Outputs an error page
-export default function render_error(error, response, options)
+export default function render_error(error, options) // , log
 {
 	// If the error is caught here it means that `catch`
 	// (error handler parameter) didn't resolve it
@@ -12,43 +12,37 @@ export default function render_error(error, response, options)
 	{
 		try
 		{
-			const { status, content } = render_stack_trace(error, options.print_error)
+			const { status = 500, content } = render_stack_trace(error, options)
 
 			if (content)
 			{
-				// HTTP response status and "Content-Type"
-				response.writeHead(status || 500,
-				{
-					'Content-Type': 'text/html'
-				})
-
-				// Output the error page
-				return response.end(content)
+				return {
+					status,
+					content,
+					contentType: 'text/html'
+				}
 			}
 		}
 		catch (error)
 		{
-			console.log('(couldn\'t render error stack trace)')
+			console.log('[react-website] Couldn\'t render error stack trace.')
 			console.log(error.stack || error)
 		}
 	}
 
-	// log the error
+	// Log the error
 	console.log('[react-website] Rendering service error')
 
-	if (options.log)
-	{
-		options.log.error(error)
+	// if (log)
+	// {
+	// 	log.error(error)
+	// }
+
+	return {
+		status: typeof error.status === 'number' ? error.status : 500,
+		content: error.message || 'Error',
+		contentType: 'text/plain'
 	}
-
-	// HTTP response status and "Content-Type"
-	response.writeHead(typeof error.status === 'number' ? error.status : 500,
-	{
-		'Content-Type': 'text/plain'
-	})
-
-	// Output the error message
-	return response.end(error.message || 'Internal error')
 }
 
 function render_stack_trace(error, options)
