@@ -733,14 +733,17 @@ In order for `http` utility calls to send an authentication token as part of an 
 {
   authentication: {
     accessToken(getCookie, { store, path, url }) {
-      // (make sure the access token is not leaked to a third party)
-      return getCookie('accessToken')
+      // (check the `url` to make sure the access token
+      //  is not leaked to a third party)
       return localStorage.getItem('accessToken')
+      return getCookie('accessToken')
       return store.getState().authentication.accessToken
     }
   }
 }
 ```
+
+The `accessToken` is initially obtained when a user signs in: the web browser sends HTTP POST request to `/sign-in` API endpoint with `{ email, password }` parameters and gets `{ accessToken }` as a response, which is then stored in `localStorage` (or in Redux `state`, or in a `cookie`) and all subsequent HTTP requests use that `accessToken` to call the API endpoints. The `accessToken` itself is usually a [JSON Web Token](https://jwt.io/introduction/) signed on the server side and holding the list of the user's priviliges ("roles"). Hence authentication and authorization are completely covered. [Refresh tokens](https://auth0.com/blog/refresh-tokens-what-are-they-and-when-to-use-them/) are also [supported](https://github.com/catamphetamine/react-website/blob/master/README-ADVANCED.md#all-react-websitejs-settings).
 
 ### HTTP request URLs
 

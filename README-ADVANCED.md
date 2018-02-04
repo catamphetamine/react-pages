@@ -283,47 +283,21 @@ const { status, content, contentType } = renderError(error)
     }
 
     // (optional)
-    url: (path, isServerSide) =>
-    {
-      // In this case `.application` configuration parameter may be removed
-      return `https://api-server.com${path}`
-    }
-    // Custom control over `http` utility HTTP requests URL.
-    // E.g. for those who don't want to proxy their API calls
-    // and instead prefer to query REST API server directly
-    // from the web browser (using Cross-Origin Requests).
-    // (e.g. when using AWS Lambda).
-    // The default `url` formatter only allows "local" URLs
-    // to be requested therefore guarding against
-    // leaking the authentication token header
-    // (e.g. `Authorization: Bearer ${token}`) to a 3rd party.
-    // Therefore by supplying a custom `url` formatter
-    // a developer takes full responsibility for guarding
-    // the authentication token header from being leaked to a 3rd party:
-    // when using `http` utility for querying 3rd party API
-    // a developer must supply an explicit option `{ authentication: false }`
-    // to prevent the authentication token header
-    // (e.g. `Authorization: Bearer ${token}`)
-    // to be sent to that 3rd party API endpoint.
+    url: (path) => `https://api-server.com${path}`
+    // Using `http.url(path)` configuration parameter
+    // one can call API endpoints like `http.post('/sign-in')`
+    // and such relative paths would be transformed
+    // into absolute URLs automatically.
 
     // By default the `http` utility methods
     // only accept relative URLs.
+    // This is done to prevent accidentally leaking
+    // sensitive HTTP headers to a third party.
+    // (e.g. JSON Web Tokens which are sent
+    //  in the form of `Authorization` HTTP header)
     // Set this flag to `true` to allow absolute URLs.
     // (is `false` by default)
     allowAbsoluteURLs: true
-
-    // (optional)
-    error: (error, { url, path, redirect, dispatch, getState }) => console.error(error)
-    //
-    // Is called when `http` calls either fail or return an error.
-    // Is not called during `@preload()`s and therefore
-    // can only be called as part of an HTTP call
-    // triggered by some user interaction in a web browser.
-    //
-    // For example, Auth0 users may listen for
-    // JWT token expiration here and redirect to a login page.
-    // There's an alternative solution for handling access token expiration:
-    // the `http.catch()` function parameter (see below).
 
     // (optional)
     errorState: (error) => ({ ... })
@@ -351,9 +325,9 @@ const { status, content, contentType } = renderError(error)
     //
     // If an error happens then the logic is (concept):
     //
-    // httpRequest().catch((error) => {
-    //   return catch(error, 0, helpers).then(httpRequest).catch((error) => {
-    //     return catch(error, 1, helpers).then(httpRequest).catch((error) => {
+    // httpRequest().then(..., (error) => {
+    //   return catch(error, 0, helpers).then(httpRequest).then(..., (error) => {
+    //     return catch(error, 1, helpers).then(httpRequest).then(..., (error) => {
     //       ...
     //     ))
     //   ))

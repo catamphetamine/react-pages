@@ -1,3 +1,8 @@
+2.0.4 / 05.02.2018
+==================
+
+  * Fixed `@preload()`s not being `blocking: true` by default.
+
 2.0.3 / 26.01.2018
 ==================
 
