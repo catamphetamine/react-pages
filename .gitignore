@@ -28,6 +28,8 @@ npm-debug.log
 # webpack build target folder
 /build/
 /es6/
+/cjs/
+/modules/
 
 # NUL
 NUL

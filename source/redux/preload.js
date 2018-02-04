@@ -16,7 +16,7 @@ import { Preload_method_name, Preload_options_name } from './middleware/preloadi
 // * `client` — if `true` then this `@preload()` will be executed only on the client side
 //              including the moment when the page is initially loaded.
 //
-export default function preload(preload, options)
+export default function preload(preload, options = {})
 {
 	return function(Wrapped)
 	{
@@ -28,8 +28,11 @@ export default function preload(preload, options)
 			}
 		}
 
-		Preload[Preload_method_name]  = preload
-		Preload[Preload_options_name] = options
+		Preload[Preload_method_name]  = Wrapped[Preload_method_name]  || []
+		Preload[Preload_options_name] = Wrapped[Preload_options_name] || []
+
+		Preload[Preload_method_name].unshift(preload)
+		Preload[Preload_options_name].unshift(options)
 
 		Preload.displayName = `Preload(${get_display_name(Wrapped)})`
 		
