@@ -33,7 +33,7 @@ export const Preload_options_name = '__preload_options__'
 //                if part of initial page preloading then on server side and
 //                if part of subsequent preloading (e.g. navigation) then on client side.
 //
-export default function preload(preload, options = {})
+export default function preload(preload, options)
 {
 	return function(DecoratedComponent)
 	{
@@ -51,7 +51,11 @@ export default function preload(preload, options = {})
 		PreloadedComponent[Preload_options_name] = DecoratedComponent[Preload_options_name] || []
 
 		PreloadedComponent[Preload_method_name].unshift(preload)
-		PreloadedComponent[Preload_options_name].unshift(options)
+		PreloadedComponent[Preload_options_name].unshift
+		({
+			blocking: true,
+			...options
+		})
 
 		// Component naming for React DevTools
 		PreloadedComponent.displayName = `Preloaded(${get_display_name(DecoratedComponent)})`
