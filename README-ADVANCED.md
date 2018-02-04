@@ -319,8 +319,8 @@ const { status, content, contentType } = renderError(error)
     error: (error, { url, path, redirect, dispatch, getState }) => console.error(error)
     //
     // Is called when `http` calls either fail or return an error.
-    // Is not called during `@preload()`s and therefore
-    // can only be called as part of an HTTP call
+    // Is not called for errors happening during the initial page render
+    // which means it can only be called as part of an HTTP call
     // triggered by some user interaction in a web browser.
     //
     // For example, Auth0 users may listen for
