@@ -267,6 +267,19 @@ const { status, content, contentType } = renderError(error)
   reduxStoreEnhancers: () => [...]
 
   // (optional)
+  // Is called for errors happening during the initial page render
+  // (which means during Server-Side Rendering
+  //  and the initial client-side render `@preload()`s).
+  //
+  // For example, Auth0 users may listen for
+  // JWT token expiration here and redirect to a login page.
+  //
+  // Or, if `@preload()` throws an "Unauthorized" error
+  // then a redirect to "/unauthorized" page can be made here.
+  //
+  error: (error, { path, url, redirect, dispatch, getState, server }) => redirect(`/error?url=${encodeURIComponent(url)}&error=${error.status}`)
+
+  // (optional)
   // `http` utility settings
   http:
   {
@@ -298,6 +311,17 @@ const { status, content, contentType } = renderError(error)
     // Set this flag to `true` to allow absolute URLs.
     // (is `false` by default)
     allowAbsoluteURLs: true
+
+    // (optional)
+    error: (error, { url, path, redirect, dispatch, getState }) => console.error(error)
+    //
+    // Is called when `http` calls either fail or return an error.
+    // Is not called during `@preload()`s and therefore
+    // can only be called as part of an HTTP call
+    // triggered by some user interaction in a web browser.
+    //
+    // For example, Auth0 users may listen for
+    // JWT token expiration here and redirect to a login page.
 
     // (optional)
     errorState: (error) => ({ ... })
@@ -353,12 +377,6 @@ const { status, content, contentType } = renderError(error)
     //
     // * `http` – `http` utility.
   }
-
-  // (optional)
-  // Can handle errors occurring inside `@preload()`.
-  // For example, if `@preload()` throws a `new Error("Unauthorized")`
-  // then a redirect to "/unauthorized" page can be made here.
-  error: (error, { path, url, redirect, dispatch, getState, server }) => redirect(`/error?url=${encodeURIComponent(url)}&error=${error.status}`)
 
   // (optional)
   authentication:

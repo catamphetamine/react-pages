@@ -743,7 +743,87 @@ In order for `http` utility calls to send an authentication token as part of an 
 }
 ```
 
-The `accessToken` is initially obtained when a user signs in: the web browser sends HTTP POST request to `/sign-in` API endpoint with `{ email, password }` parameters and gets `{ accessToken }` as a response, which is then stored in `localStorage` (or in Redux `state`, or in a `cookie`) and all subsequent HTTP requests use that `accessToken` to call the API endpoints. The `accessToken` itself is usually a [JSON Web Token](https://jwt.io/introduction/) signed on the server side and holding the list of the user's priviliges ("roles"). Hence authentication and authorization are completely covered. [Refresh tokens](https://auth0.com/blog/refresh-tokens-what-are-they-and-when-to-use-them/) are also [supported](https://github.com/catamphetamine/react-website/blob/master/README-ADVANCED.md#all-react-websitejs-settings).
+<details>
+<summary>Authentication and authorization using access tokens</summary>
+
+The `accessToken` is initially obtained when a user signs in: the web browser sends HTTP POST request to `/sign-in` API endpoint with `{ email, password }` parameters and gets `{ userInfo, accessToken }` as a response, which is then stored in `localStorage` (or in Redux `state`, or in a `cookie`) and all subsequent HTTP requests use that `accessToken` to call the API endpoints. The `accessToken` itself is usually a [JSON Web Token](https://jwt.io/introduction/) signed on the server side and holding the list of the user's priviliges ("roles"). Hence authentication and authorization are completely covered. [Refresh tokens](https://auth0.com/blog/refresh-tokens-what-are-they-and-when-to-use-them/) are also [supported](https://github.com/catamphetamine/react-website/blob/master/README-ADVANCED.md#all-react-websitejs-settings).
+
+This kind of an authentication and authorization scheme is self-sufficient and doesn't require "restricting" any routes: if a route's `@preload()` uses `http` utility for querying an API endpoint then this API endpoint must check if the user is signed in and if the user has the necessary priviliges. If yes then the route is displayed. If not then the user is redirected to either a "Sign In Required" page or "Access Denied" page.
+
+Here's a real-world (advanced) example for Auth0 authentication:
+
+#### ./react-website.js
+
+```js
+{
+  ...,
+  error(error, { path, url, redirect, dispatch, getState, server }) {
+    // Not authenticated
+    if (error.status === 401) {
+      return handleUnauthenticatedError(error, url, redirect);
+    }
+    // Not authorized
+    if (error.status === 403) {
+      return redirect('/unauthorized');
+    }
+    // Not found
+    if (error.status === 404) {
+      return redirect('/not-found');
+    }
+    // Report the error
+    console.error(`Error while preloading "${url}"`);
+    console.error(error);
+    // Redirect to a generic error page in production
+    if (process.env.NODE_ENV === 'production') {
+      // Prevents infinite redirect to the error page
+      // in case of overall page rendering bugs, etc.
+      if (path !== '/error') {
+        // Redirect to a generic error page
+        return redirect(`/error?url=${encodeURIComponent(url)}`);
+      }
+    }
+  },
+  http: {
+    error(error, { path, url, redirect, dispatch, getState }) {
+      // JWT token expired, the user needs to relogin.
+      if (error.status === 401) {
+        return handleUnauthenticatedError(error, url, redirect);
+      }
+    },
+    ...
+  }
+}
+
+function handleUnauthenticatedError(error, url, redirect) {
+  let message;
+  try {
+    message = JSON.parse(error.data.errorMessage).message;
+  } catch (parseError) {
+    console.error(parseError);
+  }
+  // Prevent double redirection to `/unauthenticated`.
+  // (e.g. when two parallel `Promise`s load inside `@preload()`
+  //  and both get Status 401 HTTP Response)
+  if (typeof window !== 'undefined' && window.location.pathname === '/unauthenticated') {
+    return;
+  }
+  let unauthenticatedURL = '/unauthenticated';
+  let parametersDelimiter = '?';
+  if (url !== '/') {
+    unauthenticatedURL += `${parametersDelimiter}url=${encodeURIComponent(url)}`;
+    parametersDelimiter = '&';
+  }
+  switch (message) {
+    case 'TokenExpiredError':
+      return redirect(`${unauthenticatedURL}${parametersDelimiter}expired=✔`);
+    case 'AuthenticationError':
+      return redirect(`${unauthenticatedURL}`);
+    default:
+      return redirect(unauthenticatedURL);
+  }
+}
+```
+</details>
 
 ### HTTP request URLs
 
