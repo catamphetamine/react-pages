@@ -277,6 +277,9 @@ const { status, content, contentType } = renderError(error)
   // Or, if `@preload()` throws an "Unauthorized" error
   // then a redirect to "/unauthorized" page can be made here.
   //
+  // `path` is `url` without `?...` parameters.
+  // `redirect()` redirects to a URL.
+  //
   error: (error, { path, url, redirect, dispatch, getState, server }) => redirect(`/error?url=${encodeURIComponent(url)}&error=${error.status}`)
 
   // (optional)
@@ -322,6 +325,9 @@ const { status, content, contentType } = renderError(error)
     //
     // For example, Auth0 users may listen for
     // JWT token expiration here and redirect to a login page.
+    //
+    // `path` is `url` without `?...` parameters.
+    // `redirect()` redirects to a URL.
 
     // (optional)
     errorState: (error) => ({ ... })
