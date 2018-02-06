@@ -96,6 +96,7 @@ export function collect_preloaders(components, preload_on_client_side_only)
 			{
 				client: preload_on_client_side_only,
 				blocking: true,
+				blockingSibling: true,
 				...component[Preload_options_name][i]
 			}
 		})))
