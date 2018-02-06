@@ -293,7 +293,7 @@ In this example the `@preload()` decorator is used to preload a page before it i
 
 * `blocking` — If `false` then child `<Route/>`'s  `@preload()`s will not wait for this `@preload()` to finish in order to get executed (`blocking` is `true` by default).
 
-* `blockingSibling` — If `true` then all further adjacent (sibling) `@preload()`s for the same `<Route/>`'s component will wait for this `@preload()` to finish in order to get executed. (is `false` by default).
+* `blockingSibling` — If `true` then all further adjacent (sibling) `@preload()`s for the same `<Route/>`'s component will wait for this `@preload()` to finish in order to get executed. (is `true` by default).
 
 * `client` — If `true` then the `@preload()` will be executed only on client side. If `false` then this `@preload()` will be executed normally: if part of initial page preloading then on server side and if part of subsequent preloading (e.g. navigation) then on client side. `false` is the default value unless overridden by `preload.client` configuration parameter.
 

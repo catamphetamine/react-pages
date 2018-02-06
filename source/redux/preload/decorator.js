@@ -21,7 +21,7 @@ export const Preload_options_name = '__preload_options__'
 // * `blockingSibling` — If `true` then all further adjacent (sibling) `@preload()`s
 //                       for the same `<Route/>`'s component will wait for this
 //                       `@preload()` to finish in order to get executed.
-//                       (is `false` by default).
+//                       (is `true` by default).
 //
 // * `client`   — If `true` then the `@preload()` will be executed only on client side.
 //                Otherwise the `@preload()` will be executed normally:
@@ -54,6 +54,7 @@ export default function preload(preload, options)
 		PreloadedComponent[Preload_options_name].unshift
 		({
 			blocking: true,
+			blockingSibling: true,
 			...options
 		})
 
