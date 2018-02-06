@@ -1,3 +1,8 @@
+2.0.5 / 06.02.2018
+==================
+
+  * Fixed `@preload()`'s `blockingSibling` not being `true` by default.
+
 2.0.4 / 05.02.2018
 ==================
 
