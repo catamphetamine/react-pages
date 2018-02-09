@@ -1130,6 +1130,8 @@ export default function Container(props) {
 
 ### Get current location
 
+Inside `@preload()`: use the `location` parameter. Everywhere else:
+
 ```js
 import React from 'react'
 import { withRouter } from 'react-router'
