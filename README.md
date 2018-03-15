@@ -1112,20 +1112,20 @@ The resulting locales array is passed as `preferredLocales` argument into `local
 import React, { Component } from 'react'
 import { Provider }         from 'react-redux'
 import { IntlProvider }     from 'react-intl'
-import { AppContainer }     from 'react-hot-loader'
+import { hot }              from 'react-hot-loader'
 
-export default function Container(props) {
+function Container(props) {
   const { store, locale, messages, children } = props
   return (
-    <AppContainer>
-      <Provider store={store}>
-        <IntlProvider locale={locale ? get_language_from_locale(locale) : 'en'} messages={messages}>
-          {children}
-        </IntlProvider>
-      </Provider>
-    </AppContainer>
+    <Provider store={store}>
+      <IntlProvider locale={locale ? get_language_from_locale(locale) : 'en'} messages={messages}>
+        {children}
+      </IntlProvider>
+    </Provider>
   )
 }
+
+export default hot(module)(Container)
 ```
 
 ### Get current location
@@ -1264,7 +1264,7 @@ telegraf -config telegraf.conf
 
 Webpack's [Hot Module Replacement](https://webpack.github.io/docs/hot-module-replacement.html) (aka Hot Reload) works for React components and Redux reducers and Redux action creators (it just doesn't work for page `@preload()`s).
 
-HMR setup for Redux reducers is as simple as adding `store.hotReload()` (as shown below). For enabling [HMR on React Components](https://webpack.js.org/guides/hmr-react/) (and Redux action creators) I would suggest the new [react-hot-loader 3](https://github.com/gaearon/react-hot-loader) (which is still in beta, so install it like `npm install react-hot-loader@3.0.0-beta.6 --save`):
+HMR setup for Redux reducers is as simple as adding `store.hotReload()` (as shown below). For enabling [HMR on React Components](https://webpack.js.org/guides/hmr-react/) (and Redux action creators) I would suggest the new [react-hot-loader 4](https://github.com/gaearon/react-hot-loader):
 
 #### application.js
 
@@ -1293,18 +1293,17 @@ render(settings).then(({ store, rerender }) => {
 ```js
 import React from 'react'
 import { Provider } from 'react-redux'
-// `react-hot-loader@3`'s `<AppContainer/>`
-import { AppContainer } from 'react-hot-loader'
+import { hot } from 'react-hot-loader'
 
-export default function Container({ store, children }) {
+function Container({ store, children }) {
   return (
-    <AppContainer>
-      <Provider store={ store }>
-        { children }
-      </Provider>
-    </AppContainer>
+    <Provider store={ store }>
+      { children }
+    </Provider>
   )
 }
+
+export default hot(module)(Container)
 ```
 
 #### .babelrc
@@ -1317,7 +1316,7 @@ export default function Container({ store, children }) {
   ],
 
   "plugins": [
-    // `react-hot-loader@3` Babel plugin
+    // `react-hot-loader@4` Babel plugin
     "react-hot-loader/babel"
   ]
 }
@@ -1331,8 +1330,6 @@ export default {
     main: [
       'webpack-hot-middleware/client?path=http://localhost:8080/__webpack_hmr',
       'babel-polyfill',
-      // This line is required for `react-hot-loader@3`
-      'react-hot-loader/patch',
       './src/index.js'
     ]
   },
