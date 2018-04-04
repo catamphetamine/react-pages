@@ -126,7 +126,7 @@ And the `index.html` would look like this:
 ```html
 <html>
   <head>
-    <title>react-website</title>
+    <title>Example</title>
   </head>
   <body>
     <div id="react"></div>
@@ -141,7 +141,7 @@ Now, `index.html` and `bundle.js` files must be served over HTTP(S). If you're u
 
 Now go to `localhost:8080`. It should respond with a fully working website.
 
-The application (`index.html`, `bundle.js`) can now be deployed as-is in a cloud (e.g. on Amazon S3) and served statically for a very low price. The API can be hosted "serverlessly" in a cloud (e.g. Amazon Lambda) which is also considered cheap. No running Node.js server is required. Yes, it's not a Server-Side Rendered approach because a user is given a blank page first, then `bundle.js` script is loaded by the web browser, then this script is executed and it fetches the data for the page from the API, and only then the page is rendered (in the browser). Google won't index such websites, but if searchability is not a requirement (at all or yet) then that would be the way to go (e.g. startup "MVP"s or "internal applications"). Server-Side Rendering can be easily added to such setup should the need arise.
+The application (`index.html`, `bundle.js`, a CSS stylesheet and images) can now be deployed as-is in a cloud (e.g. on Amazon S3) and served statically for a very low price. The API can be hosted "serverlessly" in a cloud (e.g. Amazon Lambda) which is also considered cheap. No running Node.js server is required. Yes, it's not a Server-Side Rendered approach because a user is given a blank page first, then `bundle.js` script is loaded by the web browser, then `bundle.js` script is executed fetching some data from the API via an HTTP request, and only when that HTTP request comes back — only then the page is rendered (in the browser). Google won't index such websites, but if searchability is not a requirement (at all or yet) then that would be the way to go (e.g. startup "MVP"s or "internal applications"). Server-Side Rendering can be easily added to such setup should the need arise.
 
 ## Server Side Rendering
 
@@ -322,7 +322,32 @@ npm install babel-plugin-transform-decorators-legacy --save
 
 On the client side, in order for `@preload` to work all `<Link/>`s imported from `react-router` **must** be instead imported from `react-website`. Upon a click on a `<Link/>` first it waits for the next page to preload, and then, when the next page is fully loaded, `react-router` navigation itself takes place.
 
-`@preload` also works for Back/Forward navigation.
+<details>
+<summary>`@preload` also works for Back/Forward navigation. To disable page `@preload` on Back navigation pass `instantBack` property to a `<Link/>`.</summary>
+
+For example, consider a search results page preloading some data (could be search results themselves, could be anything else unrelated). A user navigates to this page, waits for `@preload` to finish and then sees a list of items. Without `instantBack` if the user clicks on an item he's taken to the item's page. Then the user clicks "Back" and is taken back to the search results page but has to wait for that `@preload` again. With `instantBack` though the "Back" transition occurs instantly without having to wait for that `@preload` again. Same goes then for the reverse "Forward" navigation from the search results page back to the item's page, but that's just a small complementary feature. The main benefit is the instantaneous "Back" navigation creating a much better UX where a user can freely explore a list of results without getting penalized for it with a waiting period on each click.
+
+```js
+@preload(async () => await fetchSomeData())
+class SearchResultsPage extends Component {
+  render() {
+    return (
+      <ul>
+        { results.map((item) => (
+          <li>
+            <Link to="/items/{item.id}" instantBack>
+              {item.name}
+            </Link>
+          </li>
+        ))) }
+      </ul>
+    )
+  }
+}
+```
+
+In thi
+</details>
 
 ## `@preload()` indicator
 
@@ -412,10 +437,10 @@ function fetchFriends(personId, gender) {
 
 The possible `options` (the third argument of all `http` methods) are
 
-  * `headers` — HTTP Headers JSON object
-  * `authentication` — set to `false` to disable sending the authentication token as part of the HTTP request, set to a String to pass it as an `Authorization: Bearer ${token}` token (no need to set the token explicitly for every `http` method call, it is supposed to be set globally, see below)
-  * `progress(percent, event)` — is used for tracking HTTP request progress (e.g. file upload)
-  * `onResponseHeaders(headers)` – for examining HTTP response headers (e.g. [Amazon S3](http://docs.aws.amazon.com/AmazonS3/latest/API/RESTObjectPUT.html#RESTObjectPUT-responses-response-headers) file upload)
+  * `headers` — HTTP Headers JSON object.
+  * `authentication` — Set to `false` to disable sending the authentication token as part of the HTTP request. Set to a String to pass it as an `Authorization: Bearer ${token}` token (no need to set the token explicitly for every `http` method call, it is supposed to be set globally, see below).
+  * `progress(percent, event)` — Use for tracking HTTP request progress (e.g. file upload).
+  * `onResponseHeaders(headers)` – Use for examining HTTP response headers (e.g. [Amazon S3](http://docs.aws.amazon.com/AmazonS3/latest/API/RESTObjectPUT.html#RESTObjectPUT-responses-response-headers) file upload).
 
 <!--
   (removed)
@@ -1098,36 +1123,6 @@ export default class Page extends React.Component {
 }
 ```
 
-### Locale detection
-
-This library performs the following locale detection steps for each webpage rendering HTTP request:
-
-<!--  * Checks the `locale` query parameter (if it's an HTTP GET request) -->
- * Checks the `locale` cookie
- * Checks the `Accept-Language` HTTP header
- 
-The resulting locales array is passed as `preferredLocales` argument into `localize()` function parameter of the webpage rendering server which then should return `{ locale, messages }` object in order for `locale` and `messages` to be available as part of the `props` passed to the `container` component which can then pass those to `<IntlProvider/>` in case of using [`react-intl`](https://github.com/yahoo/react-intl) for internationalization.
-
-```js
-import React, { Component } from 'react'
-import { Provider }         from 'react-redux'
-import { IntlProvider }     from 'react-intl'
-import { hot }              from 'react-hot-loader'
-
-function Container(props) {
-  const { store, locale, messages, children } = props
-  return (
-    <Provider store={store}>
-      <IntlProvider locale={locale ? get_language_from_locale(locale) : 'en'} messages={messages}>
-        {children}
-      </IntlProvider>
-    </Provider>
-  )
-}
-
-export default hot(module)(Container)
-```
-
 ### Get current location
 
 Inside `@preload()`: use the `location` parameter. Everywhere else:
@@ -1149,7 +1144,7 @@ export default class Component extends React.Component {
 
 ### Changing current location
 
-These two helper Redux actions change the current location (both on client and server).
+Dispatch `goto`/`redirect` Redux action to change current location (both on client and server).
 
 ```javascript
 import { goto, redirect } from 'react-website'
@@ -1168,15 +1163,11 @@ class Page extends Component {
 }
 ```
 
-A sidenote: these two functions aren't supposed to be used inside `onEnter` and `onChange` `react-router` hooks. Instead use the `replace` argument supplied to these functions by `react-router` when they are called (`replace` works the same way as `redirect`).
-
-Alternatively, if the current location needs to be changed while still staying at the same page (e.g. a checkbox has been ticked and the corresponding URL query parameter must be added), then use `pushLocation(location, history)` or `replaceLocation(location, history)`.
+If the current location needs to be changed while still staying at the same page (e.g. a checkbox has been ticked and the corresponding URL query parameter must be added), then use `pushLocation(location, history)` or `replaceLocation(location, history)` Redux actions.
 
 ```javascript
 import { pushLocation, replaceLocation } from 'react-website'
-import { withRouter } from 'react-router'
 
-@withRouter
 class Page extends Component {
   onSearch(query) {
     const { router } = this.props
@@ -1190,6 +1181,24 @@ class Page extends Component {
   }
 }
 ```
+
+To go "Back"
+
+```javascript
+class Page extends Component {
+  render() {
+    const { router } = this.props
+
+    return (
+      <button onClick={ () => router.goBack() }>
+        Back
+      </button>
+    )
+  }
+}
+```
+
+`router` property is available on all pages (or via `@withRouter` decorator from `react-router` package).
 
 ## Monitoring
 
