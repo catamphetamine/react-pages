@@ -50,7 +50,7 @@ export default async function render({ render, render_parameters = {}, container
 			React.createElement(container, container_props, element),
 
 			// DOM element to which React markup will be rendered
-			document.getElementById('react')
+			getReactContainerElement()
 		)
 
 		return rest
@@ -95,4 +95,22 @@ function get_global_variable(name)
 	}
 	
 	return variable
+}
+
+function getReactContainerElement()
+{
+	let element = document.getElementById('react')
+
+	if (!element)
+	{
+		const body = document.body
+		if (!body) {
+			throw new Error('<body/> tag not found, make sure this script is added to the end of <body/> rather than inside <head/>.')
+		}
+		element = document.createElement('div')
+		element.setAttribute('id', 'react')
+		body.appendChild(element)
+	}
+
+	return element
 }
