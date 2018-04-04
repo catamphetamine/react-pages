@@ -72,90 +72,112 @@ export default function asynchronous_middleware(http_client, redux_event_naming,
 				cancellable_promises.set(Request, promised)
 			}
 
-			return promised.then
-			(
-				// If the Promise resolved
-				// (e.g. an HTTP request succeeded)
-				(result) =>
-				{
-					// The default `Promise` implementation has no `.finally()`
-					if (cancellable)
+			// Returning the result like this,
+			// because if returned the `promised.then()` chain directly
+			// then it wouldn't get detected as an "Unhandled rejection"
+			// in case of an error.
+			return new Promise((resolve, reject) => 
+			{
+				// Don't `return` this promise
+				// so that it detects it as an "Unhandled rejection"
+				// in case of an error.
+				promised.then
+				(
+					// If the Promise resolved
+					// (e.g. an HTTP request succeeded)
+					(result) =>
 					{
-						cancellable_promises.delete(Request)
-					}
-
-					// Dispatch the `success` event to the Redux store
-					dispatch
-					({
-						...rest,
-						type : Success,
-						[RESULT_ACTION_PROPERTY] : result
-					})
-
-					// The Promise returned from `dispatch()` call
-					// is resolved with the `promise` resolved value.
-					return result
-				},
-				// if the Http request failed
-				//
-				// (Http status !== 20x
-				//  or the Http response JSON object has an `error` field)
-				(error) =>
-				{
-					// The default `Promise` implementation has no `.finally()`
-					if (cancellable)
-					{
-						cancellable_promises.delete(Request)
-					}
-
-					// Dispatch the `failure` event to the Redux store
-					dispatch
-					({
-						...rest,
-						type : Failure,
-						[ERROR_ACTION_PROPERTY] : parseError(error)
-					})
-
-					// The Promise returned from `dispatch()` call
-					// is rejected with this error.
-
-					// Only checks `http` calls which are not part of `@preload()`
-					// so that they don't get "error handled" twice
-					// (doesn't affect anything, just a minor optimization).
-					// Also only checks `http` calls on client side
-					// because on server side `http` calls can be
-					// either part of `@preload` of part of `initialize`
-					// which are already "error handled".
-					// On the client side though, an `http` call
-					// may be performed via some user input,
-					// so it needs this separate case "error handler".
-					if (!server && on_error && !action.preloading)
-					{
-						const location = get_history().getCurrentLocation()
-
-						// Report the error
-						// (for example, redirect to a login page
-						//  if a JWT "access token" expired)
-						on_error(error,
+						// The default `Promise` implementation has no `.finally()`
+						if (cancellable)
 						{
-							path : location.pathname,
-							url  : location_url(location),
-							// Using `goto` instead of `redirect` here
-							// because it's not part of `@preload()`
-							// and is therefore part of some kind of an HTTP request
-							// triggered by user input (e.g. form submission)
-							// which means it is convenient to be able to
-							// go "Back" to the page on which the error originated.
-							redirect : to => dispatch(goto_action(to)),
-							dispatch,
-							getState,
-							server
-						})
-					}
+							cancellable_promises.delete(Request)
+						}
 
-					throw error
-				}
-			)
+						// Dispatch the `success` event to the Redux store
+						dispatch
+						({
+							...rest,
+							type : Success,
+							[RESULT_ACTION_PROPERTY] : result
+						})
+
+						// Returning the result like this,
+						// because if returned the `promised.then()` chain directly
+						// then it wouldn't get detected as an "Unhandled rejection"
+						// in case of an error.
+						resolve(result)
+
+						// The Promise returned from `dispatch()` call
+						// is resolved with the `promise` resolved value.
+						return result
+					},
+					// if the Http request failed
+					//
+					// (Http status !== 20x
+					//  or the Http response JSON object has an `error` field)
+					(error) =>
+					{
+						// The default `Promise` implementation has no `.finally()`
+						if (cancellable)
+						{
+							cancellable_promises.delete(Request)
+						}
+
+						// Dispatch the `failure` event to the Redux store
+						dispatch
+						({
+							...rest,
+							type : Failure,
+							[ERROR_ACTION_PROPERTY] : parseError(error)
+						})
+
+						// The Promise returned from `dispatch()` call
+						// is rejected with this error.
+
+						// Only checks `http` calls which are not part of `@preload()`
+						// so that they don't get "error handled" twice
+						// (doesn't affect anything, just a minor optimization).
+						// Also only checks `http` calls on client side
+						// because on server side `http` calls can be
+						// either part of `@preload` of part of `initialize`
+						// which are already "error handled".
+						// On the client side though, an `http` call
+						// may be performed via some user input,
+						// so it needs this separate case "error handler".
+						if (!server && on_error && !action.preloading)
+						{
+							const location = get_history().getCurrentLocation()
+
+							// Report the error
+							// (for example, redirect to a login page
+							//  if a JWT "access token" expired)
+							on_error(error,
+							{
+								path : location.pathname,
+								url  : location_url(location),
+								// Using `goto` instead of `redirect` here
+								// because it's not part of `@preload()`
+								// and is therefore part of some kind of an HTTP request
+								// triggered by user input (e.g. form submission)
+								// which means it is convenient to be able to
+								// go "Back" to the page on which the error originated.
+								redirect : to => dispatch(goto_action(to)),
+								dispatch,
+								getState,
+								server
+							})
+						}
+
+						// Returning the result (error) like this,
+						// because if returned the `promised.then()` chain directly
+						// then it wouldn't get detected as an "Unhandled rejection"
+						// in case of an error.
+						reject(error)
+
+						throw error
+					}
+				)
+			})
 		}
 	}
 }
