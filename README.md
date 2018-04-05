@@ -29,20 +29,20 @@ $ npm install react-website --save
 
 Start by creating the configuration file
 
-#### ./react-website.js
+#### ./src/react-website.js
 
 ```javascript
 // React-router v3 routes
-import routes from './src/routes'
+import routes from './routes'
 
 // Redux reducers
 // (they will be combined into the
 //  root Redux reducer via `combineReducers()`)
-import reducers from './src/redux/index'
+import * as reducer from './redux/index'
 
 export default {
   routes,
-  reducers
+  reducer
 }
 ```
 
@@ -53,9 +53,9 @@ import React from 'react'
 // `react-router@3`
 import { Route, IndexRoute } from 'react-router'
 
-import App from './pages/App'
-import Home from './pages/Home'
-import About from './pages/About'
+import App from '../pages/App'
+import Home from '../pages/Home'
+import About from '../pages/About'
 
 export default (
   <Route path="/" component={ App }>
