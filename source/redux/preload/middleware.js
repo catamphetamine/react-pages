@@ -32,7 +32,8 @@ import {
 	Preload_failed
 } from './actions'
 
-export default function preloading_middleware(
+export default function preloading_middleware
+(
 	server,
 	error_handler,
 	routes,
@@ -67,7 +68,7 @@ export default function preloading_middleware(
 		// // then store the current Redux state in history.
 		// if (!server && action.navigate)
 		// {
-		// 	store_in_history('redux/state', get_history().getCurrentLocation().key, getState())
+		// 	store_in_session('redux/state', get_history().getCurrentLocation().key, getState())
 		// }
 
 		// A special flavour of `dispatch` which `throw`s for redirects on the server side.
@@ -380,14 +381,19 @@ function proceed_with_navigation(dispatch, action, server, get_history, previous
 
 	if (action.instant_back)
 	{
+		// Stores "current" (soon to be "previous") location
+		// in "instant back chain", so that if "Back" is clicked
+		// then such transition could be detected as "should be instant".
 		add_instant_back(get_history().getCurrentLocation(), previous_location)
 	}
-	// Deactivate "instant back" for the current page
-	// if this new transition is not "instant back" too.
-	// Only "instant back" chain navigation preserves
-	// the ability to instantly navigate "Back".
 	else
 	{
+		// If current transition is not "instant back"
+		// then reset the whole "instant back" chain.
+		// Only a consequitive "instant back" navigation chain
+		// preserves the ability to instantly navigate "Back".
+		// Once a regular navigation takes place
+		// all previous "instant back" possibilities are discarded.
 		reset_instant_back()
 	}
 }
