@@ -129,7 +129,6 @@ And the `index.html` would look like this:
     <title>Example</title>
   </head>
   <body>
-    <div id="react"></div>
     <script src="/bundle.js"></script>
   </body>
 </html>
@@ -137,11 +136,15 @@ And the `index.html` would look like this:
 
 Where `bundle.js` is the `./src/index.js` file built with Webpack (or you could use any other javascript bundler).
 
-Now, `index.html` and `bundle.js` files must be served over HTTP(S). If you're using Webpack then place `index.html` to Webpack's `configuration.output.path` folder and run [`webpack-dev-server`](https://webpack.js.org/guides/development/#webpack-dev-server) in a terminal: it will serve `index.html` from disk and `bundle.js` from memory.
+Now, `index.html` and `bundle.js` files must be served over HTTP(S).
 
-Now go to `localhost:8080`. It should respond with a fully working website.
+If you're using Webpack then it can be achieved by using `HtmlWebpackPlugin` to generate `index.html` and running [`webpack-serve`](https://github.com/webpack-contrib/webpack-serve) with [`historyApiFallback`](https://github.com/webpack-contrib/webpack-serve#add-function-parameters) to serve the generated `index.html` and `bundle.js` files over HTTP on `localhost:8080`.
 
-The application (`index.html`, `bundle.js`, a CSS stylesheet and images) can now be deployed as-is in a cloud (e.g. on Amazon S3) and served statically for a very low price. The API can be hosted "serverlessly" in a cloud (e.g. Amazon Lambda) which is also considered cheap. No running Node.js server is required. Yes, it's not a Server-Side Rendered approach because a user is given a blank page first, then `bundle.js` script is loaded by the web browser, then `bundle.js` script is executed fetching some data from the API via an HTTP request, and only when that HTTP request comes back — only then the page is rendered (in the browser). Google won't index such websites, but if searchability is not a requirement (at all or yet) then that would be the way to go (e.g. startup "MVP"s or "internal applications"). Server-Side Rendering can be easily added to such setup should the need arise.
+If you're using [Parcel](https://parceljs.org/) then it's much simpler than Webpack. See the [basic example project](https://github.com/catamphetamine/react-website-basic-example) for the setup required in order to generate and serve `index.html` and `bundle.js` files over HTTP on `localhost:1234`.
+
+So now the website should be fully working.
+
+The website (`index.html`, `bundle.js`, CSS stylesheets and images, etc) can now be deployed as-is in a cloud (e.g. on Amazon S3) and served statically for a very low price. The API can be hosted "serverlessly" in a cloud (e.g. Amazon Lambda) which is also considered cheap. No running Node.js server is required. Yes, it's not a Server-Side Rendered approach because a user is given a blank page first, then `bundle.js` script is loaded by the web browser, then `bundle.js` script is executed fetching some data from the API via an HTTP request, and only when that HTTP request comes back — only then the page is rendered (in the browser). Google won't index such websites, but if searchability is not a requirement (at all or yet) then that would be the way to go (e.g. startup "MVP"s or "internal applications"). Server-Side Rendering can be easily added to such setup should the need arise.
 
 ## Server Side Rendering
 
@@ -217,6 +220,8 @@ Now [disable javascript in Chrome DevTools](http://stackoverflow.com/questions/1
 This concludes the introductory part of the README and the rest is the description of the various tools and techniques which come prepackaged with this library.
 
 A working example illustrating Server-Side Rendering and all other things can be found here: [webpack-react-redux-isomorphic-render-example](https://github.com/catamphetamine/webpack-react-redux-isomorphic-render-example).
+
+A much simpler and smaller example (using Parcel instead of Webpack) can be found here: [react-website-basic-example](https://github.com/catamphetamine/react-website-basic-example).
 
 # Documentation
 
@@ -1063,7 +1068,7 @@ export default (
 
 ### Setting <title/> and <meta/> tags
 
-Use `@meta(state => ...)` decorator for adding `<title/>` and `<meta/>` tags:
+Use `@meta(({ state }) => ...)` decorator for adding `<title/>` and `<meta/>` tags:
 
 ```js
 import { meta } from 'react-website'
