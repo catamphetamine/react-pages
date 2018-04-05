@@ -29,6 +29,9 @@ export default class Hyperlink extends Component
 		// when navigating "Back"
 		instantBack : PropTypes.bool.isRequired,
 
+		// `react-router` property for `<IndexLink/>`.
+		onlyActiveOnIndex : PropTypes.bool,
+
 		// Content
 		children : PropTypes.node
 	}
@@ -106,7 +109,7 @@ export default class Hyperlink extends Component
 	render()
 	{
 		const { instantBack, onNavigate, ...link_props } = this.props
-		const { to, target, children, ...rest_props } = link_props
+		const { to, target, onlyActiveOnIndex, children, ...rest_props } = link_props
 		const { router } = this.context
 
 		// Sanity check
