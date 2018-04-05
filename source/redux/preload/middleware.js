@@ -299,19 +299,22 @@ export default function preloading_middleware
 			}
 
 			// Possibly handle the error (for example, redirect to an error page)
-			error_handler(error,
+			if (error_handler)
 			{
-				path : action.location.pathname,
-				url  : location_url(action.location),
-				// Using `redirect_action` instead of `goto_action` here
-				// so that the user can't go "Back" to the page being preloaded
-				// in case of an error because it would be in inconsistent state
-				// due to `@preload()` being interrupted.
-				redirect : to => dispatch(redirect_action(to)),
-				dispatch,
-				getState,
-				server
-			})
+				error_handler(error,
+				{
+					path : action.location.pathname,
+					url  : location_url(action.location),
+					// Using `redirect_action` instead of `goto_action` here
+					// so that the user can't go "Back" to the page being preloaded
+					// in case of an error because it would be in inconsistent state
+					// due to `@preload()` being interrupted.
+					redirect : to => dispatch(redirect_action(to)),
+					dispatch,
+					getState,
+					server
+				})
+			}
 
 			// If redirect happened on the server side
 			// then a special redirection error was thrown.
