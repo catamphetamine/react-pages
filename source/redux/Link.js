@@ -127,11 +127,24 @@ export default class Hyperlink extends Component
 
 		if (is_local_website_link && !target)
 		{
-			return <Link { ...link_props } onClick={ this.on_click }>{ children }</Link>
+			return (
+				<Link
+					onClick={ this.on_click }
+					{ ...link_props }>
+					{ children }
+				</Link>
+			)
 		}
 
 		// External links (or links with `target` specified, like "open in a new tab")
-		return <a href={ to } target={ target } { ...rest_props }>{ children }</a>
+		return (
+			<a
+				href={ to }
+				target={ target }
+				{ ...rest_props }>
+				{ children }
+			</a>
+		)
 	}
 }
 
