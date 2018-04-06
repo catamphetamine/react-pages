@@ -138,9 +138,9 @@ Where `bundle.js` is the `./src/index.js` file built with Webpack (or you could 
 
 Now, `index.html` and `bundle.js` files must be served over HTTP(S).
 
-If you're using Webpack then it can be achieved by using `HtmlWebpackPlugin` to generate `index.html` and running [`webpack-serve`](https://github.com/webpack-contrib/webpack-serve) with [`historyApiFallback`](https://github.com/webpack-contrib/webpack-serve#add-function-parameters) to serve the generated `index.html` and `bundle.js` files over HTTP on `localhost:8080`.
+If you're using Webpack then add [`HtmlWebpackPlugin`](https://webpack.js.org/plugins/html-webpack-plugin/) to generate `index.html`, and run [`webpack-serve`](https://github.com/webpack-contrib/webpack-serve) with [`historyApiFallback`](https://github.com/webpack-contrib/webpack-serve#add-function-parameters) to serve the generated `index.html` and `bundle.js` files over HTTP on `localhost:8080`.
 
-If you're using [Parcel](https://parceljs.org/) then it's much simpler than Webpack. See the [basic example project](https://github.com/catamphetamine/react-website-basic-example) for the setup required in order to generate and serve `index.html` and `bundle.js` files over HTTP on `localhost:1234`.
+If you're using [Parcel](https://parceljs.org/) then it's much simpler than Webpack: see the [basic example project](https://github.com/catamphetamine/react-website-basic-example) for the setup required in order to generate and serve `index.html` and `bundle.js` files over HTTP on `localhost:1234`.
 
 So now the website should be fully working.
 
