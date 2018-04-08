@@ -10,5 +10,10 @@
 			"path": ".",
 			"folder_exclude_patterns": ["react-website/node_modules", "react-website/coverage", "react-website/build", "react-website/build", "react-website/cjs", "react-website/project.sublime-workspace"]
 		}
-	]
+	],
+	"settings":
+	{
+		"tab_size": 2,
+		"trim_trailing_white_space_on_save": true
+	}
 }

@@ -26,7 +26,8 @@ export function render_on_client({ history, routes, create_page_element })
 
 // returns a Promise resolving to { status, content, redirect }
 //
-export async function render_on_server({ hollow, create_page_element, render, routes, history })
+// export async function render_on_server({ hollow, create_page_element, render, routes, history })
+export function render_on_server({ hollow, create_page_element, render, routes, history })
 {
 	if (hollow)
 	{
@@ -34,13 +35,22 @@ export async function render_on_server({ hollow, create_page_element, render, ro
 		return {}
 	}
 
+	// // perform React-router routing
+	// const { redirect, router_state } = await match_routes_against_location
+	// ({
+	// 	routes: typeof routes === 'function' ? routes() : routes,
+	// 	// `react-router` takes the current `location` from `history`
+	// 	history
+	// })
+
 	// perform React-router routing
-	const { redirect, router_state } = await match_routes_against_location
+	return match_routes_against_location
 	({
 		routes: typeof routes === 'function' ? routes() : routes,
 		// `react-router` takes the current `location` from `history`
 		history
 	})
+	.then(({ redirect, router_state }) => {
 
 	// In case of a `react-router` `<Redirect/>`
 	if (redirect)
@@ -57,4 +67,7 @@ export async function render_on_server({ hollow, create_page_element, render, ro
 	return {
 		content : render(page_element)
 	}
+
+	//
+	})
 }

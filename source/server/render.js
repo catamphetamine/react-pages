@@ -19,7 +19,7 @@ import { render_on_server as react_router_render } from '../react-router/render'
 import { Preload } from '../redux/actions'
 import { meta_tags } from '../meta'
 
-export default async function render_page(settings, { initialize, localize, assets, proxy, url, hollow, html = {}, cookies })
+export default async function(settings, { initialize, localize, assets, proxy, url, hollow, html = {}, cookies })
 {
 	settings = normalize_common_settings(settings)
 
@@ -277,7 +277,7 @@ export default async function render_page(settings, { initialize, localize, asse
 			}
 
 			error_handler(error, error_handler_parameters)
-		
+
 			// Either redirects or throws the error
 			if (result.redirect)
 			{
@@ -324,7 +324,7 @@ function redirecting_dispatch(dispatch, redirect)
 			case Preload:
 				// `throw`s a special `Error` on server side
 				return redirect(event.location)
-		
+
 			default:
 				// Proceed with the original
 				return dispatch(event)

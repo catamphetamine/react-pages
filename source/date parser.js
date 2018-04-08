@@ -41,7 +41,7 @@ export default function parse_dates(object)
 	{
 		return new Date(object)
 	}
-	// If an array is encountered, 
+	// If an array is encountered,
 	// proceed recursively with each element of this array.
 	else if (object instanceof Array)
 	{
@@ -57,7 +57,7 @@ export default function parse_dates(object)
 	// and proceed recursively for all of its properties.
 	else if (is_object(object))
 	{
-		for (let key of Object.keys(object))
+		for (const key of Object.keys(object))
 		{
 			// proceed recursively
 			object[key] = parse_dates(object[key])

@@ -11,7 +11,8 @@ export default class HTTP_Client
 {
 	// `Set-Cookie` HTTP headers
 	// (in case any cookies are set)
-	set_cookies = new Set()
+	// set_cookies = new Set()
+	set_cookies = []
 
 	// Constructs a new instance of Http client.
 	// Optionally takes an Http Request as a reference to mimic
@@ -63,7 +64,7 @@ export default class HTTP_Client
 		{
 			this.server = true
 		}
-		
+
 		this.proxy = proxy
 
 		const http_methods =
@@ -154,7 +155,10 @@ export default class HTTP_Client
 								// Therefore using a `Set` instead of an array.
 								for (const cookie of cookies)
 								{
-									this.set_cookies.add(cookie)
+									// this.set_cookies.add(cookie)
+									if (this.set_cookies.indexOf(cookie) < 0) {
+										this.set_cookies.push(cookie)
+									}
 								}
 							}
 						}
@@ -225,7 +229,7 @@ export default class HTTP_Client
 							// (legacy)
 							//
 							// this turned out to be a lame way of handling cookies,
-							// because cookies are sent in request 
+							// because cookies are sent in request
 							// with no additional parameters
 							// such as `path`, `httpOnly` and `expires`,
 							// so there were cookie duplication issues.

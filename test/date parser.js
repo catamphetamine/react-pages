@@ -27,14 +27,14 @@ describe('date parser', function()
 				'2011',
 				'2011-01',
 				'2011-01-01',
-				
+
 				// No seconds
 				'2011-01-01T03:49Z',
 				'2016-08-27T03:49Z',
-				
+
 				// Invalid month
 				'2011-15-30T03:49:00Z',
-				
+
 				// Invalid day
 				'2011-12-32T03:49:00Z',
 
@@ -57,12 +57,12 @@ describe('date parser', function()
 
 		expect(object.date).to.be.an.instanceof(Date)
 
-		for (let date of object.dates)
+		for (const date of object.dates)
 		{
 			expect(date).to.be.an.instanceof(Date)
 		}
-		
-		for (let non_date of object.non_dates)
+
+		for (const non_date of object.non_dates)
 		{
 			expect(non_date).to.be.a('string')
 		}

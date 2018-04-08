@@ -2,7 +2,7 @@
 // (preloads data required for displaying a page before actually navigating to it)
 
 import { location_url, strip_basename } from '../../location'
-import server_redirect from '../../server/redirect'
+import server_redirect from '../../server redirect'
 
 import {
 	Redirect,
@@ -98,7 +98,7 @@ export default function preloading_middleware
 			// preloading.time = time
 
 			// This preloading time will be longer then
-			// the server-side one, say, by 10 milliseconds, 
+			// the server-side one, say, by 10 milliseconds,
 			// probably because the web browser making
 			// an asynchronous HTTP request is slower
 			// than the Node.js server making a regular HTTP request.
@@ -207,7 +207,7 @@ export default function preloading_middleware
 
 			// Page loading indicator could listen for this event
 			dispatch({ type: Preload_started })
-			
+
 			// Preload the new page.
 			// (the Promise returned is only used in server-side rendering,
 			//  client-side rendering never uses this Promise)
@@ -345,7 +345,7 @@ function after_preload(dispatch, getState, components, parameters, action, serve
 	{
 		throw new Error('The current `<Route/>` component is `undefined`. Make sure you didn\'t forget to `export default` it from the component file.')
 	}
-	
+
 	if (page[On_page_loaded_method_name])
 	{
 		page[On_page_loaded_method_name]

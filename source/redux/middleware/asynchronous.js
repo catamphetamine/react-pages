@@ -7,7 +7,7 @@ export const ERROR_ACTION_PROPERTY = 'error'
 
 // Asynchronous middleware (e.g. for HTTP Ajax calls).
 //
-// Takes effect only if the `dispatch`ed action has 
+// Takes effect only if the `dispatch`ed action has
 // `promise` function and `events` (or `event`) property.
 //
 // `dispatch()` call will return a `Promise`.
@@ -18,7 +18,7 @@ export default function asynchronous_middleware(http_client, redux_event_naming,
 	{
 		// Can cancel previous actions of the same `type` (if configured).
 		// E.g. for an AJAX autocomplete.
-		const cancellable_promises = new Map()
+		const cancellable_promises = {}
 
 		return next => action =>
 		{
@@ -64,19 +64,19 @@ export default function asynchronous_middleware(http_client, redux_event_naming,
 			// E.g. for an AJAX autocomplete.
 			if (cancellable)
 			{
-				if (cancellable_promises.has(Request))
+				if (cancellable_promises[Request])
 				{
-					cancellable_promises.get(Request).cancel()
+					cancellable_promises[Request].cancel()
 				}
 
-				cancellable_promises.set(Request, promised)
+				cancellable_promises[Request] = promised
 			}
 
 			// Returning the result like this,
 			// because if returned the `promised.then()` chain directly
 			// then it wouldn't get detected as an "Unhandled rejection"
 			// in case of an error.
-			return new Promise((resolve, reject) => 
+			return new Promise((resolve, reject) =>
 			{
 				// Don't `return` this promise
 				// so that it detects it as an "Unhandled rejection"
@@ -90,7 +90,7 @@ export default function asynchronous_middleware(http_client, redux_event_naming,
 						// The default `Promise` implementation has no `.finally()`
 						if (cancellable)
 						{
-							cancellable_promises.delete(Request)
+							delete cancellable_promises[Request]
 						}
 
 						// Dispatch the `success` event to the Redux store
@@ -120,7 +120,7 @@ export default function asynchronous_middleware(http_client, redux_event_naming,
 						// The default `Promise` implementation has no `.finally()`
 						if (cancellable)
 						{
-							cancellable_promises.delete(Request)
+							delete cancellable_promises[Request]
 						}
 
 						// Dispatch the `failure` event to the Redux store
@@ -214,6 +214,6 @@ function parse_error(error)
 	{
 		error_data.message = error.message
 	}
-	
+
 	return error_data
 }

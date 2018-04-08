@@ -10,7 +10,7 @@ export function is_object(object)
 	return exists(object) && (object !== null) && object.constructor === object_constructor
 }
 
-// extends the first object with 
+// extends the first object with
 /* istanbul ignore next: some weird transpiled code, not testable */
 export function extend(...objects)
 {
@@ -20,12 +20,12 @@ export function extend(...objects)
 	{
 		return
 	}
-	
+
 	if (objects.length === 1)
 	{
 		return objects[0]
 	}
-	
+
 	const to   = objects[0]
 	const from = objects[1]
 
@@ -36,7 +36,7 @@ export function extend(...objects)
 		return extend(intermediary_result, last)
 	}
 
-	for (let key of Object.keys(from))
+	for (const key of Object.keys(from))
 	{
 		if (is_object(from[key]))
 		{
@@ -91,7 +91,7 @@ export function clone(object)
 // creates camelCased aliases for all the keys of an object
 export function convert_from_camel_case(object)
 {
-	for (let key of Object.keys(object))
+	for (const key of Object.keys(object))
 	{
 		if (/[A-Z]/.test(key))
 		// if (key.indexOf('_') >= 0)
@@ -198,7 +198,7 @@ export function is_blank(text)
 // zips two arrays
 export function zip(a, b)
 {
-	return a.map(function(_, index) 
+	return a.map(function(_, index)
 	{
 		return [a[index], b[index]]
 	})

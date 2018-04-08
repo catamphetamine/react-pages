@@ -1,9 +1,9 @@
-import deep_equal from 'deep-equal'
+import isEqual from 'lodash/isEqual'
 import getRouteParams from 'react-router/lib/getRouteParams'
 
 import { Preload_method_name, Preload_options_name } from './decorator'
 
-// Returns function returning a Promise 
+// Returns function returning a Promise
 // which resolves when all the required preload()s are resolved.
 //
 // If no preloading is needed, then returns nothing.
@@ -65,7 +65,7 @@ export default function generate_preload_chain
 	return () => promisify(chain, preloading)
 }
 
-// Finds all `preload` (or `preload_deferred`) methods 
+// Finds all `preload` (or `preload_deferred`) methods
 // (they will be executed in parallel).
 //
 // @parameter components - `react-router` matched components
@@ -291,7 +291,7 @@ function promisify(chain, preloading)
 // On client side:
 //
 // Take the previous route components
-// (along with their parameters) 
+// (along with their parameters)
 // and the next route components
 // (along with their parameters),
 // and compare them side-by-side
@@ -330,9 +330,9 @@ function only_changed_components(routes, components, parameters)
 		const previous_parameters = window._previous_route_parameters
 
 		let i = 0
-		while (i < routes.length - 1 && 
+		while (i < routes.length - 1 &&
 			previous_routes[i].component === routes[i].component &&
-			deep_equal(getRouteParams(previous_routes[i], previous_parameters), getRouteParams(routes[i], parameters)))
+			isEqual(getRouteParams(previous_routes[i], previous_parameters), getRouteParams(routes[i], parameters)))
 		{
 			i++
 		}

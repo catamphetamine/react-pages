@@ -12,11 +12,23 @@ import match_routes_against_location from '../../react-router/match'
 // where `component` is the rendered React component
 // and `store` is the Redux store.
 //
-export default async function render({ history, create_page_element, routes, store })
+// export default async function render({ history, create_page_element, routes, store })
+export default function render({ history, create_page_element, routes, store })
 {
+	// // Performs `react-router` asynchronous match for current location
+	// // (is required for asynchonous routes to work).
+	// const { redirect, router_state } = await match_routes_against_location
+	// ({
+	// 	// `react-router` `match()` internally uses this `history` to get current location.
+	// 	// Could have just used `document.location` here,
+	// 	// but what if, for example, `basename` feature of `history` is being used.
+	// 	history,
+	// 	routes: typeof routes === 'function' ? routes(store) : routes
+	// })
+
 	// Performs `react-router` asynchronous match for current location
 	// (is required for asynchonous routes to work).
-	const { redirect, router_state } = await match_routes_against_location
+	return match_routes_against_location
 	({
 		// `react-router` `match()` internally uses this `history` to get current location.
 		// Could have just used `document.location` here,
@@ -24,6 +36,7 @@ export default async function render({ history, create_page_element, routes, sto
 		history,
 		routes: typeof routes === 'function' ? routes(store) : routes
 	})
+	.then(({ redirect, router_state }) => {
 
 	// In case of a `react-router` `<Redirect/>`
 	if (redirect)
@@ -47,6 +60,9 @@ export default async function render({ history, create_page_element, routes, sto
 		container_props: { store },
 		store
 	}
+
+	//
+	})
 }
 
 // `location` can set `scroll` to `false`
@@ -59,7 +75,7 @@ function should_scroll(previous_router_properties, new_router_properties)
 	return location.scroll !== false
 }
 
-// Fixes `react-router` bug by forcing 
+// Fixes `react-router` bug by forcing
 // `<Route/>` `component` remount on any URL change.
 // https://github.com/ReactTraining/react-router/issues/1982
 function create_route_element(component, props)

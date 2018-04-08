@@ -3,7 +3,7 @@
 import createHistory from 'react-router/lib/createMemoryHistory'
 
 import _create_history from '../history'
-import redirect from './redirect'
+import redirect from '../server redirect'
 
 export default function create_history(relative_url, history_settings, parameters)
 {

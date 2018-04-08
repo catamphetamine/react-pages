@@ -1,3 +1,7 @@
+// This file is not in `./server` because it's being `import`ed
+// in `./redux/preload/middleware` which is used on client-side.
+// (this way `babel-runtime` is not included on client-side)
+
 // Constructs a special "Error" used for
 // aborting and redirecting on server side.
 // A hacky way but it should work
@@ -22,7 +26,7 @@ export default function redirect(location)
 	if (location.basename)
 	{
 		// `location` is a read-only object
-		location = 
+		location =
 		{
 			...location,
 			basename: undefined

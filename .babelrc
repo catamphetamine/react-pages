@@ -6,14 +6,13 @@
 			"presets":
 			[
 				"react",
-				"es2015",
-				"stage-0"
+				"env"
 			],
-			
+
 			"plugins":
 			[
-				"transform-runtime",
-				"transform-react-display-name"
+				"transform-object-rest-spread",
+				"transform-class-properties"
 			]
 		},
 		"commonjs":
@@ -21,15 +20,15 @@
 			"presets":
 			[
 				"react",
-				"es2015",
-				"stage-0"
+				"env"
 			],
-			
+
 			"plugins":
 			[
-				"transform-runtime",
-				"transform-react-display-name",
-				"transform-decorators-legacy"
+				["transform-es2015-for-of", { loose: true }],
+				"transform-object-rest-spread",
+				"transform-decorators-legacy",
+				"transform-class-properties"
 			]
 		},
 		"es6":
@@ -37,15 +36,49 @@
 			"presets":
 			[
 				"react",
-				["es2015", { modules: false }],
-				"stage-0"
+				["env", { modules: false }]
 			],
-			
+
 			"plugins":
 			[
+				["transform-es2015-for-of", { loose: true }],
+				"transform-object-rest-spread",
+				"transform-decorators-legacy",
+				"transform-class-properties"
+			]
+		},
+		"commonjs/server":
+		{
+			"presets":
+			[
+				"react",
+				"env"
+			],
+
+			"plugins":
+			[
+				["transform-es2015-for-of", { loose: true }],
 				"transform-runtime",
-				"transform-react-display-name",
-				"transform-decorators-legacy"
+				"transform-object-rest-spread",
+				"transform-decorators-legacy",
+				"transform-class-properties"
+			]
+		},
+		"es6/server":
+		{
+			"presets":
+			[
+				"react",
+				["env", { modules: false }]
+			],
+
+			"plugins":
+			[
+				["transform-es2015-for-of", { loose: true }],
+				"transform-runtime",
+				"transform-object-rest-spread",
+				"transform-decorators-legacy",
+				"transform-class-properties"
 			]
 		}
 	}

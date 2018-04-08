@@ -10,7 +10,8 @@ import ReactDOM from 'react-dom'
 // providing their own `render()` logic
 // (e.g. Redux + React-router, React-router).
 //
-export default async function render({ render, render_parameters = {}, container, translation, history })
+// export default async function render({ render, render_parameters = {}, container, translation, history })
+export default function render({ render, render_parameters = {}, container, translation, history })
 {
 	// Protected cookie feature
 	const protected_cookie_value = get_global_variable('_protected_cookie_value')
@@ -24,23 +25,35 @@ export default async function render({ render, render_parameters = {}, container
 	// `render` function for development mode hot reload,
 	// protected cookie value,
 	// and also `store` (if Redux is used).
-	async function render_page()
+	// async function render_page()
+	function render_page()
 	{
-		const { element, container_props, ...rest } = await render(render_parameters)
+		// Preload language translation in development mode.
+		// `translation` loading function may be passed
+		// and its main purpose is to enable Webpack HMR
+		// in development mode for translated messages.
+		if (locale && translation)
+		{
+			return translation(locale).then(_render_page)
+		}
+
+		return _render_page(messages)
+	}
+
+	function _render_page(messages)
+	{
+		// const { element, container_props, ...rest } = await render(render_parameters)
+		return render(render_parameters).then(({ element, container_props, ...rest }) => {
 
 		// If internationalization feature is used
 		if (locale)
 		{
 			container_props.locale = locale
 
-			// Preload language translation in development mode.
-			// `translation` loading function may be passed
-			// and its main purpose is to enable Webpack HMR
-			// in development mode for translated messages.
-			if (translation)
+			if (messages)
 			{
-				container_props.messages = await translation(locale)
-			} 
+				container_props.messages = messages
+			}
 		}
 
 		render_react_element
@@ -54,10 +67,14 @@ export default async function render({ render, render_parameters = {}, container
 		)
 
 		return rest
+
+		//
+		})
 	}
 
 	// Render the page on the client side.
-	const result = await render_page()
+	// const result = await render_page()
+	return render_page().then((result) => {
 
 	return {
 		// Redux `store`, for example.
@@ -69,6 +86,9 @@ export default async function render({ render, render_parameters = {}, container
 		// "Protected cookie" could be a JWT "refresh token".
 		protectedCookie: protected_cookie_value
 	}
+
+	//
+	})
 }
 
 // Renders React element to a DOM node
@@ -93,7 +113,7 @@ function get_global_variable(name)
 	{
 		delete window[name]
 	}
-	
+
 	return variable
 }
 
