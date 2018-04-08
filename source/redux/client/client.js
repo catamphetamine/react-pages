@@ -31,7 +31,8 @@ export default function set_up_and_render(settings, options = {})
 	window._react_isomorphic_render_http_client = http_client
 
 	// Reset "instant back" on page reload
-	// since Redux state is cleared.
+	// since Redux state is cleared
+	// but `window.sessionStore` still retains its data.
 	reset_instant_back()
 
 	// Will intercept `popstate` DOM event to preload pages before showing them.
