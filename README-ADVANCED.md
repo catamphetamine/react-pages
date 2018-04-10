@@ -53,7 +53,7 @@ function autocompleteMatch(inputValue) {
 Gotcha: when relying on `bluebird` `Promise` cancellation don't use `async/await` syntax which is transpiled by Babel using [Facebook's `regenerator`](https://github.com/facebook/regenerator) (as of 2017) which doesn't use `Promise`s internally meaning that the following `async/await` rewrite won't actually cancel the previous action:
 
 ```js
-// Action cancellation won't work
+// Action cancellation won't work.
 function autocompleteMatch(inputValue) {
   return {
     promise: async (({ http })) => await http.get(`/search?query=${inputValue}`),
@@ -243,7 +243,7 @@ const { status, content, contentType } = renderError(error)
 
   // Redux reducers (an object)
   reducer: require('./src/redux/index')
-  
+
   // A React component.
   //
   // React page component (`children` property)
@@ -331,7 +331,7 @@ const { status, content, contentType } = renderError(error)
 
     // (optional)
     errorState: (error) => ({ ... })
-    // 
+    //
     // Parses a `superagent` `Error` instance
     // into a plain JSON object for storing it in Redux state.
     // The reason is that `Error` instance can't be part of Redux state
