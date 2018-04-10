@@ -4,14 +4,14 @@ import
 	filter_preloaders,
 	chain_preloaders
 }
-from '../source/redux/preload/collect'
+from './collect'
 
 import
 {
 	Preload_method_name,
 	Preload_options_name
 }
-from '../source/redux/preload/decorator'
+from './decorator'
 
 describe(`@preload`, function()
 {

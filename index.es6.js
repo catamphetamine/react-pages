@@ -1,6 +1,6 @@
 // Helpers
 
-export { default as meta } from './build/meta'
+export { default as meta } from './build/meta/meta'
 
 // Redux
 
@@ -67,7 +67,7 @@ export
 	redirect_action as redirect,
 	load_state_action as load_state,
 	load_state_action as loadState,
-	
+
 	LoadState,
 	LoadState as LOAD_STATE,
 	GoTo,

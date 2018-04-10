@@ -1,6 +1,6 @@
 // Helpers
 
-exports.meta  = require('./cjs/meta').default
+exports.meta  = require('./cjs/meta/meta').default
 
 // Redux
 
@@ -45,9 +45,9 @@ exports.loadState  = exports.load_state
 
 exports.PRELOAD    = require('./cjs/redux/preload/actions').Preload
 exports.LoadState  = require('./cjs/redux/actions').LoadState
-exports.LOAD_STATE = exports.LoadState  
+exports.LOAD_STATE = exports.LoadState
 exports.GoTo       = require('./cjs/redux/actions').GoTo
-exports.GO_TO      = exports.GoTo  
+exports.GO_TO      = exports.GoTo
 exports.Redirect   = require('./cjs/redux/actions').Redirect
 exports.REDIRECT   = exports.Redirect
 exports.Navigated  = require('./cjs/redux/actions').Navigated

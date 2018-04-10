@@ -233,7 +233,7 @@ For page preloading use the `@preload()` decorator to load the neccessary data b
 import { connect } from 'react-redux'
 import { preload } from 'react-website'
 
-// Redux "asynchronous action", 
+// Redux "asynchronous action",
 // explained later in this document.
 function fetchUsers() {
   return {
@@ -287,7 +287,7 @@ In this example the `@preload()` decorator is used to preload a page before it i
     initial
   }
   = preloadArguments
-  
+
   // Send HTTP request and wait for response.
   await dispatch(fetchPageData(parameters.id))
 })
@@ -520,7 +520,7 @@ export const fetchFriends = redux.action(
   // The fetched friends list will be placed
   // into the `friends` Redux state property.
   'friends'
-  // 
+  //
   // Or write it like this:
   // { friends: result => result }
   //
@@ -570,7 +570,7 @@ export const getComments = redux.action(
   // The fetched comments will be placed
   // into the `comments` Redux state property.
   'comments'
-  // 
+  //
   // Or write it like this:
   // { comments: result => result }
   //
@@ -1083,13 +1083,13 @@ import { meta } from 'react-website'
 
   // `<meta property="og:description" .../>`
   description: 'Muscles',
-  
+
   // `<meta property="og:image" .../>`
   image: 'https://cdn.google.com/logo.png',
-  
+
   // `<meta property="og:audio" .../>`
   audio: '...',
-  
+
   // `<meta property="og:video" .../>`
   video: '...',
 
@@ -1099,10 +1099,10 @@ import { meta } from 'react-website'
   // `<meta name="og:locale:alternate" content="en_US"/>`
   // `<meta name="og:locale:alternate" content="fr_FR"/>`
   locale_other: ['en_US', 'fr_FR'],
-  
+
   // `<meta property="og:url" .../>`
   url: 'https://google.com/',
-  
+
   // `<meta property="og:type" .../>`
   type: 'profile',
 
@@ -1110,7 +1110,7 @@ import { meta } from 'react-website'
   // The default "utf-8" encoding can be changed
   // by passing custom `charset` parameter.
   charset: 'utf-16',
-  
+
   // `<meta name="viewport" content="width=device-width,
   //   initial-scale=1.0, user-scalable=no"/>`
   // tag is added automatically
@@ -1119,7 +1119,7 @@ import { meta } from 'react-website'
   // by passing custom `viewport` parameter.
   viewport: '...',
 
-  // All other properties will be transformed directly to 
+  // All other properties will be transformed directly to
   // either `<meta property="{property_name}" content="{property_value}/>`
   // or `<meta name="{property_name}" content="{property_value}/>`
 }))
@@ -1384,7 +1384,7 @@ if (module.hot) {
 
 ## WebSocket
 
-`websocket()` helper sets up a WebSocket connection. 
+`websocket()` helper sets up a WebSocket connection.
 
 ```js
 import { render, websocket } from 'react-website'

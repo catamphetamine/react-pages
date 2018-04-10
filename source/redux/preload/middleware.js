@@ -20,7 +20,7 @@ import {
 import match_routes_against_location, { get_route_path } from '../../react-router/match'
 import { add_instant_back, reset_instant_back } from '../client/instant back'
 import timer from '../../timer'
-import { get_meta, update_meta } from '../../meta'
+import { get_meta, update_meta } from '../../meta/meta'
 
 import { On_page_loaded_method_name } from './onPageLoaded'
 

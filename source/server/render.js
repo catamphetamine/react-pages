@@ -17,7 +17,7 @@ import redux_render, { initialize as redux_initialize } from '../redux/server/se
 import { render_on_server as react_router_render } from '../react-router/render'
 
 import { Preload } from '../redux/actions'
-import { meta_tags } from '../meta'
+import { generate_meta_tags_markup } from '../meta/meta'
 
 export default async function(settings, { initialize, localize, assets, proxy, url, hollow, html = {}, cookies })
 {
@@ -195,7 +195,7 @@ export default async function(settings, { initialize, localize, assets, proxy, u
 				({
 					assets,
 					locale,
-					meta: meta_tags(meta).join(''),
+					meta: generate_meta_tags_markup(meta).join(''),
 					head,
 					bodyStart
 				})

@@ -1,4 +1,17 @@
 {
+	"presets":
+	[
+		"env",
+		"react"
+	],
+
+	"plugins":
+	[
+		"transform-object-rest-spread",
+		"transform-decorators-legacy",
+		"transform-class-properties"
+	],
+
 	"env":
 	{
 		"development":
@@ -80,6 +93,10 @@
 				"transform-decorators-legacy",
 				"transform-class-properties"
 			]
+		},
+		"test":
+		{
+			"plugins": ["istanbul"]
 		}
 	}
 }

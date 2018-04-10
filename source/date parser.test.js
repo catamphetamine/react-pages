@@ -1,4 +1,4 @@
-import parse_dates from '../source/date parser'
+import parse_dates from './date parser'
 
 describe('date parser', function()
 {

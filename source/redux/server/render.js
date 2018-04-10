@@ -6,7 +6,7 @@ import { get_location } from '../../history'
 import timer from '../../timer'
 import { start_preload } from '../preload/actions'
 import match_routes_against_location, { get_route_path } from '../../react-router/match'
-import { get_meta } from '../../meta'
+import { get_meta } from '../../meta/meta'
 
 // Returns a Promise resolving to { status, content, redirect }.
 //
@@ -41,7 +41,7 @@ export default async function render_on_server({ history, hollow, create_page_el
 
 		// After the page has finished preloading, render it
 		await store.dispatch(start_preload(get_location(history)))
-	
+
 		time.preload = preload_timer()
 
 		// Gather `<title/>` and `<meta/>` tags for this route path
