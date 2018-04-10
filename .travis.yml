@@ -3,6 +3,6 @@ node_js:
   - "stable"
 sudo: false
 script:
-  - "npm test"
+  - "npm test-coverage"
 after_success:
   - "npm install coveralls && npm run coveralls"
