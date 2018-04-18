@@ -18,7 +18,7 @@ export default function set_up_and_render(settings, options = {})
 	settings = normalize_common_settings(settings)
 
 	const { devtools, translation, stats } = options
-	
+
 	// camelCase aliasing
 	const on_navigate = options.on_navigate || options.onNavigate
 
@@ -71,16 +71,13 @@ export default function set_up_and_render(settings, options = {})
 		}
 
 		// Preload the page but don't navigate to it just yet
-		store.dispatch(start_preload(location, undefined, false)).then((result) =>
-		{
+		store.dispatch(start_preload(location, undefined, false)).then
+		(
 			// Navigate to the page
-			listener(event)
-		},
-		(error) =>
-		{
+			() => listener(event),
 			// Log the error
-			console.error(error)
-		})
+			(error) => console.error(error)
+		)
 	})
 
 	// `history` is created after the `store`.
@@ -125,7 +122,7 @@ export default function set_up_and_render(settings, options = {})
 
 	let current_location = history.getCurrentLocation()
 	const get_current_location = () => current_location
-	
+
 	history.listen((location) =>
 	{
 		current_location = location

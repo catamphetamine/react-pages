@@ -36,6 +36,13 @@ export function should_instrument_history_pop_state_listeners(call_listener)
 
 			listener = (event) =>
 			{
+				// Only instrument the first `popstate` listener
+				// (most likely it's gonna be `history`'s `popstate` listener)
+				// because each instrumented listener starts page preloading.
+				if (original_listener !== pop_state_listeners[0].original) {
+					return original_listener(event)
+				}
+
 				call_listener(original_listener, event, get_history_pop_state_location(event, initial_location))
 			}
 
@@ -85,7 +92,7 @@ function get_history_pop_state_location(event, initial_location)
 	{
 		return get_history_state_location(event.state)
 	}
-	
+
 	return initial_location
 }
 
