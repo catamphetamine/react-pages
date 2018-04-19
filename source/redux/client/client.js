@@ -2,7 +2,7 @@ import React from 'react'
 import ReactDOM from 'react-dom'
 
 import client_side_render from '../../client/render'
-import create_history, { should_instrument_history_pop_state_listeners } from '../../client/history'
+import create_history, { should_instrument_new_popstate_listeners, should_not_instrument_new_popstate_listeners } from '../../client/history'
 import render from './render'
 import create_http_client from '../http client'
 import normalize_common_settings from '../normalize'
@@ -34,51 +34,6 @@ export default function set_up_and_render(settings, options = {})
 	// since Redux state is cleared
 	// but `window.sessionStore` still retains its data.
 	reset_instant_back()
-
-	// Will intercept `popstate` DOM event to preload pages before showing them.
-	// This hook is placed before `history` is initialized because it taps on `popstate`.
-	should_instrument_history_pop_state_listeners((listener, event, location) =>
-	{
-		// This idea was discarded because state JSON could be very large.
-		// // Store the current Redux state in history
-		// // before performing the "Back"/"Forward" navigation.
-		// store_in_history('redux/state', get_current_location().key, store.getState())
-		//
-		// const redux_state = get_from_history('redux/state', event.state.key)
-		//
-		// if (redux_state)
-		// {
-		// 	// Won't preload the page again but will instead use
-		// 	// the Redux state that was relevant at the time
-		// 	// the page was navigated from.
-		// 	store.dispatch(load_state_action(redux_state))
-		//
-		// 	// Navigate to the page
-		// 	listener(event)
-		// 	return
-		// }
-
-		// "from location" means before the `popstate` transition.
-		const from_location = get_current_location()
-		const to_location   = { key: event.state ? event.state.key : undefined }
-
-		// If it's an instant "Back"/"Forward" navigation
-		if (is_instant_transition(from_location, to_location))
-		{
-			// Navigate to the page without preloading it
-			// (has been previously preloaded and is in Redux state)
-			return listener(event)
-		}
-
-		// Preload the page but don't navigate to it just yet
-		store.dispatch(start_preload(location, undefined, false)).then
-		(
-			// Navigate to the page
-			() => listener(event),
-			// Log the error
-			(error) => console.error(error)
-		)
-	})
 
 	// `history` is created after the `store`.
 	// At the same time, `store` needs the `history` later during navigation.
@@ -123,10 +78,57 @@ export default function set_up_and_render(settings, options = {})
 	let current_location = history.getCurrentLocation()
 	const get_current_location = () => current_location
 
-	history.listen((location) =>
+	// Will intercept `popstate` DOM event to preload pages before showing them.
+	// This hook is placed before `history` is initialized because it taps on `popstate`.
+	should_instrument_new_popstate_listeners((listener, event, location) =>
 	{
-		current_location = location
+		// This idea was discarded because state JSON could be very large.
+		// // Store the current Redux state in history
+		// // before performing the "Back"/"Forward" navigation.
+		// store_in_history('redux/state', get_current_location().key, store.getState())
+		//
+		// const redux_state = get_from_history('redux/state', event.state.key)
+		//
+		// if (redux_state)
+		// {
+		// 	// Won't preload the page again but will instead use
+		// 	// the Redux state that was relevant at the time
+		// 	// the page was navigated from.
+		// 	store.dispatch(load_state_action(redux_state))
+		//
+		// 	// Navigate to the page
+		// 	listener(event)
+		// 	return
+		// }
+
+		// "from location" means before the `popstate` transition.
+		const from_location = get_current_location()
+		const to_location   = { key: event.state ? event.state.key : undefined }
+
+		// If it's an instant "Back"/"Forward" navigation
+		if (is_instant_transition(from_location, to_location))
+		{
+			// Navigate to the page without preloading it
+			// (has been previously preloaded and is in Redux state)
+			return listener(event)
+		}
+
+		// Preload the page but don't navigate to it just yet
+		store.dispatch(start_preload(location, undefined, false)).then
+		(
+			// Navigate to the page
+			() => listener(event),
+			// Log the error
+			(error) => console.error(error)
+		)
 	})
+
+	// Listen to `pushstate`/`popstate` events.
+	history.listen((location) => current_location = location)
+
+	// `history` added its `popstate` listener and it has been instrumented.
+	// Don't instrument any other `popstate` listeners.
+	should_not_instrument_new_popstate_listeners()
 
 	// Call `onNavigate` on initial page load
 	if (on_navigate)

@@ -16,7 +16,7 @@ export default function create_history(location, settings, parameters)
 
 // When a `popstate` event occurs (e.g. a user click "Back" browser button)
 // it `@preload()`s the page first and only then renders it.
-export function should_instrument_history_pop_state_listeners(call_listener)
+export function should_instrument_new_popstate_listeners(call_listener)
 {
 	// A list of tracked instrumented `popstate` listeners
 	const pop_state_listeners = []
@@ -25,7 +25,7 @@ export function should_instrument_history_pop_state_listeners(call_listener)
 	// therefore keep it in case the user decides to go "Back" to the very start.
 	const initial_location = window.location
 
-	const addEventListener = window.addEventListener
+	const addEventListener = window._react_website_original_addEventListener = window.addEventListener
 	window.addEventListener = function(type, listener, flag)
 	{
 		// Modify `popstate` listener so that it's called
@@ -36,13 +36,6 @@ export function should_instrument_history_pop_state_listeners(call_listener)
 
 			listener = (event) =>
 			{
-				// Only instrument the first `popstate` listener
-				// (most likely it's gonna be `history`'s `popstate` listener)
-				// because each instrumented listener starts page preloading.
-				if (original_listener !== pop_state_listeners[0].original) {
-					return original_listener(event)
-				}
-
 				call_listener(original_listener, event, get_history_pop_state_location(event, initial_location))
 			}
 
@@ -81,6 +74,13 @@ export function should_instrument_history_pop_state_listeners(call_listener)
 		// Proceed normally
 		return removeEventListener.apply(this, arguments)
 	}
+}
+
+// Will no longer instrument `popstate` listeners.
+export function should_not_instrument_new_popstate_listeners()
+{
+	window.addEventListener = window._react_website_original_addEventListener
+	delete window._react_website_original_addEventListener
 }
 
 // Get the `location` of the page being `popstate`d
