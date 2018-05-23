@@ -105,9 +105,13 @@ export default function set_up_and_render(settings, options = {})
 		const from_location = get_current_location()
 		const to_location   = { key: event.state ? event.state.key : undefined }
 
+		window._react_isomorphic_render_was_instant_navigation = false
+
 		// If it's an instant "Back"/"Forward" navigation
 		if (is_instant_transition(from_location, to_location))
 		{
+			window._react_isomorphic_render_was_instant_navigation = true
+
 			// Navigate to the page without preloading it
 			// (has been previously preloaded and is in Redux state)
 			return listener(event)
@@ -172,10 +176,21 @@ export function getState(erase)
 	return state
 }
 
-// Returns `http` utility on the client side.
+// Returns `http` utility on client side.
 // Can be used in WebSocket message handlers,
 // since they only run on the client side.
 export function getHttpClient()
 {
 	return window._react_isomorphic_render_http_client
+}
+
+// Returns `http` utility on client side.
+// Can be used to find out if the current page
+// transition was an "instant" one.
+// E.g. an Algolia "Instant Search" component
+// could reset the stored cached `resultsState`
+// if the transition was not an "instant" one.
+export function wasInstantNavigation()
+{
+	return typeof window !== 'undefined' && window._react_isomorphic_render_was_instant_navigation === true
 }

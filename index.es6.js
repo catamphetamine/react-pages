@@ -42,7 +42,8 @@ export
 {
 	default as render,
 	getState,
-	getHttpClient
+	getHttpClient,
+	wasInstantNavigation
 }
 from './build/redux/client/client'
 

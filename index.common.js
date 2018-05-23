@@ -21,9 +21,10 @@ exports.onPageLoaded  = require('./cjs/redux/preload/onPageLoaded').default
 
 exports.Loading       = require('./cjs/components/Loading').default
 
-exports.render        = require('./cjs/redux/client/client').default
-exports.getState      = require('./cjs/redux/client/client').getState
-exports.getHttpClient = require('./cjs/redux/client/client').getHttpClient
+exports.render               = require('./cjs/redux/client/client').default
+exports.getState             = require('./cjs/redux/client/client').getState
+exports.getHttpClient        = require('./cjs/redux/client/client').getHttpClient
+exports.wasInstantNavigation = require('./cjs/redux/client/client').wasInstantNavigation
 
 exports.Preload_method_name  = preload_decorator.Preload_method_name
 exports.PRELOAD_METHOD_NAME  = exports.Preload_method_name
