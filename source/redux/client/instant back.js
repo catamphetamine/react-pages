@@ -5,20 +5,20 @@ const set = (chain) => store_in_session('instant-back', 'chain', chain)
 
 /**
  * Is called when a `<Link/>` with `instantBack` property set is clicked.
- * 
+ *
  * Stores "current" (soon to be "previous") location in "instant back chain",
  * so that if "Back" is clicked later then the transition to this
  * "current" (soon to be "previous") location is marked as "should be instant".
- * 
+ *
  * "Instant back chain" consists of locations stored as a consequitive chain
  * and theoretically there can be more than one consequtive "instant back"-able
  * navigation in it (e.g. page1 -> page2 -> page3 -> "Back" -> page2 -> "Back" -> page3)
  * though I wouldn't advice doing that and would keep it minimal (a chain of two locations).
- * 
+ *
  * Once a regular navigation is performed (i.e. not "instant one")
  * then the whole "instant back chain" is discarded.
  * E.g. a user clicks on `<Link instantBack/>` and is taken to a page
- * where he clicks on another `<Link/>` now without `instantBack` - 
+ * where he clicks on another `<Link/>` now without `instantBack` -
  * in this case all "instant back" history is discarded
  * and if the user clicks "Back" two times the second time won't be "instant".
  */
@@ -33,14 +33,17 @@ export function add_instant_back(nextLocation, previousLocation)
 	// Otherwise, the already existing "instant back" chain is reset.
 	if (chain.length > 0)
 	{
-		const previousLocationIndex = chain.indexOf(getLocationKey(previousLocation))
+		let previousLocationIndex = chain.indexOf(getLocationKey(previousLocation))
 
 		if (previousLocationIndex < 0)
 		{
-			console.error('[react-website] Error: previous location not found in an already existing instant back navigation chain', getLocationKey(previousLocation), instant_back)
+			// console.error('[react-website] Error: previous location not found in an already existing instant back navigation chain', getLocationKey(previousLocation), chain)
 			// Anomaly detected.
-			// Reset the chain and abort.
-			return reset_instant_back()
+			// Reset the chain.
+			// Basic recovery for cases where `history.replaceState()`
+			// or `replaceHistory()` were called (e.g. Algolia "Instant Search").
+			chain = [getLocationKey(previousLocation)]
+			previousLocationIndex = 0
 		}
 
 		// If transitioning from "page2" to "page3"
@@ -64,9 +67,9 @@ export function add_instant_back(nextLocation, previousLocation)
 
 /**
  * Checks if a "Back"/"Forward" transition should be "instant".
- * For "Back" transition it would mean that 
+ * For "Back" transition it would mean that
  * the `<Link/>` has `instantBack` property set.
- * For "Forward" transition it would mean that 
+ * For "Forward" transition it would mean that
  * it's a reverse of an instant "Back" transition.
  */
 export function is_instant_transition(fromLocation, toLocation)
