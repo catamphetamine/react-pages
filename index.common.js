@@ -10,9 +10,10 @@ exports.Meta  = head.Meta
 exports.preload       = require('./build/redux/preload').default
 exports.onPageLoaded  = require('./build/redux/on page loaded').default
 
-exports.render        = require('./build/redux/client/client').default
-exports.getState      = require('./build/redux/client/client').getState
-exports.getHttpClient = require('./build/redux/client/client').getHttpClient
+exports.render               = require('./build/redux/client/client').default
+exports.getState             = require('./build/redux/client/client').getState
+exports.getHttpClient        = require('./build/redux/client/client').getHttpClient
+exports.wasInstantNavigation = require('./build/redux/client/client').wasInstantNavigation
 
 var preloading_middleware = require('./build/redux/middleware/preloading middleware')
 
@@ -47,9 +48,9 @@ exports.loadState  = exports.load_state
 
 exports.PRELOAD    = require('./build/redux/actions').Preload
 exports.LoadState  = require('./build/redux/actions').LoadState
-exports.LOAD_STATE = exports.LoadState  
+exports.LOAD_STATE = exports.LoadState
 exports.GoTo       = require('./build/redux/actions').GoTo
-exports.GO_TO      = exports.GoTo  
+exports.GO_TO      = exports.GoTo
 exports.Redirect   = require('./build/redux/actions').Redirect
 exports.REDIRECT   = exports.Redirect
 exports.Navigated  = require('./build/redux/actions').Navigated
