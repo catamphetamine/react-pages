@@ -53,13 +53,6 @@ from './es6/redux/asynchronous action handler'
 
 export
 {
-	default as asynchronous_action_handler,
-	default as asynchronousActionHandler
-}
-from './es6/redux/asynchronous action handler'
-
-export
-{
 	underscoredToCamelCase,
 	event_name,
 	event_name as eventName
@@ -72,7 +65,7 @@ export
 	redirect_action as redirect,
 	load_state_action as load_state,
 	load_state_action as loadState,
-	
+
 	Preload as PRELOAD,
 	LoadState,
 	LoadState as LOAD_STATE,
