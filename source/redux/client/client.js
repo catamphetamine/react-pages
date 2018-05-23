@@ -191,5 +191,5 @@ export function getHttpClient()
 // if the transition was not an "instant" one.
 export function wasInstantNavigation()
 {
-	return typeof window !== undefined && window._react_isomorphic_render_was_instant_navigation === true
+	return typeof window !== 'undefined' && window._react_isomorphic_render_was_instant_navigation === true
 }
