@@ -979,7 +979,8 @@ import {
   // Copies files/folders into files/folders.
   // Same as Linux `cp [from] [to]`.
   copy,
-  // Downloads data from a URL into a String.
+  // Downloads data from a URL into an object
+  // of shape `{ status: Number, content: String }`.
   download
 } from 'react-website/static-site-generator'
 
