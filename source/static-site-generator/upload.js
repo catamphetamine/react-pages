@@ -1,22 +1,27 @@
-import progress from 'progress'
+import ProgressBar from 'progress'
 
-export default async function upload_website(output, upload)
+const green = '\u001b[42m \u001b[0m'
+
+export default async function upload_website(filesPath, upload)
 {
-	let upload_progress
+	let progressBar
 
-	await upload(output,
+	await upload(filesPath,
 	{
 		started(total)
 		{
-			upload_progress = new progress('  Uploading [:bar] :percent :etas',
+			progressBar = new ProgressBar('  Uploading [:bar] :percent :etas',
 			{
+				// complete: green,
+				complete: '=',
+				incomplete: ' ',
 				width: 50,
-				total
+				total: 100
 			})
 		},
 		progress(value)
 		{
-			upload_progress.update(value)
+			progressBar.update(value)
 		}
 	})
 }
