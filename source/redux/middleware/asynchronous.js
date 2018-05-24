@@ -174,7 +174,12 @@ export default function asynchronous_middleware(http_client, redux_event_naming,
 						// in case of an error.
 						reject(error)
 
-						throw error
+						// Reduce client-side error reporting software (e.g. sentry.io)
+						// noise for not-really-errors like "Unauthenticated" and "Unauthorized".
+						if (error.status !== 401 && error.status !== 403)
+						{
+							throw error
+						}
 					}
 				)
 			})
