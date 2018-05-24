@@ -55,6 +55,9 @@
     "redux": "^3.1.0",
     "react-redux": "*"
   },
+  "sideEffects": [
+    "*.css"
+  ],
   "scripts": {
     "test": "mocha --bail --require babel-core/register --require ./test/setup.js \"source/**/*.test.js\" \"test/**/*.test.js\"",
     "test-coverage": "cross-env NODE_ENV=test nyc mocha --bail --require ./test/setup.js \"source/**/*.test.js\" \"test/**/*.test.js\"",
@@ -114,25 +117,6 @@
         "BABEL_ENV": "es6/server"
       }
     }
-  },
-  "nyc": {
-    "require": [
-      "babel-register"
-    ],
-    "reporter": [
-      "lcov",
-      "text-summary"
-    ],
-    "include": [
-      "source/**/*.js"
-    ],
-    "exclude": [
-      "**/*.test.js"
-    ],
-    "sourceMap": false,
-    "instrument": false,
-    "cache": true,
-    "all": true
   },
   "repository": {
     "type": "git",
