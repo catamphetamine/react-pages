@@ -10,7 +10,7 @@ const browser_document = new BrowserDocument()
 
 const default_meta =
 {
-	viewport : 'width=device-width, initial-scale=1.0, user-scalable=no'
+	viewport : 'width=device-width, initial-scale=1.0'
 }
 
 export const Meta_method_name = '__meta__'
