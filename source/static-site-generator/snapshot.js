@@ -50,11 +50,12 @@ async function snapshot(host, port, pages, outputPath, tick)
 			targetStatusCode = page.status
 		}
 
-		const { status, content } = await download(`http://${host}:${port}${url}`)
+		const _url = `http://${host}:${port}${url}`
+		const { status, content } = await download(_url)
 
 		if (status !== targetStatusCode)
 		{
-			throw new Error(`Expected ${targetStatusCode} HTTP status code for page "${url}". Got ${status}.`);
+			throw new Error(`Expected ${targetStatusCode} HTTP status code for "${_url}". Got ${status}.`);
 		}
 
 		fs.outputFileSync(path.join(outputPath, url, '/index.html'), content)
