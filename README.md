@@ -967,66 +967,80 @@ npm install s3 --save
 ```
 
 ```js
-// The following code hasn't been tested but it used to work
-
 import path from 'path'
-import { snapshot, upload, S3Uploader, copy, download } from 'react-website/static-site-generator'
+
+import {
+  snapshot,
+  upload,
+  S3Uploader,
+  copy,
+  download
+} from 'react-website/static-site-generator'
 
 import configuration from '../configuration'
 
-// Index page is added by default
-let pages =
-[
-  '/about',
+// Temporary generated files path.
+const generatedSitePath = path.resolve(__dirname, '../static-site')
 
-  { url: '/unauthenticated', status: 401 },
-  { url: '/unauthorized', status: 403 },
-  { url: '/not-found', status: 404 },
-  { url: '/error', status: 500 }
-]
-
-async function run()
-{
-  const { status, content } = JSON.parse(await download(`https://example.com/api/items`))
-
-  if (status !== 200)
-  {
-    throw new Error('Couldn\'t load items')
-  }
-
-  const items = JSON.parse(content)
-
-  pages = pages.concat(items.map(item => `/items/${item.id}`))
-
-  const output = path.resolve(__dirname, '../static-site')
-
-  // Snapshot the website
-  await snapshot
-  ({
+async function run() {
+  // Snapshot the website.
+  await snapshot({
+    // The host and port on which the website
+    // is currently running in production mode.
+    // E.g. `localhost` and `3000`.
     host: configuration.host,
     port: configuration.port,
-    pages,
-    output
+    pages: await generatePageList(),
+    outputPath: generatedSitePath
   })
 
-  // Copy assets (built by Webpack)
-  await copy(path.resolve(__dirname, '../build/assets'), path.resolve(output, 'assets'))
+  // Copy assets (built by Webpack).
+  await copy(path.resolve(__dirname, '../build/assets'), path.resolve(generatedSitePath, 'assets'))
+  await copy(path.resolve(__dirname, '../robots.txt'), path.resolve(generatedSitePath, 'robots.txt'))
 
-  // Upload the website to Amazon S3
-  await upload(output, S3Uploader
-  ({
-    bucket,
-    accessKeyId,
-    secretAccessKey,
-    region
+  // Upload the website to Amazon S3.
+  await upload(generatedSitePath, S3Uploader({
+    bucket: confiugration.s3.bucket,
+    accessKeyId: configuration.s3.accessKeyId,
+    secretAccessKey: configuration.s3.secretAccessKey,
+    region: configuration.s3.region
   }))
+
+  console.log('Done');
 }
 
-run().catch((error) =>
-{
+run().catch((error) => {
   console.error(error)
   process.exit(1)
 })
+
+// Get the list of all page URLs.
+async function generatePageList() {
+  const pages = [
+    // Index page is added by default.
+    '/about',
+    // Error pages need a `status` property
+    // to indicate that it shouldn't throw on such errors
+    // and should proceed with snapshotting the next pages.
+    { url: '/unauthenticated', status: 401 },
+    { url: '/unauthorized', status: 403 },
+    { url: '/not-found', status: 404 },
+    { url: '/error', status: 500 }
+  ]
+
+  // (optional) Add some dynamic page URLs, like `/items/123`.
+
+  // Query the database for the list of items.
+  const { status, content } = JSON.parse(await download(`https://example.com/api/items`))
+
+  if (status !== 200) {
+    throw new Error('Couldn\'t load items')
+  }
+
+  // Add item page URLs.
+  const items = JSON.parse(content)
+  return pages.concat(items.map(item => `/items/${item.id}`))
+}
 ```
 </details>
 
@@ -1111,8 +1125,7 @@ import { meta } from 'react-website'
   // by passing custom `charset` parameter.
   charset: 'utf-16',
 
-  // `<meta name="viewport" content="width=device-width,
-  //   initial-scale=1.0, user-scalable=no"/>`
+  // `<meta name="viewport" content="width=device-width, initial-scale=1.0"/>`
   // tag is added automatically
   // (prevents downscaling on mobile devices).
   // This default behaviour can be changed
