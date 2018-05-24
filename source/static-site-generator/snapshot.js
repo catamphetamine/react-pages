@@ -1,6 +1,6 @@
 import path from 'path'
 import fs from 'fs-extra'
-import progress from 'progress'
+import ProgressBar from 'progress'
 
 import download from './download'
 
@@ -11,10 +11,12 @@ export default async function snapshot_website({ host, port, pages, outputPath }
 	pages.unshift('')
 
 	// The progress meter for the website snapshotting process
-	const snapshot_progress = new progress(' Snapshotting [:bar] :total :percent :etas',
+	const snapshot_progress = new ProgressBar(' Snapshotting [:bar] :total :percent :etas',
 	{
-		width: 50,
-		total: pages.length
+		complete   : '=',
+		incomplete : ' ',
+		width      : 50,
+		total      : pages.length
 	})
 
 	// Start the website snapshotting process

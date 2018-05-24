@@ -1,6 +1,6 @@
 import ProgressBar from 'progress'
 
-const green = '\u001b[42m \u001b[0m'
+// const green = '\u001b[42m \u001b[0m'
 
 export default async function upload_website(filesPath, upload)
 {
@@ -12,11 +12,11 @@ export default async function upload_website(filesPath, upload)
 		{
 			progressBar = new ProgressBar('  Uploading [:bar] :percent :etas',
 			{
-				// complete: green,
-				complete: '=',
-				incomplete: ' ',
-				width: 50,
-				total: 100
+				// complete : green,
+				complete   : '=',
+				incomplete : ' ',
+				width      : 50,
+				total      : 100
 			})
 		},
 		progress(value)
