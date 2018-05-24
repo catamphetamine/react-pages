@@ -970,10 +970,16 @@ npm install s3 --save
 import path from 'path'
 
 import {
+  // Snapshots website pages.
   snapshot,
+  // Uploads files.
   upload,
+  // Uploads files to Amazon S3.
   S3Uploader,
+  // Copies files/folders into files/folders.
+  // Same as Linux `cp [from] [to]`.
   copy,
+  // Downloads data from a URL into a String.
   download
 } from 'react-website/static-site-generator'
 
