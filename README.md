@@ -296,6 +296,12 @@ In this example the `@preload()` decorator is used to preload a page before it i
 <details>
 <summary>The decorator also receives an optional `options` argument (advanced topic)</summary>
 
+```js
+@preload(async () => { ... }, options)
+```
+
+The available options are:
+
 * `blocking` — If `false` then child `<Route/>`'s  `@preload()`s will not wait for this `@preload()` to finish in order to get executed (`blocking` is `true` by default).
 
 * `blockingSibling` — If `true` then all further adjacent (sibling) `@preload()`s for the same `<Route/>`'s component will wait for this `@preload()` to finish in order to get executed. (is `true` by default).
