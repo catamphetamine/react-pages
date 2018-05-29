@@ -1,7 +1,5 @@
-import { store_in_session, get_from_session } from './session store'
-
-const get = () => get_from_session('instant-back', 'chain') || []
-const set = (chain) => store_in_session('instant-back', 'chain', chain)
+const get = () => window._react_website_instant_back_chain || []
+const set = (chain) => window._react_website_instant_back_chain = chain
 
 /**
  * Is called when a `<Link/>` with `instantBack` property set is clicked.
