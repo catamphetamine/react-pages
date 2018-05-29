@@ -45,7 +45,7 @@ export default class Hyperlink extends Component
 	{
 		// `react-router` context required
 		router : PropTypes.object.isRequired,
-		
+
 		// `react-redux` context required
 		store  : PropTypes.object.isRequired
 	}
@@ -61,13 +61,13 @@ export default class Hyperlink extends Component
 	{
 		const { onClick, onNavigate, to, instantBack } = this.props
 		const { router, store } = this.context
-		
+
 		// Sanity check
 		if (!router)
 		{
 			throw new Error('<Link>s rendered outside of a router context cannot navigate.')
 		}
-		
+
 		// Sanity check
 		if (!store)
 		{
@@ -103,21 +103,38 @@ export default class Hyperlink extends Component
 
 		// Firt preload the new page, then `history.push()` will be called,
 		// and `react-router` will detect that performing the route transition.
-		store.dispatch(start_preload(resolveToLocation(to, router), undefined, undefined, undefined, instantBack))
+		store.dispatch(start_preload(resolveToLocation(to, router), { instantBack }))
 	}
 
 	render()
 	{
-		const { instantBack, onNavigate, ...link_props } = this.props
-		const { to, target, onlyActiveOnIndex, children, ...rest_props } = link_props
+		const
+		{
+			instantBack,
+			onNavigate,
+			...link_props
+		}
+		= this.props
+
+		const
+		{
+			to,
+			target,
+			onlyActiveOnIndex,
+			activeClassName,
+			activeStyle,
+			children,
+			...rest_props
+		}
+		= link_props
+
 		const { router } = this.context
 
 		// Sanity check
-		if (!router)
-		{
+		if (!router) {
 			throw new Error('<Link>s rendered outside of a router context cannot navigate.')
 		}
-		
+
 		// `to` could be a function of the current `location`
 		const location = resolveToLocation(to, router)
 

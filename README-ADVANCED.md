@@ -53,7 +53,7 @@ function autocompleteMatch(inputValue) {
 Gotcha: when relying on `bluebird` `Promise` cancellation don't use `async/await` syntax which is transpiled by Babel using [Facebook's `regenerator`](https://github.com/facebook/regenerator) (as of 2017) which doesn't use `Promise`s internally meaning that the following `async/await` rewrite won't actually cancel the previous action:
 
 ```js
-// Action cancellation won't work.
+// Action cancellation won't work
 function autocompleteMatch(inputValue) {
   return {
     promise: async (({ http })) => await http.get(`/search?query=${inputValue}`),
@@ -125,9 +125,9 @@ Notice the extraction of these two configuration parameters (`reduxEventNaming` 
 
 ## `@preload()`
 
-If one `@preload()` is in progress and another `@preload()` starts (e.g. Back/Forward browser buttons) the first `@preload()` will be cancelled if `bluebird` `Promise`s are used in the project and also if `bluebird` is configured for [`Promise` cancellation](http://bluebirdjs.com/docs/api/cancellation.html) (this is an advanced feature and is not required for operation). `@preload()` can be disabled for certain "Back" navigation cases by passing `instantBack` property to a `<Link/>` (e.g. for links on search results pages).
+If one `@preload()` is in progress and another `@preload()` starts (e.g. Back/Forward browser buttons) the first `@preload()` will be cancelled if `bluebird` `Promise`s are used in the project and also if `bluebird` is configured for [`Promise` cancellation](http://bluebirdjs.com/docs/api/cancellation.html) (this is an advanced feature and is not required for operation).
 
-### Serving assets and API
+## Serving assets and API
 
 In the introductory part of the README "static" files (assets) are served by `webpack-dev-server` on `localhost:8080`. It's for local development only. For production these "static" files must be served by someone else, be it a dedicated proxy server like NginX or (recommended) a cloud-based solution like Amazon S3.
 
@@ -592,35 +592,6 @@ const { status, content, contentType } = renderError(error)
   initialize: async (httpClient) => ({})
   // (or same without `async`: (httpClient) => Promise.resolve({})
 
-  // (optional)
-  //
-  // Returns an object of shape `{ locale, messages }`,
-  // where `locale` is the page locale chosen for this HTTP request,
-  // and `messages` are the translated messages for this `locale`
-  // (an object of shape `{ "message.key": "Message value", ... }`).
-  //
-  // The returned object may optionally have
-  // the third property `messagesJSON` (stringified `messages`)
-  // to avoid calculating `JSON.stringify(messages)`
-  // for each rendered page (a tiny optimization).
-  //
-  // `preferredLocales` argument is an array
-  // of the preferred locales for this user
-  // (from the most preferred to the least preferred)
-  //
-  // `localize()` should normally be a synchronous function.
-  // It could be asynchronous though for cases when it's taking
-  // messages not from a JSON file but rather from an
-  // "admin" user editable database.
-  // If the rountrip time (ping) from the rendering service
-  // to the database is small enough then it theoretically
-  // won't introduce any major page rendering latency
-  // (the database will surely cache such a hot query).
-  // On the other hand, if a developer fights for each millisecond
-  // then `localize()` should just return `messages` from memory.
-  //
-  localize: ({ store }, preferredLocales) => ({ locale: preferredLocales[0], messages: { 'page.heading': 'Test' } })
-
   // Is React Server Side Rendering enabled?
   // (is `true` by default)
   //
@@ -671,6 +642,11 @@ const { status, content, contentType } = renderError(error)
   // const boundActionCreators = bindActionCreators(actionCreators, window.store.dispatch)
   // export default boundActionCreators
   //
+  // Not saying that this is even a "good" practice,
+  // more like "legacy code", but still my employer
+  // happened to have such binding, so I added this feature.
+  // Still this technique cuts down on a lot of redundant "wiring" code.
+  //
   onStoreCreated: (store) => {}
 
   // (optional)
@@ -695,14 +671,6 @@ const { status, content, contentType } = renderError(error)
     // https://github.com/zalmoxisus/redux-devtools-extension/blob/master/docs/API/Arguments.md
     options: { ... }
   }
-
-  // (optional)
-  // Loads localized messages (asynchronously).
-  // The main purpose for introducting this function
-  // is to enable Webpack Hot Module Replacement (aka "hot reload")
-  // for translation files in development mode.
-  translation: async locale => messages
-  // (or same without `async`: locale => Promise.resolve(messages))
 }
 ```
 

@@ -28,7 +28,7 @@ export default function create_store(settings, data, get_history, http_client, o
 		server,
 		devtools,
 		stats,
-		on_navigate
+		onNavigate
 	}
 	= options
 
@@ -64,7 +64,7 @@ export default function create_store(settings, data, get_history, http_client, o
 			get_history,
 			settings.history.options.basename,
 			stats,
-			on_navigate
+			onNavigate
 		),
 
 		// Performs `redirect` and `goto` actions on `history`

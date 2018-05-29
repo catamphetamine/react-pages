@@ -40,7 +40,7 @@ export default async function render_on_server({ history, hollow, create_page_el
 		const preload_timer = timer()
 
 		// After the page has finished preloading, render it
-		await store.dispatch(start_preload(get_location(history)))
+		await store.dispatch(start_preload(get_location(history), {}))
 
 		time.preload = preload_timer()
 

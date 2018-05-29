@@ -23,15 +23,23 @@ export const indicate_loading = () =>
 // If `navigate` is `false` then the actual navigation won't take place.
 // This is used for the server side.
 //
-// If `initial_client_side_preload` is `true`
+// If `initialClientSidePreload` is `true`
 // then just client-side-only `@preload()`s will be executed.
 //
-export const start_preload = (location, redirect, navigate = true, initial_client_side_preload, instant_back) =>
+export const start_preload = (location,
+{
+	redirect,
+	navigate,
+	initialClientSidePreload,
+	instantBack,
+	instant
+}) =>
 ({
 	type     : Preload,
 	location : parse_location(location),
 	redirect,
-	navigate,
-	initial  : initial_client_side_preload,
-	instant_back
+	navigate : navigate === undefined ? true : navigate,
+	initial  : initialClientSidePreload,
+	instantBack,
+	instant
 })

@@ -17,10 +17,15 @@ export default function set_up_and_render(settings, options = {})
 {
 	settings = normalize_common_settings(settings)
 
-	const { devtools, translation, stats } = options
-
-	// camelCase aliasing
-	const on_navigate = options.on_navigate || options.onNavigate
+	const
+	{
+		devtools,
+		translation,
+		stats,
+		onNavigate,
+		onStoreCreated
+	}
+	= options
 
 	// Redux store (is used in history `popstate` listener)
 	let store
@@ -31,8 +36,9 @@ export default function set_up_and_render(settings, options = {})
 	window._react_isomorphic_render_http_client = http_client
 
 	// Reset "instant back" on page reload
-	// since Redux state is cleared
-	// but `window.sessionStore` still retains its data.
+	// since Redux state is cleared.
+	// "instant back" chain is stored in `window.sessionStorage`
+	// and therefore it survives page reload.
 	reset_instant_back()
 
 	// `history` is created after the `store`.
@@ -47,7 +53,7 @@ export default function set_up_and_render(settings, options = {})
 	{
 		devtools,
 		stats,
-		on_navigate
+		onNavigate
 	})
 
 	// For example, client-side-only applications
@@ -61,9 +67,14 @@ export default function set_up_and_render(settings, options = {})
 	// const boundActionCreators = bindActionCreators(actionCreators, window.store.dispatch)
 	// export default boundActionCreators
 	//
-	if (options.onStoreCreated)
+	// Not saying that this is even a "good" practice,
+	// more like "legacy code", but still my employer
+	// happened to have such binding, so I added this feature.
+  // Still this technique cuts down on a lot of redundant "wiring" code.
+  //
+	if (onStoreCreated)
 	{
-		options.onStoreCreated(store)
+		onStoreCreated(store)
 	}
 
 	// Create `react-router` `history`
@@ -105,23 +116,26 @@ export default function set_up_and_render(settings, options = {})
 		const from_location = get_current_location()
 		const to_location   = { key: event.state ? event.state.key : undefined }
 
-		window._react_isomorphic_render_was_instant_navigation = false
-
 		// If it's an instant "Back"/"Forward" navigation
-		if (is_instant_transition(from_location, to_location))
+		// then navigate to the page without preloading it.
+		// (has been previously preloaded and is in Redux state)
+		const instant = is_instant_transition(from_location, to_location)
+
+		// Preload the page but don't navigate to it just yet.
+		store.dispatch(start_preload(location,
 		{
-			window._react_isomorphic_render_was_instant_navigation = true
-
-			// Navigate to the page without preloading it
-			// (has been previously preloaded and is in Redux state)
-			return listener(event)
-		}
-
-		// Preload the page but don't navigate to it just yet
-		store.dispatch(start_preload(location, undefined, false)).then
+			navigate : false,
+			instant
+		}))
+		.then
 		(
-			// Navigate to the page
-			() => listener(event),
+			() =>
+			{
+				// Set the flag for `wasInstantNavigation()`.
+				window._react_isomorphic_render_was_instant_navigation = instant
+				// Navigate to the page.
+				listener(event)
+			},
 			// Log the error
 			(error) => console.error(error)
 		)
@@ -135,9 +149,9 @@ export default function set_up_and_render(settings, options = {})
 	should_not_instrument_new_popstate_listeners()
 
 	// Call `onNavigate` on initial page load
-	if (on_navigate)
+	if (onNavigate)
 	{
-		on_navigate(location_url(current_location), current_location)
+		onNavigate(location_url(current_location), current_location)
 	}
 
 	// Render the page
@@ -156,7 +170,7 @@ export default function set_up_and_render(settings, options = {})
 	.then((result) =>
 	{
 		// Execute all client-side-only `@preload()`s.
-		return store.dispatch(start_preload(current_location, undefined, false, true)).then(() => result)
+		return store.dispatch(start_preload(current_location, { navigate: false, initialClientSidePreload: true })).then(() => result)
 	})
 }
 

@@ -40,7 +40,7 @@ export default function preloading_middleware
 	get_history,
 	basename,
 	report_stats,
-	on_navigate
+	onNavigate
 )
 {
 	return ({ getState, dispatch }) => next => action =>
@@ -50,6 +50,13 @@ export default function preloading_middleware
 		{
 			// Do nothing
 			return next(action)
+		}
+
+		// Reset the flag for `wasInstantNavigation()`.
+		// Will be set to `true` in `./source/redux/client/client.js`
+		// if it was an "instant navigation" (instant `popstate` history transition).
+		if (!server) {
+			window._react_isomorphic_render_was_instant_navigation = false
 		}
 
 		// If `dispatch(redirect(...))` is called, for example,
@@ -75,9 +82,9 @@ export default function preloading_middleware
 		dispatch = preloading_middleware_dispatch(dispatch, server)
 
 		// On client-side page navigation
-		if (on_navigate && !action.initial)
+		if (onNavigate && !action.initial)
 		{
-			on_navigate(location_url(action.location), action.location)
+			onNavigate(location_url(action.location), action.location)
 		}
 
 		// Preload status object.
@@ -183,18 +190,22 @@ export default function preloading_middleware
 			}
 
 			// Preload all the required data for this route (page)
-			const preload = generate_preload_chain
-			(
-				action.initial,
-				server,
-				routes,
-				components,
-				getState,
-				preloader_dispatch(dispatch, preloading),
-				location,
-				params,
-				preloading
-			)
+			let preload
+			if (!action.instant)
+			{
+				preload = generate_preload_chain
+				(
+					action.initial,
+					server,
+					routes,
+					components,
+					getState,
+					preloader_dispatch(dispatch, preloading),
+					location,
+					params,
+					preloading
+				)
+			}
 
 			// If nothing to preload, just move to the next middleware
 			if (!preload)
@@ -332,17 +343,41 @@ export default function preloading_middleware
 
 function after_preload(dispatch, getState, components, parameters, action, server, get_history, previous_location)
 {
-	// Trigger `react-router` navigation on client side
-	// (and do nothing on server side)
-	proceed_with_navigation(dispatch, action, server, get_history, previous_location)
+	if (!server)
+	{
+		// Trigger `react-router` navigation on client side.
+		if (action.navigate)
+		{
+			const actionCreator = action.redirect ? history_redirect_action : history_goto_action
+			dispatch(actionCreator(action.location))
+		}
+
+		// Update instant back navigation chain.
+		if (action.instantBack)
+		{
+			// Stores "current" (soon to be "previous") location
+			// in "instant back chain", so that if "Back" is clicked
+			// then such transition could be detected as "should be instant".
+			add_instant_back(get_history().getCurrentLocation(), previous_location)
+		}
+		else if (!action.instant)
+		{
+			// If current transition is not "instant back" and not "instant"
+			// then reset the whole "instant back" chain.
+			// Only a consequitive "instant back" navigation chain
+			// preserves the ability to instantly navigate "Back".
+			// Once a regular navigation takes place
+			// all previous "instant back" possibilities are discarded.
+			reset_instant_back()
+		}
+	}
 
 	// Call `onPageLoaded()`
 	const page = components[components.length - 1]
 
 	// The current `<Route/>` component might be `undefined`
 	// if a developer forgot to `export default` it.
-	if (!page)
-	{
+	if (!page) {
 		throw new Error('The current `<Route/>` component is `undefined`. Make sure you didn\'t forget to `export default` it from the component file.')
 	}
 
@@ -352,52 +387,11 @@ function after_preload(dispatch, getState, components, parameters, action, serve
 		({
 			dispatch,
 			getState,
-			location: action.location,
+			location : action.location,
 			parameters,
-			history: get_history(),
+			history : get_history(),
 			server
 		})
-	}
-}
-
-// Trigger `react-router` navigation on client side
-// (and do nothing on server side).
-// `previous_location` is the location before the transition.
-function proceed_with_navigation(dispatch, action, server, get_history, previous_location)
-{
-	if (server)
-	{
-		return
-	}
-
-	if (action.navigate)
-	{
-		if (action.redirect)
-		{
-			dispatch(history_redirect_action(action.location))
-		}
-		else
-		{
-			dispatch(history_goto_action(action.location))
-		}
-	}
-
-	if (action.instant_back)
-	{
-		// Stores "current" (soon to be "previous") location
-		// in "instant back chain", so that if "Back" is clicked
-		// then such transition could be detected as "should be instant".
-		add_instant_back(get_history().getCurrentLocation(), previous_location)
-	}
-	else
-	{
-		// If current transition is not "instant back"
-		// then reset the whole "instant back" chain.
-		// Only a consequitive "instant back" navigation chain
-		// preserves the ability to instantly navigate "Back".
-		// Once a regular navigation takes place
-		// all previous "instant back" possibilities are discarded.
-		reset_instant_back()
 	}
 }
 

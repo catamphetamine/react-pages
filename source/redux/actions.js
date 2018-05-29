@@ -7,10 +7,10 @@ export const Navigated = '@@react-website/navigated'
 export const LoadState = '@@react-website/redux/state/replace'
 
 // Before page preloading started
-export const redirect_action = location => start_preload(location, true)
+export const redirect_action = location => start_preload(location, { redirect: true })
 
 // Before page preloading started
-export const goto_action = location => start_preload(location)
+export const goto_action = location => start_preload(location, {})
 
 // After page preloading finished
 export const navigated_action = (location) =>
