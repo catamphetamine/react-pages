@@ -60,8 +60,6 @@ export default function set_up_and_render(settings, options = {})
 		const from_location = get_current_location()
 		const to_location   = { key: event.state ? event.state.key : undefined }
 
-		window._react_isomorphic_render_was_instant_navigation = false
-
 		// If it's an instant "Back"/"Forward" navigation
 		if (is_instant_transition(from_location, to_location))
 		{
