@@ -7,7 +7,7 @@ import { connect } from 'react-redux'
 import { start_preload } from './preload/actions'
 
 @connect(() => ({}), {
-	start_preload
+	startPreload : start_preload
 })
 export default class Hyperlink extends Component
 {
@@ -53,7 +53,7 @@ export default class Hyperlink extends Component
 			onNavigate,
 			to,
 			instantBack,
-			start_preload
+			startPreload
 		}
 		= this.props
 
@@ -87,13 +87,14 @@ export default class Hyperlink extends Component
 
 		// Firt preload the new page, then `history.push()` will be called,
 		// and `react-router` will detect that performing the route transition.
-		start_preload(to, { instantBack })
+		startPreload(to, { instantBack })
 	}
 
 	render()
 	{
 		const
 		{
+			startPreload,
 			instantBack,
 			onNavigate,
 			...link_props
