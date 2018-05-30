@@ -1,6 +1,6 @@
 {
   "name": "react-website",
-  "version": "2.0.18",
+  "version": "2.0.19",
   "description": "A complete solution for building a React/Redux application: routing, page preloading, (optional) server-side rendering, asynchronous HTTP requests, document metadata, internationalization, etc.",
   "main": "index.common.js",
   "module": "index.es6.js",
