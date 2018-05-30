@@ -24,12 +24,6 @@ export function add_instant_back(nextLocation, previousLocation, nextLocationRou
 {
 	let chain = get()
 
-	// Discard "instant back" chain part having same routes.
-	const sameRoutesIndex = indexOfByRoutes(chain, nextLocationRoutes)
-	if (sameRoutesIndex >= 0) {
-		chain = chain.slice(sameRoutesIndex + 1)
-	}
-
 	// If there is already an "instant" transition in the chain
 	// then insert this transition into the chain
 	// only if it's "page1 -> page2" and "page2 -> page3"
@@ -37,9 +31,17 @@ export function add_instant_back(nextLocation, previousLocation, nextLocationRou
 	// Otherwise, the already existing "instant back" chain is reset.
 	if (chain.length > 0)
 	{
-		let previousLocationIndex = indexOfByKey(chain, getLocationKey(previousLocation))
+		const previousLocationIndex = indexOfByKey(chain, getLocationKey(previousLocation))
 
-		if (previousLocationIndex < 0)
+		if (previousLocationIndex >= 0)
+		{
+			// If transitioning from "page2" to "page3"
+			// and the existing chain is "page1 -> page2 -> page4"
+			// then trim the chain up to the "current" page
+			// so that it becomes "page1 -> page2" (eligible for merging).
+			chain = chain.slice(0, previousLocationIndex + 1)
+		}
+		else
 		{
 			// console.error('[react-website] Error: previous location not found in an already existing instant back navigation chain', getLocationKey(previousLocation), chain)
 			// Anomaly detected.
@@ -49,28 +51,24 @@ export function add_instant_back(nextLocation, previousLocation, nextLocationRou
 			// Basic recovery for cases where `history.replaceState()`
 			// or `replaceHistory()` were called.
 			// (e.g. Algolia "Instant Search" widget filters reconfigured)
-			chain =
-			[{
-				key    : getLocationKey(previousLocation),
-				routes : previousLocationRoutes
-			}]
-			previousLocationIndex = 0
+			chain = []
 		}
-
-		// If transitioning from "page2" to "page3"
-		// and the existing chain is "page1 -> page2 -> page4"
-		// then trim the chain up to the "current" page
-		// so that it becomes "page1 -> page2" (eligible for merging).
-		chain = chain.slice(0, previousLocationIndex + 1)
 	}
-	else
+
+	if (chain.length === 0)
 	{
 		// Add the "current" page to the chain.
-		chain.push
-		({
+		chain =
+		[{
 			key    : getLocationKey(previousLocation),
 			routes : previousLocationRoutes
-		})
+		}]
+	}
+
+	// Discard "instant back" chain part having same routes.
+	const sameRoutesIndex = indexOfByRoutes(chain, nextLocationRoutes)
+	if (sameRoutesIndex >= 0) {
+		chain = chain.slice(sameRoutesIndex + 1)
 	}
 
 	// Add the "next" page to the chain.
