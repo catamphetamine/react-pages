@@ -4,11 +4,9 @@ import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import { Link } from 'react-router'
 import { connect } from 'react-redux'
-import { start_preload } from './preload/actions'
+import { start_preload as startPreload } from './preload/actions'
 
-@connect(() => ({}), {
-	startPreload : start_preload
-})
+@connect(null, { startPreload })
 export default class Hyperlink extends Component
 {
 	static propTypes =

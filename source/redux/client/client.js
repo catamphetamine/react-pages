@@ -72,8 +72,7 @@ export default function set_up_and_render(settings, options = {})
 	// happened to have such binding, so I added this feature.
   // Still this technique cuts down on a lot of redundant "wiring" code.
   //
-	if (onStoreCreated)
-	{
+	if (onStoreCreated) {
 		onStoreCreated(store)
 	}
 
@@ -149,8 +148,7 @@ export default function set_up_and_render(settings, options = {})
 	should_not_instrument_new_popstate_listeners()
 
 	// Call `onNavigate` on initial page load
-	if (onNavigate)
-	{
+	if (onNavigate) {
 		onNavigate(location_url(current_location), current_location)
 	}
 
@@ -170,7 +168,12 @@ export default function set_up_and_render(settings, options = {})
 	.then((result) =>
 	{
 		// Execute all client-side-only `@preload()`s.
-		return store.dispatch(start_preload(current_location, { navigate: false, initialClientSidePreload: true })).then(() => result)
+		return store.dispatch(start_preload(current_location,
+		{
+			navigate : false,
+			initialClientSidePreload : true
+		}))
+		.then(() => result)
 	})
 }
 

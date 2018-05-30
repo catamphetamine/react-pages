@@ -36,32 +36,30 @@ export default function render({ history, create_page_element, routes, store })
 		history,
 		routes: typeof routes === 'function' ? routes(store) : routes
 	})
-	.then(({ redirect, router_state }) => {
-
-	// In case of a `react-router` `<Redirect/>`
-	if (redirect)
+	.then(({ redirect, router_state }) =>
 	{
-		window.location = location_url(redirect)
-		throw new Error(`[react-website] (Not an error) Redirecting to ${location_url(redirect)}`)
+		// In case of a `react-router` `<Redirect/>`
+		if (redirect)
+		{
+			window.location = location_url(redirect)
+			throw new Error(`[react-website] (Not an error) Redirecting to ${location_url(redirect)}`)
 
-		// This kind of a redirect won't work because
-		// the `<Router/>` hasn't been rendered yet.
-		// return store.dispatch(redirect_action(redirect))
-	}
+			// This kind of a redirect won't work because
+			// the `<Router/>` hasn't been rendered yet.
+			// return store.dispatch(redirect_action(redirect))
+		}
 
-	return {
-		element: (
-			<Router
-				{ ...router_state }
-				createElement={ create_route_element }
-				history={ history }
-				render={ applyRouterMiddleware(useScroll(should_scroll)) }/>
-		),
-		container_props: { store },
-		store
-	}
-
-	//
+		return {
+			element: (
+				<Router
+					{ ...router_state }
+					createElement={ create_route_element }
+					history={ history }
+					render={ applyRouterMiddleware(useScroll(should_scroll)) }/>
+			),
+			container_props: { store },
+			store
+		}
 	})
 }
 
