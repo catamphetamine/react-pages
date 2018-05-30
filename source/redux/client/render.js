@@ -49,6 +49,10 @@ export default function render({ history, create_page_element, routes, store })
 			// return store.dispatch(redirect_action(redirect))
 		}
 
+		// `routes` are used when comparing `instantBack` chain items
+		// for resetting `instantBack` chain when the same route is encountered twice.
+		window._react_website_current_page_routes = router_state.routes
+
 		return {
 			element: (
 				<Router

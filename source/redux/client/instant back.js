@@ -20,9 +20,15 @@ const set = (chain) => window._react_website_instant_back_chain = chain
  * in this case all "instant back" history is discarded
  * and if the user clicks "Back" two times the second time won't be "instant".
  */
-export function add_instant_back(nextLocation, previousLocation)
+export function add_instant_back(nextLocation, previousLocation, nextLocationRoutes, previousLocationRoutes)
 {
 	let chain = get()
+
+	// Discard "instant back" chain part having same routes.
+	const sameRoutesIndex = indexOfByRoutes(chain, nextLocationRoutes)
+	if (sameRoutesIndex >= 0) {
+		chain = chain.slice(sameRoutesIndex + 1)
+	}
 
 	// If there is already an "instant" transition in the chain
 	// then insert this transition into the chain
@@ -31,16 +37,23 @@ export function add_instant_back(nextLocation, previousLocation)
 	// Otherwise, the already existing "instant back" chain is reset.
 	if (chain.length > 0)
 	{
-		let previousLocationIndex = chain.indexOf(getLocationKey(previousLocation))
+		let previousLocationIndex = indexOfByKey(chain, getLocationKey(previousLocation))
 
 		if (previousLocationIndex < 0)
 		{
 			// console.error('[react-website] Error: previous location not found in an already existing instant back navigation chain', getLocationKey(previousLocation), chain)
 			// Anomaly detected.
 			// Reset the chain.
+			// return reset_instant_back()
+
 			// Basic recovery for cases where `history.replaceState()`
-			// or `replaceHistory()` were called (e.g. Algolia "Instant Search").
-			chain = [getLocationKey(previousLocation)]
+			// or `replaceHistory()` were called.
+			// (e.g. Algolia "Instant Search" widget filters reconfigured)
+			chain =
+			[{
+				key    : getLocationKey(previousLocation),
+				routes : previousLocationRoutes
+			}]
 			previousLocationIndex = 0
 		}
 
@@ -53,11 +66,19 @@ export function add_instant_back(nextLocation, previousLocation)
 	else
 	{
 		// Add the "current" page to the chain.
-		chain.push(getLocationKey(previousLocation))
+		chain.push
+		({
+			key    : getLocationKey(previousLocation),
+			routes : previousLocationRoutes
+		})
 	}
 
 	// Add the "next" page to the chain.
-	chain.push(getLocationKey(nextLocation))
+	chain.push
+	({
+		key    : getLocationKey(nextLocation),
+		routes : nextLocationRoutes
+	})
 
 	// Save the chain.
 	set(chain)
@@ -69,11 +90,12 @@ export function add_instant_back(nextLocation, previousLocation)
  * the `<Link/>` has `instantBack` property set.
  * For "Forward" transition it would mean that
  * it's a reverse of an instant "Back" transition.
+ * The order and position inside `chain` don't matter.
  */
 export function is_instant_transition(fromLocation, toLocation)
 {
-	return get().indexOf(getLocationKey(fromLocation)) >= 0 &&
-		get().indexOf(getLocationKey(toLocation)) >= 0
+	return indexOfByKey(get(), getLocationKey(fromLocation)) >= 0 &&
+		indexOfByKey(get(), getLocationKey(toLocation)) >= 0
 }
 
 /**
@@ -83,6 +105,46 @@ export const reset_instant_back = () => set()
 
 /**
  * Each history `location` has a randomly generated `key`.
- * Except for the initial `location` (the starting page) which has no `key`.
+ * Except for the initial `location` which has no `key`.
+ * (the very first entry in the browser history stack for a given tab)
  */
 const getLocationKey = location => location.key ? location.key : 'initial'
+
+function indexOfByKey(chain, key)
+{
+	let i = 0
+	while (i < chain.length)
+	{
+		if (chain[i].key === key) {
+			return i
+		}
+		i++
+	}
+
+	return -1
+}
+
+function indexOfByRoutes(chain, routes)
+{
+	let i = 0
+	while (i < chain.length)
+	{
+		if (chain[i].routes.length === routes.length)
+		{
+			let j = 0
+			while (j < routes.length)
+			{
+				if (chain[i].routes[j].component !== routes[j].component) {
+					break
+				}
+				j++
+			}
+			if (j === routes.length) {
+				return i
+			}
+		}
+		i++
+	}
+
+	return -1
+}

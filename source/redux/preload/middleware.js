@@ -210,7 +210,7 @@ export default function preloading_middleware
 			// If nothing to preload, just move to the next middleware
 			if (!preload)
 			{
-				after_preload(dispatch, getState, components, params, action, server, get_history, previous_location)
+				after_preload(dispatch, getState, components, params, action, server, get_history, previous_location, routes)
 				// Explicitly return `undefined`
 				// (not `false` by accident)
 				return
@@ -251,8 +251,7 @@ export default function preloading_middleware
 					preloading.pending = false
 
 					// Report stats to the web browser console
-					if (!server)
-					{
+					if (!server) {
 						console.log(`[react-website] @preload() took ${preload_timer()} milliseconds for ${action.location.pathname}`)
 					}
 
@@ -272,7 +271,7 @@ export default function preloading_middleware
 					// Report preloading time
 					report_preload_stats(Date.now() - started_at, route)
 
-					after_preload(dispatch, getState, components, params, action, server, get_history, previous_location)
+					after_preload(dispatch, getState, components, params, action, server, get_history, previous_location, routes)
 				},
 				(error) =>
 				{
@@ -281,8 +280,7 @@ export default function preloading_middleware
 					// then don't take any further steps on this cancelled navigation.
 					if (!preloading.cancelled)
 					{
-						if (!server)
-						{
+						if (!server) {
 							preloading.error = error
 						}
 
@@ -341,7 +339,7 @@ export default function preloading_middleware
 	}
 }
 
-function after_preload(dispatch, getState, components, parameters, action, server, get_history, previous_location)
+function after_preload(dispatch, getState, components, parameters, action, server, get_history, previous_location, routes)
 {
 	if (!server)
 	{
@@ -358,7 +356,7 @@ function after_preload(dispatch, getState, components, parameters, action, serve
 			// Stores "current" (soon to be "previous") location
 			// in "instant back chain", so that if "Back" is clicked
 			// then such transition could be detected as "should be instant".
-			add_instant_back(get_history().getCurrentLocation(), previous_location)
+			add_instant_back(get_history().getCurrentLocation(), previous_location, routes, window._react_website_current_page_routes)
 		}
 		else if (!action.instant)
 		{
@@ -370,6 +368,10 @@ function after_preload(dispatch, getState, components, parameters, action, serve
 			// all previous "instant back" possibilities are discarded.
 			reset_instant_back()
 		}
+
+		// `routes` are used when comparing `instantBack` chain items
+		// for resetting `instantBack` chain when the same route is encountered twice.
+		window._react_website_current_page_routes = routes
 	}
 
 	// Call `onPageLoaded()`
