@@ -3,8 +3,12 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import { Link } from 'react-router'
+import { connect } from 'react-redux'
 import { start_preload } from './preload/actions'
 
+@connect(() => ({}), {
+	start_preload
+})
 export default class Hyperlink extends Component
 {
 	static propTypes =
@@ -41,26 +45,22 @@ export default class Hyperlink extends Component
 		instantBack : false
 	}
 
-	static contextTypes =
+	onClick = (event) =>
 	{
-		// `react-redux` context required
-		store  : PropTypes.object.isRequired
-	}
-
-	on_click = (event) =>
-	{
-		const { onClick, onNavigate, to, instantBack } = this.props
-		const { store } = this.context
+		const
+		{
+			onClick,
+			onNavigate,
+			to,
+			instantBack,
+			start_preload
+		}
+		= this.props
 
 		// // Sanity check
 		// if (!router) {
 		// 	throw new Error('<Link>s rendered outside of a router context cannot navigate.')
 		// }
-
-		// Sanity check
-		if (!store) {
-			throw new Error('<Link>s rendered outside of a Redux context cannot navigate.')
-		}
 
 		// User may have supplied his own `onClick` handler
 		if (onClick) {
@@ -87,7 +87,7 @@ export default class Hyperlink extends Component
 
 		// Firt preload the new page, then `history.push()` will be called,
 		// and `react-router` will detect that performing the route transition.
-		store.dispatch(start_preload(to, { instantBack }))
+		start_preload(to, { instantBack })
 	}
 
 	render()
@@ -125,7 +125,7 @@ export default class Hyperlink extends Component
 		{
 			return (
 				<Link
-					onClick={ this.on_click }
+					onClick={ this.onClick }
 					{ ...link_props }>
 					{ children }
 				</Link>
