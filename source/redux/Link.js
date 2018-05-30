@@ -43,67 +43,51 @@ export default class Hyperlink extends Component
 
 	static contextTypes =
 	{
-		// `react-router` context required
-		router : PropTypes.object.isRequired,
-
 		// `react-redux` context required
 		store  : PropTypes.object.isRequired
 	}
 
-	constructor()
-	{
-		super()
-
-		this.on_click = this.on_click.bind(this)
-	}
-
-	on_click(event)
+	on_click = (event) =>
 	{
 		const { onClick, onNavigate, to, instantBack } = this.props
-		const { router, store } = this.context
+		const { store } = this.context
+
+		// // Sanity check
+		// if (!router) {
+		// 	throw new Error('<Link>s rendered outside of a router context cannot navigate.')
+		// }
 
 		// Sanity check
-		if (!router)
-		{
-			throw new Error('<Link>s rendered outside of a router context cannot navigate.')
-		}
-
-		// Sanity check
-		if (!store)
-		{
+		if (!store) {
 			throw new Error('<Link>s rendered outside of a Redux context cannot navigate.')
 		}
 
 		// User may have supplied his own `onClick` handler
-		if (onClick)
-		{
+		if (onClick) {
 			onClick(event)
 		}
 
 		// `onClick` could call `event.preventDefault()`
 		// to intercept `react-router` navigation.
-		if (event.defaultPrevented)
-		{
+		if (event.defaultPrevented) {
 			return
 		}
 
 		// Only process left mouse button clicks without modifier keys pressed
-		if (isModifiedEvent(event) || !isLeftClickEvent(event))
-		{
+		if (isModifiedEvent(event) || !isLeftClickEvent(event)) {
 			return
 		}
 
 		// Cancel `react-router` navigation inside its own `<Link/>`
 		event.preventDefault()
 
-		if (onNavigate)
-		{
+		if (onNavigate) {
 			onNavigate()
 		}
 
 		// Firt preload the new page, then `history.push()` will be called,
 		// and `react-router` will detect that performing the route transition.
-		store.dispatch(start_preload(resolveToLocation(to, router), { instantBack }))
+		store.dispatch(start_preload(to, { instantBack }))
 	}
 
 	render()
@@ -128,19 +112,14 @@ export default class Hyperlink extends Component
 		}
 		= link_props
 
-		const { router } = this.context
-
-		// Sanity check
-		if (!router) {
-			throw new Error('<Link>s rendered outside of a router context cannot navigate.')
-		}
-
-		// `to` could be a function of the current `location`
-		const location = resolveToLocation(to, router)
+		// // Sanity check
+		// if (!router) {
+		// 	throw new Error('<Link>s rendered outside of a router context cannot navigate.')
+		// }
 
 		// Is it a link to an absolute URL or to a relative (local) URL.
-		const is_local_website_link = (typeof location === 'object')
-			|| (typeof location === 'string' && location && location[0] === '/')
+		const is_local_website_link = (typeof to === 'object')
+			|| (typeof to === 'string' && to && to[0] === '/')
 
 		if (is_local_website_link && !target)
 		{
@@ -177,10 +156,4 @@ function isLeftClickEvent(event)
 function isModifiedEvent(event)
 {
 	return !!(event.metaKey || event.altKey || event.ctrlKey || event.shiftKey)
-}
-
-// `to` could be a function of the current `location`
-function resolveToLocation(to, router)
-{
-	return typeof to === 'function' ? to(router.location) : to
 }
