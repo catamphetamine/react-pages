@@ -7,7 +7,7 @@ import { RESULT_ACTION_PROPERTY, ERROR_ACTION_PROPERTY } from './middleware/asyn
 // (which will eventually be transformed into a reducer)
 export default function create_redux_module(namespace, settings)
 {
-	const redux = new Redux_module(namespace, settings)
+	const redux = new ReduxModule(namespace, settings)
 
 	// Public aliases
 	redux.getProperties = redux.get_properties
@@ -18,7 +18,7 @@ export default function create_redux_module(namespace, settings)
 	return redux
 }
 
-class Redux_module
+class ReduxModule
 {
 	handlers = {}
 	registered_state_properties = []
@@ -238,7 +238,7 @@ function add_asynchronous_action_reducers(redux, namespace, event, result_reduce
 	{
 		throw new Error("`reduxEventNaming` function parameter was not passed")
 	}
-	
+
 	if (!redux.settings.redux_property_naming)
 	{
 		throw new Error("`reduxPropertyNaming` function parameter was not passed")
@@ -323,7 +323,7 @@ function get_action_value_reducer(reducer)
 			{
 				updated_properties[property] = reducer[property](value)
 
-				// Don't know why did I previously write it like:	
+				// Don't know why did I previously write it like:
 				// updated_properties =
 				// {
 				// 	...updated_properties,
