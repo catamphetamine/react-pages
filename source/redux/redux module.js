@@ -47,8 +47,20 @@ class ReduxModule
 		this.handlers[event] = handler
 	}
 
-	on(event, handler)
+	on(namespace, event, handler)
 	{
+		if (typeof event === 'function')
+		{
+			handler = event
+			event = namespace
+			namespace = undefined
+		}
+		else
+		{
+			// Use "success" event name.
+			event = this.settings.redux_event_naming(event_name(namespace, event))[1]
+		}
+
 		if (!this.handlers[event])
 		{
 			this.handlers[event] = []
