@@ -36,7 +36,7 @@ export default async function snapshot_website({ host, port, pages, outputPath }
 async function snapshot(host, port, pages, outputPath, tick)
 {
 	// Clear the output folder
-	fs.removeSync(outputPath)
+	await remove(outputPath)
 
 	// Snapshot every page and put it into the output folder
 	for (const page of pages)
@@ -61,4 +61,9 @@ async function snapshot(host, port, pages, outputPath, tick)
 		fs.outputFileSync(path.join(outputPath, url, '/index.html'), content)
 		tick()
 	}
+}
+
+function remove(path)
+{
+	return new Promise((resolve, reject) => fs.remove(path, error => error ? reject(error) : resolve()))
 }
