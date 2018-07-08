@@ -32,6 +32,7 @@ export default function S3Uploader({ accessKeyId, secretAccessKey, region, bucke
 		const uploader = s3Client.uploadDir(params)
 
 		let initialized = false
+		let finished = false
 
 		uploader.on('progress', () =>
 		{
@@ -42,7 +43,18 @@ export default function S3Uploader({ accessKeyId, secretAccessKey, region, bucke
 			}
 			if (initialized)
 			{
-				progress(uploader.progressMd5Amount / uploader.progressMd5Total)
+				const progressSoFar = uploader.progressMd5Amount / uploader.progressMd5Total
+
+				// `s3` spams for a lot of `progress` with `1`.
+				if (progressSoFar === 1)
+				{
+					if (!finished)
+					{
+						finished = true
+						progress(1)
+					}
+				}
+				else progress(progressSoFar)
 			}
 		})
 

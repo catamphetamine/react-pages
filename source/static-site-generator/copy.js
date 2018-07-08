@@ -5,14 +5,6 @@ export default function copy(from, to)
 {
 	return new Promise((resolve, reject) =>
 	{
-		fs.copy(from, to, (error) =>
-		{
-			if (error)
-			{
-				return reject(error)
-			}
-
-			resolve()
-		})
+		fs.copy(from, to, (error) => error ? reject(error) : resolve())
 	})
 }
