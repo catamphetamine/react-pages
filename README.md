@@ -549,7 +549,7 @@ Much cleaner.
 #### redux/blogPost.js
 
 ```js
-import { reduxModule, eventName } from 'react-website'
+import { reduxModule } from 'react-website'
 
 const redux = reduxModule('BLOG_POST')
 
@@ -584,8 +584,13 @@ export const getComments = redux.action(
   // (state, result) => ({ ...state, comments: result })
 )
 
-// A developer can additionally handle any other custom events
-redux.on(eventName('BLOG_POST', 'CUSTOM_EVENT'), (state, action) => ({
+// A developer can listen to any event.
+// If two string arguments are passed
+// then the first one is namespace
+// and the second one is the event name.
+// If only one string argument is passed
+// then it is the event name.
+redux.on('BLOG_POST', 'CUSTOM_EVENT', (state, action) => ({
   ...state,
   reduxStateProperty: action.value
 }))
