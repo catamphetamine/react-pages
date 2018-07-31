@@ -233,7 +233,7 @@ function create_action(event, action, result, options, redux)
 	return (...parameters) =>
 	({
 		event   : event_name(namespace, event),
-		promise : (http) => action.apply(this, [{ http }].concat(parameters)),
+		promise : (http) => action.apply(this, parameters)(http),
 		cancelPrevious
 	})
 }
