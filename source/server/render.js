@@ -139,6 +139,71 @@ export default async function(settings, { initialize, localize, assets, proxy, u
 			messagesJSON = result.messagesJSON || JSON.stringify(messages)
 		}
 
+		function generate_base_html(meta)
+		{
+			// `html` modifiers
+			let { head, bodyStart, bodyEnd } = html
+
+			// Normalize `html` parameters
+			head      = render_to_a_string(typeof head      === 'function' ? head     (path, parameters) : head)
+			bodyStart = render_to_a_string(typeof bodyStart === 'function' ? bodyStart(path, parameters) : bodyStart)
+			bodyEnd   = render_to_a_string(typeof bodyEnd   === 'function' ? bodyEnd  (path, parameters) : bodyEnd)
+
+			// Normalize assets
+			assets = typeof assets === 'function' ? assets(path, parameters) : assets
+
+			// Sanity check
+			if (!assets.entries)
+			{
+				// Default `assets.entries` to `["main"]`.
+				if (assets.javascript && assets.javascript.main)
+				{
+					assets.entries = ['main']
+				}
+				else
+				{
+					throw new Error(`"assets.entries[]" page rendering service configuration parameter is required: it lists all Webpack "entries" for which javascripts and styles must be included on a server-side rendered page. If you didn't set up any "entries" in Webpack configuration then the default Webpack entry is called "main", in which case set "assets.entries" to "['main']" in page rendering service configuration.`)
+				}
+			}
+
+			// Render all HTML that goes before React markup.
+			const before_content = render_before_content
+			({
+				assets,
+				locale,
+				meta: generate_meta_tags_markup(meta).join(''),
+				head,
+				bodyStart
+			})
+
+			// Render all HTML that goes after React markup
+			const after_content = render_after_content
+			({
+				extension_javascript: typeof extension_javascript === 'function' ? extension_javascript() : extension_javascript,
+				assets,
+				locale,
+				locale_messages_json: messagesJSON,
+				bodyEnd,
+				protected_cookie_value,
+				hollow
+			})
+
+			return [before_content, after_content]
+		}
+
+		if (path.replace(/\/$/, '') === '/react-website-base')
+		{
+			hollow = true
+
+			const [ before_content, after_content ] = generate_base_html({})
+
+			return {
+				status: 200,
+				content: string_stream(before_content + after_content),
+				cookies: []
+			}
+		}
+
 		// Render the web page
 		const result = await render_page
 		({
@@ -165,52 +230,7 @@ export default async function(settings, { initialize, localize, assets, proxy, u
 				// `react_element_tree` is undefined if `hollow === true`.
 				// Otherwise `react_element_tree` is `<Router>...</Router>`.
 
-				// `html` modifiers
-				let { head, bodyStart, bodyEnd } = html
-
-				// Normalize `html` parameters
-				head      = render_to_a_string(typeof head      === 'function' ? head     (path, parameters) : head)
-				bodyStart = render_to_a_string(typeof bodyStart === 'function' ? bodyStart(path, parameters) : bodyStart)
-				bodyEnd   = render_to_a_string(typeof bodyEnd   === 'function' ? bodyEnd  (path, parameters) : bodyEnd)
-
-				// Normalize assets
-				assets = typeof assets === 'function' ? assets(path, parameters) : assets
-
-				// Sanity check
-				if (!assets.entries)
-				{
-					// Default `assets.entries` to `["main"]`.
-					if (assets.javascript && assets.javascript.main)
-					{
-						assets.entries = ['main']
-					}
-					else
-					{
-						throw new Error(`"assets.entries[]" page rendering service configuration parameter is required: it lists all Webpack "entries" for which javascripts and styles must be included on a server-side rendered page. If you didn't set up any "entries" in Webpack configuration then the default Webpack entry is called "main", in which case set "assets.entries" to "['main']" in page rendering service configuration.`)
-					}
-				}
-
-				// Render all HTML that goes before React markup.
-				const before_content = render_before_content
-				({
-					assets,
-					locale,
-					meta: generate_meta_tags_markup(meta).join(''),
-					head,
-					bodyStart
-				})
-
-				// Render all HTML that goes after React markup
-				const after_content = render_after_content
-				({
-					extension_javascript: typeof extension_javascript === 'function' ? extension_javascript() : extension_javascript,
-					assets,
-					locale,
-					locale_messages_json: messagesJSON,
-					bodyEnd,
-					protected_cookie_value,
-					hollow
-				})
+				const [ before_content, after_content ] = generate_base_html(meta)
 
 				// All parts are combined into a single readable stream
 
