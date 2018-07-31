@@ -29,6 +29,8 @@ export default function S3Uploader({ accessKeyId, secretAccessKey, region, bucke
 			}
 		})
 
+		console.log('(the progress bar seems to be buggy, just wait until it exits)')
+
 		const uploader = s3Client.uploadDir(params)
 
 		let initialized = false
