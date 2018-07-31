@@ -232,7 +232,14 @@ function create_action(event, action, result, options, redux)
 	return (...parameters) =>
 	({
 		event   : event_name(namespace, event),
-		promise : (utility) => action.apply(this, [utility].concat(parameters)),
+		promise : (utility) =>
+		{
+			if (redux.v4)
+			{
+				return action.apply(this, parameters)(utility.http)
+			}
+			return action.apply(this, [utility].concat(parameters))
+		},
 		cancelPrevious
 	})
 }
