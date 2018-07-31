@@ -136,6 +136,54 @@ export default async function(settings, { initialize, localize, assets, applicat
 			messagesJSON = result.messagesJSON || JSON.stringify(messages)
 		}
 
+		function generate_base_html(content = '')
+		{
+			// `html` modifiers
+
+			let { head } = html
+			// camelCase support for those who prefer it
+			let body_start = html.body_start || html.bodyStart
+			let body_end   = html.body_end   || html.bodyEnd
+
+			// Normalize `html` parameters
+			head       = normalize_markup(typeof head       === 'function' ? head      (path, parameters) : head)
+			body_start = normalize_markup(typeof body_start === 'function' ? body_start(path, parameters) : body_start)
+			body_end   = normalize_markup(typeof body_end   === 'function' ? body_end  (path, parameters) : body_end)
+
+			// Normalize assets
+			assets = typeof assets === 'function' ? assets(path, parameters) : assets
+
+			// Sanity check
+			if (!assets.entries)
+			{
+				throw new Error(`"assets.entries" array parameter is required as of version 10.1.0. E.g. "{ ... entries: ['main'] ... }"`)
+			}
+
+			// Render the HTML
+			return Html
+			({
+				...parameters,
+				extension_javascript: typeof extension_javascript === 'function' ? extension_javascript() : extension_javascript,
+				assets,
+				locale,
+				locale_messages_json: messagesJSON,
+				head,
+				body_start,
+				body_end,
+				protected_cookie_value,
+				content
+			})
+		}
+
+		if (path.replace(/\/$/, '') === '/react-website-base')
+		{
+			return {
+				status: 200,
+				content: generate_base_html(),
+				cookies: []
+			}
+		}
+
 		// Render the web page
 		const result = await render_page
 		({
@@ -161,41 +209,7 @@ export default async function(settings, { initialize, localize, assets, applicat
 				// Render page content
 				content = render === false ? normalize_markup(loading) : (content && ReactDOM.renderToString(content))
 
-				// `html` modifiers
-
-				let { head } = html
-				// camelCase support for those who prefer it
-				let body_start = html.body_start || html.bodyStart
-				let body_end   = html.body_end   || html.bodyEnd
-
-				// Normalize `html` parameters
-				head       = normalize_markup(typeof head       === 'function' ? head      (path, parameters) : head)
-				body_start = normalize_markup(typeof body_start === 'function' ? body_start(path, parameters) : body_start)
-				body_end   = normalize_markup(typeof body_end   === 'function' ? body_end  (path, parameters) : body_end)
-
-				// Normalize assets
-				assets = typeof assets === 'function' ? assets(path, parameters) : assets
-
-				// Sanity check
-				if (!assets.entries)
-				{
-					throw new Error(`"assets.entries" array parameter is required as of version 10.1.0. E.g. "{ ... entries: ['main'] ... }"`)
-				}
-
-				// Render the HTML
-				return Html
-				({
-					...parameters,
-					extension_javascript: typeof extension_javascript === 'function' ? extension_javascript() : extension_javascript,
-					assets,
-					locale,
-					locale_messages_json: messagesJSON,
-					head,
-					body_start,
-					body_end,
-					protected_cookie_value,
-					content
-				})
+				return generate_base_html(content)
 			}
 		})
 
