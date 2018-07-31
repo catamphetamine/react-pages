@@ -234,7 +234,7 @@ function create_action(event, action, result, options, redux)
 		event   : event_name(namespace, event),
 		promise : (utility) =>
 		{
-			if (redux.v4)
+			if (redux.v3)
 			{
 				return action.apply(this, parameters)(utility.http)
 			}
