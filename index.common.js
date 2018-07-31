@@ -36,6 +36,8 @@ exports.createHandler = exports.create_handler
 exports.state_connector = require('./build/redux/asynchronous action handler').state_connector
 exports.stateConnector = exports.state_connector
 
+exports.reduxModule = require('./build/redux/redux module').default
+
 exports.underscoredToCamelCase = require('./build/redux/naming').underscoredToCamelCase
 
 exports.event_name = require('./build/redux/naming').event_name

@@ -54,6 +54,12 @@ from './es6/redux/asynchronous action handler'
 
 export
 {
+	default as reduxModule
+}
+from './es6/redux/redux module'
+
+export
+{
 	underscoredToCamelCase,
 	event_name,
 	event_name as eventName
