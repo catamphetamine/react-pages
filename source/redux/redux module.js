@@ -24,14 +24,8 @@ class ReduxModule
 	handlers = {}
 	registered_state_properties = []
 
-	constructor(namespace, settings = {})
+	constructor(namespace = `REACT_WEBSITE_${counter.next()}`, settings = {})
 	{
-		// Sanity check
-		if (typeof namespace !== 'string')
-		{
-			throw new Error("`namespace: String` argument not passed to `reduxModule(namespace, [settings])`")
-		}
-
 		// This is later being read by `action()`s to reduce copy-pasta
 		this.namespace = namespace
 
@@ -70,14 +64,38 @@ class ReduxModule
 		this.handlers[event].push(handler)
 	}
 
-	action(event, action, result, options = {})
+	action(event, action, result, options)
 	{
+		// Autogenerate `event` name.
+		if (typeof event !== 'string')
+		{
+			options = result
+			result = action
+			action = event
+			event = `REACT_WEBSITE_ACTION_${counter.next()}`
+		}
+
+		options = options || {}
+
 		if (typeof action !== 'function')
 		{
 			throw new Error('[react-website] One must pass an `action()` argument (the second one) to Redux module action creator: `reduxModule(event, action, result, options = {})`.')
 		}
 
 		return create_action(event, action, result, options, this)
+	}
+
+	simpleAction(event, action, result, options)
+	{
+		if (typeof event === 'string') {
+			options = options || {}
+			options.sync = true
+		} else {
+			result = result || {}
+			result.sync = true
+		}
+
+		return this.action(event, action, result, options)
 	}
 
 	// Returns Redux action creator for resetting error.
@@ -354,3 +372,23 @@ function get_action_value_reducer(reducer)
 	// Otherwise `reducer` is `(state, value) => ...`
 	return reducer
 }
+
+class Counter
+{
+	counter = 0
+
+	next()
+	{
+		if (this.counter < MAX_SAFE_INTEGER) {
+			this.counter++
+		} else {
+			this.counter = 1
+		}
+		return this.counter
+	}
+}
+
+const counter = new Counter()
+
+// `MAX_SAFE_INTEGER` is not supported by older browsers
+const MAX_SAFE_INTEGER = Number.MAX_SAFE_INTEGER || Math.pow(2, 53) - 1
