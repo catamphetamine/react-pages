@@ -587,9 +587,10 @@ export const getComments = redux.action(
 // A developer can listen to any event.
 // If two string arguments are passed
 // then the first one is namespace
-// and the second one is the event name.
+// and the second one is the event name
+// and the listener will be called "on success".
 // If only one string argument is passed
-// then it is the event name.
+// then it is a raw Redux `action.type`.
 redux.on('BLOG_POST', 'CUSTOM_EVENT', (state, action) => ({
   ...state,
   reduxStateProperty: action.value
