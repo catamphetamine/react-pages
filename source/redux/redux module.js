@@ -23,12 +23,8 @@ class ReduxModule
 	handlers = {}
 	registered_state_properties = []
 
-	constructor(namespace, settings = {})
+	constructor(namespace = `REACT_WEBSITE_${counter.next()}`, settings = {})
 	{
-		if (!namespace) {
-			throw new TypeError('`reduxModule` `namespace` argument is required.')
-		}
-
 		this.namespace = namespace
 		this.settings = normalize_common_settings(settings, { full: false })
 	}
