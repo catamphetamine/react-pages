@@ -25,7 +25,7 @@ class ReduxModule
 
 	constructor(namespace, settings = {})
 	{
-		if (!this.namespace) {
+		if (!namespace) {
 			throw new TypeError('`reduxModule` `namespace` argument is required.')
 		}
 
@@ -114,7 +114,7 @@ class ReduxModule
 		return () =>
 		({
 			type  : event_name(this.namespace, error_event_name),
-			error : null
+			error : undefined
 		})
 	}
 
@@ -300,39 +300,61 @@ function add_asynchronous_action_reducers(redux, namespace, event, result_reduce
 	// When Promise is created: reset result variable, clear `error`, set `pending` flag.
 	redux.on(event_name(namespace, pending_event_name), (state) =>
 	{
-		// This will be the new Redux state.
-		return {
+		const new_state =
+		{
 			...state,
-
 			// Set `pending` flag
-			[pending_property_name]: true,
-
-			// Clear `error`
-			[error_property_name]: undefined
+			[pending_property_name]: true
 		}
+
+		// Clear `error`
+		if (redux.v3) {
+			delete new_state[error_property_name]
+		} else {
+			new_state[error_property_name] = undefined
+		}
+
+		return new_state
 	})
 
 	// When Promise succeeds: clear `pending` flag, set result variable.
 	redux.on(event_name(namespace, success_event_name), (state, result) =>
 	{
-		// This will be the new Redux state
 		const new_state = result_reducer(state, result)
 
 		// Clear `pending` flag
-		new_state[pending_property_name] = false
+		if (redux.v3) {
+			delete new_state[pending_property_name]
+		} else {
+			new_state[pending_property_name] = false
+		}
 
-		// Return the new Redux state
 		return new_state
 	})
 
 	// When Promise fails, clear `pending` flag and set `error`.
 	// Can also clear `error` when no `error` is passed as part of an action.
 	redux.on(event_name(namespace, error_event_name), (state, error) =>
-	({
-		...state,
-		[pending_property_name] : false,
-		[error_property_name] : error
-	}))
+	{
+		const new_state =
+		{
+			...state,
+			[error_property_name] : error
+		}
+
+		// Clear `pending` flag
+		if (redux.v3) {
+			delete new_state[pending_property_name]
+			// `resetError()`
+			if (!error) {
+				delete new_state[error_property_name]
+			}
+		} else {
+			new_state[pending_property_name] = false
+		}
+
+		return new_state
+	})
 }
 
 // Returns a function
