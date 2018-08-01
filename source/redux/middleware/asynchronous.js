@@ -54,7 +54,8 @@ export default function asynchronous_middleware(http_client, redux_event_naming,
 			// Validate that `promise()` actually returned a `Promise`
 			if (!promised || typeof promised.then !== 'function')
 			{
-				throw new Error(`"promise" function must return a Promise. Got:`, promised)
+				console.error('Redux action\'s "promise" function returned:', promised);
+				throw new Error('Redux action\'s "promise" function must return a Promise.')
 			}
 
 			// Is the action promise cancellable
