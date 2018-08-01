@@ -7,8 +7,17 @@ import download from './download'
 // Snapshots all pages (URLs)
 export default async function snapshot_website({ host, port, pages, outputPath })
 {
-	// Add the main ("home") page
-	pages.unshift('')
+	if (!pages) {
+		pages = []
+	} else {
+		// Add the main ("home") page.
+		pages.unshift('')
+	}
+
+	// Add the "base" page which is an empty page
+	// which will be rendered in user's browser on client side.
+	// This should be the "fallback" page.
+	pages.unshift('/react-website-base')
 
 	// The progress meter for the website snapshotting process
 	const snapshot_progress = new ProgressBar(' Snapshotting [:bar] :total :percent :etas',
@@ -26,11 +35,12 @@ export default async function snapshot_website({ host, port, pages, outputPath }
 		port,
 		pages,
 		outputPath,
-		function progress_tick()
-		{
-			snapshot_progress.tick()
-		}
+		() => snapshot_progress.tick()
 	)
+
+	// Move `./react-website-base/index.html` to `./base.html`.
+	fs.moveSync(path.join(outputPath, 'react-website-base/index.html'), path.join(outputPath, 'base.html'))
+	fs.removeSync(path.join(outputPath, 'react-website-base'))
 }
 
 async function snapshot(host, port, pages, outputPath, tick)
