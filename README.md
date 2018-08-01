@@ -468,7 +468,7 @@ Once one starts writing a lot of `promise`/`http` Redux actions it becomes obvio
 
 * Also gives access to `http`.
 * Autogenerates Redux action status event names (`${actionName}_PENDING`, `${actionName}_SUCCESS`, `${actionName}_ERROR`).
-* Automatically populates the corresponding action status properties (`${actionName}Pending`: `true`/`false`, `${actionName}Error`) in Redux state.
+* Automatically populates the corresponding action status properties (`${actionName}Pending`: `true`/`false`, `${actionName}Error: Error`) in Redux state.
 * Automatically adds Redux reducers for the action status events.
 
 For example, the `fetchFriends()` action from the previous section can be rewritten as:
