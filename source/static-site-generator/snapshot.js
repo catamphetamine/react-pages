@@ -4,7 +4,7 @@ import ProgressBar from 'progress'
 
 import download from './download'
 
-// Snapshots all pages (URLs)
+// Snapshots all pages (URLs).
 export default async function snapshot_website({ host, port, pages, outputPath })
 {
 	if (!pages) {
@@ -19,7 +19,7 @@ export default async function snapshot_website({ host, port, pages, outputPath }
 	// This should be the "fallback" page.
 	pages.unshift('/react-website-base')
 
-	// The progress meter for the website snapshotting process
+	// The progress meter for the website snapshotting process.
 	const snapshot_progress = new ProgressBar(' Snapshotting [:bar] :total :percent :etas',
 	{
 		complete   : '=',
