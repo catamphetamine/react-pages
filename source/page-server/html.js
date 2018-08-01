@@ -51,6 +51,7 @@ export function safe_json_stringify(json)
 
 const template = nunjucks.compile
 (`
+	<!doctype html>
 	<html {{ webpage_head.htmlAttributes.toString() }} {% if locale %} lang="{{get_language_from_locale(locale)}}" {% endif %}>
 		<head>
 			{# "react-helmet" stuff #}
