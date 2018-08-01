@@ -467,7 +467,7 @@ The possible `options` (the third argument of all `http` methods) are
 Once one starts writing a lot of `promise`/`http` Redux actions it becomes obvious that there's a lot of copy-pasting and verbosity involved. To reduce those tremendous amounts of copy-pasta "redux module" tool may be used which:
 
 * Also gives access to `http`.
-* Autogenerates Redux action status event names (`${actionName}_PENDING`, `${actionName}_SUCCESS`, `${actionName}_ERROR`).
+* Autogenerates Redux action status events (`${actionName}_PENDING`, `${actionName}_SUCCESS`, `${actionName}_ERROR`).
 * Automatically populates the corresponding action status properties (`${actionName}Pending`: `true`/`false`, `${actionName}Error: Error`) in Redux state.
 * Automatically adds Redux reducers for the action status events.
 
