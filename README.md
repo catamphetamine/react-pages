@@ -1009,7 +1009,7 @@ run().catch((error) => {
 // Get the list of all page URLs.
 async function generatePageList() {
   const pages = [
-    // Index page is added by default.
+    '/',
     '/about',
     // Error pages need a `status` property
     // to indicate that it shouldn't throw on such errors
@@ -1034,6 +1034,8 @@ async function generatePageList() {
   return pages.concat(items.map(item => `/items/${item.id}`))
 }
 ```
+
+The `snapshot()` function snapshots the list of `pages` to `.html` files and then the `upload()` function uploads them to the cloud (in this case to Amazon S3). The `snapshot()` function also snapshots a special `base.html` page which is an empty page that should be used as the "fallback", i.e. the cloud should respond with `base.html` file contents when the file for the requested URL is not found: in this case `base.html` will see the current URL and perform all the routing neccessary on the client side to show the correct page. If the `snapshot()` function isn't passed the list of `pages` to snapshot (e.g. if `pages` argument is `null` or `undefined`) then it will only snapshot `base.html`. The static website will work with just `base.html`, the only point of snapshotting other pages is for Google indexing.
 </details>
 
 ####
