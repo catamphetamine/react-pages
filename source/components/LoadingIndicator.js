@@ -40,5 +40,8 @@ export default function ActivityIndicator(props)
 ActivityIndicator.propTypes =
 {
 	// CSS class
-	className : PropTypes.string
+	className : PropTypes.string,
+
+	// CSS style object
+	style     : PropTypes.object
 }

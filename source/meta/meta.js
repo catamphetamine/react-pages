@@ -1,23 +1,23 @@
 import React, { Component } from 'react'
-import hoist_statics from 'hoist-non-react-statics'
+import hoistNonReactStatics from 'hoist-non-react-statics'
 import flatten from 'lodash/flatten'
 import compact from 'lodash/compact'
 
-import BrowserDocument, { meta_attribute_for } from './BrowserDocument'
+import BrowserDocument, { getMetaAttributeFor } from './BrowserDocument'
 import { get_display_name } from '../utility'
 
-const browser_document = new BrowserDocument()
+const browserDocument = new BrowserDocument()
 
-const default_meta =
+const DEFAULT_META =
 {
 	viewport : 'width=device-width, initial-scale=1.0'
 }
 
-export const Meta_method_name = '__meta__'
+const META_METHOD_NAME = '__meta__'
 
 /**
  * `@meta()` decorator used for adding `<title/>` and <meta/>` tags to a React page.
- * @param  {function} getMeta - A function of `{ state, location, parameters }` returning this page's meta object.
+ * @param  {function} getMeta - A function of `state` returning this page's meta object.
  * @example
  * @meta(({ state }) => ({ title: `${state.user.name}'s profile` }))
  */
@@ -31,9 +31,9 @@ export default function meta(getMeta)
 			}
 		}
 
-		Meta[Meta_method_name] = getMeta
+		Meta[META_METHOD_NAME] = getMeta
 		Meta.displayName = `Meta(${get_display_name(DecoratedComponent)})`
-		return hoist_statics(Meta, DecoratedComponent)
+		return hoistNonReactStatics(Meta, DecoratedComponent)
 	}
 }
 
@@ -42,39 +42,34 @@ export default function meta(getMeta)
  * defined for this route (`components` array).
  * @return {object}
  */
-export function get_meta(components, location, params, state)
+export function getMeta(components, state)
 {
 	// // `Object.assign` is not supported in Internet Explorer.
-	// return Object.assign({}, default_meta, ...components.map(_ => get_component_meta(_, ...))))
+	// return Object.assign({}, DEFAULT_META, ...components.map(_ => getComponentMeta(_, ...))))
 
 	return components.reduce((meta, component) => ({
 		...meta,
-		...get_component_meta(component, state, location, params)
+		...getComponentMeta(component, state)
 	}),
-	default_meta)
+	DEFAULT_META)
 }
 
 /**
  * Gets `React.Component`'s meta.
  * @return {object?}
  */
-function get_component_meta(component, state, location, parameters)
+function getComponentMeta(component, state)
 {
-	if (component[Meta_method_name])
+	if (component[META_METHOD_NAME])
 	{
-		return component[Meta_method_name]
-		({
-			state,
-			location,
-			parameters
-		})
+		return component[META_METHOD_NAME](state)
 	}
 }
 
 /**
  * Updates `<title/>` and `<meta/>` tags (inside `<head/>`).
  */
-export function update_meta(meta, document = browser_document)
+export function updateMeta(meta, document = browserDocument)
 {
 	const { title, charset } = meta
 	meta = normalizeMetaKeys(meta)
@@ -90,7 +85,7 @@ export function update_meta(meta, document = browser_document)
 
 	// Update `<meta charset/>`.
 	if (charset) {
-		update_meta_tag(document, meta_tags, 'charset', charset)
+		updateMetaTag(document, meta_tags, 'charset', charset)
 	}
 
 	// Update existing `<meta/>` tags.
@@ -100,7 +95,7 @@ export function update_meta(meta, document = browser_document)
 		{
 			return [].concat(meta[key])
 				.map((value) => {
-					if (!update_meta_tag(document, meta_tags, key, value)) {
+					if (!updateMetaTag(document, meta_tags, key, value)) {
 						return [key, value]
 					}
 				})
@@ -121,7 +116,7 @@ export function update_meta(meta, document = browser_document)
  * @param  {object[]} meta
  * @return {string[]}
  */
-export function generate_meta_tags_markup(meta)
+export function generateMetaTagsMarkup(meta)
 {
 	const { title, charset } = meta
 	meta = normalizeMetaKeys(meta)
@@ -142,7 +137,7 @@ export function generate_meta_tags_markup(meta)
 			{
 				// Convert meta value to an array.
 				return [].concat(meta[key])
-					.map(value => meta_tag_markup(key, value))
+					.map(value => generateMetaTagMarkup(key, value))
 			})
 		)
 	)
@@ -154,9 +149,9 @@ export function generate_meta_tags_markup(meta)
  * @param {string} value
  * @return {string}
  */
-function meta_tag_markup(name, value)
+function generateMetaTagMarkup(name, value)
 {
-	return `<meta ${meta_attribute_for(name)}="${name}" content="${escape_html(value)}"/>`
+	return `<meta ${getMetaAttributeFor(name)}="${name}" content="${escape_html(value)}"/>`
 }
 
 /**
@@ -164,7 +159,7 @@ function meta_tag_markup(name, value)
  * "name" can refer to both `name` and `property`.
  * @return {string}
  */
-function meta_tag_names(key)
+function getMetaTagNames(key)
 {
 	switch (key)
 	{
@@ -183,7 +178,7 @@ function meta_tag_names(key)
 		case 'audio':
 		case 'video':
 			return [`og:${key}`]
-		case 'locale_other':
+		case 'localeOther':
 			return ['og:locale:alternate']
 		default:
 			return [escape_html(key)]
@@ -195,7 +190,7 @@ function meta_tag_names(key)
  * @param {Document} document - `BrowserDocument` or `TestDocument`.
  * @return {boolean?}
  */
-function update_meta_tag(document, meta_tags, name, value)
+function updateMetaTag(document, meta_tags, name, value)
 {
 	let i = 0
 	while (i < meta_tags.length)
@@ -242,7 +237,7 @@ function escape_html(string)
 function normalizeMetaKeys(meta)
 {
 	return Object.keys(meta).reduce((normalizedMeta, key) => {
-		for (const name of meta_tag_names(key)) {
+		for (const name of getMetaTagNames(key)) {
 			normalizedMeta[name] = meta[key]
 		}
 		return normalizedMeta

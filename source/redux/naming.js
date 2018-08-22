@@ -22,7 +22,7 @@ export function underscoredToCamelCase(string)
 }
 
 // Converts `namespace` and `event` into a namespaced event name
-export function event_name(namespace, event)
+export function eventName(namespace, event)
 {
 	return namespace ? `${namespace}: ${event}` : event
 }

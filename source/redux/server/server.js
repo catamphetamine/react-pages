@@ -1,28 +1,25 @@
 import UglifyJS from 'uglify-js'
 
-import { ISO_date_regexp } from '../../date parser'
-import { safe_json_stringify } from '../../server/html'
+import { ISO_date_regexp } from '../../parseDates'
+import { safeJsonStringify } from '../../server/html'
 import render from './render'
-import create_store from '../store'
-import create_http_client from '../http client'
+import createStore from '../store'
+import createHttpClient from '../HttpClient'
+import { createHistoryProtocol } from '../../router/server'
 
-export default function _render(options)
-{
-	return render
-	({
-		...options,
-		routes: typeof options.routes === 'function' ? options.routes(store) : options.routes
-	})
-}
-
-export async function initialize(settings, { protected_cookie_value, proxy, cookies, initialize, get_history })
+export async function initialize(settings, {
+	protected_cookie_value,
+	proxy,
+	cookies,
+	initialize,
+	url
+})
 {
 	// Redux store
 	let store
 
 	// Create HTTP client (Redux action creator `http` utility)
-	const http_client = create_http_client(settings, () => store, protected_cookie_value,
-	{
+	const httpClient = createHttpClient(settings, () => store, protected_cookie_value, {
 		proxy,
 		cookies
 	})
@@ -30,77 +27,61 @@ export async function initialize(settings, { protected_cookie_value, proxy, cook
 	// Create Redux store
 
 	// Initial store data
-	let store_data = {}
+	let initialState = {}
 
 	// Supports custom preloading before the page is rendered
 	// (for example to authenticate the user and retrieve user selected language)
-	if (initialize)
-	{
-		store_data = await initialize(http_client)
+	if (initialize) {
+		initialState = await initialize(httpClient)
 	}
 
 	// Create Redux store
-	store = create_store(settings, store_data, get_history, http_client,
-	{
+	store = createStore(settings, initialState, () => createHistoryProtocol(url), httpClient, {
 		server : true
 	})
 
-	function extension_javascript()
-	{
-		let extension_javascript = ''
-
-		// JSON Date deserializer
-		if (settings.parse_dates)
-		{
-			extension_javascript += `<script>${define_json_date_parser}</script>`
-		}
-
-		const store_state = store.getState()
-		// Remove `redux-router` data from store
-		delete store_state.router
-
-		// Store data will be reloaded into the store on the client-side.
-		// All forward slashes are escaped to prevent XSS attacks.
-		// Another solution would be replacing with `\uxxxx` sequences.
-		// https://medium.com/node-security/the-most-common-xss-vulnerability-in-react-js-applications-2bdffbcc1fa0
-		extension_javascript += `<script>`
-		extension_javascript += `window._redux_state = JSON.parse(${ JSON.stringify(safe_json_stringify(store_state)) }${ settings.parse_dates ? ', JSON.date_parser' : '' })`
-		extension_javascript += `</script>`
-
-		return extension_javascript
-	}
-
 	return {
 		store,
-		extension_javascript,
-		cookies: http_client.set_cookies
+		generateJavascript: () => generateJavascript(store, settings),
+		cookies: httpClient.set_cookies
 	}
 }
 
-// JSON date deserializer
-// use as the second, 'reviver' argument to JSON.parse(json, JSON.date_parser);
-//
+function generateJavascript(store, settings) {
+	let code = ''
+
+	// JSON Date deserializer
+	if (settings.parseDates) {
+		code += `<script>${DEFINE_JSON_DATE_PARSER}</script>`
+	}
+
+	// Store data will be reloaded into the store on the client-side.
+	// All forward slashes are escaped to prevent XSS attacks.
+	// Another solution would be replacing with `\uxxxx` sequences.
+	// https://medium.com/node-security/the-most-common-xss-vulnerability-in-react-js-applications-2bdffbcc1fa0
+	code += `<script>`
+	code += `window._redux_state = JSON.parse(${ JSON.stringify(safeJsonStringify(store.getState())) }${ settings.parseDates ? ', JSON.dateParser' : '' })`
+	code += `</script>`
+
+	return code
+}
+
+// JSON date deserializer.
+// Use as the second, 'reviver' argument to `JSON.parse(json, JSON.dateParser)`.
 // http://stackoverflow.com/questions/14488745/javascript-json-date-deserialization/23691273#23691273
-//
-const define_json_date_parser = UglifyJS.minify
+const DEFINE_JSON_DATE_PARSER = UglifyJS.minify
 (`
-if (!JSON.date_parser)
-{
-	JSON.date_parser = function(key, value)
-	{
-		if (typeof value === 'string' && /^${ISO_date_regexp}$/.test(value))
-		{
+if (!JSON.dateParser) {
+	JSON.dateParser = function(key, value) {
+		if (typeof value === 'string' && /^${ISO_date_regexp}$/.test(value)) {
 			return new Date(value)
 		}
-
 		return value
 	}
 }
-`,
-{ fromString: true }).code
+`, { fromString: true }).code
 
 // Just to be extra safe from XSS attacks
-if (define_json_date_parser.indexOf('<') !== -1)
-{
+if (DEFINE_JSON_DATE_PARSER.indexOf('<') !== -1) {
 	throw new Error('JSON Date parser XSS vulnerability detected')
 }

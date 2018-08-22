@@ -5,7 +5,7 @@ export const exists = what => typeof what !== 'undefined'
 const object_constructor = {}.constructor
 
 // detects a JSON object
-export function is_object(object)
+export function isObject(object)
 {
 	return exists(object) && (object !== null) && object.constructor === object_constructor
 }
@@ -38,9 +38,9 @@ export function extend(...objects)
 
 	for (const key of Object.keys(from))
 	{
-		if (is_object(from[key]))
+		if (isObject(from[key]))
 		{
-			if (!is_object(to[key]))
+			if (!isObject(to[key]))
 			{
 				to[key] = {}
 			}
@@ -74,7 +74,7 @@ export function merge()
 
 export function clone(object)
 {
-	if (is_object(object))
+	if (isObject(object))
 	{
 		return merge({}, object)
 	}
@@ -204,12 +204,12 @@ export function zip(a, b)
 	})
 }
 
-export function get_language_from_locale(locale)
-{
-	const dash_index = locale.indexOf('-')
-	if (dash_index >= 0)
-	{
-		return locale.substring(0, dash_index)
-	}
-	return locale
-}
+// export function get_language_from_locale(locale)
+// {
+// 	const dash_index = locale.indexOf('-')
+// 	if (dash_index >= 0)
+// 	{
+// 		return locale.substring(0, dash_index)
+// 	}
+// 	return locale
+// }

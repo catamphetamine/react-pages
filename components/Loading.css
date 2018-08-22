@@ -12,7 +12,7 @@
 	z-index : 0;
 	opacity : 0;
 
-	transition : opacity 100ms ease-out, z-index 100ms step-end;
+	transition : opacity 160ms ease-out, z-index 160ms step-end;
 }
 
 .react-website__loading-spinner
@@ -40,6 +40,7 @@
 	transition-delay : 0ms;
 }
 
+/*
 .react-website__loading--shown .rrui__activity-indicator-circle-container,
 .react-website__loading--shown .rrui__activity-indicator-circle
 {
@@ -51,3 +52,4 @@
 {
 	animation-delay : 0ms;
 }
+*/

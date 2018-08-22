@@ -1,10 +1,10 @@
 import React, { Component } from 'react'
-import hoist_non_react_statics from 'hoist-non-react-statics'
+import hoistNonReactStatics from 'hoist-non-react-statics'
 
 import { get_display_name } from '../../utility'
 
-export const Preload_method_name  = '__preload__'
-export const Preload_options_name = '__preload_options__'
+export const PRELOAD_METHOD_NAME  = '__preload__'
+export const PRELOAD_OPTIONS_NAME = '__preload_options__'
 
 // `@preload(preloader, [options])` decorator.
 //
@@ -35,24 +35,20 @@ export const Preload_options_name = '__preload_options__'
 //
 export default function preload(preload, options)
 {
-	return function(DecoratedComponent)
-	{
-		class PreloadedComponent extends Component
-		{
-			render()
-			{
+	return function(DecoratedComponent) {
+		class PreloadedComponent extends Component {
+			render() {
 				return <DecoratedComponent {...this.props} />
 			}
 		}
 
 		// Since there can be several `@preload()`s
 		// on a single component, using arrays here.
-		PreloadedComponent[Preload_method_name]  = DecoratedComponent[Preload_method_name]  || []
-		PreloadedComponent[Preload_options_name] = DecoratedComponent[Preload_options_name] || []
+		PreloadedComponent[PRELOAD_METHOD_NAME]  = DecoratedComponent[PRELOAD_METHOD_NAME]  || []
+		PreloadedComponent[PRELOAD_OPTIONS_NAME] = DecoratedComponent[PRELOAD_OPTIONS_NAME] || []
 
-		PreloadedComponent[Preload_method_name].unshift(preload)
-		PreloadedComponent[Preload_options_name].unshift
-		({
+		PreloadedComponent[PRELOAD_METHOD_NAME].unshift(preload)
+		PreloadedComponent[PRELOAD_OPTIONS_NAME].unshift({
 			blocking: true,
 			blockingSibling: true,
 			...options
@@ -60,8 +56,8 @@ export default function preload(preload, options)
 
 		// Component naming for React DevTools
 		PreloadedComponent.displayName = `Preloaded(${get_display_name(DecoratedComponent)})`
-		
+
 		// Keep all non-React-specific static methods
-		return hoist_non_react_statics(PreloadedComponent, DecoratedComponent)
+		return hoistNonReactStatics(PreloadedComponent, DecoratedComponent)
 	}
 }

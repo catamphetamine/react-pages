@@ -1,4 +1,4 @@
-import { is_object } from './helpers'
+import { isObject } from './helpers'
 
 // ISO 8601 date regular expression
 // Adapted from: http://stackoverflow.com/a/14322189/970769
@@ -29,12 +29,12 @@ export const ISO_date_matcher = new RegExp('^' + ISO_date_regexp + '$')
 // Without it the developer would have to convert
 // `Date` strings to `Date`s in Ajax HTTP responses manually.
 //
-// Use as the second, 'reviver' argument to `JSON.parse`: `JSON.parse(json, JSON.date_parser)`
+// Use as the second, 'reviver' argument to `JSON.parse`: `JSON.parse(json, JSON.dateParser)`
 //
 // http://stackoverflow.com/questions/14488745/javascript-json-date-deserialization/23691273#23691273
 
 // Walks JSON object tree
-export default function parse_dates(object)
+export default function parseDates(object)
 {
 	// If it's a date in an ISO string format, then parse it
 	if (typeof object === 'string' && ISO_date_matcher.test(object))
@@ -48,19 +48,19 @@ export default function parse_dates(object)
 		let i = 0
 		while (i < object.length)
 		{
-			object[i] = parse_dates(object[i])
+			object[i] = parseDates(object[i])
 			i++
 		}
 	}
 	// If a child JSON object is encountered,
 	// convert all of its `Date` string values to `Date`s,
 	// and proceed recursively for all of its properties.
-	else if (is_object(object))
+	else if (isObject(object))
 	{
 		for (const key of Object.keys(object))
 		{
 			// proceed recursively
-			object[key] = parse_dates(object[key])
+			object[key] = parseDates(object[key])
 		}
 	}
 

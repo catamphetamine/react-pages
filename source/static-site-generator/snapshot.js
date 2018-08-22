@@ -7,11 +7,9 @@ import download from './download'
 // Snapshots all pages (URLs).
 export default async function snapshot_website({ host, port, pages, outputPath })
 {
+	// Could be `null`, not just `undefined`.
 	if (!pages) {
 		pages = []
-	} else {
-		// Add the main ("home") page.
-		pages.unshift('')
 	}
 
 	// Add the "base" page which is an empty page

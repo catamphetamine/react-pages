@@ -1,25 +1,36 @@
+import React from 'react'
 import { createStore, combineReducers, applyMiddleware, compose } from 'redux'
 import { composeWithDevTools } from 'redux-devtools-extension/logOnlyInProduction'
 
-import asynchronous_middleware from './middleware/asynchronous'
-import history_middleware from './middleware/history'
+import asynchronousMiddleware from './middleware/asynchronous'
 
-import preloading_middleware from './preload/middleware'
-import preload_reducer from './preload/reducer'
+import preload from './preload/preload'
+import preloadReducer from './preload/reducer'
 
-import { LoadState } from './actions'
+import {
+	convertRoutes,
+	foundReducer,
+	createRouterStoreEnhancers,
+	initializeRouter,
+	getMatchedRoutes,
+	getMatchedRoutesParams,
+	getRouteParams,
+	getCurrentlyMatchedLocation,
+	getPreviouslyMatchedLocation,
+	// setUpNavigationHook
+} from '../router'
 
-export default function create_store(settings, data, get_history, http_client, options)
+export default function _createStore(settings, data, createHistoryProtocol, httpClient, options)
 {
-	const
+	let
 	{
 		reducer,
 		routes,
-		redux_middleware,
-		redux_store_enhancers,
-		redux_event_naming,
-		preload,
-		http
+		reduxMiddleware,
+		reduxStoreEnhancers,
+		reduxEventNaming,
+		http,
+		onError
 	}
 	= settings
 
@@ -32,124 +43,141 @@ export default function create_store(settings, data, get_history, http_client, o
 	}
 	= options
 
-	// Redux middleware
-	const middleware = []
+	// `routes` will be converted.
+	let convertedRoutes
+	const getRoutes = () => convertedRoutes
 
-	// User may supply his own Redux middleware
-	if (redux_middleware)
-	{
-		middleware.push(...redux_middleware())
-	}
+	// Add `@preload()` data hook.
+	routes = React.cloneElement(routes, {
+		getData() {
+			let isInitialClientSideNavigation
+			if (!server) {
+				if (!window._react_website_routes_rendered) {
+					isInitialClientSideNavigation = true
+					window._react_website_routes_rendered = true
+				}
+				if (window._react_website_skip_preload) {
+					return Promise.resolve()
+				}
+			}
 
-	// Built-in middleware
+			return preload(
+				getCurrentlyMatchedLocation(store.getState()),
+				// `previousLocation` is the location before the transition.
+				// Is used for `instantBack`.
+				(server || isInitialClientSideNavigation) ? undefined : getPreviouslyMatchedLocation(store.getState()),
+				{
+					routes: getMatchedRoutes(store.getState(), getRoutes()),
+					routeParams: getMatchedRoutesParams(store.getState()),
+					params: getRouteParams(store.getState())
+				},
+				server,
+				onError,
+				store.dispatch,
+				store.getState,
+				stats,
+				onNavigate
+			)
+		}
+	})
+
+	// Convert `found` `<Route/>`s to a JSON structure.
+	routes = convertRoutes(routes)
+	convertedRoutes = routes
+
+	// Redux middleware.
+	// User may supply his own Redux middleware.
+	const middleware = reduxMiddleware ? reduxMiddleware() : []
+
+	// Built-in middleware.
 	middleware.push
 	(
 		// Asynchronous middleware (e.g. for HTTP Ajax calls).
-		asynchronous_middleware
+		asynchronousMiddleware
 		(
-			http_client,
-			redux_event_naming,
+			httpClient,
+			reduxEventNaming,
 			server,
-			http.error,
-			http.errorState,
-			get_history
-		),
-
-		// Makes @preload() decorator work.
-		preloading_middleware
-		(
-			server,
-			settings.error,
-			routes,
-			get_history,
-			settings.history.options.basename,
-			stats,
-			onNavigate
-		),
-
-		// Performs `redirect` and `goto` actions on `history`
-		history_middleware(get_history)
+			http.onError,
+			http.errorState
+		)
 	)
 
 	// Redux "store enhancers"
-	const store_enhancers =
+	const storeEnhancers =
 	[
-		// Redux middleware are applied in reverse order
+		// Redux middleware are applied in reverse order.
 		// (which is counter-intuitive)
 		applyMiddleware(...middleware)
 	]
 
-	// User may supply his own Redux store enhancers
-	if (redux_store_enhancers)
-	{
-		store_enhancers.push(...redux_store_enhancers())
+	// User may supply his own Redux store enhancers.
+	if (reduxStoreEnhancers) {
+		storeEnhancers.push(...reduxStoreEnhancers())
 	}
 
-	// Check that `@preload()` status reducer name isn't occupied
-	if (reducer.preload)
-	{
-		throw new Error(`"preload" reducer name is reserved for react-website's "@preload()" status. Use a different name for your "preload" reducer.`)
-	}
+	storeEnhancers.push(...createRouterStoreEnhancers(routes, createHistoryProtocol, {
+		basename: settings.basename
+	}))
 
-	// Create Redux store
-	const store = get_store_enhancers_composer(server, devtools)(...store_enhancers)(createStore)(create_reducer(reducer), data)
+	// Create Redux store.
+	const store = getStoreEnhancersComposer(server, devtools)(...storeEnhancers)(createStore)(createReducer(reducer), data)
 
 	// On the client side, add `hotReload()` function to the `store`.
 	// (could just add this function to `window` but adding it to the `store` fits more)
-	if (!server)
-	{
-		// `hot_reload` helper function gives the web application means to hot reload its Redux reducers
-		store.hot_reload = reducer => store.replaceReducer(create_reducer(reducer))
-		// Add camelCase alias
-		store.hotReload = store.hot_reload
+	if (!server) {
+		// `hotReload` helper function gives the web application means to hot reload its Redux reducers
+		store.hotReload = (reducer) => store.replaceReducer(createReducer(reducer))
 	}
+
+	// Initialize `found`.
+	initializeRouter(store)
 
 	// Return the Redux store
 	return store
 }
 
-function create_reducer(reducers)
+function createReducer(reducers)
 {
-	// Add `@preload()` status reducer
-	reducers.preload = preload_reducer
-	// Create reducer
-	return replaceable_state(combineReducers(reducers), LoadState)
-}
-
-function replaceable_state(reducer, event)
-{
-	return function(state, action)
-	{
-		switch (action.type)
-		{
-			case event:
-				return reducer(action.state, action)
-			default:
-				return reducer(state, action)
+	// Check for reserved reducer names.
+	for (const reducerName of RESERVED_REDUCER_NAMES) {
+		if (reducers[reducerName]) {
+			throw new Error(`"${reducerName}" reducer name is reserved.`)
 		}
 	}
+	// Clone the object because it will be modified.
+	reducers = { ...reducers }
+	// Add `found` reducer.
+	reducers.found = foundReducer
+	// Add `@preload()` status reducer.
+	reducers.preload = preloadReducer
+	// Create reducer.
+	return combineReducers(reducers)
 }
 
-function get_store_enhancers_composer(server, devtools)
+function getStoreEnhancersComposer(server, devtools)
 {
 	// Redux DevTools aren't used on the server side
-	if (server)
-	{
+	if (server) {
 		return compose
 	}
 
 	// Custom behaviour
-	if (devtools && devtools.compose)
-	{
+	if (devtools && devtools.compose) {
 		return devtools.compose
 	}
 
 	// With custom options
-	if (devtools && devtools.options)
-	{
+	if (devtools && devtools.options) {
 		return composeWithDevTools(devtools.options)
 	}
 
 	// Without custom options
 	return composeWithDevTools
 }
+
+const RESERVED_REDUCER_NAMES = [
+	'found',
+	'location',
+	'preload'
+]

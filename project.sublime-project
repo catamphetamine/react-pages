@@ -8,7 +8,7 @@
 		{
 			"follow_symlinks": true,
 			"path": ".",
-			"folder_exclude_patterns": ["react-website/node_modules", "react-website/coverage", "react-website/build", "react-website/build", "react-website/cjs", "react-website/project.sublime-workspace", "react-website/.nyc_output"]
+			"folder_exclude_patterns": ["react-website/node_modules", "react-website/coverage", "react-website/modules", "react-website/commonjs", "react-website/project.sublime-workspace", "react-website/.nyc_output"]
 		}
 	],
 	"settings":

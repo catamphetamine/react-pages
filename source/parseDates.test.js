@@ -1,6 +1,6 @@
-import parse_dates from './date parser'
+import parseDates from './parseDates'
 
-describe('date parser', function()
+describe('parseDates', function()
 {
 	it('should parse dates correctly', function()
 	{
@@ -53,7 +53,7 @@ describe('date parser', function()
 			]
 		}
 
-		parse_dates(object)
+		parseDates(object)
 
 		expect(object.date).to.be.an.instanceof(Date)
 

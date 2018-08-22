@@ -1,8 +1,8 @@
-import parse_dates from './date parser'
-import { is_object } from './helpers'
+import parseDates from './parseDates'
+import { isObject } from './helpers'
 
 // Performs HTTP requests
-export default class HTTP_Request
+export default class HttpRequest
 {
 	constructor(method, url, data, options)
 	{
@@ -225,9 +225,8 @@ export default class HTTP_Request
 			case 'application/json':
 			// http://jsonapi.org/
 			case 'application/vnd.api+json':
-				if (this.parse_json_dates)
-				{
-					return parse_dates(response.body)
+				if (this.parse_json_dates) {
+					return parseDates(response.body)
 				}
 				return response.body
 
@@ -295,7 +294,7 @@ function construct_form_data(data)
 
 function has_binary_data(data)
 {
-	if (!is_object(data))
+	if (!isObject(data))
 	{
 		return false
 	}

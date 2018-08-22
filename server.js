@@ -1,10 +1,10 @@
 // npm package helper
 
-var web_server = require('./cjs/server/server').default
+var webServer = require('./commonjs/server/server').default
 
-exports = module.exports = web_server
+exports = module.exports = webServer
 
-exports.render = require('./cjs/server/server').render_page
-exports.renderError = require('./cjs/server/render error').default
+exports.render = require('./commonjs/server/server').renderPage
+exports.renderError = require('./commonjs/server/renderError').default
 
-exports['default'] = web_server
+exports['default'] = webServer

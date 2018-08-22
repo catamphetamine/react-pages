@@ -1,13 +1,15 @@
 {
   "name": "react-website",
-  "version": "2.0.31",
+  "version": "3.0.0-alpha.1",
   "description": "A complete solution for building a React/Redux application: routing, page preloading, (optional) server-side rendering, asynchronous HTTP requests, document metadata, internationalization, etc.",
-  "main": "index.common.js",
-  "module": "index.es6.js",
+  "main": "index.commonjs.js",
+  "module": "index.js",
   "dependencies": {
     "babel-runtime": "^6.6.1",
     "classnames": "^2.2.5",
     "cookie": "^0.3.1",
+    "found": "^0.3.12",
+    "found-scroll": "^0.1.5",
     "fs-extra": "^2.1.2",
     "hoist-non-react-statics": "^2.5.5",
     "lodash": "^4.17.5",
@@ -16,7 +18,6 @@
     "print-error": "^0.1.3",
     "progress": "^2.0.0",
     "prop-types": "^15.5.6",
-    "react-router-scroll": "^0.4.1",
     "redux-devtools-extension": "^2.13.2",
     "robust-websocket": "^0.3.0",
     "string-to-stream": "^1.1.0",
@@ -33,26 +34,22 @@
     "babel-plugin-transform-runtime": "^6.23.0",
     "babel-preset-env": "^1.6.1",
     "babel-preset-react": "^6.5.0",
-    "better-npm-run": "0.0.14",
     "chai": "^3.5.0",
     "crlf": "^1.1.1",
-    "cross-env": "^5.1.4",
+    "cross-env": "^5.2.0",
     "mocha": "^5.0.5",
     "npm-run-all": "^1.4.0",
     "nyc": "^11.6.0",
     "react": "^16",
     "react-dom": "^16",
     "react-redux": "^4.4.5",
-    "react-router": "^3.0.0",
     "redux": "^3.5.2",
     "rimraf": "^2.5.0"
   },
   "peerDependencies": {
     "react": ">= 16.0.0",
     "react-dom": ">= 16.0.0",
-    "react-router": "^3.0.0",
-    "history": "^3.0.0",
-    "redux": ">= 3.1.0",
+    "redux": ">= 4.0.0",
     "react-redux": "*"
   },
   "sideEffects": [
@@ -62,61 +59,19 @@
     "test": "mocha --bail --require babel-core/register --require ./test/setup.js \"source/**/*.test.js\" \"test/**/*.test.js\"",
     "test-coverage": "cross-env NODE_ENV=test nyc mocha --bail --require ./test/setup.js \"source/**/*.test.js\" \"test/**/*.test.js\"",
     "coveralls": "nyc report --reporter=text-lcov | coveralls",
-    "clean-for-build": "rimraf ./cjs/**/* ./build/**/*",
-    "build-commonjs-modules": "better-npm-run build-commonjs-modules-client && better-npm-run build-commonjs-modules-server && better-npm-run build-commonjs-modules-server-redux && better-npm-run build-commonjs-modules-static-site-generator",
-    "build-modules": "better-npm-run build-modules-client && better-npm-run build-modules-server && better-npm-run build-modules-server-redux && better-npm-run build-modules-static-site-generator",
-    "build": "npm-run-all clean-for-build build-commonjs-modules build-modules",
+    "clean-for-build": "rimraf ./commonjs/**/* ./modules/**/*",
+    "build-commonjs-modules-client": "cross-env BABEL_ENV=commonjs babel ./source --out-dir ./commonjs --source-maps --ignore ./source/server/,./source/redux/server/,./source/static-site-generator/",
+    "build-commonjs-modules-server": "cross-env BABEL_ENV=commonjs/server babel ./source/server --out-dir ./commonjs/server --source-maps",
+    "build-commonjs-modules-server-redux": "cross-env BABEL_ENV=commonjs/server babel ./source/redux/server --out-dir ./commonjs/redux/server --source-maps",
+    "build-commonjs-modules-static-site-generator": "cross-env BABEL_ENV=commonjs/server babel ./source/static-site-generator --out-dir ./commonjs/static-site-generator --source-maps",
+    "build-commonjs-modules": "npm run build-commonjs-modules-client && npm run build-commonjs-modules-server && npm run build-commonjs-modules-server-redux && npm run build-commonjs-modules-static-site-generator",
+    "build-es6-modules-client": "cross-env BABEL_ENV=es6 babel ./source --out-dir ./modules --source-maps --ignore ./source/server/,./source/redux/server/,./source/static-site-generator/",
+    "build-es6-modules-server": "cross-env BABEL_ENV=es6/server babel ./source/server --out-dir ./modules/server --source-maps",
+    "build-es6-modules-server-redux": "cross-env BABEL_ENV=es6/server babel ./source/redux/server --out-dir ./modules/redux/server --source-maps",
+    "build-es6-modules-static-site-generator": "cross-env BABEL_ENV=es6/server babel ./source/static-site-generator --out-dir ./modules/static-site-generator --source-maps",
+    "build-es6-modules": "npm run build-es6-modules-client && npm run build-es6-modules-server && npm run build-es6-modules-server-redux && npm run build-es6-modules-static-site-generator",
+    "build": "npm-run-all clean-for-build build-commonjs-modules build-es6-modules",
     "prepare": "npm-run-all build test"
-  },
-  "betterScripts": {
-    "build-commonjs-modules-client": {
-      "command": "babel ./source --out-dir ./cjs --source-maps --ignore ./source/server/,./source/redux/server/,./source/static-site-generator/",
-      "env": {
-        "BABEL_ENV": "commonjs"
-      }
-    },
-    "build-commonjs-modules-server": {
-      "command": "babel ./source/server --out-dir ./cjs/server --source-maps",
-      "env": {
-        "BABEL_ENV": "commonjs/server"
-      }
-    },
-    "build-commonjs-modules-server-redux": {
-      "command": "babel ./source/redux/server --out-dir ./cjs/redux/server --source-maps",
-      "env": {
-        "BABEL_ENV": "commonjs/server"
-      }
-    },
-    "build-commonjs-modules-static-site-generator": {
-      "command": "babel ./source/static-site-generator --out-dir ./cjs/static-site-generator --source-maps",
-      "env": {
-        "BABEL_ENV": "commonjs/server"
-      }
-    },
-    "build-modules-client": {
-      "command": "babel ./source --out-dir ./build --source-maps --ignore ./source/server/,./source/redux/server/,./source/static-site-generator/",
-      "env": {
-        "BABEL_ENV": "es6"
-      }
-    },
-    "build-modules-server": {
-      "command": "babel ./source/server --out-dir ./build/server --source-maps",
-      "env": {
-        "BABEL_ENV": "es6/server"
-      }
-    },
-    "build-modules-server-redux": {
-      "command": "babel ./source/redux/server --out-dir ./build/redux/server --source-maps",
-      "env": {
-        "BABEL_ENV": "es6/server"
-      }
-    },
-    "build-modules-static-site-generator": {
-      "command": "babel ./source/static-site-generator --out-dir ./build/static-site-generator --source-maps",
-      "env": {
-        "BABEL_ENV": "es6/server"
-      }
-    }
   },
   "repository": {
     "type": "git",

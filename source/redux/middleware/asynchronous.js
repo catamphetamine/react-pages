@@ -1,6 +1,6 @@
-import { exists, is_object } from '../../helpers'
-import { goto_action } from '../actions'
-import { location_url } from '../../location'
+import { exists, isObject } from '../../helpers'
+import { getLocationUrl } from '../../location'
+import { goto } from '../../router'
 
 export const RESULT_ACTION_PROPERTY = 'value'
 export const ERROR_ACTION_PROPERTY = 'error'
@@ -12,48 +12,59 @@ export const ERROR_ACTION_PROPERTY = 'error'
 //
 // `dispatch()` call will return a `Promise`.
 //
-export default function asynchronous_middleware(http_client, redux_event_naming, server, on_error, parseError = parse_error, get_history)
-{
+export default function asynchronousMiddleware(
+	httpClient,
+	reduxEventNaming,
+	server,
+	onError,
+	parseError = defaultParseError
+) {
 	return ({ dispatch, getState }) =>
 	{
 		// Can cancel previous actions of the same `type` (if configured).
 		// E.g. for an AJAX autocomplete.
-		const cancellable_promises = {}
+		const cancellablePromises = {}
 
 		return next => action =>
 		{
-			let { promise, event, events, cancelPrevious, ...rest } = action
+			let {
+				promise,
+				event,
+				events,
+				cancelPrevious,
+				...rest
+			} = action
 
 			// If the dispatched action doesn't have a `promise` function property then do nothing
-			if (typeof promise !== 'function')
-			{
+			if (typeof promise !== 'function') {
 				return next(action)
 			}
 
 			// Generate the three event names automatically based on a base event name
-			if (!events && typeof event === 'string')
-			{
-				events = redux_event_naming(event)
+			if (!events && typeof event === 'string') {
+				events = reduxEventNaming(event)
 			}
 
 			// Validate `events` property
-			if (!events || events.length !== 3)
-			{
+			if (!events || events.length !== 3) {
 				throw new Error(`"events" property must be an array of 3 event names: e.g. ['pending', 'success', 'error']`)
 			}
 
 			// event names
-			const [Request, Success, Failure] = events
+			const [ Request, Success, Failure ] = events
 
 			// dispatch the `pending` event to the Redux store
 			dispatch({ ...rest, type: Request })
 
 			// Run the asychronous action (e.g. an HTTP request)
-			const promised = promise({ http: http_client, dispatch, getState })
+			const promised = promise({
+				http: httpClient,
+				dispatch,
+				getState
+			})
 
 			// Validate that `promise()` actually returned a `Promise`
-			if (!promised || typeof promised.then !== 'function')
-			{
+			if (!promised || typeof promised.then !== 'function') {
 				console.error('Redux action\'s "promise" function returned:', promised);
 				throw new Error('Redux action\'s "promise" function must return a Promise.')
 			}
@@ -63,40 +74,32 @@ export default function asynchronous_middleware(http_client, redux_event_naming,
 
 			// Cancel previous action of the same `type` (if configured).
 			// E.g. for an AJAX autocomplete.
-			if (cancellable)
-			{
-				if (cancellable_promises[Request])
-				{
-					cancellable_promises[Request].cancel()
+			if (cancellable) {
+				if (cancellablePromises[Request]) {
+					cancellablePromises[Request].cancel()
 				}
-
-				cancellable_promises[Request] = promised
+				cancellablePromises[Request] = promised
 			}
 
 			// Returning the result like this,
 			// because if returned the `promised.then()` chain directly
 			// then it wouldn't get detected as an "Unhandled rejection"
 			// in case of an error.
-			return new Promise((resolve, reject) =>
-			{
+			return new Promise((resolve, reject) => {
 				// Don't `return` this promise
 				// so that it detects it as an "Unhandled rejection"
 				// in case of an error.
-				promised.then
-				(
+				promised.then(
 					// If the Promise resolved
 					// (e.g. an HTTP request succeeded)
-					(result) =>
-					{
+					(result) => {
 						// The default `Promise` implementation has no `.finally()`
-						if (cancellable)
-						{
-							delete cancellable_promises[Request]
+						if (cancellable) {
+							delete cancellablePromises[Request]
 						}
 
 						// Dispatch the `success` event to the Redux store
-						dispatch
-						({
+						dispatch({
 							...rest,
 							type : Success,
 							[RESULT_ACTION_PROPERTY] : result
@@ -116,17 +119,14 @@ export default function asynchronous_middleware(http_client, redux_event_naming,
 					//
 					// (Http status !== 20x
 					//  or the Http response JSON object has an `error` field)
-					(error) =>
-					{
+					(error) => {
 						// The default `Promise` implementation has no `.finally()`
-						if (cancellable)
-						{
-							delete cancellable_promises[Request]
+						if (cancellable) {
+							delete cancellablePromises[Request]
 						}
 
 						// Dispatch the `failure` event to the Redux store
-						dispatch
-						({
+						dispatch({
 							...rest,
 							type : Failure,
 							[ERROR_ACTION_PROPERTY] : parseError(error)
@@ -145,24 +145,23 @@ export default function asynchronous_middleware(http_client, redux_event_naming,
 						// On the client side though, an `http` call
 						// may be performed via some user input,
 						// so it needs this separate case "error handler".
-						if (!server && on_error && !action.preloading)
-						{
-							const location = get_history().getCurrentLocation()
+						if (!server && onError && !action.preloading) {
+
+							const location = getState().location
 
 							// Report the error
 							// (for example, redirect to a login page
 							//  if a JWT "access token" expired)
-							on_error(error,
-							{
+							onError(error, {
 								path : location.pathname,
-								url  : location_url(location),
+								url  : getLocationUrl(location),
 								// Using `goto` instead of `redirect` here
 								// because it's not part of `@preload()`
 								// and is therefore part of some kind of an HTTP request
 								// triggered by user input (e.g. form submission)
 								// which means it is convenient to be able to
 								// go "Back" to the page on which the error originated.
-								redirect : to => dispatch(goto_action(to)),
+								redirect : to => dispatch(goto(to)),
 								dispatch,
 								getState,
 								server
@@ -177,8 +176,7 @@ export default function asynchronous_middleware(http_client, redux_event_naming,
 
 						// Reduce client-side error reporting software (e.g. sentry.io)
 						// noise for not-really-errors like "Unauthenticated" and "Unauthorized".
-						if (error.status !== 401 && error.status !== 403)
-						{
+						if (error.status !== 401 && error.status !== 403) {
 							throw error
 						}
 					}
@@ -202,24 +200,22 @@ export default function asynchronous_middleware(http_client, redux_event_naming,
 // the `error` instance ha `.data` JSON object property
 // which carries the `application/json` HTTP response data.
 //
-function parse_error(error)
+function defaultParseError(error)
 {
 	// Copies JSON HTTP response entirely
-	const error_data = is_object(error.data) ? error.data : {}
+	const errorData = isObject(error.data) ? error.data : {}
 
 	// Sets HTTP response `status` code
 	// if `status` property wasn't present in JSON HTTP response.
-	if (!exists(error_data.status))
-	{
-		error_data.status = error.status
+	if (!exists(errorData.status)) {
+		errorData.status = error.status
 	}
 
 	// Copies `message` from `Error` instance
 	// if `message` property wasn't present in JSON HTTP response.
-	if (!exists(error_data.message))
-	{
-		error_data.message = error.message
+	if (!exists(errorData.message)) {
+		errorData.message = error.message
 	}
 
-	return error_data
+	return errorData
 }

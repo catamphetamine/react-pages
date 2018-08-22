@@ -8,8 +8,8 @@ from './collect'
 
 import
 {
-	Preload_method_name,
-	Preload_options_name
+	PRELOAD_METHOD_NAME,
+	PRELOAD_OPTIONS_NAME
 }
 from './decorator'
 
@@ -25,13 +25,13 @@ describe(`@preload`, function()
 		([
 			null,
 			{
-				[Preload_method_name]  : [preload_1],
-				[Preload_options_name] : [{ client : true }]
+				[PRELOAD_METHOD_NAME]  : [preload_1],
+				[PRELOAD_OPTIONS_NAME] : [{ client : true }]
 			},
 			undefined,
 			{
-				[Preload_method_name]  : [preload_2, preload_3],
-				[Preload_options_name] : [{ blocking: false }, { server : true }]
+				[PRELOAD_METHOD_NAME]  : [preload_2, preload_3],
+				[PRELOAD_OPTIONS_NAME] : [{ blocking: false }, { server : true }]
 			},
 			{}
 		])

@@ -1,19 +1,21 @@
-import { event_name } from './naming'
+import { eventName } from './naming'
 import normalize_common_settings from './normalize'
 
 import { RESULT_ACTION_PROPERTY, ERROR_ACTION_PROPERTY } from './middleware/asynchronous'
 
 // Creates Redux module object
 // (which will eventually be transformed into a reducer)
-export default function create_redux_module(namespace, settings)
+export default function createReduxModule(namespace, settings)
 {
 	const redux = new ReduxModule(namespace, settings)
 
 	// Public aliases
-	redux.getProperties = redux.get_properties
 	redux.resetError = redux.reset_error
 	redux.properties = redux.add_state_properties
 	redux.property = redux.add_state_properties
+
+	// Deprecated.
+	redux.getProperties = redux.get_properties
 
 	return redux
 }
@@ -50,7 +52,7 @@ class ReduxModule
 		else
 		{
 			// Use "success" event name.
-			event = this.settings.redux_event_naming(event_name(namespace, event))[1]
+			event = this.settings.reduxEventNaming(eventName(namespace, event))[1]
 		}
 
 		if (!this.handlers[event])
@@ -104,16 +106,17 @@ class ReduxModule
 			success_event_name,
 			error_event_name
 		]
-		= this.settings.redux_event_naming(event)
+		= this.settings.reduxEventNaming(event)
 
 		// Redux "action creator"
 		return () =>
 		({
-			type  : event_name(this.namespace, error_event_name),
+			type  : eventName(this.namespace, error_event_name),
 			error : undefined
 		})
 	}
 
+	// Deprecated.
 	get_properties = (state) =>
 	{
 		const properties = {}
@@ -126,11 +129,9 @@ class ReduxModule
 		return properties
 	}
 
-	// camelCased alias
-	getProperties = (state) =>
-	{
-		return this.get_properties(state)
-	}
+	// camelCased alias.
+	// Deprecated.
+	getProperties = (state) => this.get_properties(state)
 
 	reducer(initial_state = {})
 	{
@@ -224,12 +225,12 @@ function create_action(event, action, result, options, redux)
 	if (sync)
 	{
 		// Reducer
-		redux.on(event_name(namespace, event), get_action_value_reducer(result))
+		redux.on(eventName(namespace, event), get_action_value_reducer(result))
 
 		// Redux "action creator"
 		return (...parameters) =>
 		({
-			type : event_name(namespace, event),
+			type : eventName(namespace, event),
 			[RESULT_ACTION_PROPERTY] : action.apply(this, parameters)
 		})
 	}
@@ -247,14 +248,14 @@ function create_action(event, action, result, options, redux)
 	// Redux "action creator"
 	return (...parameters) =>
 	({
-		event   : event_name(namespace, event),
+		event   : eventName(namespace, event),
 		promise : (utility) =>
 		{
-			if (redux.v3)
-			{
-				return action.apply(this, parameters)(utility.http)
+			if (redux.v2) {
+				// For gradual migration from version "2.x" syntax.
+				return action.apply(this, [utility].concat(parameters))
 			}
-			return action.apply(this, [utility].concat(parameters))
+			return action.apply(this, parameters)(utility.http)
 		},
 		cancelPrevious
 	})
@@ -269,12 +270,12 @@ function create_action(event, action, result, options, redux)
 //
 function add_asynchronous_action_reducers(redux, namespace, event, result_reducer)
 {
-	if (!redux.settings.redux_event_naming)
+	if (!redux.settings.reduxEventNaming)
 	{
 		throw new Error("`reduxEventNaming` function parameter was not passed")
 	}
 
-	if (!redux.settings.redux_property_naming)
+	if (!redux.settings.reduxPropertyNaming)
 	{
 		throw new Error("`reduxPropertyNaming` function parameter was not passed")
 	}
@@ -285,16 +286,16 @@ function add_asynchronous_action_reducers(redux, namespace, event, result_reduce
 		success_event_name,
 		error_event_name
 	]
-	= redux.settings.redux_event_naming(event)
+	= redux.settings.reduxEventNaming(event)
 
-	const pending_property_name = redux.settings.redux_property_naming(pending_event_name)
-	const error_property_name   = redux.settings.redux_property_naming(error_event_name)
+	const pending_property_name = redux.settings.reduxPropertyNaming(pending_event_name)
+	const error_property_name   = redux.settings.reduxPropertyNaming(error_event_name)
 
 	// This info will be used in `storeConnector`
 	redux.add_state_properties(pending_property_name, error_property_name)
 
 	// When Promise is created: reset result variable, clear `error`, set `pending` flag.
-	redux.on(event_name(namespace, pending_event_name), (state) =>
+	redux.on(eventName(namespace, pending_event_name), (state) =>
 	{
 		const new_state =
 		{
@@ -304,25 +305,27 @@ function add_asynchronous_action_reducers(redux, namespace, event, result_reduce
 		}
 
 		// Clear `error`
-		if (redux.v3) {
-			delete new_state[error_property_name]
-		} else {
+		if (redux.v2) {
+			// For gradual migration from version "2.x" syntax.
 			new_state[error_property_name] = undefined
+		} else {
+			delete new_state[error_property_name]
 		}
 
 		return new_state
 	})
 
 	// When Promise succeeds: clear `pending` flag, set result variable.
-	redux.on(event_name(namespace, success_event_name), (state, result) =>
+	redux.on(eventName(namespace, success_event_name), (state, result) =>
 	{
 		const new_state = result_reducer(state, result)
 
 		// Clear `pending` flag
-		if (redux.v3) {
-			delete new_state[pending_property_name]
-		} else {
+		if (redux.v2) {
+			// For gradual migration from version "2.x" syntax.
 			new_state[pending_property_name] = false
+		} else {
+			delete new_state[pending_property_name]
 		}
 
 		return new_state
@@ -330,7 +333,7 @@ function add_asynchronous_action_reducers(redux, namespace, event, result_reduce
 
 	// When Promise fails, clear `pending` flag and set `error`.
 	// Can also clear `error` when no `error` is passed as part of an action.
-	redux.on(event_name(namespace, error_event_name), (state, error) =>
+	redux.on(eventName(namespace, error_event_name), (state, error) =>
 	{
 		const new_state =
 		{
@@ -339,14 +342,15 @@ function add_asynchronous_action_reducers(redux, namespace, event, result_reduce
 		}
 
 		// Clear `pending` flag
-		if (redux.v3) {
+		if (redux.v2) {
+			// For gradual migration from version "2.x" syntax.
+			new_state[pending_property_name] = false
+		} else {
 			delete new_state[pending_property_name]
 			// `resetError()`
 			if (!error) {
 				delete new_state[error_property_name]
 			}
-		} else {
-			new_state[pending_property_name] = false
 		}
 
 		return new_state

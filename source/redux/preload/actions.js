@@ -1,17 +1,15 @@
-import { parse_location } from '../../location'
+import { parseLocation } from '../../location'
 
-export const Preload_started  = '@@react-website/redux/preload-started'
-export const Preload_finished = '@@react-website/redux/preload-finished'
-export const Preload_failed   = '@@react-website/redux/preload-failed'
-
-export const Preload   = '@@react-website/preload'
+export const PRELOAD_STARTED  = '@@react-website/redux/preload-started'
+export const PRELOAD_FINISHED = '@@react-website/redux/preload-finished'
+export const PRELOAD_FAILED   = '@@react-website/redux/preload-failed'
 
 // Can be called manually to show the loading screen.
 // E.g. when the user has been logged in
 // and calling `window.location.reload()`.
-export const indicate_loading = () =>
+export const indicateLoading = () =>
 ({
-	type      : Preload_started,
+	type      : PRELOAD_STARTED,
 	immediate : true
 })
 
@@ -26,7 +24,7 @@ export const indicate_loading = () =>
 // If `initialClientSidePreload` is `true`
 // then just client-side-only `@preload()`s will be executed.
 //
-export const start_preload = (location,
+export const startPreload = (location,
 {
 	redirect,
 	navigate,
@@ -35,8 +33,8 @@ export const start_preload = (location,
 	instant
 }) =>
 ({
-	type     : Preload,
-	location : parse_location(location),
+	type     : PRELOAD,
+	location : parseLocation(location),
 	redirect,
 	navigate : navigate === undefined ? true : navigate,
 	initial  : initialClientSidePreload,

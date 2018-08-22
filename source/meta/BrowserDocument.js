@@ -31,7 +31,7 @@ export default class BrowserDocument
 		if (name === 'charset') {
 			meta.setAttribute('charset', value)
 		} else {
-			meta.setAttribute(meta_attribute_for(name), name)
+			meta.setAttribute(getMetaAttributeFor(name), name)
 			meta.setAttribute('content', value)
 		}
 		return meta
@@ -42,7 +42,7 @@ export default class BrowserDocument
 		if (name === 'charset') {
 			return meta.hasAttribute('charset')
 		}
-		return meta.getAttribute(meta_attribute_for(name)) === name
+		return meta.getAttribute(getMetaAttributeFor(name)) === name
 	}
 
 	getMetaTagValue(meta)
@@ -72,7 +72,7 @@ export default class BrowserDocument
  * Get `<meta/>` "name" attribute.
  * @return {string}
  */
-export function meta_attribute_for(name)
+export function getMetaAttributeFor(name)
 {
 	return name.indexOf(':') >= 0 ? 'property' : 'name'
 }

@@ -1,18 +1,16 @@
 // Based on `koa-locale`
 // https://github.com/koa-modules/locale/blob/master/index.js
-export function get_preferred_locales(headers, cookies)
+export function getPreferredLocales(headers, cookies)
 {
 	let locales = []
 
 	// const locale_from_query = getLocaleFromQuery(require('url').parse(request.url, true).query)
-	// if (locale_from_query)
-	// {
+	// if (locale_from_query) {
 	// 	locales.push(locale_from_query)
 	// }
 
 	const locale_from_cookie = getLocaleFromCookie(cookies.locale)
-	if (locale_from_cookie)
-	{
+	if (locale_from_cookie) {
 		locales.push(locale_from_cookie)
 	}
 
@@ -38,15 +36,11 @@ function getLocalesFromHeader(accepts = '')
 	let match
 	// Terminates at 10 preferred locales max
 	// (to protect from a possible overflow attack)
-	while (locales.length < 10 && (match = regular_expression.exec(accepts)))
-	{
+	while (locales.length < 10 && (match = regular_expression.exec(accepts))) {
 		let locale = match[2]
-
-		if (match.length > 3 && match[3])
-		{
+		if (match.length > 3 && match[3]) {
 			locale += match[3].toUpperCase()
 		}
-
 		locales.push(locale)
 	}
 

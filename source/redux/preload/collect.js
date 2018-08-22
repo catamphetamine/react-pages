@@ -1,19 +1,18 @@
 import isEqual from 'lodash/isEqual'
-import getRouteParams from 'react-router/lib/getRouteParams'
 
-import { Preload_method_name, Preload_options_name } from './decorator'
+import { PRELOAD_METHOD_NAME, PRELOAD_OPTIONS_NAME } from './decorator'
 
 // Returns function returning a Promise
 // which resolves when all the required preload()s are resolved.
 //
 // If no preloading is needed, then returns nothing.
 //
-export default function generate_preload_chain
+export default function generatePreloadChain
 (
 	initial_client_side_preload,
 	server,
-	routes,
 	components,
+	routesParams,
 	getState,
 	dispatch,
 	location,
@@ -25,7 +24,7 @@ export default function generate_preload_chain
 	// Skips some of the `@preloads()`.
 	if (!server)
 	{
-		components = only_changed_components(routes, components, parameters)
+		components = getOnlyChangedComponents(components, routesParams)
 	}
 
 	// Get all `preload` methods on the React-Router component chain
@@ -82,12 +81,12 @@ export function collect_preloaders(components)
 	return components
 		// Some wrapper `<Route/>`s can have no `component`.
 		// Select all components having `@preload()`.
-		.filter(component => component && component[Preload_method_name])
+		.filter(component => component && component[PRELOAD_METHOD_NAME])
 		// Extract `@preload()` functions and their options.
-		.map((component) => component[Preload_method_name].map((preload, i) =>
+		.map((component) => component[PRELOAD_METHOD_NAME].map((preload, i) =>
 		({
 			preload,
-			options: component[Preload_options_name][i]
+			options: component[PRELOAD_OPTIONS_NAME][i]
 		})))
 		// // Flatten `@preload()` functions and their options.
 		// .reduce((all, preload_and_options) => all.concat(preload_and_options), [])
@@ -322,28 +321,30 @@ function promisify(chain, preloading)
 // influence the last `<Route/>` component in the chain
 // which is gonna be reloaded anyway.
 //
-function only_changed_components(routes, components, parameters)
+function getOnlyChangedComponents(components, routesParams)
 {
-	if (window._previous_routes)
+	let changedComponents = components
+
+	if (window._previous_route_components)
 	{
-		const previous_routes     = window._previous_routes
-		const previous_parameters = window._previous_route_parameters
+		const previous_route_components = window._previous_route_components
+		const previous_route_parameters = window._previous_route_parameters
 
 		let i = 0
-		while (i < routes.length - 1 &&
-			previous_routes[i].component === routes[i].component &&
-			isEqual(getRouteParams(previous_routes[i], previous_parameters), getRouteParams(routes[i], parameters)))
+		while (i < components.length - 1 &&
+			previous_route_components[i] === components[i] &&
+			isEqual(previous_route_parameters[i], routesParams[i]))
 		{
 			i++
 		}
 
-		components = components.slice(i)
+		changedComponents = changedComponents.slice(i)
 	}
 
-	window._previous_routes           = routes
-	window._previous_route_parameters = parameters
+	window._previous_route_components = components
+	window._previous_route_parameters = routesParams
 
-	return components
+	return changedComponents
 }
 
 function concat(array, part)

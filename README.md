@@ -17,14 +17,17 @@ A complete solution for building a React/Redux application
 * HTTP Cookies
 * etc
 
+# version 2.x vs version 3.x
+
+These are the docs for the upcoming version `3.0.0` which is currently in `alpha` stage. For version `2.x` docs see the [README of the `2.x` branch](https://github.com/catamphetamine/react-website/tree/2.x).
+
 # Introduction
 
 ## Getting started
 
 ```bash
 $ npm install redux react-redux --save
-$ npm install react-router@3 --save
-$ npm install react-website --save
+$ npm install react-website@next --save
 ```
 
 Start by creating the configuration file
@@ -50,8 +53,7 @@ export default {
 
 ```js
 import React from 'react'
-// `react-router@3`
-import { Route, IndexRoute } from 'react-router'
+import { Route } from 'react-website'
 
 import App from '../pages/App'
 import Home from '../pages/Home'
@@ -59,7 +61,7 @@ import About from '../pages/About'
 
 export default (
   <Route path="/" component={ App }>
-    <IndexRoute component={ Home }/>
+    <Route component={ Home }/>
     <Route path="about" component={ About }/>
   </Route>
 )
@@ -69,13 +71,13 @@ export default (
 
 ```js
 import React from 'react'
-import { IndexLink, Link } from 'react-website'
+import { Link } from 'react-website'
 
 export default ({ children }) => (
   <div>
     <h1> Web Application </h1>
     <ul>
-      <li> <IndexLink> Home </IndexLink> </li>
+      <li> <Link exact to="/"> Home </Link> </li>
       <li> <Link to="/about"> About </Link> </li>
     </ul>
     { children }
@@ -154,7 +156,7 @@ Search engine crawlers like Google bot won't wait for a page to make its asynchr
 
 So the only thing preventing a dynamic website from being indexed by a crawler is asynchronous HTTP queries for data, not javascript itself. This therefore brings two solutions: one is to perform everything (routing, data fetching, rendering) on the server side and the other is to perform routing and data fetching on the server side leaving rendering to the client's web browser. Both these approaches work with web crawlers. And this is what this library provides.
 
-While the first approach is more elegant and pure, while also delivering the fastest "time to first byte", currently it is a CPU intensive task to render a complex React page (takes about 30 milliseconds of blocking CPU single core time for complex pages having more than 1000 components, as of 2017). Therefore one may prefer the second approach: performing routing and page preloading on the server side while leaving page rendering to the client. This means that the user won't see any content until the javascript bundle is downloaded (which takes some time, especially with large applications not using "code splitting"), but it also means that the server's CPU is freed from rendering React. This mode is activated by passing `hollow: true` flag to the rendering server.
+While the first approach is more elegant and pure, while also delivering the fastest "time to first byte", currently it is a CPU intensive task to render a complex React page (takes about 30 milliseconds of blocking CPU single core time for complex pages having more than 1000 components, as of 2017). Therefore one may prefer the second approach: performing routing and page preloading on the server side while leaving page rendering to the client. This means that the user won't see any content until the javascript bundle is downloaded (which takes some time, especially with large applications not using "code splitting"), but it also means that the server's CPU is freed from rendering React. This mode is activated by passing `renderContent: false` flag to the rendering server.
 
 ### Page loading time
 
@@ -518,9 +520,6 @@ import { reduxModule } from 'react-website'
 
 const redux = reduxModule('FRIENDS')
 
-// Use the new syntax.
-redux.v3 = true
-
 export const fetchFriends = redux.action(
   'FETCH_FRIENDS',
   (personId, gender) => http => {
@@ -573,9 +572,6 @@ and in this case `redux` will autogenerate the namespace and the action name, so
 import { reduxModule } from 'react-website'
 
 const redux = reduxModule('BLOG_POST')
-
-// Use the new syntax.
-redux.v3 = true
 
 // Post comment Redux "action creator"
 export const postComment = redux.action(
@@ -673,7 +669,7 @@ export default class BlogPostPage extends Component {
   }
 
   renderPostCommentForm() {
-    // `params` are the URL parameters populated by `react-router`:
+    // `params` are the URL parameters:
     // `<Route path="/blog/:blogPostId"/>`.
     const {
       userId,
@@ -774,7 +770,7 @@ A real-world (advanced) example for Auth0 authentication:
 ```js
 {
   ...,
-  error(error, { path, url, redirect, dispatch, getState, server }) {
+  onError(error, { path, url, redirect, getState, server }) {
     // Not authenticated
     if (error.status === 401) {
       return handleUnauthenticatedError(error, url, redirect);
@@ -787,9 +783,6 @@ A real-world (advanced) example for Auth0 authentication:
     if (error.status === 404) {
       return redirect('/not-found');
     }
-    // Report the error
-    console.error(`Error while preloading "${url}"`);
-    console.error(error);
     // Redirect to a generic error page in production
     if (process.env.NODE_ENV === 'production') {
       // Prevents infinite redirect to the error page
@@ -798,10 +791,14 @@ A real-world (advanced) example for Auth0 authentication:
         // Redirect to a generic error page
         return redirect(`/error?url=${encodeURIComponent(url)}`);
       }
+    } else {
+      // Report the error
+      console.error(`Error while preloading "${url}"`);
+      console.error(error);
     }
   },
   http: {
-    error(error, { path, url, redirect, dispatch, getState }) {
+    onError(error, { path, url, redirect, dispatch, getState }) {
       // JWT token expired, the user needs to relogin.
       if (error.status === 401) {
         return handleUnauthenticatedError(error, url, redirect);
@@ -1076,12 +1073,12 @@ export default (
 
 ### Setting <title/> and <meta/> tags
 
-Use `@meta(({ state }) => ...)` decorator for adding `<title/>` and `<meta/>` tags:
+Use `@meta(state) => ...)` decorator for adding `<title/>` and `<meta/>` tags:
 
 ```js
 import { meta } from 'react-website'
 
-@meta(({ state, location, parameters }) => ({
+@meta(state) => ({
   // `<meta property="og:site_name" .../>`
   site_name: 'International Bodybuilders Club',
 
@@ -1106,7 +1103,7 @@ import { meta } from 'react-website'
 
   // `<meta name="og:locale:alternate" content="en_US"/>`
   // `<meta name="og:locale:alternate" content="fr_FR"/>`
-  locale_other: ['en_US', 'fr_FR'],
+  localeOther: ['en_US', 'fr_FR'],
 
   // `<meta property="og:url" .../>`
   url: 'https://google.com/',
@@ -1143,7 +1140,7 @@ Inside `@preload()`: use the `location` parameter. Everywhere else:
 
 ```js
 import React from 'react'
-import { withRouter } from 'react-router'
+import { withRouter } from 'found'
 
 // Using `babel-plugin-transform-decorators-legacy`
 // https://babeljs.io/docs/plugins/transform-decorators/
@@ -1154,6 +1151,15 @@ export default class Component extends React.Component {
     return <div>{ JSON.stringify(router.location) }</div>
   }
 }
+```
+
+Also, the current router state is available in the Redux state under `found` property.
+
+```js
+@connect(({ found }) => ({
+  location: found.resolvedMatch.location,
+  params: found.resolvedMatch.params
+}))
 ```
 
 ### Changing current location
@@ -1177,21 +1183,26 @@ class Page extends Component {
 }
 ```
 
-If the current location needs to be changed while still staying at the same page (e.g. a checkbox has been ticked and the corresponding URL query parameter must be added), then use `pushLocation(location, history)` or `replaceLocation(location, history)` Redux actions.
+If the current location needs to be changed while still staying at the same page (e.g. a checkbox has been ticked and the corresponding URL query parameter must be added), then use `dispatch(pushLocation(location))` or `dispatch(replaceLocation(location))` Redux actions.
 
 ```javascript
 import { pushLocation, replaceLocation } from 'react-website'
 
+@connect(() => ({
+  ...
+}), {
+  pushLocation
+})
 class Page extends Component {
   onSearch(query) {
-    const { router } = this.props
+    const { pushLocation } = this.props
 
     pushLocation({
-      pathname: router.location.pathname,
+      pathname: '/'
       query: {
         query
       }
-    }, router)
+    })
   }
 }
 ```
@@ -1199,12 +1210,14 @@ class Page extends Component {
 To go "Back"
 
 ```javascript
+import { goBack } from 'react-website'
+
 class Page extends Component {
   render() {
     const { router } = this.props
 
     return (
-      <button onClick={ () => router.goBack() }>
+      <button onClick={ () => router.go(-1) }>
         Back
       </button>
     )
@@ -1212,7 +1225,7 @@ class Page extends Component {
 }
 ```
 
-`router` property is available on all pages (or via `@withRouter` decorator from `react-router` package).
+`router` property (from `found` package) is available on all pages as a `router` property, or through `context.router`, or via [`@withRouter`](https://github.com/4Catalyzer/found#programmatic-navigation) decorator.
 
 ## Monitoring
 
@@ -1233,7 +1246,7 @@ For each page being rendered stats are reported if `stats()` parameter is passed
 The arguments for the `stats()` function are:
 
  * `url` — the requested URL (without the `protocol://host:port` part)
- * `route` — `react-router` route string (e.g. `/user/:userId/post/:postId`)
+ * `route` — the route path (e.g. `/user/:userId/post/:postId`)
  * `time.initialize` — server side `initialize()` function execution time (if defined)
  * `time.preload` — page preload time
  * `time.total` — total time spent preloading and rendering the page

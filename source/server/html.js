@@ -1,7 +1,5 @@
 import nunjucks from 'nunjucks'
 
-import { get_language_from_locale } from '../helpers'
-
 nunjucks.configure({ autoescape: true })
 
 export function render_before_content({
@@ -12,42 +10,39 @@ export function render_before_content({
 	bodyStart
 })
 {
-	return template_before_content.render
+	return TEMPLATE_BEFORE_CONTENT.render
 	({
 		icon : assets.icon,
 		style_urls : assets.entries.map(entry => assets.styles && assets.styles[entry]).filter(url => url),
 		locale,
 		meta,
 		head,
-		bodyStart,
-		get_language_from_locale
+		bodyStart
 	})
 }
 
 export function render_after_content({
 	assets,
-	hollow,
+	contentNotRendered,
 	locale,
-	locale_messages_json,
-	extension_javascript,
+	javascript,
 	protected_cookie_value,
 	bodyEnd
 })
 {
-	return template_after_content.render
+	return TEMPLATE_AFTER_CONTENT.render
 	({
 		javascript_urls : assets.entries.map(entry => assets.javascript && assets.javascript[entry]).filter(url => url),
-		hollow,
+		contentNotRendered,
 		locale,
-		locale_messages_json,
-		extension_javascript,
+		javascript,
 		protected_cookie_value,
 		bodyEnd,
-		safe_json_stringify
+		safeJsonStringify
 	})
 }
 
-export function safe_json_stringify(json)
+export function safeJsonStringify(json)
 {
 	// The default javascript JSON.stringify doesn't escape forward slashes,
 	// but it is allowed by the JSON specification, so we manually do it here.
@@ -57,7 +52,7 @@ export function safe_json_stringify(json)
 	return JSON.stringify(json).replace(/\//g, '\\/')
 }
 
-const template_before_content = nunjucks.compile
+const TEMPLATE_BEFORE_CONTENT = nunjucks.compile
 (`
 	<!doctype html>
 	<html>
@@ -67,7 +62,7 @@ const template_before_content = nunjucks.compile
 
 			{#
 				(will be done only in production mode
-				 with webpack extract text plugin) 
+				 with webpack extract text plugin)
 				Mount CSS stylesheets for all entry points (e.g. "main")
 			#}
 			{% for style_url in style_urls %}
@@ -91,7 +86,7 @@ const template_before_content = nunjucks.compile
 			{# Supports adding arbitrary markup to <body/> start #}
 			{{ bodyStart | safe }}
 
-			{# 
+			{#
 				React page content.
 				(most of the possible XSS attack scripts are executed here,
 				 before the global protected cookie value variable is set,
@@ -100,18 +95,18 @@ const template_before_content = nunjucks.compile
 			<div id="react">`
 .replace(/\t/g, ''))
 
-const template_after_content = nunjucks.compile
+const TEMPLATE_AFTER_CONTENT = nunjucks.compile
 (`</div>
 
 			{#
-				Server-Side Rendering "hollow" flag.
+				Server-Side Rendering "renderContent" flag.
 				It is used to determine whether to call
 				"ReactDOM.hydrate()" or "ReactDOM.render()".
 			#}
 			<script>
 				window._server_side_render = true
-				{% if hollow %}
-					window._hollow_server_side_render = true
+				{% if contentNotRendered %}
+					window._empty_server_side_render = true
 				{% endif %}
 			</script>
 
@@ -122,24 +117,14 @@ const template_after_content = nunjucks.compile
 			#}
 			{% if locale %}
 				<script>
-					window._locale = {{ safe_json_stringify(locale) | safe }}
-				</script>
-			{% endif %}
-
-			{#
-				Localized messages.
-				The value must be XSS-safe.
-			#}
-			{% if locale %}
-				<script>
-					window._locale_messages = {{ locale_messages_json | safe }}
+					window._locale = {{ safeJsonStringify(locale) | safe }}
 				</script>
 			{% endif %}
 
 			{# Custom javascript. Must be XSS-safe. #}
 			{# e.g. Redux stuff goes here (Redux state, Date parser) #}
-			{% if extension_javascript %}
-				{{ extension_javascript | safe }}
+			{% if javascript %}
+				{{ javascript | safe }}
 			{% endif %}
 
 			{# javascripts #}
@@ -153,7 +138,7 @@ const template_after_content = nunjucks.compile
 			#}
 			{% if protected_cookie_value %}
 				<script data-protected-cookie>
-					window._protected_cookie_value={{ safe_json_stringify(protected_cookie_value) | safe }}
+					window._protected_cookie_value={{ safeJsonStringify(protected_cookie_value) | safe }}
 				</script>
 			{% endif %}
 

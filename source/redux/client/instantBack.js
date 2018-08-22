@@ -20,7 +20,7 @@ const set = (chain) => window._react_website_instant_back_chain = chain
  * in this case all "instant back" history is discarded
  * and if the user clicks "Back" two times the second time won't be "instant".
  */
-export function add_instant_back(nextLocation, previousLocation, nextLocationRoutes, previousLocationRoutes)
+export function addInstantBack(nextLocation, previousLocation, nextLocationRoutes, previousLocationRoutes)
 {
 	let chain = get()
 
@@ -46,7 +46,7 @@ export function add_instant_back(nextLocation, previousLocation, nextLocationRou
 			// console.error('[react-website] Error: previous location not found in an already existing instant back navigation chain', getLocationKey(previousLocation), chain)
 			// Anomaly detected.
 			// Reset the chain.
-			// return reset_instant_back()
+			// return resetInstantBack()
 
 			// Basic recovery for cases where `history.replaceState()`
 			// or `replaceHistory()` were called.
@@ -66,14 +66,13 @@ export function add_instant_back(nextLocation, previousLocation, nextLocationRou
 	}
 
 	// Discard "instant back" chain part having same routes.
-	const sameRoutesIndex = indexOfByRoutes(chain, nextLocationRoutes)
+	const sameRoutesIndex = findSameRoutesLocationIndex(chain, nextLocationRoutes)
 	if (sameRoutesIndex >= 0) {
 		chain = chain.slice(sameRoutesIndex + 1)
 	}
 
 	// Add the "next" page to the chain.
-	chain.push
-	({
+	chain.push({
 		key    : getLocationKey(nextLocation),
 		routes : nextLocationRoutes
 	})
@@ -90,7 +89,7 @@ export function add_instant_back(nextLocation, previousLocation, nextLocationRou
  * it's a reverse of an instant "Back" transition.
  * The order and position inside `chain` don't matter.
  */
-export function is_instant_transition(fromLocation, toLocation)
+export function isInstantTransition(fromLocation, toLocation)
 {
 	return indexOfByKey(get(), getLocationKey(fromLocation)) >= 0 &&
 		indexOfByKey(get(), getLocationKey(toLocation)) >= 0
@@ -99,14 +98,14 @@ export function is_instant_transition(fromLocation, toLocation)
 /**
  * Clears any "instant back" history.
  */
-export const reset_instant_back = () => set()
+export const resetInstantBack = () => set()
 
 /**
  * Each history `location` has a randomly generated `key`.
  * Except for the initial `location` which has no `key`.
  * (the very first entry in the browser history stack for a given tab)
  */
-const getLocationKey = location => location.key ? location.key : 'initial'
+const getLocationKey = location => location.key || window._react_website_initial_location_key
 
 function indexOfByKey(chain, key)
 {
@@ -122,7 +121,7 @@ function indexOfByKey(chain, key)
 	return -1
 }
 
-function indexOfByRoutes(chain, routes)
+function findSameRoutesLocationIndex(chain, routes)
 {
 	let i = 0
 	while (i < chain.length)
@@ -132,7 +131,7 @@ function indexOfByRoutes(chain, routes)
 			let j = 0
 			while (j < routes.length)
 			{
-				if (chain[i].routes[j].component !== routes[j].component) {
+				if (chain[i].routes[j].Component !== routes[j].Component) {
 					break
 				}
 				j++
@@ -145,4 +144,20 @@ function indexOfByRoutes(chain, routes)
 	}
 
 	return -1
+}
+
+// Returns `http` utility on client side.
+// Can be used to find out if the current page
+// transition was an "instant" one.
+// E.g. an Algolia "Instant Search" component
+// could reset the stored cached `resultsState`
+// if the transition was not an "instant" one.
+export function wasInstantNavigation() {
+	return typeof window !== 'undefined' && window._react_website_was_instant_navigation === true
+}
+
+export function setInstantNavigationFlag(value) {
+	if (typeof window !== 'undefined') {
+		window._react_website_was_instant_navigation = value
+	}
 }

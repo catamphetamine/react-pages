@@ -10,110 +10,68 @@ import ReactDOM from 'react-dom'
 // providing their own `render()` logic
 // (e.g. Redux + React-router, React-router).
 //
-// export default async function render({ render, render_parameters = {}, container, translation, history })
-export default function render({ render, render_parameters = {}, container, translation, history })
-{
+export default function render({ render, renderParameters = {}, container }) {
 	// Protected cookie feature
-	const protected_cookie_value = get_global_variable('_protected_cookie_value')
+	const protected_cookie_value = getGlobalVariable('_protected_cookie_value')
 
-	// Internationalization feature
-	const locale   = get_global_variable('_locale')
-	const messages = get_global_variable('_locale_messages')
+	// // Internationalization feature
+	// const locale = getGlobalVariable('_locale')
 
 	// Renders current React page (inside a container).
 	// Returns a Promise for an object holding
 	// `render` function for development mode hot reload,
 	// protected cookie value,
 	// and also `store` (if Redux is used).
-	// async function render_page()
-	function render_page()
+	function renderPage()
 	{
-		// Preload language translation in development mode.
-		// `translation` loading function may be passed
-		// and its main purpose is to enable Webpack HMR
-		// in development mode for translated messages.
-		if (locale && translation)
-		{
-			return translation(locale).then(_render_page)
-		}
+		return render(renderParameters).then(({ element, containerProps, ...rest }) => {
+			// if (locale) {
+			// 	containerProps.locale = locale
+			// }
 
-		return _render_page(messages)
-	}
+			render_react_element(
+				// Render page `element` inside a container element.
+				// E.g. Redux context `<Provider/>`, and others.
+				React.createElement(container, containerProps, element),
 
-	function _render_page(messages)
-	{
-		// const { element, container_props, ...rest } = await render(render_parameters)
-		return render(render_parameters).then(({ element, container_props, ...rest }) => {
+				// DOM element to which React markup will be rendered
+				getReactContainerElement()
+			)
 
-		// If internationalization feature is used
-		if (locale)
-		{
-			container_props.locale = locale
-
-			if (messages)
-			{
-				container_props.messages = messages
-			}
-		}
-
-		render_react_element
-		(
-			// Render page `element` inside a container element.
-			// E.g. Redux context `<Provider/>`, and others.
-			React.createElement(container, container_props, element),
-
-			// DOM element to which React markup will be rendered
-			getReactContainerElement()
-		)
-
-		return rest
-
-		//
+			return rest
 		})
 	}
 
 	// Render the page on the client side.
-	// const result = await render_page()
-	return render_page().then((result) => {
-
-	return {
+	return renderPage().then((result) => ({
 		// Redux `store`, for example.
 		...result,
 		// Client side code can then rerender the page any time
 		// by calling this `render()` function
 		// (makes hot reload work in development mode).
-		rerender: render_page,
+		rerender: renderPage,
 		// "Protected cookie" could be a JWT "refresh token".
 		protectedCookie: protected_cookie_value
-	}
-
-	//
-	})
+	}))
 }
 
 // Renders React element to a DOM node
-function render_react_element(element, to)
-{
+function render_react_element(element, to) {
 	// If using React >= 16 and the content is Server-Side Rendered.
-	if (ReactDOM.hydrate && window._server_side_render && !window._hollow_server_side_render)
-	{
+	if (ReactDOM.hydrate && window._server_side_render && !window._empty_server_side_render) {
 		// New API introduced in React 16
 		// for "hydrating" Server-Side Rendered markup.
 		return ReactDOM.hydrate(element, to)
 	}
-
 	return ReactDOM.render(element, to)
 }
 
 // Retrieves a variable from `window` erasing it.
-function get_global_variable(name)
-{
+function getGlobalVariable(name) {
 	const variable = window[name]
-	if (variable !== undefined)
-	{
+	if (variable !== undefined) {
 		delete window[name]
 	}
-
 	return variable
 }
 
@@ -121,8 +79,7 @@ function getReactContainerElement()
 {
 	let element = document.getElementById('react')
 
-	if (!element)
-	{
+	if (!element) {
 		const body = document.body
 		if (!body) {
 			throw new Error('<body/> tag not found, make sure this script is added to the end of <body/> rather than inside <head/>.')

@@ -1,7 +1,7 @@
 import
 {
-	update_meta,
-	generate_meta_tags_markup
+	updateMeta,
+	generateMetaTagsMarkup
 }
 from './meta'
 
@@ -18,13 +18,13 @@ describe(`@meta`, () =>
 			['og:locale', 'fr']
 		])
 
-		update_meta
+		updateMeta
 		({
 			title        : 'Test',
 			description  : 'Testing metadata',
 			site_name    : 'Testing',
 			locale       : 'ru',
-			locale_other : ['en', 'fr'],
+			localeOther  : ['en', 'fr'],
 			viewport     : 'width=device-width, initial-scale=1',
 			keywords     : 'react, redux, webpack',
 			author       : '@catamphetamine'
@@ -51,7 +51,7 @@ describe(`@meta`, () =>
 	it(`should update meta without title and charset`, () =>
 	{
 		const document = new TestDocument()
-		update_meta({}, document)
+		updateMeta({}, document)
 		document.getMetaTags().should.deep.equal([])
 		expect(document.getTitle()).to.be.undefined
 	})
@@ -59,26 +59,26 @@ describe(`@meta`, () =>
 	it(`should update charset`, () =>
 	{
 		const document = new TestDocument([['charset', 'win1250']])
-		update_meta({ charset : 'utf-8' }, document)
+		updateMeta({ charset : 'utf-8' }, document)
 		document.getMetaTags().should.deep.equal([['charset', 'utf-8']])
 	})
 
 	it(`should skip updating same charset`, () =>
 	{
 		const document = new TestDocument([['charset', 'utf-8']])
-		update_meta({ charset : 'utf-8' }, document)
+		updateMeta({ charset : 'utf-8' }, document)
 		document.getMetaTags().should.deep.equal([['charset', 'utf-8']])
 	})
 
 	it(`should generate meta tags markup`, () =>
 	{
-		generate_meta_tags_markup
+		generateMetaTagsMarkup
 		({
 			charset      : 'utf-8',
 			title        : 'Test',
 			description  : 'Testing metadata',
 			locale       : 'ru',
-			locale_other : ['en', 'fr'],
+			localeOther  : ['en', 'fr'],
 			viewport     : 'width=device-width, initial-scale=1',
 			keywords     : 'react, redux, webpack',
 			author       : '@catamphetamine'
@@ -101,7 +101,7 @@ describe(`@meta`, () =>
 
 	it(`should generate meta tags markup with default title and charset`, () =>
 	{
-		generate_meta_tags_markup({}).should.deep.equal
+		generateMetaTagsMarkup({}).should.deep.equal
 		([
 			"<meta charset=\"utf-8\"/>",
 			"<title></title>"

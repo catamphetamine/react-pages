@@ -1,13 +1,13 @@
 import superagent from 'superagent'
 
 import { starts_with } from './helpers'
-import { get_cookie } from './client/cookies'
-import HTTP_Request, { get_cookie_key_value } from './http request'
+import { getCookie } from './client/cookies'
+import HttpRequest, { get_cookie_key_value } from './HttpRequest'
 
 // This is an isomorphic (universal) HTTP client
 // which works both on Node.js and in the web browser,
 // and therefore can be used in Redux actions (for HTTP requests)
-export default class HTTP_Client
+export default class HttpClient
 {
 	// `Set-Cookie` HTTP headers
 	// (in case any cookies are set)
@@ -34,7 +34,7 @@ export default class HTTP_Client
 		}
 		= options
 
-		const parse_json_dates = options.parse_dates !== false
+		const parse_json_dates = options.parseDates !== false
 
 		// The default `transform_url` gives protection against XSS attacks
 		// in a way that `Authorization: Bearer {token}` HTTP header
@@ -45,7 +45,7 @@ export default class HTTP_Client
 		// `options.transform_url` because the rendered page content
 		// is placed before the `options` are even defined (inside webpack bundle).
 		//
-		// Once `HTTP_Client` instance is created, the `protected_cookie_value` variable
+		// Once `HttpClient` instance is created, the `protected_cookie_value` variable
 		// is erased from everywhere except the closures of HTTP methods defined below,
 		// and the protected cookie value is therefore unable to be read directly by an attacker.
 		//
@@ -106,7 +106,7 @@ export default class HTTP_Client
 			}
 
 			// A regular cookie which can be read by a web browser
-			return get_cookie(name)
+			return getCookie(name)
 		})
 
 		// `superagent` doesn't save cookies by default on the server side.
@@ -138,7 +138,7 @@ export default class HTTP_Client
 				const perform_http_request = () =>
 				{
 					// Create Http request
-					const request = new HTTP_Request(method, url, data,
+					const request = new HttpRequest(method, url, data,
 					{
 						agent,
 						parse_json_dates,
@@ -151,7 +151,7 @@ export default class HTTP_Client
 								// Cookies will be duplicated here
 								// because `superagent.agent()` persists
 								// `Set-Cookie`s between subsequent requests
-								// (i.e. for the same `HTTP_Client` instance).
+								// (i.e. for the same `HttpClient` instance).
 								// Therefore using a `Set` instead of an array.
 								for (const cookie of cookies)
 								{

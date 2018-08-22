@@ -1,6 +1,6 @@
-import Http_client from '../http client'
+import HttpClient from '../HttpClient'
 
-export default function create_http_client(settings, get_store, protected_cookie_value, options = {})
+export default function createHttpClient(settings, get_store, protected_cookie_value, options = {})
 {
 	let on_before_send
 	let catch_to_retry
@@ -11,7 +11,7 @@ export default function create_http_client(settings, get_store, protected_cookie
 	{
 		on_before_send = (request) =>
 		{
-			// If using Redux, then add `store` as a parameter 
+			// If using Redux, then add `store` as a parameter
 			// for `http_client` customization function
 			settings.http.request(request,
 			{
@@ -46,14 +46,14 @@ export default function create_http_client(settings, get_store, protected_cookie
 		}
 	}
 
-	return new Http_client
+	return new HttpClient
 	({
 		on_before_send,
 		catch_to_retry,
 		get_access_token,
 		transform_url               : settings.http.url,
 		allow_absolute_urls         : settings.http.allowAbsoluteURLs,
-		parse_dates                 : settings.parse_dates,
+		parseDates                  : settings.parseDates,
 		authentication_token_header : settings.authentication.header,
 		protected_cookie            : settings.authentication.protectedCookie,
 		protected_cookie_value,

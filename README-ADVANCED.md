@@ -20,14 +20,14 @@ So, **javascript is required** on the client side in order for this CSRF attacks
 
 ## `@onPageLoaded()`
 
-When using `{ client: true }` `@preload()`s it's sometimes required to perform some actions (e.g. adjust the current URL) after those `@preload()`s finish (and after the browser navigates to the preloaded page). While with regular `@preload()`s it could be done using `componentDidMount()` (though only on the client side) such an approach wouldn't work for `{ client: true }` `@preload()`s because they're called after `componentDidMount()`. The solution is `@onPageLoaded()` decorator which takes a function parameter, exactly as `@preload()` decorator does, with an extra `history` parameter.
+When using `{ client: true }` `@preload()`s it's sometimes required to perform some actions (e.g. adjust the current URL) after those `@preload()`s finish (and after the browser navigates to the preloaded page). While with regular `@preload()`s it could be done using `componentDidMount()` (though only on the client side) such an approach wouldn't work for `{ client: true }` `@preload()`s because they're called after `componentDidMount()`. The solution is `@onPageLoaded()` decorator which takes a function parameter, exactly as `@preload()` decorator does.
 
 ```js
 import { onPageLoaded, replaceLocation } from 'react-website'
 
-@onPageLoaded(function({ dispatch, getState, history, location, parameters, server }) {
+@onPageLoaded(function({ dispatch, getState, location, parameters, server }) {
   if (isAnIdURL(location.pathname)) {
-    replaceLocation(replaceIdWithAnAlias(location, getState().userProfilePage.userProfile), history)
+    dispatch(replaceLocation(replaceIdWithAnAlias(location, getState().userProfilePage.userProfile)))
   }
 }
 ```
@@ -235,10 +235,7 @@ const { status, content, contentType } = renderError(error)
 
 ```javascript
 {
-  // React-router routes
-  // (either a `<Route/>` element or a
-  //  `function({ dispatch, getState })`
-  //  returning a `<Route/>` element)
+  // Routes element.
   routes: require('./src/routes')
 
   // Redux reducers (an object)
@@ -280,7 +277,7 @@ const { status, content, contentType } = renderError(error)
   // `path` is `url` without `?...` parameters.
   // `redirect()` redirects to a URL.
   //
-  error: (error, { path, url, redirect, dispatch, getState, server }) => redirect(`/error?url=${encodeURIComponent(url)}&error=${error.status}`)
+  onError: (error, { path, url, redirect, getState, server }) => redirect(`/error?url=${encodeURIComponent(url)}&error=${error.status}`)
 
   // (optional)
   // `http` utility settings
@@ -316,7 +313,7 @@ const { status, content, contentType } = renderError(error)
     allowAbsoluteURLs: true
 
     // (optional)
-    error: (error, { url, path, redirect, dispatch, getState }) => console.error(error)
+    onError: (error, { url, path, redirect, dispatch, getState }) => console.error(error)
     //
     // Is called when `http` calls either fail or return an error.
     // Is not called for errors happening during the initial page render
@@ -442,16 +439,7 @@ const { status, content, contentType } = renderError(error)
   }
 
   // (optional)
-  history:
-  {
-    // (optional)
-    // `history` options (like `basename`)
-    options: {}
-
-    // (optional)
-    // Custom `history` wrapper, like `syncHistoryWithStore` from `react-router-redux`
-    wrap: (history, { store }) => history
-  }
+  basename: '/path'
 
   // (optional)
   // Controls automatic `Date` parsing
@@ -568,18 +556,18 @@ const { status, content, contentType } = renderError(error)
   {
     // (optional)
     // Markup inserted into server rendered webpage's <head/>.
-    // Can be either a function returning a value or just a value.
-    head: (path, { store }) => String, or React.Element, or an array of React.Elements
+    // Can be either a function returning a string or just a string.
+    head: (path, { store }) => String
 
     // (optional)
     // Markup inserted to the start of the server rendered webpage's <body/>.
-    // Can be either a function returning a value or just a value.
-    bodyStart: (path, { store }) => String, or React.Element, or an array of React.Elements
+    // Can be either a function returning a string or just a string.
+    bodyStart: (path, { store }) => String
 
     // (optional)
     // Markup inserted to the end of the server rendered webpage's <body/>.
-    // Can be either a function returning a value or just a value.
-    bodyEnd: (path, { store }) => String, or React.Element, or an array of React.Elements
+    // Can be either a function returning a string or just a string.
+    bodyEnd: (path, { store }) => String
   }
 
   // (optional)

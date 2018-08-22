@@ -3,42 +3,37 @@ import https from 'https'
 import cookie from 'cookie'
 
 import render from './render'
-import render_error from './render error'
-import { get_preferred_locales } from './locale'
+import renderError from './renderError'
 import timer from '../timer'
+import { getPreferredLocales } from './locale'
 
 export default function server(settings, options)
 {
-	return (options.secure ? https : http).createServer((request, response) =>
-	{
+	return (options.secure ? https : http).createServer((request, response) => {
 		// Render the page (and handle errors, if any)
-		render_page_http(request, response, settings, options)
-			.catch((error) => render_error_http(error, response, options.printError))
+		respondWithPage(request, response, settings, options)
+			.catch((error) => respondWithError(error, response, options.printError))
 	})
 }
 
 // Renders a webpage
-async function render_page_http(request, response, settings, options)
+async function respondWithPage(request, response, settings, options)
 {
-	const
-	{
+	const {
 		redirect,
 		cookies,
 		status,
 		content
-	}
-	= await render_page(request.url, request.headers, settings, options)
+	} = await renderPage(request.url, request.headers, settings, options)
 
-	if (redirect)
-	{
+	if (redirect) {
 		response.writeHead(302, { Location: redirect })
 		return response.end()
 	}
 
 	// `cookies` is a `Set`, not an `Array`,
 	// hence the `for` loop.
-	for (const cookie of cookies)
-	{
+	for (const cookie of cookies) {
 		response.setHeader('Set-Cookie', cookie)
 	}
 
@@ -51,86 +46,70 @@ async function render_page_http(request, response, settings, options)
 
 // Renders a webpage.
 // `headers`: `{ cookie, accept-language, host }`.
-export async function render_page(url, headers, settings, options)
+export async function renderPage(url, headers, settings, options)
 {
-	// Support `2.0.x`.
-	if (typeof url === 'object')
-	{
-		throw new Error(`[react-website] The internal "render()" function was changed in v2.1.0: it now takes 4 arguments instead of 2. And the object being returned also changed. See README-ADVANCED for more info.`)
-	}
-
-	const
-	{
+	const {
 		secure,
 		proxy,
 		assets,
-		localize,
 		authentication,
 		initialize,
-		hollow,
+		renderContent,
 		html,
 		stats
-	}
-	= options
+	} = options
 
 	const cookies = headers.cookie ? cookie.parse(headers.cookie) : {}
 
-	const total_timer = timer()
+	const totalTimer = timer()
 
-	let { status, content, redirect, route, time, cookies: set_cookies } = await render(settings,
-	{
+	let { status, content, redirect, route, time, cookies: cookiesToSet } = await render(settings, {
 		proxy,
 		assets,
-		localize : localize ? (parameters) => localize(parameters, get_preferred_locales(headers, cookies)) : undefined,
 		authentication,
 		initialize,
-		hollow,
+		renderContent,
 		html,
 		url,
 		// // HTTP headers.
 		// // Some people use them to get things like `window.navigator` on server side.
 		// headers,
 		// Cookies for protected cookie value retrieval
-		cookies
+		cookies,
+		locales: getPreferredLocales(headers, cookies)
 	})
 
 	// If a redirect happened perform an HTTP redirect
-	if (redirect)
-	{
+	if (redirect) {
 		// Convert relative URL to an absolute one
-		if (redirect[0] === '/')
-		{
+		if (redirect[0] === '/') {
 			redirect = `${secure ? 'https' : 'http'}://${headers.host}${redirect}`;
 		}
-
 		return { redirect }
 	}
 
 	// Report page rendering stats
-	if (stats)
-	{
-		stats
-		({
+	if (stats) {
+		stats({
 			url,
 			route,
-			time:
-			{
+			time: {
 				...time,
-				total: total_timer()
+				total: totalTimer()
 			}
 		})
 	}
 
 	return {
-		cookies: set_cookies,
+		cookies: cookiesToSet,
 		status,
 		content
 	}
 }
 
-function render_error_http(error, response, options)
+function respondWithError(error, response, options)
 {
-	const { status, content, contentType } = render_error(error, options)
+	const { status, content, contentType } = renderError(error, options)
 
 	// HTTP response status and "Content-Type"
 	response.writeHead(status, { 'Content-Type': contentType })

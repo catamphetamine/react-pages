@@ -1,27 +1,30 @@
-import React, { Component } from 'react'
+import React from 'react'
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
 import classNames from 'classnames'
 
 import LoadingIndicator from './LoadingIndicator'
+import FadeInOut from './FadeInOut'
 
 @connect(({ preload }) =>
 ({
 	pending   : preload.pending,
 	immediate : preload.immediate
 }))
-export default class Loading extends Component
+export default class Loading extends React.Component
 {
 	static propTypes =
 	{
 		pending   : PropTypes.bool.isRequired,
 		immediate : PropTypes.bool.isRequired,
-		indicator : PropTypes.func.isRequired
+		indicator : PropTypes.func.isRequired,
+		fadeOutDuration : PropTypes.number.isRequired
 	}
 
 	static defaultProps =
 	{
-		indicator : LoadingIndicator
+		indicator : LoadingIndicator,
+		fadeOutDuration : 160
 	}
 
 	render()
@@ -30,7 +33,8 @@ export default class Loading extends Component
 		{
 			pending,
 			immediate,
-			indicator : Indicator
+			indicator : Indicator,
+			fadeOutDuration
 		}
 		= this.props
 
@@ -41,7 +45,9 @@ export default class Loading extends Component
 					'react-website__loading--shown'     : pending,
 					'react-website__loading--immediate' : immediate
 				})}>
-				<Indicator className="react-website__loading-spinner"/>
+				<FadeInOut show={pending} fadeOutDuration={fadeOutDuration}>
+					<Indicator className="react-website__loading-spinner"/>
+				</FadeInOut>
 			</div>
 		)
 	}
