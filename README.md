@@ -1212,12 +1212,17 @@ To go "Back"
 ```javascript
 import { goBack } from 'react-website'
 
+@connect(() => ({
+  ...
+}), {
+  goBack
+})
 class Page extends Component {
   render() {
-    const { router } = this.props
+    const { goBack } = this.props
 
     return (
-      <button onClick={ () => router.go(-1) }>
+      <button onClick={goBack}>
         Back
       </button>
     )
