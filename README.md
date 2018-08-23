@@ -239,7 +239,7 @@ import { preload } from 'react-website'
 // explained later in this document.
 function fetchUsers() {
   return {
-    promise: ({ http }) => http.get('/api/users'),
+    promise: http => http.get('/api/users'),
     events: ['FETCH_USERS_PENDING', 'FETCH_USERS_SUCCESS', 'FETCH_USERS_FAILURE']
   }
 }
@@ -418,7 +418,7 @@ function asynchronousAction() {
 
 ### HTTP utility
 
-Because in almost all cases dispatching an "asynchronous action" means "making an HTTP request", the `promise` function described above always takes an `http` utility parameter: `promise: ({ http }) => ...`.
+Because in almost all cases dispatching an "asynchronous action" means "making an HTTP request", the `promise` function described above always takes an `http` argument: `promise: http => ...`.
 
 The `http` utility has the following methods:
 
@@ -440,7 +440,7 @@ So, API endpoints can be queried using `http` and ES6 `async/await` syntax like 
 ```js
 function fetchFriends(personId, gender) {
   return {
-    promise: async ({ http }) => await http.get(`/api/person/${personId}/friends`, { gender }),
+    promise: http => http.get(`/api/person/${personId}/friends`, { gender }),
     events: ['GET_FRIENDS_PENDING', 'GET_FRIENDS_SUCCESS', 'GET_FRIENDS_FAILURE']
   }
 }
@@ -481,7 +481,7 @@ Before:
 // ./actions/friends.js
 function fetchFriends(personId, gender) {
   return {
-    promise: ({ http }) => http.get(`/api/person/${personId}/friends`, { gender }),
+    promise: http => http.get(`/api/person/${personId}/friends`, { gender }),
     events: ['FETCH_FRIENDS_PENDING', 'FETCH_FRIENDS_SUCCESS', 'FETCH_FRIENDS_FAILURE']
   }
 }
@@ -915,7 +915,7 @@ class ItemPage extends React.Component {
 // Redux action creator
 function uploadItemPhoto(itemId, file) {
   return {
-    promise: ({ http }) => http.post(
+    promise: http => http.post(
       '/item/photo',
       { itemId, file },
       { progress(percent) { console.log(percent) } }

@@ -249,13 +249,15 @@ function create_action(event, action, result, options, redux)
 	return (...parameters) =>
 	({
 		event   : eventName(namespace, event),
-		promise : (utility) =>
+		// `dispatch` and `getState` arguments are deprecated
+		// and will be removed in some future major version release.
+		promise : (http, dispatch, getState) =>
 		{
 			if (redux.v2) {
 				// For gradual migration from version "2.x" syntax.
-				return action.apply(this, [utility].concat(parameters))
+				return action.apply(this, [{ http, dispatch, getState }].concat(parameters))
 			}
-			return action.apply(this, parameters)(utility.http)
+			return action.apply(this, parameters)(http)
 		},
 		cancelPrevious
 	})
