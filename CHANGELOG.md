@@ -1,4 +1,4 @@
-3.0.0-alpha.1 / 23.08.2018
+3.0.0-alpha.2 / 23.08.2018
 ==================
 
   * (breaking change) There will likely be some more miscellaneous breaking changes, but the most of the changes have already been made. Marking this version as `alpha` (a milestone) to indicate that something might change.
@@ -10,6 +10,10 @@
   * (breaking change) `reduxModule`'s action syntax changed to the "new" one by default (see the README). Therefore setting `redux.v3 = true` flag is no longer needed. For compatibility with the "old" syntax from version `2.x` use `redux.v2 = true` flag. For gradual migration from version `2.x` use the `redux.v3 = true` flag.
 
   * (breaking change) `static-site-generator`'s `snapshot()` no longer adds the home page (`/`) to the list of pages by default.
+
+  * (breaking change) `websocket` export was moved into its own file: `react-website/websocket`. The reason is that not everyone uses that, so this reduces the resulting application bundle for a tiny bit.
+
+  * (breaking change) for Redux actions having `promise()` property: `promise()` function now receives just the `http` argument instead of `{ http, dispatch, getState }` object. The reason is that `dispatch` and `getState` are unnecessary and aren't used.
 
   * (breaking chage) `@meta()` decorator now receives just `state` argument instead of on object of shape `{ state, location, parameters }`.
 

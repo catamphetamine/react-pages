@@ -19,7 +19,6 @@ import
 	underscoredToCamelCase,
 	eventName,
 	Link,
-	websocket,
 	getCookie,
 	replaceLocation,
 	pushLocation,
@@ -66,8 +65,6 @@ describe(`exports`, function()
 		Redirect.should.be.a('function')
 		withRouter.should.be.a('function')
 
-		websocket.should.be.a('function')
-
 		getCookie.should.be.a('function')
 
 		replaceLocation.should.be.a('function')
@@ -110,8 +107,6 @@ describe(`exports`, function()
 		_.Route.should.be.a('function')
 		_.Redirect.should.be.a('function')
 		_.withRouter.should.be.a('function')
-
-		_.websocket.should.be.a('function')
 
 		_.getCookie.should.be.a('function')
 

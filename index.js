@@ -68,12 +68,6 @@ from './modules/redux/Link'
 
 export
 {
-	default as websocket
-}
-from './modules/redux/client/websocket'
-
-export
-{
 	getCookie
 }
 from './modules/client/cookies'

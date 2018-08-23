@@ -1414,7 +1414,8 @@ if (module.hot) {
 `websocket()` helper sets up a WebSocket connection.
 
 ```js
-import { render, websocket } from 'react-website'
+import { render } from 'react-website'
+import websocket from 'react-website/websocket'
 
 render(settings).then(({ store, protectedCookie }) => {
   websocket({

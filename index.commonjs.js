@@ -33,8 +33,6 @@ exports.eventName = require('./commonjs/redux/naming').eventName
 
 exports.Link = require('./commonjs/redux/Link').default
 
-exports.websocket = require('./commonjs/redux/client/websocket').default
-
 exports.getCookie = require('./commonjs/client/cookies').getCookie
 
 exports.Route = require('./commonjs/router').Route
