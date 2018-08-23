@@ -81,10 +81,13 @@ export async function renderPage(url, headers, settings, options)
 
 	// If a redirect happened perform an HTTP redirect
 	if (redirect) {
-		// Convert relative URL to an absolute one
-		if (redirect[0] === '/') {
-			redirect = `${secure ? 'https' : 'http'}://${headers.host}${redirect}`;
-		}
+		// No need to convert a relative URL to an absolute URL:
+		// since June 2014 the RFC permits redirection to relative URLs.
+		// https://stackoverflow.com/questions/8250259/is-a-302-redirect-to-relative-url-valid-or-invalid
+		// // Convert relative URL to an absolute one
+		// if (redirect[0] === '/') {
+		// 	redirect = `${secure ? 'https' : 'http'}://${headers.host}${redirect}`;
+		// }
 		return { redirect }
 	}
 
