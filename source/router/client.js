@@ -11,16 +11,15 @@ import render from './render'
 export function createRouterElement(renderArgs, getState) {
 	const ConnectedRouter = createConnectedRouter({
 		render: (renderArgs) => {
-			const pageHasLoaded = !getState().preload.pending
-			const nextLocation = renderArgs.location
-			const previousLocation = getState().found.resolvedMatch.location
-			const location = pageHasLoaded ? nextLocation : previousLocation
-			const key = window.reactWebsiteRemountOnNavigate === false ? undefined : `${location.pathname}${location.search}`
+			// Force re-mount the last `<Route/>` component on location path change.
+			// https://github.com/4Catalyzer/found/issues/199#issuecomment-415616836
+			const elements = renderArgs.elements
+			if (elements && window.reactWebsiteRemountOnNavigate !== false) {
+				elements[elements.length - 1] = React.cloneElement(elements[elements.length - 1], { key: renderArgs.location.pathname })
+			}
 			return (
 				<ScrollManager renderArgs={renderArgs}>
-					<Passthrough key={key}>
-						{render(renderArgs)}
-					</Passthrough>
+					{render(renderArgs)}
 				</ScrollManager>
 			)
 		}
@@ -34,8 +33,4 @@ export function createRouterElement(renderArgs, getState) {
 
 export function createHistoryProtocol() {
 	return new BrowserProtocol()
-}
-
-function Passthrough(props) {
-	return props.children
 }
