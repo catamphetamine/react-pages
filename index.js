@@ -43,6 +43,19 @@ from './modules/redux/client/client'
 
 export
 {
+	getPreferredLocale,
+	getPreferredLocales
+}
+from './modules/client/locale'
+
+export
+{
+	getLanguageFromLocale
+}
+from './modules/locale'
+
+export
+{
 	wasInstantNavigation
 }
 from './modules/redux/client/instantBack'

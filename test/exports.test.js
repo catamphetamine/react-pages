@@ -20,6 +20,9 @@ import
 	eventName,
 	Link,
 	getCookie,
+	getPreferredLocales,
+	getPreferredLocale,
+	getLanguageFromLocale,
 	replaceLocation,
 	pushLocation,
 	goBack,
@@ -66,6 +69,9 @@ describe(`exports`, function()
 		withRouter.should.be.a('function')
 
 		getCookie.should.be.a('function')
+		getPreferredLocales.should.be.a('function')
+		getPreferredLocale.should.be.a('function')
+		getLanguageFromLocale.should.be.a('function')
 
 		replaceLocation.should.be.a('function')
 		pushLocation.should.be.a('function')
@@ -109,6 +115,9 @@ describe(`exports`, function()
 		_.withRouter.should.be.a('function')
 
 		_.getCookie.should.be.a('function')
+		_.getPreferredLocales.should.be.a('function')
+		_.getPreferredLocale.should.be.a('function')
+		_.getLanguageFromLocale.should.be.a('function')
 
 		_.replaceLocation.should.be.a('function')
 		_.pushLocation.should.be.a('function')

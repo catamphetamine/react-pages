@@ -2,9 +2,8 @@ import nunjucks from 'nunjucks'
 
 nunjucks.configure({ autoescape: true })
 
-export function render_before_content({
+export function renderBeforeContent({
 	assets,
-	locale,
 	meta,
 	head,
 	bodyStart
@@ -14,17 +13,16 @@ export function render_before_content({
 	({
 		icon : assets.icon,
 		style_urls : assets.entries.map(entry => assets.styles && assets.styles[entry]).filter(url => url),
-		locale,
 		meta,
 		head,
 		bodyStart
 	})
 }
 
-export function render_after_content({
+export function renderAfterContent({
 	assets,
 	contentNotRendered,
-	locale,
+	locales,
 	javascript,
 	protected_cookie_value,
 	bodyEnd
@@ -34,7 +32,7 @@ export function render_after_content({
 	({
 		javascript_urls : assets.entries.map(entry => assets.javascript && assets.javascript[entry]).filter(url => url),
 		contentNotRendered,
-		locale,
+		locales,
 		javascript,
 		protected_cookie_value,
 		bodyEnd,
@@ -115,9 +113,9 @@ const TEMPLATE_AFTER_CONTENT = nunjucks.compile
 				(is only used in client-side Ajax "translate"
 				 the existence of which is questionable).
 			#}
-			{% if locale %}
+			{% if locales %}
 				<script>
-					window._locale = {{ safeJsonStringify(locale) | safe }}
+					window._react_website_locales = {{ safeJsonStringify(locales) | safe }}
 				</script>
 			{% endif %}
 

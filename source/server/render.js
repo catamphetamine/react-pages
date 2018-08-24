@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom/server'
 import createStringStream from 'string-to-stream'
 import combineStreams from 'multistream'
 
-import { render_before_content, render_after_content } from './html'
+import { renderBeforeContent, renderAfterContent } from './html'
 import normalizeSettings from '../redux/normalize'
 import timer from '../timer'
 import { getLocationUrl, parseLocation } from '../location'
@@ -97,31 +97,27 @@ export default async function(settings, {
 				}
 			}
 
-			// Preferred locale.
-			const locale = locales[0]
-
 			// Render all HTML that goes before React markup.
-			const before_content = render_before_content
+			const beforeContent = renderBeforeContent
 			({
 				assets,
-				locale,
 				meta: generateMetaTagsMarkup(meta).join(''),
 				head,
 				bodyStart
 			})
 
 			// Render all HTML that goes after React markup
-			const after_content = render_after_content
+			const afterContent = renderAfterContent
 			({
 				javascript: generateJavascript(),
 				assets,
-				locale,
+				locales,
 				bodyEnd,
 				protected_cookie_value,
 				contentNotRendered: renderContent === false
 			})
 
-			return [ before_content, after_content ]
+			return [ beforeContent, afterContent ]
 		}
 
 		// A special `base.html` page for static sites.
@@ -130,12 +126,12 @@ export default async function(settings, {
 		{
 			renderContent = false
 
-			const [ before_content, after_content ] = generateOuterHtml({})
+			const [ beforeContent, afterContent ] = generateOuterHtml({})
 
 			return {
 				route: '/react-website-base',
 				status: 200,
-				content: createStringStream(before_content + after_content),
+				content: createStringStream(beforeContent + afterContent),
 				cookies: []
 			}
 		}
@@ -160,12 +156,12 @@ export default async function(settings, {
 			}
 		}
 
-		const [ before_content, after_content ] = generateOuterHtml(meta)
+		const [ beforeContent, afterContent ] = generateOuterHtml(meta)
 
 		const streams =
 		[
-			createStringStream(before_content),
-			createStringStream(after_content)
+			createStringStream(beforeContent),
+			createStringStream(afterContent)
 		]
 
 		if (renderContent !== false)

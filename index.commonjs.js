@@ -26,6 +26,10 @@ exports.getState             = require('./commonjs/redux/client/client').getStat
 exports.getHttpClient        = require('./commonjs/redux/client/client').getHttpClient
 exports.wasInstantNavigation = require('./commonjs/redux/client/instantBack').wasInstantNavigation
 
+exports.getPreferredLocales   = require('./commonjs/client/locale').getPreferredLocales
+exports.getPreferredLocale    = require('./commonjs/client/locale').getPreferredLocale
+exports.getLanguageFromLocale = require('./commonjs/locale').getLanguageFromLocale
+
 exports.reduxModule = require('./commonjs/redux/ReduxModule').default
 
 exports.underscoredToCamelCase = require('./commonjs/redux/naming').underscoredToCamelCase

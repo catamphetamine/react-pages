@@ -1,9 +1,5 @@
 This section contains advanced topics. This means that the features described here are for those who have already spent some time with this library and therefore won't be overwhelmed and confused by the topics covered here.
 
-## react-router-redux
-
-I didn't build [`react-router-redux`](https://github.com/reactjs/react-router-redux) functionality into this library because I thought that Redux state is actually not intended for storing router state. See [PHILOSOPHY](https://github.com/catamphetamine/react-website/blob/master/PHILOSOPHY.md).
-
 ## CSRF protection
 
 [Cross-Site Request Forgery attacks](http://docs.spring.io/spring-security/site/docs/current/reference/html/csrf.html) are the kind of attacks when a legitimate user is tricked into navigating a malicious website which, upon loading, sends a forged HTTP request (GET, POST) to the legitimate website therefore performing an action on behalf of the legitimate user (because the "remember me" cookie is also sent along).
@@ -63,15 +59,6 @@ function autocompleteMatch(inputValue) {
 }
 ```
 
-## react-router@4
-
-"— Does it support `react-router@4`?"
-"— [No](https://github.com/catamphetamine/react-website/issues/42)."
-
-## onEnter
-
-`react-router`'s `onEnter` hook is being called twice both on server and client because `react-router`'s `match()` is called before preloading and then the actual navigation happens which triggers the second `match()` call (internally inside `react-router`). This is not considered a blocker because in this library `@preload()` substitutes `onEnter` hooks so just use `@preload()` instead. Double `onEnter` can be fixed using `<RouterContext/>` instead of `<Router/>` but I see no reason to implement such a fix since `onEnter` is simply not used.
-
 ## Redux module event and property naming
 
 By default it generates `"_PENDING"`, `"_SUCCESS"` and `"_ERROR"` Redux events along with the corresponding camelCase properties in Redux state. One can customize that by supplying custom `reduxEventNaming` and `reduxPropertyNaming` functions.
@@ -121,11 +108,42 @@ const redux = reduxModule('BLOG_POST', reduxSettings)
 ...
 ```
 
-Notice the extraction of these two configuration parameters (`reduxEventNaming` and `reduxPropertyNaming`) into a separate file `react-website-redux.js`: this is done to break circular dependency on `./react-website.js` file because the `routes` parameter inside `./react-website.js` is the `react-router` `./routes.js` file which `import`s React page components which in turn `import` action creators which in turn would import `./react-website.js` hence the circular (recursive) dependency (same goes for the `reducer` parameter inside `./react-website.js`).
+Notice the extraction of these two configuration parameters (`reduxEventNaming` and `reduxPropertyNaming`) into a separate file `react-website-redux.js`: this is done to break circular dependency on `./react-website.js` file because the `routes` parameter inside `./react-website.js` is the `./routes.js` file which `import`s React page components which in turn `import` action creators which in turn would import `./react-website.js` hence the circular (recursive) dependency (same goes for the `reducer` parameter inside `./react-website.js`).
 
 ## `@preload()`
 
 If one `@preload()` is in progress and another `@preload()` starts (e.g. Back/Forward browser buttons) the first `@preload()` will be cancelled if `bluebird` `Promise`s are used in the project and also if `bluebird` is configured for [`Promise` cancellation](http://bluebirdjs.com/docs/api/cancellation.html) (this is an advanced feature and is not required for operation).
+
+## Locales
+
+On client side there are a couple utility functions available for localization purposes.
+
+`getPreferredLocales()` function returns user's "preferred locales" (taken from `locale` cookie and `Accept-Language` HTTP header) if server-side rendering is enabled.
+
+```js
+import { getPreferredLocales } from 'react-website'
+
+getPreferredLocales()
+// E.g. ["ru", "ru-RU", "en-US", "en"]
+```
+
+When server-side rendering is disabled then use `getPreferredLocale()` function which returns the preferred locale of user's web browser (taken from `navigator.language`).
+
+```js
+import { getPreferredLocale } from 'react-website'
+
+getPreferredLocale()
+// E.g. "ru-RU", "en".
+```
+
+To convert locale to language use `getLanguageFromLocale()` function.
+
+```js
+import { getLanguageFromLocale } from 'react-website'
+
+getLanguageFromLocale('ru-RU')
+// Outputs: "ru".
+```
 
 ## Serving assets and API
 
