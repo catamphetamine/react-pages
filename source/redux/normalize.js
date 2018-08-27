@@ -21,8 +21,8 @@ export default function normalizeSettings(settings, options = {})
 		if (!settings.routes) {
 			throw new Error(`"routes" parameter is required`)
 		}
-		if (!settings.reducer) {
-			throw new Error(`"reducer" parameter is required`)
+		if (!settings.reducers) {
+			throw new Error(`"reducers" parameter is required`)
 		}
 	}
 

@@ -108,7 +108,7 @@ const redux = reduxModule('BLOG_POST', reduxSettings)
 ...
 ```
 
-Notice the extraction of these two configuration parameters (`reduxEventNaming` and `reduxPropertyNaming`) into a separate file `react-website-redux.js`: this is done to break circular dependency on `./react-website.js` file because the `routes` parameter inside `./react-website.js` is the `./routes.js` file which `import`s React page components which in turn `import` action creators which in turn would import `./react-website.js` hence the circular (recursive) dependency (same goes for the `reducer` parameter inside `./react-website.js`).
+Notice the extraction of these two configuration parameters (`reduxEventNaming` and `reduxPropertyNaming`) into a separate file `react-website-redux.js`: this is done to break circular dependency on `./react-website.js` file because the `routes` parameter inside `./react-website.js` is the `./routes.js` file which `import`s React page components which in turn `import` action creators which in turn would import `./react-website.js` hence the circular (recursive) dependency (same goes for the `reducers` parameter inside `./react-website.js`).
 
 ## `@preload()`
 
@@ -257,7 +257,7 @@ const { status, content, contentType } = renderError(error)
   routes: require('./src/routes')
 
   // Redux reducers (an object)
-  reducer: require('./src/redux/index')
+  reducers: require('./src/redux/index')
 
   // A React component.
   //

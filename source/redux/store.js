@@ -24,7 +24,7 @@ export default function _createStore(settings, data, createHistoryProtocol, http
 {
 	let
 	{
-		reducer,
+		reducers,
 		routes,
 		reduxMiddleware,
 		reduxStoreEnhancers,
@@ -121,13 +121,13 @@ export default function _createStore(settings, data, createHistoryProtocol, http
 	}))
 
 	// Create Redux store.
-	const store = getStoreEnhancersComposer(server, devtools)(...storeEnhancers)(createStore)(createReducer(reducer), data)
+	const store = getStoreEnhancersComposer(server, devtools)(...storeEnhancers)(createStore)(createReducer(reducers), data)
 
 	// On the client side, add `hotReload()` function to the `store`.
 	// (could just add this function to `window` but adding it to the `store` fits more)
 	if (!server) {
 		// `hotReload` helper function gives the web application means to hot reload its Redux reducers
-		store.hotReload = (reducer) => store.replaceReducer(createReducer(reducer))
+		store.hotReload = (reducers) => store.replaceReducer(createReducer(reducers))
 	}
 
 	// Initialize `found`.

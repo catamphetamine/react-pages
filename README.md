@@ -38,14 +38,13 @@ Start by creating the configuration file
 // React-router v3 routes
 import routes from './routes'
 
-// Redux reducers
-// (they will be combined into the
-//  root Redux reducer via `combineReducers()`)
-import * as reducer from './redux/index'
+// Redux reducers, which will be combined into
+// a single Redux reducer via `combineReducers()`.
+import * as reducers from './redux/index'
 
 export default {
   routes,
-  reducer
+  reducers
 }
 ```
 
@@ -622,7 +621,7 @@ redux.on('BLOG_POST', 'CUSTOM_EVENT', (state, action) => ({
 export default redux.reducer()
 ```
 
-#### redux/reducer.js
+#### redux/index.js
 
 ```js
 // The "main" reducer composed of various reducers.
@@ -1318,16 +1317,11 @@ render(settings).then(({ store, rerender }) => {
     module.hot.accept('./react-website', () => {
       rerender()
       // Update reducer
-      store.hotReload(settings.reducer)
+      store.hotReload(settings.reducers)
     })
   }
 })
 ```
-
-<!--
-// Update reducer (for Webpack 1)
-// store.hotReload(require('./react-website').reducer)
--->
 
 #### Container.js
 
