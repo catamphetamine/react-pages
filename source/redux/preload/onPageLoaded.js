@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import hoist_non_react_statics from 'hoist-non-react-statics'
 
-import { get_display_name } from '../../utility'
+import { getDisplayName } from '../../utility'
 
 export const ON_PAGE_LOADED_METHOD_NAME = '__on_page_loaded__'
 
@@ -24,7 +24,7 @@ export default function onPageLoaded(on_page_loaded, options)
 		OnPageLoaded[ON_PAGE_LOADED_METHOD_NAME] = on_page_loaded
 
 		// Component naming for React DevTools
-		OnPageLoaded.displayName = `OnPageLoaded(${get_display_name(DecoratedComponent)})`
+		OnPageLoaded.displayName = `OnPageLoaded(${getDisplayName(DecoratedComponent)})`
 
 		// Keep all non-React-specific static methods
 		return hoist_non_react_statics(OnPageLoaded, DecoratedComponent)

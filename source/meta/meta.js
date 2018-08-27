@@ -4,7 +4,7 @@ import flatten from 'lodash/flatten'
 import compact from 'lodash/compact'
 
 import BrowserDocument, { getMetaAttributeFor } from './BrowserDocument'
-import { get_display_name } from '../utility'
+import { getDisplayName } from '../utility'
 
 const browserDocument = new BrowserDocument()
 
@@ -32,7 +32,7 @@ export default function meta(getMeta)
 		}
 
 		Meta[META_METHOD_NAME] = getMeta
-		Meta.displayName = `Meta(${get_display_name(DecoratedComponent)})`
+		Meta.displayName = `Meta(${getDisplayName(DecoratedComponent)})`
 		return hoistNonReactStatics(Meta, DecoratedComponent)
 	}
 }
@@ -60,8 +60,7 @@ export function getMeta(components, state)
  */
 function getComponentMeta(component, state)
 {
-	if (component[META_METHOD_NAME])
-	{
+	if (component[META_METHOD_NAME]) {
 		return component[META_METHOD_NAME](state)
 	}
 }

@@ -1,4 +1,4 @@
-export function get_display_name(Component)
+export function getDisplayName(Component)
 {
 	return Component.displayName || Component.name || 'Component'
 }

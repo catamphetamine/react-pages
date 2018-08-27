@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import hoistNonReactStatics from 'hoist-non-react-statics'
 
-import { get_display_name } from '../../utility'
+import { getDisplayName } from '../../utility'
 
 export const PRELOAD_METHOD_NAME  = '__preload__'
 export const PRELOAD_OPTIONS_NAME = '__preload_options__'
@@ -55,7 +55,7 @@ export default function preload(preload, options)
 		})
 
 		// Component naming for React DevTools
-		PreloadedComponent.displayName = `Preloaded(${get_display_name(DecoratedComponent)})`
+		PreloadedComponent.displayName = `Preload(${getDisplayName(DecoratedComponent)})`
 
 		// Keep all non-React-specific static methods
 		return hoistNonReactStatics(PreloadedComponent, DecoratedComponent)
