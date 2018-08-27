@@ -1,6 +1,7 @@
 import { exists, isObject } from '../../helpers'
 import { getLocationUrl } from '../../location'
 import { goto } from '../../router'
+import { DEFAULT_REDUX_EVENT_NAMING } from '../naming'
 
 export const RESULT_ACTION_PROPERTY = 'value'
 export const ERROR_ACTION_PROPERTY = 'error'
@@ -19,6 +20,8 @@ export default function asynchronousMiddleware(
 	onError,
 	parseError = defaultParseError
 ) {
+	reduxEventNaming = reduxEventNaming || DEFAULT_REDUX_EVENT_NAMING
+
 	return ({ dispatch, getState }) =>
 	{
 		// Can cancel previous actions of the same `type` (if configured).

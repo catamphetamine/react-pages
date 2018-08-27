@@ -1,6 +1,4 @@
-import { eventName } from './naming'
-import normalize_common_settings from './normalize'
-
+import { eventName, underscoredToCamelCase, DEFAULT_REDUX_EVENT_NAMING } from './naming'
 import { RESULT_ACTION_PROPERTY, ERROR_ACTION_PROPERTY } from './middleware/asynchronous'
 
 // Creates Redux module object
@@ -28,7 +26,11 @@ class ReduxModule
 	constructor(namespace = `REACT_WEBSITE_${counter.next()}`, settings = {})
 	{
 		this.namespace = namespace
-		this.settings = normalize_common_settings(settings, { full: false })
+
+		this.settings = {
+			reduxEventNaming: settings.reduxEventNaming || DEFAULT_REDUX_EVENT_NAMING,
+			reduxPropertyNaming: settings.reduxPropertyNaming || underscoredToCamelCase
+		}
 	}
 
 	replace(event, handler)
@@ -272,16 +274,6 @@ function create_action(event, action, result, options, redux)
 //
 function add_asynchronous_action_reducers(redux, namespace, event, result_reducer)
 {
-	if (!redux.settings.reduxEventNaming)
-	{
-		throw new Error("`reduxEventNaming` function parameter was not passed")
-	}
-
-	if (!redux.settings.reduxPropertyNaming)
-	{
-		throw new Error("`reduxPropertyNaming` function parameter was not passed")
-	}
-
 	const
 	[
 		pending_event_name,

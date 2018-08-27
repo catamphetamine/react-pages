@@ -1,4 +1,5 @@
-// Converts `UNDERSCORED_NAMES` to `camelCasedNames`
+// Converts `UNDERSCORED_NAMES` to `camelCasedNames`.
+// E.g. event `GET_USERS_ERROR` => state.`getUsersError`.
 export function underscoredToCamelCase(string)
 {
 	return string.split('_')
@@ -26,3 +27,10 @@ export function eventName(namespace, event)
 {
 	return namespace ? `${namespace}: ${event}` : event
 }
+
+export const DEFAULT_REDUX_EVENT_NAMING = (event) =>
+([
+	`${event}_PENDING`,
+	`${event}_SUCCESS`,
+	`${event}_ERROR`
+])
