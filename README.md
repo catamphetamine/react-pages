@@ -35,7 +35,6 @@ Start by creating the configuration file
 #### ./src/react-website.js
 
 ```javascript
-// React-router v3 routes
 import routes from './routes'
 
 // Redux reducers, which will be combined into
@@ -1061,11 +1060,11 @@ To set a custom HTTP response status code for a specific route set the `status` 
 
 ```javascript
 export default (
-  <Route path="/" component={Layout}>
-    <IndexRoute component={Home}/>
-    <Route path="blog"  component={Blog}/>
-    <Route path="about" component={About}/>
-    <Route path="*"     component={PageNotFound} status={404}/>
+  <Route path="/" Component={Layout}>
+    <Route Component={Home}/>
+    <Route path="blog"  Component={Blog}/>
+    <Route path="about" Component={About}/>
+    <Route path="*"     Component={PageNotFound} status={404}/>
   </Route>
 )
 ```
@@ -1304,7 +1303,7 @@ telegraf -config telegraf.conf
 
 Webpack's [Hot Module Replacement](https://webpack.github.io/docs/hot-module-replacement.html) (aka Hot Reload) works for React components and Redux reducers and Redux action creators (it just doesn't work for page `@preload()`s).
 
-HMR setup for Redux reducers is as simple as adding `store.hotReload()` (as shown below). For enabling [HMR on React Components](https://webpack.js.org/guides/hmr-react/) (and Redux action creators) I would suggest the new [react-hot-loader 4](https://github.com/gaearon/react-hot-loader):
+HMR setup for Redux reducers is as simple as adding `store.hotReload()` (as shown below). For enabling [HMR on React Components](https://webpack.js.org/guides/hmr-react/) (and Redux action creators) use [react-hot-loader](https://github.com/gaearon/react-hot-loader):
 
 #### application.js
 
@@ -1351,57 +1350,21 @@ export default hot(module)(Container)
   ],
 
   "plugins": [
-    // `react-hot-loader@4` Babel plugin
+    // `react-hot-loader` Babel plugin
     "react-hot-loader/babel"
   ]
 }
 ```
 
-#### webpack.config.js
+#### ./src/index.js
 
 ```js
-export default {
-  entry: {
-    main: [
-      'webpack-hot-middleware/client?path=http://localhost:8080/__webpack_hmr',
-      'babel-polyfill',
-      './src/index.js'
-    ]
-  },
-  plugins: [
-    new webpack.HotModuleReplacementPlugin(),
-    ...
-  ],
-  ...
-}
+// An ES6 polyfill is required for `react-hot-loader`.
+require('babel-polyfill')
+...
 ```
 
-P.S.: Currently it says `Warning: [react-router] You cannot change <Router routes>; it will be ignored` in the browser console. I'm just ignoring this for now, maybe I'll find a proper fix later.
-
-<details>
-<summary>Currently I'm using this hacky workaround in <code>./src/index.js</code></summary>
-
-```js
-/**
- * Warning from React Router, caused by react-hot-loader.
- * The warning can be safely ignored, so filter it from the console.
- * Otherwise you'll see it every time something changes.
- * See https://github.com/gaearon/react-hot-loader/issues/298
- */
-if (module.hot) {
-  const isString = a => typeof a === 'string';
-  const orgError = console.error; // eslint-disable-line no-console
-  console.error = (...args) => { // eslint-disable-line no-console
-    if (args && args.length === 1 && isString(args[0]) && args[0].indexOf('You cannot change <Router routes>;') > -1) {
-      // React route changed
-    } else {
-      // Log the error as normally
-      orgError.apply(console, args);
-    }
-  };
-}
-```
-</details>
+Then start [`webpack-dev-server`](https://github.com/webpack/webpack-dev-server) or [`webpack-serve`](https://github.com/webpack-contrib/webpack-serve) with `--hot` option.
 
 ## WebSocket
 
