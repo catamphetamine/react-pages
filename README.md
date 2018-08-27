@@ -1097,12 +1097,12 @@ import { meta } from 'react-website'
   // `<meta property="og:video" .../>`
   video: '...',
 
-  // `<meta property="og:locale" .../>`
-  locale: location.query.language || 'ru_RU',
+  // `<meta property="og:locale" content="ru_RU"/>`
+  locale: state.user.locale,
 
-  // `<meta name="og:locale:alternate" content="en_US"/>`
-  // `<meta name="og:locale:alternate" content="fr_FR"/>`
-  localeOther: ['en_US', 'fr_FR'],
+  // `<meta property="og:locale:alternate" content="en_US"/>`
+  // `<meta property="og:locale:alternate" content="fr_FR"/>`
+  locales: ['ru_RU', 'en_US', 'fr_FR'],
 
   // `<meta property="og:url" .../>`
   url: 'https://google.com/',

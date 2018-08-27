@@ -47,11 +47,21 @@ export function getMeta(components, state)
 	// // `Object.assign` is not supported in Internet Explorer.
 	// return Object.assign({}, DEFAULT_META, ...components.map(_ => getComponentMeta(_, ...))))
 
-	return components.reduce((meta, component) => ({
+	const meta = components.reduce((meta, component) => ({
 		...meta,
 		...getComponentMeta(component, state)
 	}),
 	DEFAULT_META)
+
+	// Remove `locale` from `locales`.
+	if (meta.locale && meta.locales) {
+		meta.locales = meta.locales.filter(_ => _ !== meta.locale)
+		if (meta.locales.length === 0) {
+			delete meta.locales
+		}
+	}
+
+	return meta
 }
 
 /**
@@ -177,7 +187,7 @@ function getMetaTagNames(key)
 		case 'audio':
 		case 'video':
 			return [`og:${key}`]
-		case 'localeOther':
+		case 'locales':
 			return ['og:locale:alternate']
 		default:
 			return [escape_html(key)]

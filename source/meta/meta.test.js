@@ -24,7 +24,7 @@ describe(`@meta`, () =>
 			description  : 'Testing metadata',
 			site_name    : 'Testing',
 			locale       : 'ru',
-			localeOther  : ['en', 'fr'],
+			locales      : ['ru', 'en', 'fr'],
 			viewport     : 'width=device-width, initial-scale=1',
 			keywords     : 'react, redux, webpack',
 			author       : '@catamphetamine'
@@ -78,7 +78,7 @@ describe(`@meta`, () =>
 			title        : 'Test',
 			description  : 'Testing metadata',
 			locale       : 'ru',
-			localeOther  : ['en', 'fr'],
+			locales      : ['ru', 'en', 'fr'],
 			viewport     : 'width=device-width, initial-scale=1',
 			keywords     : 'react, redux, webpack',
 			author       : '@catamphetamine'
