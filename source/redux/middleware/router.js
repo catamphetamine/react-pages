@@ -119,6 +119,7 @@ export default function routerMiddleware(routes, codeSplit, onNavigate, reportSt
 					// Hide page loading indicator.
 					dispatch({ type: PRELOAD_FINISHED })
 
+					// Report preload time in console for debugging.
 					if (Date.now() - startedAt > 30) {
 						console.log(`[react-website] "${location.pathname}" loaded in ${Date.now() - startedAt} ms`)
 					}
