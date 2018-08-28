@@ -93,6 +93,10 @@ export default function _preload(
 	if (getLocale) {
 		const locale = getLocale(getState())
 		// Set the `_key` for each `<Route/>`.
+		// Each page component gets `route` property
+		// from which it can get the `_key`
+		// and using that `_key` it can get the
+		// translation data from Redux state.
 		routerArgs.routes.forEach((route, i) => {
 			route._key = routerArgs.routeIndices.slice(0, i + 1).join('/')
 		})
@@ -104,7 +108,7 @@ export default function _preload(
 			.filter(_ => _.getTranslation)
 		if (translations.length > 0) {
 			loadTranslation = () => Promise.all(translations.map(({ path, getTranslation }) => {
-				return getTranslation().then((translation) => dispatch('SET_TRANSLATION', {
+				return getTranslation().then((translation) => dispatch('@@react-website/translation', {
 					path,
 					translation
 				}))
