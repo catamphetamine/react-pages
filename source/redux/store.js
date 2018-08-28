@@ -10,7 +10,10 @@ import preloadReducer from './preload/reducer'
 
 import translateReducer from './translate/reducer'
 
+import { getLocationUrl } from '../location'
+
 import {
+	redirect,
 	convertRoutes,
 	foundReducer,
 	createRouterStoreEnhancers,
@@ -19,8 +22,7 @@ import {
 	getMatchedRoutesParams,
 	getRouteParams,
 	getCurrentlyMatchedLocation,
-	getPreviouslyMatchedLocation,
-	// setUpNavigationHook
+	getPreviouslyMatchedLocation
 } from '../router'
 
 export default function _createStore(settings, data, createHistoryProtocol, httpClient, options)
@@ -48,6 +50,9 @@ export default function _createStore(settings, data, createHistoryProtocol, http
 	}
 	= options
 
+	let store
+	const getStore = () => store
+
 	// `routes` will be converted.
 	let convertedRoutes
 	const getConvertedRoutes = () => convertedRoutes
@@ -66,21 +71,40 @@ export default function _createStore(settings, data, createHistoryProtocol, http
 						return Promise.resolve()
 					}
 				}
+				const location = getCurrentlyMatchedLocation(store.getState())
+				const previousLocation = (server || isInitialClientSideNavigation) ? undefined : getPreviouslyMatchedLocation(store.getState())
 				return preload(
-					getCurrentlyMatchedLocation(store.getState()),
-					// `previousLocation` is the location before the transition.
-					// Is used for `instantBack`.
-					(server || isInitialClientSideNavigation) ? undefined : getPreviouslyMatchedLocation(store.getState()),
+					location,
+					previousLocation,
 					{
 						routes: getMatchedRoutes(store.getState(), getConvertedRoutes()),
 						routeParams: getMatchedRoutesParams(store.getState()),
 						params: getRouteParams(store.getState())
 					},
 					server,
-					onError,
 					getLocale,
 					store.dispatch,
 					store.getState
+				)
+				.then(
+					result => result,
+					error => {
+						// Possibly handle the error (for example, redirect to an error page).
+						if (onError) {
+							onError(error, {
+								path : location.pathname,
+								url  : getLocationUrl(location),
+								// Using `redirect` instead of `goto` here
+								// so that the user can't go "Back" to the page being preloaded
+								// in case of an error because it would be in inconsistent state
+								// due to `@preload()` being interrupted.
+								redirect : to => getStore().dispatch(redirect(to)),
+								getState : getStore().getState,
+								server
+							})
+						}
+						throw error
+					}
 				)
 			}
 		})
@@ -134,7 +158,7 @@ export default function _createStore(settings, data, createHistoryProtocol, http
 	storeEnhancers.push(applyMiddleware(...middleware))
 
 	// Create Redux store.
-	const store = getStoreEnhancersComposer(server, devtools)(...storeEnhancers)(createStore)(createReducer(reducers), data)
+	store = getStoreEnhancersComposer(server, devtools)(...storeEnhancers)(createStore)(createReducer(reducers), data)
 
 	// On the client side, add `hotReload()` function to the `store`.
 	// (could just add this function to `window` but adding it to the `store` fits more)

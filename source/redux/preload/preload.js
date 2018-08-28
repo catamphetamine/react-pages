@@ -1,4 +1,3 @@
-import { getLocationUrl } from '../../location'
 import throwRedirectError from '../../serverRedirect'
 
 import {
@@ -20,12 +19,9 @@ import { TRANSLATE_LOCALES_PROPERTY } from '../translate/decorator'
 
 export default function _preload(
 	location,
-	// `previousLocation` is the location before the transition.
-	// Is used for `instantBack`.
 	previousLocation,
 	routerArgs,
 	server,
-	onError,
 	getLocale,
 	dispatch,
 	getState
@@ -129,7 +125,7 @@ export default function _preload(
 
 	// If nothing to preload, just move to the next middleware
 	if (!promise) {
-		return
+		return Promise.resolve()
 	}
 
 	preloading.pending = true
@@ -185,21 +181,6 @@ export default function _preload(
 
 			// Update preload status object
 			preloading.pending = false
-
-			// Possibly handle the error (for example, redirect to an error page).
-			if (onError) {
-				onError(error, {
-					path : location.pathname,
-					url  : getLocationUrl(location),
-					// Using `redirect` instead of `goto` here
-					// so that the user can't go "Back" to the page being preloaded
-					// in case of an error because it would be in inconsistent state
-					// due to `@preload()` being interrupted.
-					redirect : to => dispatch(redirect(to)),
-					getState,
-					server
-				})
-			}
 
 			throw error
 		}
