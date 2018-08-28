@@ -42,14 +42,14 @@ export default function meta(getMeta)
  * defined for this route (`components` array).
  * @return {object}
  */
-export function getMeta(components, state)
+export function mergeMeta(meta)
 {
 	// // `Object.assign` is not supported in Internet Explorer.
-	// return Object.assign({}, DEFAULT_META, ...components.map(_ => getComponentMeta(_, ...))))
+	// return Object.assign({}, DEFAULT_META, ...)
 
-	const meta = components.reduce((meta, component) => ({
+	meta = meta.reduce((meta, componentMeta) => ({
 		...meta,
-		...getComponentMeta(component, state)
+		...componentMeta
 	}),
 	DEFAULT_META)
 
@@ -65,14 +65,15 @@ export function getMeta(components, state)
 }
 
 /**
- * Gets `React.Component`'s meta.
+ * Gets `React.Component` chain meta.
  * @return {object?}
  */
-function getComponentMeta(component, state)
+export function getComponentsMeta(components, state)
 {
-	if (component[META_METHOD_NAME]) {
-		return component[META_METHOD_NAME](state)
-	}
+	return components
+		.map(_ => _[META_METHOD_NAME])
+		.filter(_ => _)
+		.map(_ => _(state))
 }
 
 /**

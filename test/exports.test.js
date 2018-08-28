@@ -7,6 +7,7 @@ import
 	getState,
 	getHttpClient,
 	preload,
+	translate,
 	onPageLoaded,
 	goto,
 	redirect,
@@ -46,6 +47,7 @@ describe(`exports`, function()
 		getState.should.be.a('function')
 		getHttpClient.should.be.a('function')
 		preload.should.be.a('function')
+		translate.should.be.a('function')
 		onPageLoaded.should.be.a('function')
 
 		goto.should.be.a('function')
@@ -92,6 +94,7 @@ describe(`exports`, function()
 		_.getState.should.be.a('function')
 		_.getHttpClient.should.be.a('function')
 		_.preload.should.be.a('function')
+		_.translate.should.be.a('function')
 		_.onPageLoaded.should.be.a('function')
 
 		_.goto.should.be.a('function')

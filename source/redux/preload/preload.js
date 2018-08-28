@@ -6,22 +6,14 @@ import {
 	goto,
 	REDIRECT_ACTION_TYPE,
 	GOTO_ACTION_TYPE,
-	getRoutePath,
-	// getMatchedRoutes,
-	// getMatchedRoutesParams,
-	// getRouteParams
+	getRoutePath
 } from '../../router'
 
 import {
-	isInstantTransition,
-	setInstantNavigationFlag,
-	addInstantBack,
-	resetInstantBack
+	isInstantTransition
 } from '../client/instantBack'
 
 import timer from '../../timer'
-import { getMeta, updateMeta } from '../../meta/meta'
-import { ON_PAGE_LOADED_METHOD_NAME } from './onPageLoaded'
 import generatePreloadChain from './collect'
 
 import {
@@ -29,6 +21,8 @@ import {
 	PRELOAD_FINISHED,
 	PRELOAD_FAILED
 } from './actions'
+
+import { TRANSLATE_LOCALES_PROPERTY } from '../translate/decorator'
 
 export default function _preload(
 	location,
@@ -38,24 +32,12 @@ export default function _preload(
 	routerArgs,
 	server,
 	onError,
+	getLocale,
 	dispatch,
 	getState,
-	reportStats,
-	onNavigate
+	reportStats
 ) {
 	const isInitialClientSideNavigation = !server && !previousLocation
-
-	if (isInitialClientSideNavigation) {
-		window._react_website_initial_location_key = location.key
-	}
-
-	// Indicates whether an `instantBack` `<Link/>` was clicked.
-	const instantBack = !server && window._react_website_instant_back
-
-	// Reset the flag for `wasInstantNavigation()`.
-	// Will be set to `true` in `./source/redux/client/client.js`
-	// if it was an "instant navigation" (instant `popstate` history transition).
-	setInstantNavigationFlag(false)
 
 	// If it's an instant "Back"/"Forward" navigation
 	// then navigate to the page without preloading it.
@@ -64,11 +46,6 @@ export default function _preload(
 		location.action === 'POP' &&
 		previousLocation &&
 		isInstantTransition(previousLocation, location)
-
-	// On client-side page navigation
-	if (onNavigate && !isInitialClientSideNavigation) {
-		onNavigate(getLocationUrl(location), location)
-	}
 
 	// Preload status object.
 	// `preloading` holds the cancellation flag for this navigation process.
@@ -103,22 +80,12 @@ export default function _preload(
 		}
 	}
 
-	const { routes, routeParams, params } = routerArgs
-
-	// routes = getMatchedRoutes(getState(), routes)
-	// const routeParams = getMatchedRoutesParams(getState())
-	// const params = getRouteParams(getState())
-
+	const { routes, routeParams, routeIndices, params } = routerArgs
 	const components = routes.map(_ => _.Component)
 
 	// Concatenated `react-router` route string.
 	// E.g. "/user/:user_id/post/:post_id"
 	const route = getRoutePath(routes)
-
-	// On client-side page navigation
-	if (!server && !isInitialClientSideNavigation) {
-		updateMeta(getMeta(components, getState()))
-	}
 
 	// Instrument `dispatch`.
 	// `dispatch` for server side `throw`s a special "redirect error" on redirect.
@@ -127,8 +94,7 @@ export default function _preload(
 
 	// Preload all the required data for this route (page)
 	let preload
-	if (!_isInstantTransition)
-	{
+	if (!_isInstantTransition) {
 		preload = generatePreloadChain(
 			isInitialClientSideNavigation,
 			server,
@@ -142,27 +108,40 @@ export default function _preload(
 		)
 	}
 
-	function onFinish() {
-		if (!server) {
-			afterPreload(
-				dispatch,
-				getState,
-				location,
-				previousLocation,
-				params,
-				components,
-				routes,
-				instantBack,
-				_isInstantTransition
-			)
+	// Load translations (if any).
+	let loadTranslation
+	if (getLocale) {
+		const locale = getLocale(getState())
+		// Set the `_key` for each `<Route/>`.
+		routerArgs.routes.forEach((route, i) => {
+			route._key = routerArgs.routeIndices.slice(0, i + 1).join('/')
+		})
+		const translations = components
+			.map((component, i) => ({
+				path: routerArgs.routes[i]._key,
+				getTranslation: component[TRANSLATE_LOCALES_PROPERTY] && component[TRANSLATE_LOCALES_PROPERTY][locale]
+			}))
+			.filter(_ => _.getTranslation)
+		if (translations.length > 0) {
+			loadTranslation = Promise.all(translations.map(({ path, getTranslation }) => {
+				return getTranslation().then((translation) => dispatch('SET_TRANSLATION', {
+					path,
+					translation
+				}))
+			}))
 		}
 	}
 
+	if (preload) {
+		if (loadTranslation) {
+			preload = Promise.all([preload, loadTranslation])
+		}
+	} else if (loadTranslation) {
+		preload = loadTranslation
+	}
+
 	// If nothing to preload, just move to the next middleware
-	if (!preload)
-	{
-		onFinish()
-		// Allow the transition.
+	if (!preload) {
 		return
 	}
 
@@ -215,9 +194,6 @@ export default function _preload(
 			// Page loading indicator could listen for this event
 			dispatch({ type: PRELOAD_FINISHED })
 
-			// Set the flag for `wasInstantNavigation()`.
-			setInstantNavigationFlag(_isInstantTransition)
-
 			// Report preloading time.
 			// This preloading time will be longer then
 			// the server-side one, say, by 10 milliseconds,
@@ -237,8 +213,6 @@ export default function _preload(
 					}
 				})
 			}
-
-			onFinish()
 		},
 		(error) =>
 		{
@@ -281,57 +255,6 @@ export default function _preload(
 			throw error
 		}
 	)
-}
-
-function afterPreload(
-	dispatch,
-	getState,
-	location,
-	previousLocation,
-	parameters,
-	components,
-	routes,
-	instantBack,
-	isInstantTransition
-) {
-	// Update instant back navigation chain.
-	if (instantBack)
-	{
-		// Stores "current" (soon to be "previous") location
-		// in "instant back chain", so that if "Back" is clicked
-		// then such transition could be detected as "should be instant".
-		addInstantBack(location, previousLocation, routes, window._react_website_current_page_routes)
-	}
-	else if (!isInstantTransition)
-	{
-		// If current transition is not "instant back" and not "instant"
-		// then reset the whole "instant back" chain.
-		// Only a consequitive "instant back" navigation chain
-		// preserves the ability to instantly navigate "Back".
-		// Once a regular navigation takes place
-		// all previous "instant back" possibilities are discarded.
-		resetInstantBack()
-	}
-
-	// `routes` are used when comparing `instantBack` chain items
-	// for resetting `instantBack` chain when the same route is encountered twice.
-	window._react_website_current_page_routes = routes
-
-	// Call `onPageLoaded()`
-	const page = components[components.length - 1]
-
-	// The current `<Route/>` component might be `undefined`
-	// if a developer forgot to `export default` it.
-	if (page && page[ON_PAGE_LOADED_METHOD_NAME])
-	{
-		page[ON_PAGE_LOADED_METHOD_NAME]
-		({
-			dispatch,
-			getState,
-			location,
-			parameters
-		})
-	}
 }
 
 // Instrument `dispatch`.

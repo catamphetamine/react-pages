@@ -25,7 +25,13 @@ export
 {
 	default as onPageLoaded
 }
-from './modules/redux/preload/onPageLoaded'
+from './modules/redux/client/onPageLoaded'
+
+export
+{
+	default as translate
+}
+from './modules/redux/translate/decorator'
 
 export
 {

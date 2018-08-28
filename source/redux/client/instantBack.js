@@ -20,7 +20,12 @@ const set = (chain) => window._react_website_instant_back_chain = chain
  * in this case all "instant back" history is discarded
  * and if the user clicks "Back" two times the second time won't be "instant".
  */
-export function addInstantBack(nextLocation, previousLocation, nextLocationRoutes, previousLocationRoutes)
+export function addInstantBack(
+	nextLocation,
+	previousLocation,
+	nextLocationRouteComponents,
+	previousLocationRouteComponents
+)
 {
 	let chain = get()
 
@@ -60,21 +65,21 @@ export function addInstantBack(nextLocation, previousLocation, nextLocationRoute
 		// Add the "current" page to the chain.
 		chain =
 		[{
-			key    : getLocationKey(previousLocation),
-			routes : previousLocationRoutes
+			key : getLocationKey(previousLocation),
+			routes : previousLocationRouteComponents
 		}]
 	}
 
 	// Discard "instant back" chain part having same routes.
-	const sameRoutesIndex = findSameRoutesLocationIndex(chain, nextLocationRoutes)
+	const sameRoutesIndex = findSameRoutesLocationIndex(chain, nextLocationRouteComponents)
 	if (sameRoutesIndex >= 0) {
 		chain = chain.slice(sameRoutesIndex + 1)
 	}
 
 	// Add the "next" page to the chain.
 	chain.push({
-		key    : getLocationKey(nextLocation),
-		routes : nextLocationRoutes
+		key : getLocationKey(nextLocation),
+		routes : nextLocationRouteComponents
 	})
 
 	// Save the chain.
@@ -102,10 +107,8 @@ export const resetInstantBack = () => set()
 
 /**
  * Each history `location` has a randomly generated `key`.
- * Except for the initial `location` which has no `key`.
- * (the very first entry in the browser history stack for a given tab)
  */
-const getLocationKey = location => location.key || window._react_website_initial_location_key
+const getLocationKey = location => location.key
 
 function indexOfByKey(chain, key)
 {
@@ -131,7 +134,7 @@ function findSameRoutesLocationIndex(chain, routes)
 			let j = 0
 			while (j < routes.length)
 			{
-				if (chain[i].routes[j].Component !== routes[j].Component) {
+				if (chain[i].routes[j] !== routes[j]) {
 					break
 				}
 				j++

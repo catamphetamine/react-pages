@@ -1,3 +1,12 @@
+3.0.0-alpha.3 / 27.08.2018
+==================
+
+  * (breaking change) `reducer` settings parameter was renamed to `reducers`.
+
+  * (breaking change) `@meta()` `localeOther` parameter renamed to `locales`.
+
+  * Fixed re-mounting the whole `<Route/>` chain on navigation: only the leaf `<Route/>` is now being re-mounted.
+
 3.0.0-alpha.2 / 23.08.2018
 ==================
 

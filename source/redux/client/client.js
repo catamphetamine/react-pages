@@ -66,16 +66,6 @@ export default function setUpAndRender(settings, options = {}) {
 		onStoreCreated(store)
 	}
 
-	// Call `onNavigate` on initial page load
-	if (onNavigate) {
-		const location = {
-			pathname: document.location.pathname,
-			search: document.location.search,
-			hash: document.location.hash
-		}
-		onNavigate(getLocationUrl(location), location)
-	}
-
 	// Render the page
 	return clientSideRender({
 		container: settings.container,

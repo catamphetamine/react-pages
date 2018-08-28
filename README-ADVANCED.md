@@ -16,12 +16,12 @@ So, **javascript is required** on the client side in order for this CSRF attacks
 
 ## `@onPageLoaded()`
 
-When using `{ client: true }` `@preload()`s it's sometimes required to perform some actions (e.g. adjust the current URL) after those `@preload()`s finish (and after the browser navigates to the preloaded page). While with regular `@preload()`s it could be done using `componentDidMount()` (though only on the client side) such an approach wouldn't work for `{ client: true }` `@preload()`s because they're called after `componentDidMount()`. The solution is `@onPageLoaded()` decorator which takes a function parameter, exactly as `@preload()` decorator does.
+When using `{ client: true }` `@preload()`s it's sometimes required to perform some actions (e.g. adjust the current URL) after those `@preload()`s finish (and after the browser navigates to the preloaded page). While with regular `@preload()`s it could be done using `componentDidMount()` (though only on the client side) such an approach wouldn't work for `{ client: true }` `@preload()`s because they're called after `componentDidMount()`. The solution is `@onPageLoaded()` decorator which is called after all `@preload()`s finish on client side.
 
 ```js
 import { onPageLoaded, replaceLocation } from 'react-website'
 
-@onPageLoaded(function({ dispatch, getState, location, parameters, server }) {
+@onPageLoaded(({ dispatch, getState, location, parameters }) => {
   if (isAnIdURL(location.pathname)) {
     dispatch(replaceLocation(replaceIdWithAnAlias(location, getState().userProfilePage.userProfile)))
   }
@@ -296,6 +296,11 @@ const { status, content, contentType } = renderError(error)
   // `redirect()` redirects to a URL.
   //
   onError: (error, { path, url, redirect, getState, server }) => redirect(`/error?url=${encodeURIComponent(url)}&error=${error.status}`)
+
+  // (optional)
+  // Gets current user's locale.
+  // Is used in `@translate()` decorator.
+  getLocale: (state) => state.user.profile && state.user.profile.locale || getCookie('locale') || getPreferredLocale() || 'en'
 
   // (optional)
   // `http` utility settings

@@ -16,6 +16,7 @@ export default class HyperLink extends Component
 		}
 
 		window._react_website_instant_back = instantBack
+		// Is reset in `./redux/middleware/router.js`
 		setTimeout(() => window._react_website_instant_back = false, 0)
 	}
 

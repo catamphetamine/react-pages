@@ -3,9 +3,12 @@ import { createStore, combineReducers, applyMiddleware, compose } from 'redux'
 import { composeWithDevTools } from 'redux-devtools-extension/logOnlyInProduction'
 
 import asynchronousMiddleware from './middleware/asynchronous'
+import routerMiddleware from './middleware/router'
 
 import preload from './preload/preload'
 import preloadReducer from './preload/reducer'
+
+import translateReducer from './translate/reducer'
 
 import {
 	convertRoutes,
@@ -30,7 +33,9 @@ export default function _createStore(settings, data, createHistoryProtocol, http
 		reduxStoreEnhancers,
 		reduxEventNaming,
 		http,
-		onError
+		onError,
+		getLocale,
+		codeSplit
 	}
 	= settings
 
@@ -45,41 +50,42 @@ export default function _createStore(settings, data, createHistoryProtocol, http
 
 	// `routes` will be converted.
 	let convertedRoutes
-	const getRoutes = () => convertedRoutes
+	const getConvertedRoutes = () => convertedRoutes
 
 	// Add `@preload()` data hook.
-	routes = React.cloneElement(routes, {
-		getData() {
-			let isInitialClientSideNavigation
-			if (!server) {
-				if (!window._react_website_routes_rendered) {
-					isInitialClientSideNavigation = true
-					window._react_website_routes_rendered = true
+	if (!codeSplit) {
+		routes = React.cloneElement(routes, {
+			getData() {
+				let isInitialClientSideNavigation
+				if (!server) {
+					if (!window._react_website_routes_rendered) {
+						isInitialClientSideNavigation = true
+						window._react_website_routes_rendered = true
+					}
+					if (window._react_website_skip_preload) {
+						return Promise.resolve()
+					}
 				}
-				if (window._react_website_skip_preload) {
-					return Promise.resolve()
-				}
+				return preload(
+					getCurrentlyMatchedLocation(store.getState()),
+					// `previousLocation` is the location before the transition.
+					// Is used for `instantBack`.
+					(server || isInitialClientSideNavigation) ? undefined : getPreviouslyMatchedLocation(store.getState()),
+					{
+						routes: getMatchedRoutes(store.getState(), getConvertedRoutes()),
+						routeParams: getMatchedRoutesParams(store.getState()),
+						params: getRouteParams(store.getState())
+					},
+					server,
+					onError,
+					getLocale,
+					store.dispatch,
+					store.getState,
+					stats
+				)
 			}
-
-			return preload(
-				getCurrentlyMatchedLocation(store.getState()),
-				// `previousLocation` is the location before the transition.
-				// Is used for `instantBack`.
-				(server || isInitialClientSideNavigation) ? undefined : getPreviouslyMatchedLocation(store.getState()),
-				{
-					routes: getMatchedRoutes(store.getState(), getRoutes()),
-					routeParams: getMatchedRoutesParams(store.getState()),
-					params: getRouteParams(store.getState())
-				},
-				server,
-				onError,
-				store.dispatch,
-				store.getState,
-				stats,
-				onNavigate
-			)
-		}
-	})
+		})
+	}
 
 	// Convert `found` `<Route/>`s to a JSON structure.
 	routes = convertRoutes(routes)
@@ -103,13 +109,16 @@ export default function _createStore(settings, data, createHistoryProtocol, http
 		)
 	)
 
+	if (!server) {
+		middleware.push(routerMiddleware(
+			routes,
+			codeSplit,
+			onNavigate
+		))
+	}
+
 	// Redux "store enhancers"
-	const storeEnhancers =
-	[
-		// Redux middleware are applied in reverse order.
-		// (which is counter-intuitive)
-		applyMiddleware(...middleware)
-	]
+	const storeEnhancers = []
 
 	// User may supply his own Redux store enhancers.
 	if (reduxStoreEnhancers) {
@@ -119,6 +128,10 @@ export default function _createStore(settings, data, createHistoryProtocol, http
 	storeEnhancers.push(...createRouterStoreEnhancers(routes, createHistoryProtocol, {
 		basename: settings.basename
 	}))
+
+	// Redux middleware are applied in reverse order.
+	// (which is counter-intuitive)
+	storeEnhancers.push(applyMiddleware(...middleware))
 
 	// Create Redux store.
 	const store = getStoreEnhancersComposer(server, devtools)(...storeEnhancers)(createStore)(createReducer(reducers), data)
@@ -151,6 +164,8 @@ function createReducer(reducers)
 	reducers.found = foundReducer
 	// Add `@preload()` status reducer.
 	reducers.preload = preloadReducer
+	// // Add `@translate()` reducer.
+	// reducers.translation = translateReducer
 	// Create reducer.
 	return combineReducers(reducers)
 }
@@ -179,5 +194,6 @@ function getStoreEnhancersComposer(server, devtools)
 const RESERVED_REDUCER_NAMES = [
 	'found',
 	'location',
-	'preload'
+	'preload',
+	'translation'
 ]

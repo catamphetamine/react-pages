@@ -1,7 +1,7 @@
 import React from 'react'
 
 import timer from '../../timer'
-import { getMeta } from '../../meta/meta'
+import { mergeMeta, getComponentsMeta } from '../../meta/meta'
 import { matchRoutes } from '../../router'
 import { createRouterElement } from '../../router/server'
 
@@ -35,8 +35,8 @@ export default async function renderOnServer({
 		time.preload = preloadTimer()
 
 		// Gather `<title/>` and `<meta/>` tags for this route path
-		const { routes } = renderArgs
-		const components = routes.map(_ => _.Component)
+		const { routes, elements } = renderArgs
+		const components = elements.map(_ => _.type)
 
 		// Return HTTP status code and the rendered page
 		return {
@@ -45,7 +45,7 @@ export default async function renderOnServer({
 			route   : getRoutePath(routes),
 			status  : getHttpResponseStatusCodeForTheRoute(routes),
 			content : createRouterElement(renderArgs),
-			meta    : getMeta(components, store.getState()),
+			meta    : mergeMeta(getComponentsMeta(components, store.getState())),
 			containerProps : { store },
 			time
 		}

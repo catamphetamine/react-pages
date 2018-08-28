@@ -17,7 +17,8 @@ exports.PRELOAD_OPTIONS_NAME = preloadDecorator.PRELOAD_OPTIONS_NAME
 
 exports.preload = preloadDecorator.default
 exports.indicateLoading = PreloadActions.indicateLoading
-exports.onPageLoaded = require('./commonjs/redux/preload/onPageLoaded').default
+exports.translate = require('./commonjs/redux/translate/decorator').default
+exports.onPageLoaded = require('./commonjs/redux/client/onPageLoaded').default
 
 exports.Loading = require('./commonjs/components/Loading').default
 

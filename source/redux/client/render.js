@@ -27,7 +27,7 @@ export default function render({ store })
 
 		// `routes` are used when comparing `instantBack` chain items
 		// for resetting `instantBack` chain when the same route is encountered twice.
-		window._react_website_current_page_routes = renderArgs.routes
+		window._react_website_route_components = renderArgs.routeIndices
 
 		return {
 			element: createRouterElement(renderArgs, store.getState),

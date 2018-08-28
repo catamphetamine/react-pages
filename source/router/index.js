@@ -6,10 +6,10 @@ export { default as withRouter } from 'found/lib/withRouter'
 import createMatchEnhancer from 'found/lib/createMatchEnhancer'
 import Matcher from 'found/lib/Matcher'
 import makeRouteConfig from 'found/lib/makeRouteConfig'
-
 import getStoreRenderArgs from 'found/lib/getStoreRenderArgs'
 import RedirectException from 'found/lib/RedirectException'
 import resolver from 'found/lib/resolver'
+import FoundActionTypes from 'found/lib/ActionTypes'
 
 import Actions from 'farce/lib/Actions'
 import ActionTypes from 'farce/lib/ActionTypes'
@@ -63,14 +63,19 @@ export function matchRoutes(store) {
 	)
 }
 
-export function getMatchedRoutes(state, routes)
+export function getRoutesByPath(routeIndices, routes)
 {
 	const matchedRoutes = []
-	for (const i of state.found.match.routeIndices) {
+	for (const i of routeIndices) {
 		matchedRoutes.push(routes[i])
 		routes = routes[i].children
 	}
 	return matchedRoutes
+}
+
+export function getMatchedRoutes(state, routes)
+{
+	return getRoutesByPath(state.found.match.routeIndices, routes)
 }
 
 export function getMatchedRoutesParams(state) {
@@ -141,3 +146,6 @@ function skipPreload() {
 		setTimeout(() => window._react_website_skip_preload = false)
 	}
 }
+
+export const UPDATE_MATCH = FoundActionTypes.UPDATE_MATCH
+export const RESOLVE_MATCH = FoundActionTypes.RESOLVE_MATCH
