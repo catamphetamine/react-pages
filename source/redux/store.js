@@ -80,8 +80,7 @@ export default function _createStore(settings, data, createHistoryProtocol, http
 					onError,
 					getLocale,
 					store.dispatch,
-					store.getState,
-					stats
+					store.getState
 				)
 			}
 		})
@@ -113,7 +112,8 @@ export default function _createStore(settings, data, createHistoryProtocol, http
 		middleware.push(routerMiddleware(
 			routes,
 			codeSplit,
-			onNavigate
+			onNavigate,
+			stats
 		))
 	}
 

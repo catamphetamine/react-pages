@@ -1,6 +1,12 @@
-import { UPDATE_MATCH, RESOLVE_MATCH, getRoutesByPath } from '../../router'
+import { UPDATE_MATCH, RESOLVE_MATCH, getRoutesByPath, getRoutePath } from '../../router'
 import { getComponentsMeta, mergeMeta, updateMeta } from '../../meta/meta'
 import { getLocationUrl } from '../../location'
+
+import {
+	PRELOAD_STARTED,
+	PRELOAD_FINISHED,
+	PRELOAD_FAILED
+} from '../preload/actions'
 
 import {
 	isInstantTransition,
@@ -9,8 +15,9 @@ import {
 	resetInstantBack
 } from '../client/instantBack'
 
-export default function routerMiddleware(routes, codeSplit, onNavigate)
+export default function routerMiddleware(routes, codeSplit, onNavigate, reportStats)
 {
+	let startedAt
 	let previousLocation
 	let previousRouteIndices
 
@@ -24,9 +31,12 @@ export default function routerMiddleware(routes, codeSplit, onNavigate)
 	{
 		return next => event =>
 		{
+			const location = event.payload && event.payload.location
+			const routeIndices = event.payload && event.payload.routeIndices
+
 			switch (event.type) {
 				case UPDATE_MATCH:
-					const { location, routeIndices } = event.payload
+					startedAt = Date.now()
 
 					// If it's an instant "Back"/"Forward" navigation
 					// then navigate to the page without preloading it.
@@ -47,8 +57,7 @@ export default function routerMiddleware(routes, codeSplit, onNavigate)
 					const instantBack = window._react_website_instant_back
 
 					// Update instant back navigation chain.
-					if (instantBack)
-					{
+					if (instantBack) {
 						// Stores "current" (soon to be "previous") location
 						// in "instant back chain", so that if "Back" is clicked
 						// then such transition could be detected as "should be instant".
@@ -58,9 +67,7 @@ export default function routerMiddleware(routes, codeSplit, onNavigate)
 							routeIndices,
 							previousRouteIndices
 						)
-					}
-					else if (!_isInstantTransition)
-					{
+					} else if (!_isInstantTransition) {
 						// If current transition is not "instant back" and not "instant"
 						// then reset the whole "instant back" chain.
 						// Only a consequitive "instant back" navigation chain
@@ -72,17 +79,47 @@ export default function routerMiddleware(routes, codeSplit, onNavigate)
 
 					// `RESOLVE_MATCH` is not being emitted
 					// for the first render for some reason.
-					if (!previousLocation) {
+					const isFirstRender = !previousLocation
+					if (isFirstRender) {
 						updateMetaTags(routeIndices, getState())
+					} else {
+						// Show page loading indicator.
+						dispatch({ type: PRELOAD_STARTED })
 					}
 
 					previousLocation = location
 					previousRouteIndices = routeIndices
-
 					break
 
 				case RESOLVE_MATCH:
-					updateMetaTags(event.payload.routeIndices, getState())
+					updateMetaTags(routeIndices, getState())
+
+					// Report preloading time.
+					// This preloading time will be longer then
+					// the server-side one, say, by 10 milliseconds,
+					// probably because the web browser making
+					// an asynchronous HTTP request is slower
+					// than the Node.js server making a regular HTTP request.
+					// Also this includes network latency
+					// for a particular website user, etc.
+					// So this `preload` time doesn't actually describe
+					// the server-side performance.
+					if (reportStats) {
+						reportStats({
+							url: getLocationUrl(location),
+							// Concatenated `react-router` route string.
+							// E.g. "/user/:user_id/post/:post_id"
+							route: getRoutePath(getRoutesByPath(routeIndices, routes)),
+							time: {
+								preload: Date.now() - startedAt
+							}
+						})
+					}
+
+					// Hide page loading indicator.
+					dispatch({ type: PRELOAD_FINISHED })
+
+					console.log(`[react-website] "${location.pathname}" loaded in ${Date.now() - startedAt} ms`)
 					break
 			}
 

@@ -5,20 +5,14 @@ import {
 	redirect,
 	goto,
 	REDIRECT_ACTION_TYPE,
-	GOTO_ACTION_TYPE,
-	getRoutePath
+	GOTO_ACTION_TYPE
 } from '../../router'
 
-import {
-	isInstantTransition
-} from '../client/instantBack'
+import { isInstantTransition } from '../client/instantBack'
 
-import timer from '../../timer'
 import generatePreloadChain from './collect'
 
 import {
-	PRELOAD_STARTED,
-	PRELOAD_FINISHED,
 	PRELOAD_FAILED
 } from './actions'
 
@@ -34,8 +28,7 @@ export default function _preload(
 	onError,
 	getLocale,
 	dispatch,
-	getState,
-	reportStats
+	getState
 ) {
 	const isInitialClientSideNavigation = !server && !previousLocation
 
@@ -59,33 +52,20 @@ export default function _preload(
 		window.__preloading_page = preloading
 	}
 
-	// Measures time taken (on the client side)
-	let startedAt
-
 	if (!server) {
-		// Measures time taken (on the client side)
-		startedAt = Date.now()
-
 		// If on the client side, then store the current pending navigation,
 		// so that it can be cancelled when a new navigation process takes place
 		// before the current navigation process finishes.
 
 		// If there's preceeding navigation pending,
 		// then cancel that previous navigation.
-		if (previousPreloading && previousPreloading.pending && !previousPreloading.cancelled)
-		{
+		if (previousPreloading && previousPreloading.pending && !previousPreloading.cancelled) {
 			previousPreloading.cancel()
-			// Page loading indicator could listen for this event.
-			dispatch({ type: PRELOAD_FINISHED })
 		}
 	}
 
 	const { routes, routeParams, routeIndices, params } = routerArgs
 	const components = routes.map(_ => _.Component)
-
-	// Concatenated `react-router` route string.
-	// E.g. "/user/:user_id/post/:post_id"
-	const route = getRoutePath(routes)
 
 	// Instrument `dispatch`.
 	// `dispatch` for server side `throw`s a special "redirect error" on redirect.
@@ -123,7 +103,7 @@ export default function _preload(
 			}))
 			.filter(_ => _.getTranslation)
 		if (translations.length > 0) {
-			loadTranslation = Promise.all(translations.map(({ path, getTranslation }) => {
+			loadTranslation = () => Promise.all(translations.map(({ path, getTranslation }) => {
 				return getTranslation().then((translation) => dispatch('SET_TRANSLATION', {
 					path,
 					translation
@@ -132,26 +112,21 @@ export default function _preload(
 		}
 	}
 
+	let promise
 	if (preload) {
 		if (loadTranslation) {
-			preload = Promise.all([preload, loadTranslation])
+			promise = Promise.all([preload(), loadTranslation()])
+		} else {
+			promise = preload()
 		}
 	} else if (loadTranslation) {
-		preload = loadTranslation
+		promise = loadTranslation()
 	}
 
 	// If nothing to preload, just move to the next middleware
-	if (!preload) {
+	if (!promise) {
 		return
 	}
-
-	// Page loading indicator could listen for this event
-	dispatch({ type: PRELOAD_STARTED })
-
-	// Preload the new page.
-	// (the Promise returned is only used in server-side rendering,
-	//  client-side rendering never uses this Promise)
-	const promise = preload()
 
 	preloading.pending = true
 
@@ -170,17 +145,10 @@ export default function _preload(
 		}
 	}
 
-	const preloadTimer = timer()
-
 	return promise.then(
 		// Navigate to the new page
 		() => {
 			preloading.pending = false
-
-			// Report stats to the web browser console
-			if (!server) {
-				console.log(`[react-website] @preload() took ${preloadTimer()} milliseconds for ${location.pathname}`)
-			}
 
 			// If this navigation process was cancelled
 			// before @preload() finished its work,
@@ -189,29 +157,6 @@ export default function _preload(
 				// Return `false` out of the `Promise`
 				// indicating that the navigation was cancelled.
 				return false
-			}
-
-			// Page loading indicator could listen for this event
-			dispatch({ type: PRELOAD_FINISHED })
-
-			// Report preloading time.
-			// This preloading time will be longer then
-			// the server-side one, say, by 10 milliseconds,
-			// probably because the web browser making
-			// an asynchronous HTTP request is slower
-			// than the Node.js server making a regular HTTP request.
-			// Also this includes network latency
-			// for a particular website user, etc.
-			// So this `preload` time doesn't actually describe
-			// the server-side performance.
-			if (reportStats) {
-				reportStats({
-					url: getLocationUrl(location),
-					route,
-					time: {
-						preload: Date.now() - startedAt
-					}
-				})
 			}
 		},
 		(error) =>
@@ -275,8 +220,6 @@ function instrumentDispatch(dispatch, server, preloading) {
 					if (preloading.cancel) {
 						preloading.cancel()
 					}
-					// Page loading indicator could listen for this event.
-					dispatch({ type: PRELOAD_FINISHED })
 				}
 			default:
 				// Proceed normally.
