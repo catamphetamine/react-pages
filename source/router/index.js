@@ -41,7 +41,11 @@ export function createRouterStoreEnhancers(routes, createHistoryProtocol, option
 export function matchRoutes(store) {
 	return getStoreRenderArgs({
 		store,
-		resolver
+		resolver,
+		matchContext: {
+			dispatch: store.dispatch,
+			getState: store.getState
+		}
 	})
 	.then(
 		(renderArgs) => {

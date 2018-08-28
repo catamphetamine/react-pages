@@ -8,7 +8,7 @@ import { ScrollManager } from 'found-scroll'
 
 import render from './render'
 
-export function createRouterElement(renderArgs, getState) {
+export function createRouterElement(renderArgs, { dispatch, getState }) {
 	const ConnectedRouter = createConnectedRouter({
 		render: (renderArgs) => {
 			// Force re-mount the last `<Route/>` component on location path change.
@@ -26,6 +26,10 @@ export function createRouterElement(renderArgs, getState) {
 	})
 	return (
 		<ConnectedRouter
+			matchContext={{
+				dispatch,
+				getState
+			}}
 			resolver={resolver}
 			initialRenderArgs={renderArgs}/>
 	)

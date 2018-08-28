@@ -30,7 +30,7 @@ export default function render({ store })
 		window._react_website_route_components = renderArgs.routeIndices
 
 		return {
-			element: createRouterElement(renderArgs, store.getState),
+			element: createRouterElement(renderArgs, store),
 			containerProps: { store },
 			store
 		}

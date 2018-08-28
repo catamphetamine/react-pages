@@ -5,24 +5,16 @@ import { composeWithDevTools } from 'redux-devtools-extension/logOnlyInProductio
 import asynchronousMiddleware from './middleware/asynchronous'
 import routerMiddleware from './middleware/router'
 
-import preload from './preload/preload'
 import preloadReducer from './preload/reducer'
+import createGetDataForPreload from './preload/getData'
 
 import translateReducer from './translate/reducer'
 
-import { getLocationUrl } from '../location'
-
 import {
-	redirect,
 	convertRoutes,
 	foundReducer,
 	createRouterStoreEnhancers,
-	initializeRouter,
-	getMatchedRoutes,
-	getMatchedRoutesParams,
-	getRouteParams,
-	getCurrentlyMatchedLocation,
-	getPreviouslyMatchedLocation
+	initializeRouter
 } from '../router'
 
 export default function _createStore(settings, data, createHistoryProtocol, httpClient, options)
@@ -50,9 +42,6 @@ export default function _createStore(settings, data, createHistoryProtocol, http
 	}
 	= options
 
-	let store
-	const getStore = () => store
-
 	// `routes` will be converted.
 	let convertedRoutes
 	const getConvertedRoutes = () => convertedRoutes
@@ -60,53 +49,7 @@ export default function _createStore(settings, data, createHistoryProtocol, http
 	// Add `@preload()` data hook.
 	if (!codeSplit) {
 		routes = React.cloneElement(routes, {
-			getData() {
-				let isInitialClientSideNavigation
-				if (!server) {
-					if (!window._react_website_routes_rendered) {
-						isInitialClientSideNavigation = true
-						window._react_website_routes_rendered = true
-					}
-					if (window._react_website_skip_preload) {
-						return Promise.resolve()
-					}
-				}
-				const location = getCurrentlyMatchedLocation(store.getState())
-				const previousLocation = (server || isInitialClientSideNavigation) ? undefined : getPreviouslyMatchedLocation(store.getState())
-				return preload(
-					location,
-					previousLocation,
-					{
-						routes: getMatchedRoutes(store.getState(), getConvertedRoutes()),
-						routeParams: getMatchedRoutesParams(store.getState()),
-						params: getRouteParams(store.getState())
-					},
-					server,
-					getLocale,
-					store.dispatch,
-					store.getState
-				)
-				.then(
-					result => result,
-					error => {
-						// Possibly handle the error (for example, redirect to an error page).
-						if (onError) {
-							onError(error, {
-								path : location.pathname,
-								url  : getLocationUrl(location),
-								// Using `redirect` instead of `goto` here
-								// so that the user can't go "Back" to the page being preloaded
-								// in case of an error because it would be in inconsistent state
-								// due to `@preload()` being interrupted.
-								redirect : to => getStore().dispatch(redirect(to)),
-								getState : getStore().getState,
-								server
-							})
-						}
-						throw error
-					}
-				)
-			}
+			getData: createGetDataForPreload(server, onError, getLocale, getConvertedRoutes)
 		})
 	}
 
@@ -158,7 +101,7 @@ export default function _createStore(settings, data, createHistoryProtocol, http
 	storeEnhancers.push(applyMiddleware(...middleware))
 
 	// Create Redux store.
-	store = getStoreEnhancersComposer(server, devtools)(...storeEnhancers)(createStore)(createReducer(reducers), data)
+	const store = getStoreEnhancersComposer(server, devtools)(...storeEnhancers)(createStore)(createReducer(reducers), data)
 
 	// On the client side, add `hotReload()` function to the `store`.
 	// (could just add this function to `window` but adding it to the `store` fits more)
