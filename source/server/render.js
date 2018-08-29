@@ -28,7 +28,8 @@ export default async function(settings, {
 		routes,
 		container,
 		authentication,
-		onError
+		onError,
+		codeSplit
 	} = settings
 
 	// If Redux is being used, then render for Redux.
@@ -147,7 +148,8 @@ export default async function(settings, {
 			time
 		} = await render({
 			...parameters,
-			routes
+			routes,
+			codeSplit
 		})
 
 		if (redirect) {

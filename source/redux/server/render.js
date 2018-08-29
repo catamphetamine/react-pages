@@ -1,7 +1,7 @@
 import React from 'react'
 
 import timer from '../../timer'
-import { mergeMeta, getComponentsMeta } from '../../meta/meta'
+import { mergeMeta, getComponentsMeta, getCodeSplitMeta } from '../../meta/meta'
 import { matchRoutes } from '../../router'
 import { createRouterElement } from '../../router/server'
 
@@ -9,7 +9,8 @@ import { createRouterElement } from '../../router/server'
 //
 export default async function renderOnServer({
 	store,
-	routes
+	routes,
+	codeSplit
 }) {
 	// Routing only takes a couple of milliseconds
 	// const routingTimer = timer()
@@ -36,7 +37,6 @@ export default async function renderOnServer({
 
 		// Gather `<title/>` and `<meta/>` tags for this route path
 		const { routes, elements } = renderArgs
-		const components = elements.map(_ => _.type)
 
 		// Return HTTP status code and the rendered page
 		return {
@@ -45,7 +45,7 @@ export default async function renderOnServer({
 			route   : getRoutePath(routes),
 			status  : getHttpResponseStatusCodeForTheRoute(routes),
 			content : createRouterElement(renderArgs),
-			meta    : mergeMeta(getComponentsMeta(components, store.getState())),
+			meta    : mergeMeta(codeSplit ? getCodeSplitMeta(routes, store.getState()) : getComponentsMeta(elements.map(_ => _.type), store.getState())),
 			containerProps : { store },
 			time
 		}

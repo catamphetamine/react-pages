@@ -66,7 +66,7 @@ export function mergeMeta(meta)
 
 /**
  * Gets `React.Component` chain meta.
- * @return {object?}
+ * @return {object[]}
  */
 export function getComponentsMeta(components, state)
 {
@@ -74,6 +74,14 @@ export function getComponentsMeta(components, state)
 		.map(_ => _[META_METHOD_NAME])
 		.filter(_ => _)
 		.map(_ => _(state))
+}
+
+/**
+ * Gathers `getMeta` from routes chain.
+ * @return {object[]}
+ */
+export function getCodeSplitMeta(routes, state) {
+	return routes.map(_ => _.getMeta).filter(_ => _).map(_ => _(state))
 }
 
 /**

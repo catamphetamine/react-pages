@@ -1,5 +1,5 @@
 import { UPDATE_MATCH, RESOLVE_MATCH, getRoutesByPath, getRoutePath } from '../../router'
-import { getComponentsMeta, mergeMeta, updateMeta } from '../../meta/meta'
+import { getComponentsMeta, mergeMeta, updateMeta, getCodeSplitMeta } from '../../meta/meta'
 import { getLocationUrl } from '../../location'
 
 import {
@@ -130,8 +130,4 @@ export default function routerMiddleware(routes, codeSplit, onNavigate, reportSt
 			return next(event)
 		}
 	}
-}
-
-function getCodeSplitMeta(routes, state) {
-	return routes.map(_ => _.getMeta).filter(_ => _).map(_ => _(state))
 }
