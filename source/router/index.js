@@ -82,12 +82,20 @@ export function getMatchedRoutes(state, routes)
 	return getRoutesByPath(state.found.match.routeIndices, routes)
 }
 
+export function getMatchedRoutesIndices(state) {
+	return state.found.match.routeIndices
+}
+
 export function getMatchedRoutesParams(state) {
 	return state.found.match.routeParams
 }
 
 export function getCurrentlyMatchedLocation(state) {
 	return state.found.match.location
+}
+
+export function getRouteParams(state) {
+	return state.found.match.params
 }
 
 export function getPreviouslyMatchedLocation(state) {
@@ -110,10 +118,6 @@ export function getRoutePath(routes)
 		.map(route => route.path.replace(/^\//, '').replace(/\/$/, ''))
 		// Join `<Route/>` `path`s with slashes (`/`).
 		.join('/') || '/'
-}
-
-export function getRouteParams(state) {
-	return state.found.params
 }
 
 export function convertRoutes(routes) {
