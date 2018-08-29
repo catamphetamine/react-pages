@@ -20,9 +20,9 @@ export function getPreferredLocales(headers, cookies)
 }
 
 // // From query, `locale=en`
-// function getLocaleFromQuery(query_parameters)
+// function getLocaleFromQuery(query)
 // {
-// 	return query_parameters.locale
+// 	return query.locale
 // }
 
 // From accept-language, `Accept-Language: zh-CN`

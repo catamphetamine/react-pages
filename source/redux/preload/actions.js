@@ -12,32 +12,3 @@ export const indicateLoading = () =>
 	type      : PRELOAD_STARTED,
 	immediate : true
 })
-
-// Starts `location` page preloading.
-//
-// If `redirect` is `true` then will perform
-// `history.replace()` instead of `history.push()`.
-//
-// If `navigate` is `false` then the actual navigation won't take place.
-// This is used for the server side.
-//
-// If `initialClientSidePreload` is `true`
-// then just client-side-only `@preload()`s will be executed.
-//
-export const startPreload = (location,
-{
-	redirect,
-	navigate,
-	initialClientSidePreload,
-	instantBack,
-	instant
-}) =>
-({
-	type     : PRELOAD,
-	location : parseLocation(location),
-	redirect,
-	navigate : navigate === undefined ? true : navigate,
-	initial  : initialClientSidePreload,
-	instantBack,
-	instant
-})
