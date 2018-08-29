@@ -7,7 +7,7 @@ export const ON_PAGE_LOADED_METHOD_NAME = '__on_page_loaded__'
 
 // `@onPageLoaded()` decorator.
 //
-// `function onPageLoaded({ dispatch, getState, location, parameters, server })`.
+// `function onPageLoaded({ dispatch, getState, location, params, server })`.
 //
 export default function onPageLoaded(on_page_loaded, options)
 {

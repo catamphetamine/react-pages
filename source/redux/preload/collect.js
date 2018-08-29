@@ -39,9 +39,10 @@ export default function generatePreloadChain
 			dispatch,
 			getState,
 			location,
+			// `parameters` property name is deprecated, use `params` instead.
 			parameters,
-			server,
-			initial : initial_client_side_preload
+			params: parameters,
+			server
 		},
 		server
 	)

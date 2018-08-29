@@ -10,7 +10,7 @@ export const PRELOAD_OPTIONS_NAME = '__preload_options__'
 //
 // `preloader` function must return a `Promise` (or be `async`):
 //
-// `function preloader({ dispatch, getState, location, parameters, server })`.
+// `function preloader({ dispatch, getState, location, params, server })`.
 //
 // The decorator also receives an optional `options` argument (advanced topic):
 //
