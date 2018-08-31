@@ -51,7 +51,7 @@ export default function createHttpClient(settings, get_store, options = {})
 		on_before_send,
 		catch_to_retry,
 		get_access_token,
-		transform_url               : settings.http.url,
+		transform_url               : settings.http.transformURL,
 		allow_absolute_urls         : settings.http.allowAbsoluteURLs,
 		parseDates                  : settings.parseDates,
 		authentication_token_header : settings.authentication.header,

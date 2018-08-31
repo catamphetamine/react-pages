@@ -319,8 +319,8 @@ const { status, content, contentType } = renderError(error)
   http:
   {
     // (optional)
-    url: (path) => `https://api-server.com${path}`
-    // Using `http.url(path)` configuration parameter
+    transformURL: (path) => `https://api-server.com${path}`
+    // Using `http.transformURL(path)` configuration parameter
     // one can call API endpoints like `http.post('/sign-in')`
     // and such relative paths would be transformed
     // into absolute URLs automatically.
@@ -408,7 +408,7 @@ const { status, content, contentType } = renderError(error)
   authentication:
   {
     // (optional)
-    accessToken: (getCookie, { store }) => String
+    accessToken: ({ getState, path, url, getCookie }) => String
     //
     // If specified, this "access token" will always be set
     // automatically in the "Authorization" HTTP header

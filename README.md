@@ -740,12 +740,15 @@ In order for `http` utility to send an authentication token as part of an HTTP r
 {
   authentication: {
     accessToken({ getState, path, url, getCookie }) {
-      // Optionally check the `url` to make sure that the access token
+      // Optionally check the `path` (or `url`) to make sure that the access token
       // is not leaked to a third party: only send it to own servers.
       // For example, at some point someone may use `http` utility
       // to get some data from a 3rd party endpoint, hence the `url` check.
+      // `path` is the URL supplied to `http` utility method call.
+      // `url` is the result of `http.transformURL(path)` (if configured).
+      // An example of `path`: "/api/method".
       // An example of `url`: "https://server.com/api/method".
-      // if (url.indexOf('https://own-api.com/') !== 0) {
+      // if (path.indexOf('/') !== 0) {
       //   return
       // }
       return localStorage.getItem('accessToken')
@@ -858,12 +861,12 @@ const server = webpageServer(settings, {
 
 ####
 
-The modern approach is to query API by an absolute URL (through CORS) in a cloud. In this case all URLs are transformed from relative ones into absolute ones by the `http.url(path)` parameter configured in `react-website.js`.
+The modern approach is to query API by an absolute URL (through CORS) in a cloud. In this case all URLs are transformed from relative ones into absolute ones by the `http.transformURL(path)` parameter configured in `react-website.js`.
 
 ```js
 {
   http: {
-    url: path => `https://api-service.cloud-provider.com${path}`
+    transformURL: path => `https://my-api.cloud.com${path}`
   }
 }
 ```

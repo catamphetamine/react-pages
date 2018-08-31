@@ -3,6 +3,8 @@
 
 * (breaking change) "protected cookie" concept removed from the code. The reason is that web applications are shifting from being server-side rendered to being purely client-side and also querying API on a different host via CORS.
 
+* (breaking change) `http.url()` parameter function renamed to `http.transformURL()`.
+
 * (breaking change) `authentication.accessToken()` parameter function now receives a single `{ getState, path, url, getCookie }` argument instead of the two `(getCookie, { store, path, url })` arguments. The reason is that cookies are no longer relevant because access tokens are stored in most cases in `localStorage`. Also it's just `getState` parameter now instead of the old `store` parameter.
 
 * (breaking change) `http.request` parameter removed for now. If the need for it arises it might be reconsidered.
