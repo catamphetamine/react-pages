@@ -76,9 +76,6 @@
     "type": "git",
     "url": "git+https://github.com/catamphetamine/react-website.git"
   },
-  "bin": {
-    "generate-entry-html": "./bin/generate-entry-html.js"
-  },
   "keywords": [
     "react",
     "isomorphic",
