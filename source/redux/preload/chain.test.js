@@ -1,6 +1,6 @@
 import
 {
-	collect_preloaders,
+	collectPreloadersFromComponents,
 	filter_preloaders,
 	chain_preloaders
 }
@@ -15,13 +15,13 @@ from './decorator'
 
 describe(`@preload`, function()
 {
-	it(`should collect preloaders`, () =>
+	it(`should collect preloaders from React Components`, () =>
 	{
 		const preload_1 = () => {}
 		const preload_2 = () => {}
 		const preload_3 = () => {}
 
-		collect_preloaders
+		collectPreloadersFromComponents
 		([
 			null,
 			{

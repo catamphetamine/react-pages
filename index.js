@@ -35,14 +35,6 @@ from './modules/redux/translate/decorator'
 
 export
 {
-	preloadPage,
-	fetchData,
-	preloadPageAndFetchData
-}
-from './modules/redux/getData'
-
-export
-{
 	default as Loading
 }
 from './modules/components/Loading'

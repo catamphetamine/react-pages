@@ -82,7 +82,7 @@ export default function generatePreloadChain
 // objects having shape `{ preload(), options }`.
 // Therefore the returned value is an array of arrays.
 //
-function collectPreloadersFromComponents(components)
+export function collectPreloadersFromComponents(components)
 {
 	// Find all static `preload` methods on the route component chain
 	return components

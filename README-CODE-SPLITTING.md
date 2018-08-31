@@ -68,10 +68,9 @@ export default class Page extends React.Component {
 #### `./src/pages/Page.data.js`
 
 ```js
-import { preloadPage } from 'react-website'
 import { fetchPageData } from '../redux/page'
 
-export default preloadPage(async ({ dispatch, getState, params, ... }) => {
+export default async ({ dispatch, getState, params, ... }) => {
 	await dispatch(fetchPageData(params.id))
 })
 ```
