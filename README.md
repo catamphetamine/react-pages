@@ -19,7 +19,7 @@ A complete solution for building a React/Redux application
 
 # version 2.x vs version 3.x
 
-These are the docs for the upcoming version `3.0.0` which is currently in `alpha` stage. For version `2.x` docs see the [README of the `2.x` branch](https://github.com/catamphetamine/react-website/tree/2.x).
+These are the docs for version `3.0.0-beta` which is the recommended one for new projects. For version `2.x` (legacy projects) docs see the [README of the `2.x` branch](https://github.com/catamphetamine/react-website/tree/2.x).
 
 # Introduction
 

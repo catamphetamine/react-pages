@@ -1,4 +1,4 @@
-3.0.0-alpha.5 / 31.08.2018
+3.0.0-beta / 31.08.2018
 ==================
 
 * (breaking change) "protected cookie" concept removed from the code. The reason is that web applications are shifting from being server-side rendered to being purely client-side and also querying API on a different host via CORS.
