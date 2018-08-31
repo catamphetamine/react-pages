@@ -90,7 +90,7 @@ const TEMPLATE_BEFORE_CONTENT = nunjucks.compile
 				 before the global protected cookie value variable is set,
 				 so they're unlikely to even be able to hijack it)
 			#}
-			<div id="react">`
+			<div id="react" class="react--loading">`
 .replace(/\t/g, ''))
 
 const TEMPLATE_AFTER_CONTENT = nunjucks.compile

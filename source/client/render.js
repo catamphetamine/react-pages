@@ -29,7 +29,7 @@ export default function render({ render, renderParameters = {}, container }) {
 			// 	containerProps.locale = locale
 			// }
 
-			render_react_element(
+			renderReactElementTree(
 				// Render page `element` inside a container element.
 				// E.g. Redux context `<Provider/>`, and others.
 				React.createElement(container, containerProps, element),
@@ -56,7 +56,7 @@ export default function render({ render, renderParameters = {}, container }) {
 }
 
 // Renders React element to a DOM node
-function render_react_element(element, to) {
+function renderReactElementTree(element, to) {
 	// If using React >= 16 and the content is Server-Side Rendered.
 	if (ReactDOM.hydrate && window._server_side_render && !window._empty_server_side_render) {
 		// New API introduced in React 16

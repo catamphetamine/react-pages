@@ -31,6 +31,11 @@ export default function routerMiddleware(routes, codeSplit, onNavigate, reportSt
 	{
 		return next => event =>
 		{
+			// Skip the first pass of the initial client-side render.
+			if (window._react_website_initial_prerender) {
+				return next(event)
+			}
+
 			const location = event.payload && event.payload.location
 			const routeIndices = event.payload && event.payload.routeIndices
 
@@ -77,21 +82,26 @@ export default function routerMiddleware(routes, codeSplit, onNavigate, reportSt
 						resetInstantBack()
 					}
 
-					// `RESOLVE_MATCH` is not being emitted
-					// for the first render for some reason.
-					const isFirstRender = !previousLocation
-					if (isFirstRender) {
-						updateMetaTags(routeIndices, getState())
-					} else {
-						// Show page loading indicator.
-						dispatch({ type: PRELOAD_STARTED })
-					}
+					// // `RESOLVE_MATCH` is not being emitted
+					// // for the first render for some reason.
+					// const isFirstRender = !previousLocation
+					// if (isFirstRender) {
+					// 	updateMetaTags(routeIndices, getState())
+					// } else {
+					// 	// Show page loading indicator.
+					// 	dispatch({ type: PRELOAD_STARTED })
+					// }
+
+					// Show page loading indicator.
+					dispatch({ type: PRELOAD_STARTED })
 
 					previousLocation = location
 					previousRouteIndices = routeIndices
 					break
 
 				case RESOLVE_MATCH:
+					window._react_website_router_rendered = true
+
 					updateMetaTags(routeIndices, getState())
 
 					// Report preloading time.

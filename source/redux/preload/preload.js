@@ -9,7 +9,7 @@ import {
 
 import { isInstantTransition } from '../client/instantBack'
 
-import generatePreloadChain from './collect'
+import generatePreloadChain from './chain'
 
 import {
 	PRELOAD_FAILED
@@ -21,6 +21,7 @@ export default function _preload(
 	location,
 	previousLocation,
 	routerArgs,
+	codeSplit,
 	server,
 	getLocale,
 	dispatch,
@@ -74,7 +75,10 @@ export default function _preload(
 		preload = generatePreloadChain(
 			isInitialClientSideNavigation,
 			server,
+			codeSplit,
 			components,
+			routes,
+			routeIndices,
 			routeParams,
 			getState,
 			dispatch,

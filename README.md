@@ -8,11 +8,11 @@ A complete solution for building a React/Redux application
 
 * Routing
 * Page preloading
+* (optional) Code splitting
 * (optional) Server-side rendering
 * Asynchronous HTTP requests
-* Extremely reduced Redux verbosity
+* Easy and simplified Redux (no boilerplate code)
 * Document metadata (`<title/>`, `<meta/>`, social network sharing)
-* Internationalization
 * Webpack "hot reload"
 * HTTP Cookies
 * etc
@@ -280,16 +280,14 @@ In this example the `@preload()` decorator is used to preload a page before it i
     location,
     // `react-router` URL `params`
     // (e.g. '/users/:id')
-    parameters,
+    params,
     // Is this server side rendering
-    server,
-    // Is this the initial page preload in a web browser
-    initial
+    server
   }
   = preloadArguments
 
   // Send HTTP request and wait for response.
-  await dispatch(fetchPageData(parameters.id))
+  await dispatch(fetchPageData(params.id))
 })
 ```
 
@@ -430,7 +428,7 @@ The `http` utility has the following methods:
 Each of these methods returns a `Promise` and takes three arguments:
 
 * the `url` of the HTTP request
-* `parameters` object (e.g. HTTP GET `query` or HTTP POST `body`)
+* `data` object (e.g. HTTP GET `query` or HTTP POST `body`)
 * `options` (described further)
 
 So, API endpoints can be queried using `http` and ES6 `async/await` syntax like so:
@@ -638,10 +636,10 @@ import { connectComments, getComments, postComment } from './redux/blogPost'
 
 // Preload comments before showing the page
 // (see "Page preloading" section of this document)
-@preload(async ({ dispatch, parameters }) => {
-  // `parameters` are the URL parameters populated by `react-router`:
+@preload(async ({ dispatch, params }) => {
+  // `params` are the URL parameters populated by `react-router`:
   // `<Route path="/blog/:blogPostId"/>`.
-  await dispatch(getComments(parameters.blogPostId))
+  await dispatch(getComments(params.blogPostId))
 })
 // See `react-redux` documentation on `@connect()` decorator
 @connect((state) => ({
@@ -872,7 +870,7 @@ The modern approach is to query API by an absolute URL (through CORS) in a cloud
 
 ### File upload
 
-The `http` utility will also upload files if they're passed as part of `parameters` (see example below). The files passed inside `parameters` must have one of the following types:
+The `http` utility will also upload files if they're passed as part of `data` (see example below). The files passed inside `data` must have one of the following types:
 
 * In case of a [`File`](https://developer.mozilla.org/en-US/docs/Web/API/File) it will be a single file upload.
 * In case of a [`FileList`](https://developer.mozilla.org/en-US/docs/Web/API/FileList) with a single `File` inside it would be treated as a single `File`.
@@ -1548,6 +1546,10 @@ function reducer(state, action) {
 ## Server-Side Rendering and bundlers
 
 If the application is being built with a bundler (most likely Webpack) and Server-Side Rendering is enabled then make sure to build the server-side code with the bundler too so that `require()` calls for assets (images, styles, fonts, etc) inside React components don't break (see [universal-webpack](https://github.com/catamphetamine/universal-webpack), for example).
+
+## Code splitting
+
+Code splitting is supported. See [README-CODE-SPLITTING](https://github.com/catamphetamine/react-website/blob/master/README-CODE-SPLITTING.md)
 
 ## Advanced
 

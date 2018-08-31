@@ -10,6 +10,7 @@ import { resetInstantBack } from './instantBack'
 import { getLocationUrl } from '../../location'
 import { convertRoutes } from '../../router'
 import { createHistoryProtocol } from '../../router/client'
+import { redirect } from '../../router'
 
 // This function is what's gonna be called from the project's code on the client-side.
 export default function setUpAndRender(settings, options = {}) {
@@ -36,6 +37,12 @@ export default function setUpAndRender(settings, options = {}) {
 	// "instant back" chain is stored in `window.sessionStorage`
 	// and therefore it survives page reload.
 	resetInstantBack()
+
+	// The first pass of initial client-side render
+	// is to render the markup which matches server-side one.
+	// The second pass will be to render after resolving `getData`.
+	window._react_website_initial_prerender = true
+	window._react_website_skip_preload = true
 
 	// Create Redux store
 	store = createStore(settings, getState(true), createHistoryProtocol, httpClient, {
@@ -73,6 +80,12 @@ export default function setUpAndRender(settings, options = {}) {
 		renderParameters: {
 			store
 		}
+	})
+	.then((result) => {
+		// Perform the second pass of initial client-side rendering.
+		// The second pass resolves `getData` on `<Route/>`s.
+		store.dispatch(redirect(document.location))
+		return result
 	})
 }
 

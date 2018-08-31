@@ -11,7 +11,10 @@ export default function generatePreloadChain
 (
 	initial_client_side_preload,
 	server,
+	codeSplit,
 	components,
+	routes,
+	routeIndices,
 	routesParams,
 	getState,
 	dispatch,
@@ -20,20 +23,24 @@ export default function generatePreloadChain
 	preloading
 )
 {
-	// A small client-side optimization.
-	// Skips some of the `@preloads()`.
-	if (!server)
-	{
-		components = getOnlyChangedComponents(components, routesParams)
+	// Client-side optimization.
+	// Skips `@preloads()` for `<Route/>`s that didn't change as a result of navigation.
+	if (!server) {
+		if (codeSplit) {
+			routes = filterByChangedRoutes(routes, routeIndices, routesParams)
+		} else {
+			components = filterByChangedRoutes(components, routeIndices, routesParams)
+		}
+		window._react_website_previous_routes = routeIndices
+		window._react_website_previous_routes_parameters = routesParams
 	}
 
 	// Get all `preload` methods on the React-Router component chain
-	let preloaders = collect_preloaders(components)
+	let preloaders = codeSplit ? collectPreloadersFromRoutes(routes) : collectPreloadersFromComponents(components)
 
 	// Set `.preload({ ... })` function arguments,
 	// and also set default `@preload()` options.
-	set_up_preloaders
-	(
+	setUpPreloaders(
 		preloaders,
 		{
 			dispatch,
@@ -56,8 +63,7 @@ export default function generatePreloadChain
 	const chain = chain_preloaders(preloaders)
 
 	// If there are no `@preload()`s for this route, then exit.
-	if (chain.length === 0)
-	{
+	if (chain.length === 0) {
 		return
 	}
 
@@ -76,16 +82,15 @@ export default function generatePreloadChain
 // objects having shape `{ preload(), options }`.
 // Therefore the returned value is an array of arrays.
 //
-export function collect_preloaders(components)
+function collectPreloadersFromComponents(components)
 {
-	// Find all static `preload` methods on the React-Router component chain
+	// Find all static `preload` methods on the route component chain
 	return components
 		// Some wrapper `<Route/>`s can have no `component`.
 		// Select all components having `@preload()`.
 		.filter(component => component && component[PRELOAD_METHOD_NAME])
 		// Extract `@preload()` functions and their options.
-		.map((component) => component[PRELOAD_METHOD_NAME].map((preload, i) =>
-		({
+		.map((component) => component[PRELOAD_METHOD_NAME].map((preload, i) => ({
 			preload,
 			options: component[PRELOAD_OPTIONS_NAME][i]
 		})))
@@ -93,30 +98,66 @@ export function collect_preloaders(components)
 		// .reduce((all, preload_and_options) => all.concat(preload_and_options), [])
 }
 
+function collectPreloadersFromRoutes(routes) {
+	// Find all preload properties on the route chain.
+	return routes
+		.map((route) => {
+			const preloads = []
+			if (route.preload) {
+				const preload = route.preload
+				preloads.push({
+					preload,
+					options: preload.options || {}
+				})
+			}
+			if (route.preloadClient) {
+				const preload = route.preloadClient
+				preloads.push({
+					preload,
+					options: {
+						...preload.options,
+						client: true
+					}
+				})
+			}
+			if (route.preloadClientAfter) {
+				const preload = route.preloadClientAfter
+				preloads.push({
+					preload,
+					options: {
+						...preload.options,
+						client: true,
+						blockingSibling: true
+					}
+				})
+			}
+			return preloads
+		})
+		// Flatten the array.
+		// .reduce((all, preload_and_options) => all.concat(preload_and_options), [])
+}
+
 // Applies default `@preload()` options
 // and sets `@preload()` function arguments.
-function set_up_preloaders(preloaders, preload_arguments, server)
+function setUpPreloaders(preloaders, preload_arguments, server)
 {
-	for (const component_preloaders of preloaders)
-	{
-		for (const preloader of component_preloaders)
-		{
-			set_up_preloader(preloader, preload_arguments, server)
+	for (const component_preloaders of preloaders) {
+		for (const preloader of component_preloaders) {
+			setUpPreloader(preloader, preload_arguments, server)
 		}
 	}
 }
 
 // Applies default `@preload()` options
 // and sets `@preload()` function arguments.
-function set_up_preloader(preloader, preload_arguments, server)
+function setUpPreloader(preloader, preload_arguments, server)
 {
 	const preload = preloader.preload
 	preloader.preload = () => preload(preload_arguments)
 
 	// If Server-Side Rendering is not being used at all
 	// then all `@preload()`s must be marked as client-side ones.
-	if (!server && !window._server_side_render)
-	{
+	if (!server && !window._server_side_render) {
 		preloader.options.client = true
 	}
 }
@@ -133,24 +174,18 @@ export function filter_preloaders(preloaders, server, initial_client_side_preloa
 		preloaders[i] = preloaders[i].filter((preloader) =>
 		{
 			// Don't execute client-side-only `@preload()`s on server side
-			if (preloader.options.client && server)
-			{
+			if (preloader.options.client && server) {
 				return false
 			}
-
 			// Don't execute server-side-only `@preload()`s on client side
-			if (preloader.options.server && !server)
-			{
+			if (preloader.options.server && !server) {
 				return false
 			}
-
 			// If it's initial client side preload (after the page has been loaded),
 			// then only execute those `@preload()`s marked as "client-side-only".
-			if (initial_client_side_preload && !preloader.options.client)
-			{
+			if (initial_client_side_preload && !preloader.options.client) {
 				return false
 			}
-
 			return true
 		})
 	})
@@ -169,18 +204,13 @@ export function chain_preloaders(preloaders, chain = [], parallel = [])
 	// If all `preload`s have been visited
 	if (preloaders.length === 0)
 	{
-		if (parallel.length === 0)
-		{
+		if (parallel.length === 0) {
 			return chain
 		}
-
 		// Finalize pending parallel `preload`s
-
-		if (parallel.length === 1)
-		{
+		if (parallel.length === 1) {
 			return chain.concat(parallel)
 		}
-
 		return chain.concat({ parallel })
 	}
 
@@ -191,8 +221,7 @@ export function chain_preloaders(preloaders, chain = [], parallel = [])
 
 	if (!is_preloader_blocking(preloader))
 	{
-		return chain_preloaders
-		(
+		return chain_preloaders(
 			preloaders,
 			chain,
 			concat(parallel, get_preloader(preloader))
@@ -201,21 +230,16 @@ export function chain_preloaders(preloaders, chain = [], parallel = [])
 
 	if (parallel.length === 0)
 	{
-		return chain_preloaders
-		(
+		return chain_preloaders(
 			preloaders,
 			concat(chain, get_preloader(preloader)),
 			[]
 		)
 	}
 
-	return chain_preloaders
-	(
+	return chain_preloaders(
 		preloaders,
-		chain.concat
-		({
-			parallel: concat(parallel, get_preloader(preloader))
-		}),
+		chain.concat({ parallel: concat(parallel, get_preloader(preloader)) }),
 		[]
 	)
 }
@@ -223,8 +247,7 @@ export function chain_preloaders(preloaders, chain = [], parallel = [])
 function get_preloader(preloader)
 {
 	// A list of same component's `@preload()`s
-	if (Array.isArray(preloader))
-	{
+	if (Array.isArray(preloader)) {
 		return chain_preloaders(preloader)
 	}
 
@@ -259,8 +282,7 @@ function is_preloader_blocking(preloader)
 // Returns a `Promise` chain.
 function promisify(chain, preloading)
 {
-	if (typeof chain === 'function')
-	{
+	if (typeof chain === 'function') {
 		return chain()
 	}
 
@@ -273,11 +295,9 @@ function promisify(chain, preloading)
 	{
 		return promise.then(() =>
 		{
-			if (preloading.cancelled)
-			{
+			if (preloading.cancelled) {
 				return
 			}
-
 			return promisify(link, preloading)
 		})
 	},
@@ -322,40 +342,35 @@ function promisify(chain, preloading)
 // influence the last `<Route/>` component in the chain
 // which is gonna be reloaded anyway.
 //
-function getOnlyChangedComponents(components, routesParams)
+function filterByChangedRoutes(filtered, routes, routesParams)
 {
-	let changedComponents = components
+	let filteredByChangedRoutes = filtered
 
-	if (window._previous_route_components)
+	if (window._react_website_previous_routes)
 	{
-		const previous_route_components = window._previous_route_components
-		const previous_route_parameters = window._previous_route_parameters
+		const previous_routes = window._react_website_previous_routes
+		const previous_routes_parameters = window._react_website_previous_routes_parameters
 
 		let i = 0
-		while (i < components.length - 1 &&
-			previous_route_components[i] === components[i] &&
-			isEqual(previous_route_parameters[i], routesParams[i]))
+		while (i < routes.length - 1 &&
+			previous_routes[i] === routes[i] &&
+			isEqual(previous_routes_parameters[i], routesParams[i]))
 		{
 			i++
 		}
 
-		changedComponents = changedComponents.slice(i)
+		filteredByChangedRoutes = filteredByChangedRoutes.slice(i)
 	}
 
-	window._previous_route_components = components
-	window._previous_route_parameters = routesParams
-
-	return changedComponents
+	return filteredByChangedRoutes
 }
 
 function concat(array, part)
 {
-	if (Array.isArray(part) && part.length > 1)
-	{
+	if (Array.isArray(part) && part.length > 1) {
 		// Pushes an array
 		return array.concat([part])
 	}
-
 	// Pushes a single element
 	return array.concat(part)
 }

@@ -5,13 +5,40 @@ import {
 } from './actions'
 
 // `@preload()` reducer
-export default function(state = { pending : false, immediate : false }, action = {})
+export default function createPreloadReducer(showInitially = false)
 {
-	switch (action.type)
+	return function(state = {
+		initial: showInitially,
+		pending : showInitially,
+		immediate : showInitially
+	}, action = {})
 	{
-		case PRELOAD_STARTED  : return { ...state, pending: true,  immediate : action.immediate || false, error: undefined }
-		case PRELOAD_FINISHED : return { ...state, pending: false, immediate : false }
-		case PRELOAD_FAILED   : return { ...state, pending: false, immediate : false, error: action.error }
-		default               : return state
+		switch (action.type)
+		{
+			case PRELOAD_STARTED:
+				return {
+					...state,
+					pending: true,
+					immediate: action.immediate || false,
+					error: undefined
+				}
+			case PRELOAD_FINISHED:
+				return {
+					...state,
+					pending: false,
+					immediate: false,
+					initial: false
+				}
+			case PRELOAD_FAILED:
+				return {
+					...state,
+					pending: false,
+					immediate: false,
+					initial: false,
+					error: action.error
+				}
+			default:
+				return state
+		}
 	}
 }

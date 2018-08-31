@@ -20,6 +20,10 @@ exports.indicateLoading = PreloadActions.indicateLoading
 exports.translate = require('./commonjs/redux/translate/decorator').default
 exports.onPageLoaded = require('./commonjs/redux/client/onPageLoaded').default
 
+exports.preloadPage = require('./commonjs/redux/getData').preloadPage
+exports.fetchData = require('./commonjs/redux/getData').fetchData
+exports.preloadPageAndFetchData = require('./commonjs/redux/getData').preloadPageAndFetchData
+
 exports.Loading = require('./commonjs/components/Loading').default
 
 exports.render               = require('./commonjs/redux/client/client').default

@@ -12,17 +12,24 @@
 	z-index : 0;
 	opacity : 0;
 
-	transition : opacity 160ms ease-out, z-index 160ms step-end;
+	transition : background-color 0ms linear 160ms, opacity 160ms ease-out, z-index 160ms step-end;
 }
 
 .react-website__loading-spinner
 {
-	position : absolute;
-	left     : calc(50% - 2rem);
-	top      : calc(50% - 2rem);
-	width    : 4rem;
-	height   : 4rem;
-	color    : white;
+	position   : absolute;
+	left       : calc(50% - 2rem);
+	top        : calc(50% - 2rem);
+	width      : 4rem;
+	height     : 4rem;
+	color      : white;
+
+	transition : color 0ms linear 160ms;
+}
+
+.react-website__loading--initial .react-website__loading-spinner
+{
+	transition : none;
 }
 
 .react-website__loading--shown

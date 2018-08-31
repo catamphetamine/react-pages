@@ -71,17 +71,20 @@ export function mergeMeta(meta)
 export function getComponentsMeta(components, state)
 {
 	return components
+		// `.filter(_ => _)` here just in case someone forgets to set
+		// `codeSplit: true` for `<Route/>`s with `getComponent`.
+		.filter(_ => _)
 		.map(_ => _[META_METHOD_NAME])
 		.filter(_ => _)
 		.map(_ => _(state))
 }
 
 /**
- * Gathers `getMeta` from routes chain.
+ * Gathers `meta` from routes chain.
  * @return {object[]}
  */
 export function getCodeSplitMeta(routes, state) {
-	return routes.map(_ => _.getMeta).filter(_ => _).map(_ => _(state))
+	return routes.map(_ => _.meta).filter(_ => _).map(_ => _(state))
 }
 
 /**

@@ -8,6 +8,9 @@ import
 	getHttpClient,
 	preload,
 	translate,
+	preloadPage,
+	fetchData,
+	preloadPageAndFetchData,
 	onPageLoaded,
 	goto,
 	redirect,
@@ -49,6 +52,10 @@ describe(`exports`, function()
 		preload.should.be.a('function')
 		translate.should.be.a('function')
 		onPageLoaded.should.be.a('function')
+
+		preloadPage.should.be.a('function')
+		fetchData.should.be.a('function')
+		preloadPageAndFetchData.should.be.a('function')
 
 		goto.should.be.a('function')
 		redirect.should.be.a('function')
@@ -96,6 +103,10 @@ describe(`exports`, function()
 		_.preload.should.be.a('function')
 		_.translate.should.be.a('function')
 		_.onPageLoaded.should.be.a('function')
+
+		_.preloadPage.should.be.a('function')
+		_.fetchData.should.be.a('function')
+		_.preloadPageAndFetchData.should.be.a('function')
 
 		_.goto.should.be.a('function')
 		_.redirect.should.be.a('function')

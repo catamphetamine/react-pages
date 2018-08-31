@@ -1,3 +1,14 @@
+3.0.0-alpha.4 / 31.08.2018
+==================
+
+* (breaking change) `@preload()`s are now non-blocking by default (`blocking` is `false` by default and `blockingSibling` is `false` by default). Previously `@preload()`s were blocking by default (`blocking` was `true` by default and `blockingSibling` was `true` by default).
+
+* (breaking change) Removed `initial` argument of `@preload()` due to not being used.
+
+* `parameters` argument of `@preload()` and `getData()` is deprecated. Use `params` property name instead.
+
+* Added support for code splitting.
+
 3.0.0-alpha.3 / 27.08.2018
 ==================
 

@@ -8,6 +8,7 @@ import FadeInOut from './FadeInOut'
 
 @connect(({ preload }) =>
 ({
+	initial   : preload.initial,
 	pending   : preload.pending,
 	immediate : preload.immediate
 }))
@@ -15,6 +16,7 @@ export default class Loading extends React.Component
 {
 	static propTypes =
 	{
+		initial   : PropTypes.bool.isRequired,
 		pending   : PropTypes.bool.isRequired,
 		immediate : PropTypes.bool.isRequired,
 		indicator : PropTypes.func.isRequired,
@@ -31,6 +33,7 @@ export default class Loading extends React.Component
 	{
 		const
 		{
+			initial,
 			pending,
 			immediate,
 			indicator : Indicator,
@@ -42,6 +45,7 @@ export default class Loading extends React.Component
 			<div
 				className={classNames('rrui__fixed-full-width', 'react-website__loading',
 				{
+					'react-website__loading--initial'   : initial,
 					'react-website__loading--shown'     : pending,
 					'react-website__loading--immediate' : immediate
 				})}>

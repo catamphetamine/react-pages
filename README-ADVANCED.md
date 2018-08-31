@@ -21,7 +21,7 @@ When using `{ client: true }` `@preload()`s it's sometimes required to perform s
 ```js
 import { onPageLoaded, replaceLocation } from 'react-website'
 
-@onPageLoaded(({ dispatch, getState, location, parameters }) => {
+@onPageLoaded(({ dispatch, getState, location, params }) => {
   if (isAnIdURL(location.pathname)) {
     dispatch(replaceLocation(replaceIdWithAnAlias(location, getState().userProfilePage.userProfile)))
   }
@@ -272,6 +272,18 @@ const { status, content, contentType } = renderError(error)
   // export default ({ store, children }) => <Provider store={ store }>{ children }</Provider>
   //
   container: require('./src/Container')
+
+  // Use this flag to enable "code splitting" mode.
+  // See `README-CODE-SPLITTING` for more info.
+  // https://github.com/catamphetamine/react-website/blob/master/README-CODE-SPLITTING.md
+  codeSplit: true/false
+
+  // When using `codeSplit` with `getComponent`
+  // `<Route/>` components are loaded after the initial page render.
+  // To hide webpage content until all `<Route/>` components
+  // are resolved one may set `showPreloadInitially` to `true`
+  // and use the exported `<Loading/>` component on the website.
+  showPreloadInitially: true/false
 
   // (optional)
   // User can add custom Redux middleware

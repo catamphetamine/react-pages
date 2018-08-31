@@ -3,6 +3,7 @@ import { getLocationUrl } from '../../location'
 import {
 	redirect,
 	getMatchedRoutes,
+	getMatchedRoutesIndices,
 	getMatchedRoutesParams,
 	getRouteParams,
 	getCurrentlyMatchedLocation,
@@ -11,29 +12,23 @@ import {
 
 import preload from './preload'
 
-export default function createGetDataForPreload(server, onError, getLocale, getConvertedRoutes) {
-	return function({ params, context }) {
-		let isInitialClientSideNavigation
-		if (!server) {
-			if (!window._react_website_routes_rendered) {
-				isInitialClientSideNavigation = true
-				window._react_website_routes_rendered = true
-			}
-			if (window._react_website_skip_preload) {
-				return Promise.resolve()
-			}
+export default function createGetDataForPreload(codeSplit, server, onError, getLocale, getConvertedRoutes) {
+	return function({ params, context: { dispatch, getState } }) {
+		if (!server && window._react_website_skip_preload) {
+			return Promise.resolve()
 		}
-		const { dispatch, getState } = context
-		const location = getCurrentlyMatchedLocation(getState())
-		const previousLocation = (server || isInitialClientSideNavigation) ? undefined : getPreviouslyMatchedLocation(getState())
+		const { location, previousLocation } = getLocations(getState())
+		const isInitialClientSideNavigation = !server && !previousLocation
 		return preload(
 			location,
-			previousLocation,
+			isInitialClientSideNavigation ? undefined : previousLocation,
 			{
 				routes: getMatchedRoutes(getState(), getConvertedRoutes()),
+				routeIndices: getMatchedRoutesIndices(getState()),
 				routeParams: getMatchedRoutesParams(getState()),
 				params: getRouteParams(getState())
 			},
+			codeSplit,
 			server,
 			getLocale,
 			dispatch,
@@ -59,5 +54,13 @@ export default function createGetDataForPreload(server, onError, getLocale, getC
 				throw error
 			}
 		)
+	}
+}
+
+function getLocations(state) {
+	const server = typeof window === 'undefined'
+	return {
+		location: getCurrentlyMatchedLocation(state),
+		previousLocation: (server || !window._react_website_router_rendered) ? undefined : getPreviouslyMatchedLocation(state)
 	}
 }

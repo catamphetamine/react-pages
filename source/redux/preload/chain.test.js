@@ -4,7 +4,7 @@ import
 	filter_preloaders,
 	chain_preloaders
 }
-from './collect'
+from './chain'
 
 import
 {

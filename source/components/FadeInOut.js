@@ -5,6 +5,7 @@ import classNames from 'classnames'
 export default class FadeInOut extends React.Component {
 	static propTypes = {
 		show: PropTypes.bool.isRequired,
+		hiddenClassName: PropTypes.string,
 		fadeOutDuration: PropTypes.number.isRequired,
 		fadeInClassName: PropTypes.string,
 		children: PropTypes.node.isRequired
@@ -99,6 +100,7 @@ export default class FadeInOut extends React.Component {
 	render() {
 		const {
 			fadeInClassName,
+			hiddenClassName,
 			children
 		} = this.props
 
@@ -117,6 +119,12 @@ export default class FadeInOut extends React.Component {
 				})
 			}
 			return children
+		}
+
+		if (hiddenClassName) {
+			return React.cloneElement(children, {
+				className: classNames(children.props.className, hiddenClassName)
+			})
 		}
 
 		return null
