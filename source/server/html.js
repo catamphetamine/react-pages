@@ -24,7 +24,6 @@ export function renderAfterContent({
 	contentNotRendered,
 	locales,
 	javascript,
-	protected_cookie_value,
 	bodyEnd
 })
 {
@@ -34,7 +33,6 @@ export function renderAfterContent({
 		contentNotRendered,
 		locales,
 		javascript,
-		protected_cookie_value,
 		bodyEnd,
 		safeJsonStringify
 	})
@@ -84,12 +82,7 @@ const TEMPLATE_BEFORE_CONTENT = nunjucks.compile
 			{# Supports adding arbitrary markup to <body/> start #}
 			{{ bodyStart | safe }}
 
-			{#
-				React page content.
-				(most of the possible XSS attack scripts are executed here,
-				 before the global protected cookie value variable is set,
-				 so they're unlikely to even be able to hijack it)
-			#}
+			{# React page content. #}
 			<div id="react" class="react--loading">`
 .replace(/\t/g, ''))
 
@@ -126,29 +119,6 @@ const TEMPLATE_AFTER_CONTENT = nunjucks.compile
 			{% endif %}
 
 			{# javascripts #}
-
-			{#
-				Make protected cookie value visible to the client-side code
-				to set up the "http" utility used inside Redux actions.
-				(the client-side React initialization code will
-				 automatically erase this protected cookie value global variable
-				 to protect the user from session hijacking via an XSS attack)
-			#}
-			{% if protected_cookie_value %}
-				<script data-protected-cookie>
-					window._protected_cookie_value={{ safeJsonStringify(protected_cookie_value) | safe }}
-				</script>
-			{% endif %}
-
-			{#
-				Remove the <script/> tag above as soon as it executes
-				to prevent potentially exposing protected cookie value during an XSS attack.
-			#}
-			{% if protected_cookie_value %}
-				<script>
-					document.body.removeChild(document.querySelector('script[data-protected-cookie]'))
-				</script>
-			{% endif %}
 
 			{#
 				Include all required "entry" points javascript

@@ -11,16 +11,9 @@ import ReactDOM from 'react-dom'
 // (e.g. Redux + React-router, React-router).
 //
 export default function render({ render, renderParameters = {}, container }) {
-	// Protected cookie feature
-	const protected_cookie_value = getGlobalVariable('_protected_cookie_value')
-
-	// // Internationalization feature
-	// const locale = getGlobalVariable('_locale')
-
 	// Renders current React page (inside a container).
 	// Returns a Promise for an object holding
 	// `render` function for development mode hot reload,
-	// protected cookie value,
 	// and also `store` (if Redux is used).
 	function renderPage()
 	{
@@ -49,9 +42,7 @@ export default function render({ render, renderParameters = {}, container }) {
 		// Client side code can then rerender the page any time
 		// by calling this `render()` function
 		// (makes hot reload work in development mode).
-		rerender: renderPage,
-		// "Protected cookie" could be a JWT "refresh token".
-		protectedCookie: protected_cookie_value
+		rerender: renderPage
 	}))
 }
 

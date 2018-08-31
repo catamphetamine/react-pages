@@ -319,18 +319,6 @@ const { status, content, contentType } = renderError(error)
   http:
   {
     // (optional)
-    // Will be called for each HTTP request
-    // sent using `http` utility inside Redux action creators.
-    // (`request` is a `superagent` request)
-    request: (request, { store }) =>
-    {
-      if (request.url.indexOf('https://my.domain.com') === 0)
-      {
-        request.set('X-Secret-Token', store.getState().secretToken)
-      }
-    }
-
-    // (optional)
     url: (path) => `https://api-server.com${path}`
     // Using `http.url(path)` configuration parameter
     // one can call API endpoints like `http.post('/sign-in')`
@@ -419,32 +407,6 @@ const { status, content, contentType } = renderError(error)
   // (optional)
   authentication:
   {
-    // (optional)
-    protectedCookie: 'cookie-name'
-    //
-    // The "remember me" cookie can be further protected
-    // by making it non-readable in a web browser (the so called "httpOnly" cookies).
-    // But how a web browser is gonna get the cookie value to send it as part of an HTTP header?
-    // The answer is: the cookie can be read on the server side when the page is being rendered,
-    // and then be inserted on a page as a javascript variable which is captured by
-    // `http` utility HTTP request methods and immediately removed from the global scope.
-    // Therefore this variable will only be accessible inside `http` utility methods
-    // and an attacker won't be able neither to read the cookie value nor to read the variable value.
-    // This way the only thing a CSRF attacker could do is to request a webpage
-    // (without being able to analyse its content) which is never an action so it's always safe.
-    // And so the user is completely protected against CSRF attacks.
-    //
-    // This can be an Auth0 "refresh token", for example.
-    // https://auth0.com/blog/refresh-tokens-what-are-they-and-when-to-use-them/
-    // If it is, then it's gonna be available in `http.catch()` function
-    // and can be used there to refresh expired (short lived) access tokens.
-    // If it's the case and `authentication.protectedCookie` is a "refresh token",
-    // then also set `authentication.accessToken()` function parameter
-    // to return the currently used "access token":
-    // this "access token" will always be set automatically
-    // in the "Authorization" HTTP header
-    // when using `http` utility inside Redux actions.
-
     // (optional)
     accessToken: (getCookie, { store }) => String
     //

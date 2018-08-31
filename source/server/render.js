@@ -36,12 +36,6 @@ export default async function(settings, {
 	// Else render for pure React.
 	const render = reduxRender
 
-	// Read protected cookie value (if configured)
-	let protected_cookie_value
-	if (authentication && authentication.protectedCookie) {
-		protected_cookie_value = cookies.get(authentication.protectedCookie)
-	}
-
 	const initializeTimer = timer()
 
 	// `parameters` are used for `assets` and `html` modifiers.
@@ -51,7 +45,6 @@ export default async function(settings, {
 		generateJavascript,
 		...parameters
 	} = await reduxInitialize(settings, {
-		protected_cookie_value,
 		proxy,
 		cookies,
 		initialize,
@@ -114,7 +107,6 @@ export default async function(settings, {
 				assets,
 				locales,
 				bodyEnd,
-				protected_cookie_value,
 				contentNotRendered: renderContent === false
 			})
 

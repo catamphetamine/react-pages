@@ -71,10 +71,7 @@ export async function renderPage(url, headers, settings, options)
 		renderContent,
 		html,
 		url,
-		// // HTTP headers.
-		// // Some people use them to get things like `window.navigator` on server side.
-		// headers,
-		// Cookies for protected cookie value retrieval
+		// Cookies for making `http` requests on server.
 		cookies,
 		locales: getPreferredLocales(headers, cookies)
 	})

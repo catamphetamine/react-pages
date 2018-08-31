@@ -28,7 +28,7 @@ export default function setUpAndRender(settings, options = {}) {
 	let store
 
 	// Create HTTP client (Redux action creator `http` utility)
-	const httpClient = createHttpClient(settings, () => store, window._protected_cookie_value)
+	const httpClient = createHttpClient(settings, () => store)
 	// E.g. for WebSocket message handlers, since they only run on the client side.
 	window._react_website_http_client = httpClient
 

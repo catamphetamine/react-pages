@@ -447,7 +447,7 @@ function fetchFriends(personId, gender) {
 The possible `options` (the third argument of all `http` methods) are
 
   * `headers` — HTTP Headers JSON object.
-  * `authentication` — Set to `false` to disable sending the authentication token as part of the HTTP request. Set to a String to pass it as an `Authorization: Bearer ${token}` token (no need to set the token explicitly for every `http` method call, it is supposed to be set globally, see below).
+  * `authentication` — Set to `false` to disable sending the authentication token as part of the HTTP request. Set to a String to pass it as an `Authorization: Bearer ${token}` token (no need to supply the token explicitly for every `http` method call, it is supposed to be set globally, see below).
   * `progress(percent, event)` — Use for tracking HTTP request progress (e.g. file upload).
   * `onResponseHeaders(headers)` – Use for examining HTTP response headers (e.g. [Amazon S3](http://docs.aws.amazon.com/AmazonS3/latest/API/RESTObjectPUT.html#RESTObjectPUT-responses-response-headers) file upload).
 
@@ -734,17 +734,23 @@ export default redux.reducer()
 
 ### HTTP authentication
 
-In order for `http` utility calls to send an authentication token as part of an HTTP request (the `Authorization: Bearer ${token}` HTTP header) the `authentication.accessToken()` function must be specified in `react-website.js`.
+In order for `http` utility to send an authentication token as part of an HTTP request (the `Authorization: Bearer ${token}` HTTP header) the `authentication.accessToken()` function must be specified in `react-website.js`.
 
 ```js
 {
   authentication: {
-    accessToken(getCookie, { store, path, url }) {
-      // (check the `url` to make sure the access token
-      //  is not leaked to a third party)
+    accessToken({ getState, path, url, getCookie }) {
+      // Optionally check the `url` to make sure that the access token
+      // is not leaked to a third party: only send it to own servers.
+      // For example, at some point someone may use `http` utility
+      // to get some data from a 3rd party endpoint, hence the `url` check.
+      // An example of `url`: "https://server.com/api/method".
+      // if (url.indexOf('https://own-api.com/') !== 0) {
+      //   return
+      // }
       return localStorage.getItem('accessToken')
       return getCookie('accessToken')
-      return store.getState().authentication.accessToken
+      return getState().authentication.accessToken
     }
   }
 }
@@ -759,7 +765,7 @@ The `accessToken` is initially obtained when a user signs in: the web browser se
 
 This kind of an authentication and authorization scheme is self-sufficient and doesn't require "restricting" any routes: if a route's `@preload()` uses `http` utility for querying an API endpoint then this API endpoint must check if the user is signed in and if the user has the necessary priviliges. If yes then the route is displayed. If not then the user is redirected to either a "Sign In Required" page or "Access Denied" page.
 
-A real-world (advanced) example for Auth0 authentication:
+A real-world (advanced) example for handling "Unauthenticated"/"Unauthorized" errors happening in `@preload()`s and during `http` calls:
 
 #### ./react-website.js
 
@@ -805,12 +811,6 @@ A real-world (advanced) example for Auth0 authentication:
 }
 
 function handleUnauthenticatedError(error, url, redirect) {
-  let message;
-  try {
-    message = JSON.parse(error.data.errorMessage).message;
-  } catch (parseError) {
-    console.error(parseError);
-  }
   // Prevent double redirection to `/unauthenticated`.
   // (e.g. when two parallel `Promise`s load inside `@preload()`
   //  and both get Status 401 HTTP Response)
@@ -823,7 +823,7 @@ function handleUnauthenticatedError(error, url, redirect) {
     unauthenticatedURL += `${parametersDelimiter}url=${encodeURIComponent(url)}`;
     parametersDelimiter = '&';
   }
-  switch (message) {
+  switch (error.message) {
     case 'TokenExpiredError':
       return redirect(`${unauthenticatedURL}${parametersDelimiter}expired=✔`);
     case 'AuthenticationError':
@@ -1372,13 +1372,13 @@ Then start [`webpack-dev-server`](https://github.com/webpack/webpack-dev-server)
 import { render } from 'react-website'
 import websocket from 'react-website/websocket'
 
-render(settings).then(({ store, protectedCookie }) => {
+render(settings).then(({ store }) => {
   websocket({
     host: 'localhost',
     port: 80,
     // secure: true,
     store,
-    token: protectedCookie
+    token: localStorage.getItem('token')
   })
 })
 ```

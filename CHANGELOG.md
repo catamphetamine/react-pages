@@ -1,3 +1,26 @@
+3.0.0-alpha.5 / 31.08.2018
+==================
+
+* (breaking change) "protected cookie" concept removed from the code. The reason is that web applications are shifting from being server-side rendered to being purely client-side and also querying API on a different host via CORS.
+
+* (breaking change) `authentication.accessToken()` parameter function now receives a single `{ getState, path, url, getCookie }` argument instead of the two `(getCookie, { store, path, url })` arguments. The reason is that cookies are no longer relevant because access tokens are stored in most cases in `localStorage`. Also it's just `getState` parameter now instead of the old `store` parameter.
+
+* (breaking change) `http.request` parameter removed for now. If the need for it arises it might be reconsidered.
+
+* (breaking change) `store` parameter removed from `http.catch` parameters for now. If the need for it arises it might be reconsidered.
+
+<!--
+// (optional)
+// Will be called for each HTTP request
+// sent using `http` utility inside Redux action creators.
+// (`request` is a `superagent` request)
+onBeforeSend: (request, { store }) => {
+  if (request.url.indexOf('https://my.domain.com') === 0) {
+    request.set('X-Secret-Token', store.getState().secretToken)
+  }
+}
+-->
+
 3.0.0-alpha.4 / 31.08.2018
 ==================
 

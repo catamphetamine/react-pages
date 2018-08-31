@@ -8,7 +8,6 @@ import createHttpClient from '../HttpClient'
 import { createHistoryProtocol } from '../../router/server'
 
 export async function initialize(settings, {
-	protected_cookie_value,
 	proxy,
 	cookies,
 	initialize,
@@ -19,7 +18,7 @@ export async function initialize(settings, {
 	let store
 
 	// Create HTTP client (Redux action creator `http` utility)
-	const httpClient = createHttpClient(settings, () => store, protected_cookie_value, {
+	const httpClient = createHttpClient(settings, () => store, {
 		proxy,
 		cookies
 	})

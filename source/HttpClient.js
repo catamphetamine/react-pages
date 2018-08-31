@@ -1,7 +1,7 @@
 import superagent from 'superagent'
 
 import { starts_with } from './helpers'
-import { getCookie } from './client/cookies'
+import { getCookie as _getCookie } from './client/cookies'
 import HttpRequest, { get_cookie_key_value } from './HttpRequest'
 
 // This is an isomorphic (universal) HTTP client
@@ -24,8 +24,6 @@ export default class HttpClient
 			proxy,
 			headers,
 			cookies,
-			protected_cookie,
-			protected_cookie_value,
 			authentication_token_header,
 			on_before_send,
 			catch_to_retry,
@@ -45,16 +43,8 @@ export default class HttpClient
 		// `options.transform_url` because the rendered page content
 		// is placed before the `options` are even defined (inside webpack bundle).
 		//
-		// Once `HttpClient` instance is created, the `protected_cookie_value` variable
-		// is erased from everywhere except the closures of HTTP methods defined below,
-		// and the protected cookie value is therefore unable to be read directly by an attacker.
-		//
 		// The `transform_url` function also resided in the closures of HTTP methods defined below,
 		// so it's also unable to be changed by an attacker.
-		//
-		// The only thing an attacker is left to do is to send malicious requests
-		// to the server on behalf of the user, and those requests would be executed,
-		// but the attacker won't be able to hijack the protected cookie value.
 		//
 		const transform_url = options.transform_url || this.proxy_url.bind(this)
 
@@ -97,17 +87,7 @@ export default class HttpClient
 			return cookies[name]
 		})
 		:
-		((name) =>
-		{
-			// "httpOnly" cookies can't be read by a web browser
-			if (name === protected_cookie)
-			{
-				return protected_cookie_value
-			}
-
-			// A regular cookie which can be read by a web browser
-			return getCookie(name)
-		})
+		_getCookie
 
 		// `superagent` doesn't save cookies by default on the server side.
 		// Therefore calling `.agent()` explicitly to enable setting cookies.
