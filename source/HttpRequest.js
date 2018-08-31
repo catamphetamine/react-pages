@@ -21,6 +21,8 @@ export default class HttpRequest
 		// Create Http request.
 		this.request = agent[method](url)
 
+		let isMultipartFormData
+
 		// Attach data to the outgoing HTTP request
 		if (data)
 		{
@@ -35,7 +37,8 @@ export default class HttpRequest
 				case 'patch':
 				case 'head':
 				case 'options':
-					this.request.send(has_binary_data(data) ? construct_form_data(data) : data)
+					isMultipartFormData = has_binary_data(data)
+					this.request.send(isMultipartFormData ? construct_form_data(data) : data)
 					break
 
 				case 'delete':
@@ -48,6 +51,18 @@ export default class HttpRequest
 
 		// Apply HTTP headers
 		this.request.set(headers)
+
+		// `superagent` is supposed to set `Content-Type` automatically
+		// when calling `.send()` but it doesn't get called for GET/HEAD/DELETE HTTP requests.
+		// Also, when `.send()` is called with `FormData` it also doesn't set
+		// any `Content-Type` HTTP header. So setting it here manually.
+		if (!this.request._header['content-type']) {
+			if (isMultipartFormData) {
+				this.request.type('multipart/form-data')
+			} else {
+				this.request.type('application/json')
+			}
+		}
 
 		// `true`/`false`
 		this.parse_json_dates = parse_json_dates
