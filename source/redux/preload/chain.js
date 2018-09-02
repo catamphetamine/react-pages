@@ -1,7 +1,3 @@
-import isEqual from 'lodash/isEqual'
-
-import { PRELOAD_METHOD_NAME, PRELOAD_OPTIONS_NAME } from './decorator'
-
 // Returns function returning a Promise
 // which resolves when all the required preload()s are resolved.
 //
@@ -9,13 +5,9 @@ import { PRELOAD_METHOD_NAME, PRELOAD_OPTIONS_NAME } from './decorator'
 //
 export default function generatePreloadChain
 (
-	initial_client_side_preload,
+	preloaders,
 	server,
-	codeSplit,
-	components,
-	routes,
-	routeIndices,
-	routesParams,
+	isInitialClientSidePreload,
 	getState,
 	dispatch,
 	location,
@@ -23,21 +15,6 @@ export default function generatePreloadChain
 	preloading
 )
 {
-	// Client-side optimization.
-	// Skips `@preloads()` for `<Route/>`s that didn't change as a result of navigation.
-	if (!server) {
-		if (codeSplit) {
-			routes = filterByChangedRoutes(routes, routeIndices, routesParams)
-		} else {
-			components = filterByChangedRoutes(components, routeIndices, routesParams)
-		}
-		window._react_website_previous_routes = routeIndices
-		window._react_website_previous_routes_parameters = routesParams
-	}
-
-	// Get all `preload` methods on the React-Router component chain
-	let preloaders = codeSplit ? collectPreloadersFromRoutes(routes) : collectPreloadersFromComponents(components)
-
 	// Set `.preload({ ... })` function arguments,
 	// and also set default `@preload()` options.
 	setUpPreloaders(
@@ -56,7 +33,7 @@ export default function generatePreloadChain
 
 	// Only select those `@preload()`s which
 	// should be run in current circumstances.
-	preloaders = filter_preloaders(preloaders, server, initial_client_side_preload)
+	preloaders = filter_preloaders(preloaders, server, isInitialClientSidePreload)
 
 	// Construct a sequential chain out of preloaders.
 	// Because each of them could be either parallel or sequential.
@@ -69,72 +46,6 @@ export default function generatePreloadChain
 
 	// Return a function which generates preloading `Promise` chain.
 	return () => promisify(chain, preloading)
-}
-
-// Finds all `preload` (or `preload_deferred`) methods
-// (they will be executed in parallel).
-//
-// @parameter components - `react-router` matched components
-//
-// @returns an array of `component_preloaders`.
-// `component_preloaders` is an array of all
-// `@preload()`s for a particular React component:
-// objects having shape `{ preload(), options }`.
-// Therefore the returned value is an array of arrays.
-//
-export function collectPreloadersFromComponents(components)
-{
-	// Find all static `preload` methods on the route component chain
-	return components
-		// Some wrapper `<Route/>`s can have no `component`.
-		// Select all components having `@preload()`.
-		.filter(component => component && component[PRELOAD_METHOD_NAME])
-		// Extract `@preload()` functions and their options.
-		.map((component) => component[PRELOAD_METHOD_NAME].map((preload, i) => ({
-			preload,
-			options: component[PRELOAD_OPTIONS_NAME][i]
-		})))
-		// // Flatten `@preload()` functions and their options.
-		// .reduce((all, preload_and_options) => all.concat(preload_and_options), [])
-}
-
-function collectPreloadersFromRoutes(routes) {
-	// Find all preload properties on the route chain.
-	return routes
-		.map((route) => {
-			const preloads = []
-			if (route.preload) {
-				const preload = route.preload
-				preloads.push({
-					preload,
-					options: preload.options || {}
-				})
-			}
-			if (route.preloadClient) {
-				const preload = route.preloadClient
-				preloads.push({
-					preload,
-					options: {
-						...preload.options,
-						client: true
-					}
-				})
-			}
-			if (route.preloadClientAfter) {
-				const preload = route.preloadClientAfter
-				preloads.push({
-					preload,
-					options: {
-						...preload.options,
-						client: true,
-						blockingSibling: true
-					}
-				})
-			}
-			return preloads
-		})
-		// Flatten the array.
-		// .reduce((all, preload_and_options) => all.concat(preload_and_options), [])
 }
 
 // Applies default `@preload()` options
@@ -164,7 +75,7 @@ function setUpPreloader(preloader, preload_arguments, server)
 
 // Selects only those `@preload()`s which
 // should be run in current circumstances.
-export function filter_preloaders(preloaders, server, initial_client_side_preload)
+export function filter_preloaders(preloaders, server, isInitialClientSidePreload)
 {
 	// `preloaders` array will be mutated
 	preloaders = preloaders.slice()
@@ -183,7 +94,7 @@ export function filter_preloaders(preloaders, server, initial_client_side_preloa
 			}
 			// If it's initial client side preload (after the page has been loaded),
 			// then only execute those `@preload()`s marked as "client-side-only".
-			if (initial_client_side_preload && !preloader.options.client) {
+			if (isInitialClientSidePreload && !preloader.options.client) {
 				return false
 			}
 			return true
@@ -302,67 +213,6 @@ function promisify(chain, preloading)
 		})
 	},
 	Promise.resolve())
-}
-
-// A minor optimization for skipping `@preload()`s
-// for those parent `<Route/>`s which haven't changed
-// as a result of a client-side navigation.
-//
-// On client side:
-//
-// Take the previous route components
-// (along with their parameters)
-// and the next route components
-// (along with their parameters),
-// and compare them side-by-side
-// filtering out the same top level components
-// (both having the same component classes
-//  and having the same parameters).
-//
-// Therefore @preload() methods could be skipped
-// for those top level components which remain
-// the same (and in the same state).
-// This would be an optimization.
-//
-// (e.g. the main <Route/> could be @preload()ed only once - on the server side)
-//
-// At the same time, at least one component should be preloaded:
-// even if navigating to the same page it still kinda makes sense to reload it.
-// (assuming it's not an "anchor" hyperlink navigation)
-//
-// Parameters for each `<Route/>` component can be found using this helper method:
-// https://github.com/ReactTraining/react-router/blob/master/modules/getRouteParams.js
-//
-// Also, GET query parameters would also need to be compared, I guess.
-// But, I guess, it would make sense to assume that GET parameters
-// only affect the last `<Route/>` component in the chain.
-// And, in general, GET query parameters should be avoided,
-// but that's not the case for example with search forms.
-// So here we assume that GET query parameters only
-// influence the last `<Route/>` component in the chain
-// which is gonna be reloaded anyway.
-//
-function filterByChangedRoutes(filtered, routes, routesParams)
-{
-	let filteredByChangedRoutes = filtered
-
-	if (window._react_website_previous_routes)
-	{
-		const previous_routes = window._react_website_previous_routes
-		const previous_routes_parameters = window._react_website_previous_routes_parameters
-
-		let i = 0
-		while (i < routes.length - 1 &&
-			previous_routes[i] === routes[i] &&
-			isEqual(previous_routes_parameters[i], routesParams[i]))
-		{
-			i++
-		}
-
-		filteredByChangedRoutes = filteredByChangedRoutes.slice(i)
-	}
-
-	return filteredByChangedRoutes
 }
 
 function concat(array, part)
