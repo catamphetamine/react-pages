@@ -288,6 +288,7 @@ function collectPreloadersFromRoutes(routes) {
 			}
 			return preloads
 		})
+		.filter(_ => _.length > 0)
 		// Flatten the array.
 		// .reduce((all, preload_and_options) => all.concat(preload_and_options), [])
 }
