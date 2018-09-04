@@ -17,9 +17,9 @@ A complete solution for building a React/Redux application
 * HTTP Cookies
 * etc
 
-# version 2.x vs version 3.x
+# 2.x
 
-These are the docs for version `3.0.0-beta` which is the recommended one for new projects. For version `2.x` (legacy projects) docs see the [README of the `2.x` branch](https://github.com/catamphetamine/react-website/tree/2.x).
+These are the docs for the latest version `3.x`. For version `2.x` (legacy projects) docs see the [README of the `2.x` branch](https://github.com/catamphetamine/react-website/tree/2.x).
 
 # Introduction
 
@@ -31,10 +31,10 @@ First, install Redux:
 $ npm install redux react-redux --save
 ```
 
-Then, install the **next** (3.x) version of `react-website`:
+Then, install `react-website`:
 
 ```bash
-$ npm install react-website@next --save
+$ npm install react-website --save
 ```
 
 Start by creating `react-website` configuration file.
