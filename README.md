@@ -25,12 +25,19 @@ These are the docs for version `3.0.0-beta` which is the recommended one for new
 
 ## Getting started
 
+First, install Redux:
+
 ```bash
 $ npm install redux react-redux --save
+```
+
+Then, install the **next** (3.x) version of `react-website`:
+
+```bash
 $ npm install react-website@next --save
 ```
 
-Start by creating the configuration file
+Start by creating `react-website` configuration file.
 
 #### ./src/react-website.js
 
@@ -46,6 +53,8 @@ export default {
   reducers
 }
 ```
+
+The routes:
 
 #### ./src/routes.js
 
@@ -98,6 +107,8 @@ import React from 'react'
 
 export default () => <div> Made using `react-website` </div>
 ```
+
+The reducers:
 
 #### ./src/redux/index.js
 
