@@ -20,12 +20,12 @@ export default {
 }
 ```
 
-Then, in routes, replace all `Component={...}` with `getComponent={() => import(...)}` and instead of adding `@preload()` and `@meta()` decorators to page components add `preload` and `meta` properties to `<Route/>`s themselves.
+Then, in routes, replace all `Component={...}` with `getComponent={() => import(...).then(_ => _.default)}` and instead of adding `@preload()` and `@meta()` decorators to page components add `preload` and `meta` properties to `<Route/>`s themselves.
 
 ```js
 <Route
 	path="/"
-	getComponent={() => import('./Application.js')}
+	getComponent={() => import('./Application.js').then(_ => _.default)}
 	meta={state => ({ title: '...' }))
 	preload={async ({ dispatch, getState, params, ... }) => ...}>
 	...
@@ -55,10 +55,9 @@ import React from 'react'
 
 export default class Page extends React.Component {
 	render() {
-		const { translate } = this.props
 		return (
 			<section>
-				<h1>{translate('title')}</h1>
+				...
 			</section>
 		)
 	}

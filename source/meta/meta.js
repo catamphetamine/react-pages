@@ -80,7 +80,12 @@ export function getComponentsMeta(components, state)
 }
 
 /**
- * Gathers `meta` from routes chain.
+ * Gathers `meta` from `<Route/>`s chain.
+ * Meta could have been provided via the standard `@meta()` decorator instead
+ * but `found` router doesn't provide the actual React Components for `<Route/>`s
+ * which are resolved through `getComponent` so there's currently no way
+ * of getting the actual Route component classes, hence the `meta` property workaround.
+ *
  * @return {object[]}
  */
 export function getCodeSplitMeta(routes, state) {
