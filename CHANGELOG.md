@@ -1,5 +1,7 @@
-3.0.0-beta-2 / 04.09.2018
+3.0.0 / 04.09.2018
 ==================
+
+* Released `3.0.0`.
 
 * Added `codeSplit` example project link.
 
