@@ -68,7 +68,8 @@ from './modules/redux/client/instantBack'
 
 export
 {
-	default as reduxModule
+	default as ReduxModule,
+	createReduxModule as reduxModule
 }
 from './modules/redux/ReduxModule'
 

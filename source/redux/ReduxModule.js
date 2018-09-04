@@ -1,24 +1,13 @@
 import { eventName, underscoredToCamelCase, DEFAULT_REDUX_EVENT_NAMING } from './naming'
 import { RESULT_ACTION_PROPERTY, ERROR_ACTION_PROPERTY } from './middleware/asynchronous'
 
-// Creates Redux module object
-// (which will eventually be transformed into a reducer)
-export default function createReduxModule(namespace, settings)
+// Deprecated. Use `new ReduxModule()` instead.
+export function createReduxModule(namespace, settings)
 {
-	const redux = new ReduxModule(namespace, settings)
-
-	// Public aliases
-	redux.resetError = redux.reset_error
-	redux.properties = redux.add_state_properties
-	redux.property = redux.add_state_properties
-
-	// Deprecated.
-	redux.getProperties = redux.get_properties
-
-	return redux
+	return new ReduxModule(namespace, settings)
 }
 
-class ReduxModule
+export default class ReduxModule
 {
 	handlers = {}
 	registered_state_properties = []
@@ -100,7 +89,7 @@ class ReduxModule
 	}
 
 	// Returns Redux action creator for resetting error.
-	reset_error(event)
+	resetError(event)
 	{
 		const
 		[
@@ -119,7 +108,7 @@ class ReduxModule
 	}
 
 	// Deprecated.
-	get_properties = (state) =>
+	getProperties = (state) =>
 	{
 		const properties = {}
 
@@ -130,10 +119,6 @@ class ReduxModule
 
 		return properties
 	}
-
-	// camelCased alias.
-	// Deprecated.
-	getProperties = (state) => this.get_properties(state)
 
 	reducer(initial_state = {})
 	{
@@ -192,6 +177,18 @@ class ReduxModule
 	add_state_properties()
 	{
 		this.registered_state_properties.push.apply(this.registered_state_properties, arguments)
+	}
+
+	// Public alias.
+	properties()
+	{
+		this.add_state_properties.apply(this, arguments)
+	}
+
+	// Public alias.
+	property()
+	{
+		this.add_state_properties.apply(this, arguments)
 	}
 }
 

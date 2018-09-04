@@ -16,6 +16,8 @@ import
 	PRELOAD_FAILED,
 	PRELOAD_METHOD_NAME,
 	PRELOAD_OPTIONS_NAME,
+	ReduxModule,
+	// Deprecated. Use `new ReduxModule()` instead.
 	reduxModule,
 	underscoredToCamelCase,
 	eventName,
@@ -108,6 +110,7 @@ describe(`exports`, function()
 		_.PRELOAD_OPTIONS_NAME.should.be.a('string')
 
 		_.reduxModule.should.be.a('function')
+		_.ReduxModule.should.be.a('function')
 
 		_.underscoredToCamelCase.should.be.a('function')
 		_.eventName.should.be.a('function')

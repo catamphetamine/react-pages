@@ -101,10 +101,10 @@ export default {
 #### redux/blogPost.js
 
 ```js
-import { reduxModule, eventName } from 'react-website'
+import { ReduxModule, eventName } from 'react-website'
 import reduxSettings from './react-website-redux'
 
-const redux = reduxModule('BLOG_POST', reduxSettings)
+const redux = new ReduxModule('BLOG_POST', reduxSettings)
 ...
 ```
 
