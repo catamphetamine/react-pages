@@ -109,3 +109,5 @@ Since `@preload()` decorator is not used on `<Route/>`s for code splitting there
 * `preloadClientAfter` — the equivalent of `@preload(..., { client: true, blockingSibling: true })`, is only called on client and after `preload` and `preloadClient` finish.
 
 Each of the preload functions can also have a static `options` property where `options` are the same as the `options` for `@preload()`.
+
+See the [example project](https://github.com/catamphetamine/webpack-react-redux-server-side-render-example/pull/40) showcasing "code splitting".
