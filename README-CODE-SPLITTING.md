@@ -20,7 +20,7 @@ export default {
 }
 ```
 
-Then, in routes, replace all `Component={...}` with `getComponent={() => import(...).then(_ => _.default)}` and instead of adding `@preload()` and `@meta()` decorators to page components add `preload` and `meta` properties to `<Route/>`s themselves.
+Then, in routes, replace some or all `Component={...}` with `getComponent={() => import(...).then(_ => _.default)}` and replace **all** `@preload()` and `@meta()` decorators on page components with `preload` and `meta` properties on `<Route/>`s themselves.
 
 ```js
 <Route

@@ -1,3 +1,10 @@
+3.0.0-beta-2 / 04.09.2018
+==================
+
+* Added `codeSplit` example project link.
+
+* `reduxModule()` function is deprecated (still works), use the exported class `new ReduxModule()` instead.
+
 3.0.0-beta / 31.08.2018
 ==================
 
