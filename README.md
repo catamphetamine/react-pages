@@ -1148,24 +1148,7 @@ export default class Page extends React.Component {
 
 Inside `@preload()`: use the `location` parameter.
 
-Anywhere in a React component:
-
-```js
-import React from 'react'
-import { withRouter } from 'found'
-
-// Using `babel-plugin-transform-decorators-legacy`
-// https://babeljs.io/docs/plugins/transform-decorators/
-@withRouter
-export default class Component extends React.Component {
-  render() {
-    const { router } = this.props
-    return <div>{ JSON.stringify(router.location) }</div>
-  }
-}
-```
-
-Also, the current router state is available in Redux state under `found` property.
+Anywhere in a React component: use the `found` property in Redux state.
 
 ```js
 @connect(({ found }) => ({
@@ -1242,7 +1225,20 @@ class Page extends Component {
 }
 ```
 
-`router` property (from `found` package) is available on all pages as a `router` property, or through `context.router`, or via [`@withRouter`](https://github.com/4Catalyzer/found#programmatic-navigation) decorator.
+If someone prefers interacting with [`found`](https://github.com/4Catalyzer/found) `router` directly instead then it is available on all pages as a `router` property, or via [`@withRouter`](https://github.com/4Catalyzer/found#programmatic-navigation) decorator.
+
+```js
+import React from 'react'
+import { withRouter } from 'found'
+
+@withRouter
+export default class Component extends React.Component {
+  render() {
+    const { router } = this.props
+    ...
+  }
+}
+```
 
 ## Monitoring
 
