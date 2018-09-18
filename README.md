@@ -1146,7 +1146,9 @@ export default class Page extends React.Component {
 
 ### Get current location
 
-Inside `@preload()`: use the `location` parameter. Everywhere else:
+Inside `@preload()`: use the `location` parameter.
+
+Anywhere in a React component:
 
 ```js
 import React from 'react'
@@ -1163,7 +1165,7 @@ export default class Component extends React.Component {
 }
 ```
 
-Also, the current router state is available in the Redux state under `found` property.
+Also, the current router state is available in Redux state under `found` property.
 
 ```js
 @connect(({ found }) => ({
