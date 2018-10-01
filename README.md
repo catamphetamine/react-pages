@@ -149,7 +149,7 @@ Where `bundle.js` is the `./src/index.js` file built with Webpack (or you could 
 
 Now, `index.html` and `bundle.js` files must be served over HTTP(S).
 
-If you're using Webpack then add [`HtmlWebpackPlugin`](https://webpack.js.org/plugins/html-webpack-plugin/) to generate `index.html`, and run [`webpack-serve`](https://github.com/webpack-contrib/webpack-serve) with [`historyApiFallback`](https://github.com/webpack-contrib/webpack-serve#add-function-parameters) to serve the generated `index.html` and `bundle.js` files over HTTP on `localhost:8080`.
+If you're using Webpack then add [`HtmlWebpackPlugin`](https://webpack.js.org/plugins/html-webpack-plugin/) to generate `index.html`, and run [`webpack-dev-server`](https://webpack.js.org/configuration/dev-server/) with [`historyApiFallback`](https://webpack.js.org/configuration/dev-server/#devserver-historyapifallback) to serve the generated `index.html` and `bundle.js` files over HTTP on `localhost:8080`.
 
 If you're using [Parcel](https://parceljs.org/) then it's much simpler than Webpack: see the [basic example project](https://github.com/catamphetamine/react-website-basic-example) for the setup required in order to generate and serve `index.html` and `bundle.js` files over HTTP on `localhost:1234`.
 
@@ -1063,7 +1063,9 @@ export default class Course extends Component {
 }
 ```
 
-In this example `loadCourseInfo()` will be executed while snapshotting and therefore course info will be present on the snapshotted page. But course price won't be present on the snapshotted page because it's being loaded inside `@preloadClient()` which only gets called in a user's web browser. When a user opens the course page in his web browser it will show the snapshotted page with course info with a "loading" spinner on top of it as it is loading the course price. After the course price has been loaded the "loading" spinner disappears and the user sees the fully rendered course page.
+In this example `loadCourseInfo()` will be executed while snapshotting and therefore course info will be present on the snapshotted page. But course price won't be present on the snapshotted page because it's being loaded inside `@preload(..., { client: true })` which only gets called in a user's web browser. When a user opens the course page in his web browser it will show the snapshotted page with course info with a "loading" spinner on top of it as it is loading the course price. After the course price has been loaded the "loading" spinner disappears and the user sees the fully rendered course page.
+
+The "client-side-only" `@preload()`s have a catch though: for [technical reasons](https://github.com/catamphetamine/react-website/blob/master/source/redux/client/client.js#L15) they aren't executed when the application is first rendered in a web browser. After the initial page load, the application is first rendered without resolving "client-side-only" `@preload()`s and only after this "first rendering pass" finishes does it resolve all "client-side-only" `@preload()`s and re-renders itself. This limitation is inherent to how React server-side rendering works. It can be simplified for cases where `index.html` approach is used, and this workaround will probably get implemented in some future version.
 </details>
 
 ## Page HTTP response status code
