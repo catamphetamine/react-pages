@@ -34,18 +34,6 @@ export default class HttpClient
 
 		const parse_json_dates = options.parseDates !== false
 
-		// The default `transform_url` gives protection against XSS attacks
-		// in a way that `Authorization: Bearer {token}` HTTP header
-		// is only exposed (sent) to local URLs, therefore an attacker
-		// theoretically won't be able to hijack that authentication token.
-		//
-		// An XSS attacker is assumed to be unable to set his own
-		// `options.transform_url` because the rendered page content
-		// is placed before the `options` are even defined (inside webpack bundle).
-		//
-		// The `transform_url` function also resided in the closures of HTTP methods defined below,
-		// so it's also unable to be changed by an attacker.
-		//
 		const transform_url = options.transform_url || this.proxy_url.bind(this)
 
 		// Clone HTTP request cookies on the server-side
