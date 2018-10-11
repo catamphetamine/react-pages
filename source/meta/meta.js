@@ -76,7 +76,7 @@ export function getComponentsMeta(components, state)
 		.filter(_ => _)
 		.map(_ => _[META_METHOD_NAME])
 		.filter(_ => _)
-		.map(_ => _(state))
+		.map(_ => dropUndefinedProperties(_(state)))
 }
 
 /**
@@ -89,7 +89,10 @@ export function getComponentsMeta(components, state)
  * @return {object[]}
  */
 export function getCodeSplitMeta(routes, state) {
-	return routes.map(_ => _.meta).filter(_ => _).map(_ => _(state))
+	return routes
+		.map(_ => _.meta)
+		.filter(_ => _)
+		.map(_ => dropUndefinedProperties(_(state)))
 }
 
 /**
@@ -152,8 +155,8 @@ export function generateMetaTagsMarkup(meta)
 		// because some browsers only read the first
 		// 1024 bytes when deciding on page encoding.
 		// (`<meta charset/>` is always present)
-		`<meta charset="${escape_html(charset || 'utf-8')}"/>`,
-		`<title>${escape_html(title || '')}</title>`
+		`<meta charset="${escapeHTML(charset || 'utf-8')}"/>`,
+		`<title>${escapeHTML(title || '')}</title>`
 	]
 	.concat
 	(
@@ -177,7 +180,7 @@ export function generateMetaTagsMarkup(meta)
  */
 function generateMetaTagMarkup(name, value)
 {
-	return `<meta ${getMetaAttributeFor(name)}="${name}" content="${escape_html(value)}"/>`
+	return `<meta ${getMetaAttributeFor(name)}="${name}" content="${escapeHTML(value)}"/>`
 }
 
 /**
@@ -207,7 +210,7 @@ function getMetaTagNames(key)
 		case 'locales':
 			return ['og:locale:alternate']
 		default:
-			return [escape_html(key)]
+			return [escapeHTML(key)]
 	}
 }
 
@@ -243,7 +246,7 @@ function updateMetaTag(document, meta_tags, name, value)
  * Escapes a string so that it's kinda safe to insert into HTML.
  * @return {string}
  */
-function escape_html(string)
+function escapeHTML(string)
 {
 	return string
 		.replace('&', '&amp;')
@@ -268,4 +271,21 @@ function normalizeMetaKeys(meta)
 		}
 		return normalizedMeta
 	}, {})
+}
+
+function dropUndefinedProperties(object)
+{
+	const keys = Object.keys(object)
+	for (const key of keys) {
+		if (object[key] === undefined) {
+			return keys.reduce((newObject, key) => {
+				if (object[key] !== undefined) {
+					newObject[key] = object[key]
+				}
+				return newObject
+			},
+			{})
+		}
+	}
+	return object
 }
