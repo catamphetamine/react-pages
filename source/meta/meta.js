@@ -8,8 +8,16 @@ import { getDisplayName } from '../utility'
 
 const browserDocument = new BrowserDocument()
 
-const DEFAULT_META =
+export const DEFAULT_META =
 {
+	charset  : 'utf-8',
+	// Fixes CSS screen width on mobile devices.
+	// Otherwise media queries would not be applied initially
+	// and it would show desktop version design.
+	// Also, for `/react-website-blank` page this meta tag
+	// needs to be present in markup as the default one
+	// because `/react-website-blank` page doesn't collect
+	// meta from page components.
 	viewport : 'width=device-width, initial-scale=1.0'
 }
 
@@ -155,7 +163,7 @@ export function generateMetaTagsMarkup(meta)
 		// because some browsers only read the first
 		// 1024 bytes when deciding on page encoding.
 		// (`<meta charset/>` is always present)
-		`<meta charset="${escapeHTML(charset || 'utf-8')}"/>`,
+		`<meta charset="${escapeHTML(charset || DEFAULT_META.charset)}"/>`,
 		`<title>${escapeHTML(title || '')}</title>`
 	]
 	.concat
@@ -186,6 +194,7 @@ function generateMetaTagMarkup(name, value)
 /**
  * Gets `<meta/>` tag "name" by key.
  * "name" can refer to both `name` and `property`.
+ * Also filters out `charset`.
  * @return {string}
  */
 function getMetaTagNames(key)
@@ -248,7 +257,7 @@ function updateMetaTag(document, meta_tags, name, value)
  */
 function escapeHTML(string)
 {
-	return string
+	return string && string
 		.replace('&', '&amp;')
 		.replace('<', '&lt;')
 		.replace('>', '&gt;')

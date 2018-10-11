@@ -9,7 +9,7 @@ import timer from '../timer'
 import { getLocationUrl, parseLocation } from '../location'
 import reduxRender from '../redux/server/render'
 import { initialize as reduxInitialize } from '../redux/server/server'
-import { generateMetaTagsMarkup } from '../meta/meta'
+import { generateMetaTagsMarkup, DEFAULT_META } from '../meta/meta'
 
 export default async function(settings, {
 	initialize,
@@ -119,7 +119,7 @@ export default async function(settings, {
 		{
 			renderContent = false
 
-			const [ beforeContent, afterContent ] = generateOuterHtml({})
+			const [ beforeContent, afterContent ] = generateOuterHtml(DEFAULT_META)
 
 			return {
 				route: '/react-website-base',
