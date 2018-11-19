@@ -109,7 +109,7 @@ export function getCodeSplitMeta(routes, state) {
 export function updateMeta(meta, document = browserDocument)
 {
 	const { title, charset } = meta
-	meta = normalizeMetaKeys(meta)
+	meta = normalizeMeta(meta)
 
 	// Get all `<meta/>` tags.
 	// (will be mutated)
@@ -127,17 +127,13 @@ export function updateMeta(meta, document = browserDocument)
 
 	// Update existing `<meta/>` tags.
 	// (removing them from `meta_tags` array)
-	const new_meta_tags = compact(flatten(
-		Object.keys(meta).map((key) =>
-		{
-			return [].concat(meta[key])
-				.map((value) => {
-					if (!updateMetaTag(document, meta_tags, key, value)) {
-						return [key, value]
-					}
-				})
+	const new_meta_tags = compact(
+		meta.map(([key, value]) => {
+			if (!updateMetaTag(document, meta_tags, key, value)) {
+				return [key, value]
+			}
 		})
-	))
+	)
 
 	// Delete no longer existent `<meta/>` tags.
 	meta_tags.forEach(document.removeMetaTag)
@@ -156,7 +152,7 @@ export function updateMeta(meta, document = browserDocument)
 export function generateMetaTagsMarkup(meta)
 {
 	const { title, charset } = meta
-	meta = normalizeMetaKeys(meta)
+	meta = normalizeMeta(meta)
 
 	return [
 		// `<meta charset/>` should always come first
@@ -166,17 +162,8 @@ export function generateMetaTagsMarkup(meta)
 		`<meta charset="${escapeHTML(charset || DEFAULT_META.charset)}"/>`,
 		`<title>${escapeHTML(title || '')}</title>`
 	]
-	.concat
-	(
-		flatten
-		(
-			Object.keys(meta).map((key) =>
-			{
-				// Convert meta value to an array.
-				return [].concat(meta[key])
-					.map(value => generateMetaTagMarkup(key, value))
-			})
-		)
+	.concat(
+		meta.map(([key, value]) => generateMetaTagMarkup(key, value))
 	)
 }
 
@@ -192,12 +179,12 @@ function generateMetaTagMarkup(name, value)
 }
 
 /**
- * Gets `<meta/>` tag "name" by key.
- * "name" can refer to both `name` and `property`.
+ * Gets `<meta/>` property aliases.
+ * (for both `name` and `property`).
  * Also filters out `charset`.
  * @return {string}
  */
-function getMetaTagNames(key)
+function getMetaKeyAliases(key)
 {
 	switch (key)
 	{
@@ -270,16 +257,20 @@ function escapeHTML(string)
  * Transforms meta object having "keys"
  * into a meta object having the actual
  * `<meta/>` tag `name`s and `property`es.
- * @return {object}
+ * @return Array of arrays having shape `[key, value]`.
  */
 function normalizeMetaKeys(meta)
 {
-	return Object.keys(meta).reduce((normalizedMeta, key) => {
-		for (const name of getMetaTagNames(key)) {
-			normalizedMeta[name] = meta[key]
+	return Object.keys(meta).reduce((all, key) => {
+		for (const alias of getMetaKeyAliases(key)) {
+			all.push([alias, meta[key]])
 		}
-		return normalizedMeta
-	}, {})
+		return all
+	}, [])
+}
+
+function normalizeMeta(meta) {
+	return convertMeta(normalizeMetaKeys(meta))
 }
 
 function dropUndefinedProperties(object)
@@ -297,4 +288,56 @@ function dropUndefinedProperties(object)
 		}
 	}
 	return object
+}
+
+// Expands nested objects.
+// Expands arrays.
+// @param meta — Either an object or an array of arrays having shape `[key, value]`.
+// @return An array of arrays having shape `[key, value]`.
+export function convertMeta(meta) {
+	// Convert meta object to an array of arrays having shape `[key, value]`.
+	if (!Array.isArray(meta)) {
+		meta = Object.keys(meta).map(key => [key, meta[key]])
+	}
+	return flatten(
+		meta.map((keyValue) => {
+			return flatten(
+				expandArrays(keyValue)
+					.map(expandObjects)
+			)
+		})
+	)
+}
+
+// There can be arrays of properties.
+// For example:
+// <meta property="og:image" content="//example.com/image.jpg" />
+// <meta property="og:image:width" content="100" />
+// <meta property="og:image:height" content="100" />
+// <meta property="og:image" content="//example.com/image@2x.jpg" />
+// <meta property="og:image:width" content="200" />
+// <meta property="og:image:height" content="200" />
+export function expandArrays(meta) {
+	if (Array.isArray(meta[1])) {
+		return meta[1].map(value => [meta[0], value])
+	}
+	return [meta]
+}
+
+// If `value` is an object
+// then expand such object
+// prefixing property names.
+export function expandObjects(meta) {
+	if (typeof meta[1] === 'object') {
+		return flatten(
+			Object.keys(meta[1])
+				.map((key) => [
+					key === '_' ? meta[0] : `${meta[0]}:${key}`,
+					meta[1][key]
+				])
+				// Expand objects recursively.
+				.map(expandObjects)
+		)
+	}
+	return [meta]
 }

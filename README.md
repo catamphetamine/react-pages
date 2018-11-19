@@ -1104,6 +1104,23 @@ import { meta } from 'react-website'
   // `<meta property="og:image" .../>`
   image: 'https://cdn.google.com/logo.png',
 
+  // Objects are expanded.
+  //
+  // `<meta property="og:image" content="https://cdn.google.com/logo.png"/>`
+  // `<meta property="og:image:width" content="100"/>`
+  // `<meta property="og:image:height" content="100"/>`
+  // `<meta property="og:image:type" content="image/png"/>`
+  //
+  image: {
+    _: 'https://cdn.google.com/logo.png',
+    width: 100,
+    height: 100,
+    type: 'image/png'
+  },
+
+  // Arrays are expanded (including arrays of objects).
+  image: [{...}, {...}, ...],
+
   // `<meta property="og:audio" .../>`
   audio: '...',
 
