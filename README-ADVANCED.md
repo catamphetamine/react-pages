@@ -325,16 +325,6 @@ const { status, content, contentType } = renderError(error)
     // and such relative paths would be transformed
     // into absolute URLs automatically.
 
-    // By default the `http` utility methods
-    // only accept relative URLs.
-    // This is done to prevent accidentally leaking
-    // sensitive HTTP headers to a third party.
-    // (e.g. JSON Web Tokens which are sent
-    //  in the form of `Authorization` HTTP header)
-    // Set this flag to `true` to allow absolute URLs.
-    // (is `false` by default)
-    allowAbsoluteURLs: true
-
     // (optional)
     onError: (error, { url, path, redirect, dispatch, getState }) => console.error(error)
     //

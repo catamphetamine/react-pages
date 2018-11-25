@@ -86,15 +86,6 @@ export default class HttpClient
 		{
 			this[method] = (path, data, options = {}) =>
 			{
-				// Rejects URLs of form "//www.google.ru/search",
-				// and verifies that the `path` is an internal URL.
-				// This check is performed to avoid leaking cookies
-				// and HTTP authentication headers to a third party.
-				if (!is_relative_url(path) && !allow_absolute_urls)
-				{
-					throw new Error(`You requested an absolute URL using "http" utility: "${path}". Use relative URLs instead (e.g. "/api/item/3") – this is cleaner and safer. To transform relative URLs into absolute ones configure the "http.transformURL(relativeURL) -> absoluteURL" parameter function in "react-website.js". Example: (path) => \`https://api.server.com\${path}\`. Alternatively, set "http.allowAbsoluteURLs" setting to "true" (for those rare cases when it is justifiable).`)
-				}
-
 				// `url` will be absolute for server-side
 				const url = transform_url(path, this.server)
 
@@ -143,8 +134,7 @@ export default class HttpClient
 						path
 					)
 
-					// Server side only
-					// (copies user authentication cookies to retain session specific data)
+					// On server side, add cookies to relative HTTP requests.
 					if (this.server && is_relative_url(path))
 					{
 						request.add_cookies(cookies, this.set_cookies)

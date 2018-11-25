@@ -52,6 +52,7 @@ export default function createHttpClient(settings, get_store, options = {})
 		catch_to_retry,
 		get_access_token,
 		transform_url               : settings.http.transformURL,
+		// `allowAbsoluteURLs` flag is deprecated.
 		allow_absolute_urls         : settings.http.allowAbsoluteURLs,
 		parseDates                  : settings.parseDates,
 		authentication_token_header : settings.authentication.header,

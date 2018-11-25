@@ -750,21 +750,14 @@ In order for `http` utility to send an authentication token as part of an HTTP r
 ```js
 {
   authentication: {
-    accessToken({ getState, path, url, getCookie }) {
-      // Optionally check the `path` (or `url`) to make sure that the access token
-      // is not leaked to a third party: only send it to own servers.
-      // For example, at some point someone may use `http` utility
-      // to get some data from a 3rd party endpoint, hence the `url` check.
-      // `path` is the URL supplied to `http` utility method call.
-      // `url` is the result of `http.transformURL(path)` (if configured).
-      // An example of `path`: "/api/method".
-      // An example of `url`: "https://server.com/api/method".
-      // if (path.indexOf('/') !== 0) {
-      //   return
-      // }
-      return localStorage.getItem('accessToken')
-      return getCookie('accessToken')
-      return getState().authentication.accessToken
+    accessToken({ getState, url, getCookie }) {
+      // It's recommended to check the `url` to make sure that the access token
+      // is not leaked to a third party: only send it to your own servers.
+      if (url.indexOf('https://my.api.com/') === 0) {
+        return localStorage.getItem('accessToken')
+        return getCookie('accessToken')
+        return getState().authentication.accessToken
+      }
     }
   }
 }

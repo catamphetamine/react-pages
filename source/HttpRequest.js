@@ -83,7 +83,12 @@ export default class HttpRequest
 		}
 		else if (get_access_token)
 		{
-			token = get_access_token(getCookie, { url, path })
+			token = get_access_token(getCookie, {
+				url,
+				// `path` is deprecated, use `requestedURL` instead.
+				path,
+				requestedURL: path
+			})
 		}
 
 		if (token && authentication !== false)
