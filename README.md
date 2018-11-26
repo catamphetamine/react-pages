@@ -728,12 +728,13 @@ const redux = new ReduxModule('NOTIFICATIONS')
 // Call it as `dispatch(notify(text))`.
 //
 export const notify = redux.simpleAction(
+  // (optional) Redux event name.
   'NOTIFY',
-  // The action
+  // The action.
   (text) => formatMessage(text),
-  // The Redux state reducer for the action's return value
+  // The Redux state reducer for the action's return value.
   (state, message) => ({ ...state, message }),
-  // The Redux reducer above could be also defined as
+  // The Redux reducer above could be also defined as:
   // 'message'
 )
 
