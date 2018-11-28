@@ -319,11 +319,13 @@ const { status, content, contentType } = renderError(error)
   http:
   {
     // (optional)
-    transformURL: (path) => `https://api-server.com${path}`
-    // Using `http.transformURL(path)` configuration parameter
-    // one can call API endpoints like `http.post('/sign-in')`
+    transformURL: (url, server: true/false) => url
+    // Using `http.transformURL(url)` configuration parameter
+    // one can call API endpoints like `http.post('/api')`
     // and such relative paths would be transformed
     // into absolute URLs automatically.
+    // Or it could transform shortcut URLs like `api://`
+    // into longer ones like `https://my-api.cloud-provider.com/`.
 
     // (optional)
     onError: (error, { url, path, redirect, dispatch, getState }) => console.error(error)

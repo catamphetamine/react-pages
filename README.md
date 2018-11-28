@@ -845,36 +845,50 @@ function handleUnauthenticatedError(error, url, redirect) {
 
 ### HTTP request URLs
 
-All URLs queried via `http` utility are supposed to be relative ones (e.g. `/api/users/list`) for convenience. In order to transform these convenient relative URLs into real ones there are two approaches built-in.
-
 <details>
-<summary>The old-school approach is for people using a proxy server.</summary>
+<summary>When sending HTTP requests to API using the <code>http</code> utility it is recommended to set up <code>http.transformURL(url)</code> configuration setting to make the code a bit cleaner.</summary>
 
-In this case all client-side HTTP requests will still query relative URLs which are gonna hit the proxy server and the proxy server will route them to the API service. And on server side it's gonna query the proxy server by an absolute URL (there is no notion of "relative URLs" on the server side) therefore the proxy `host` and `port` need to be configured in webpage rendering service options.
+#####
+
+Before:
 
 ```js
-const server = webpageServer(settings, {
-  proxy: {
-    host: '192.168.0.1',
-    port: 3000,
-    // (enable for HTTPS protocol)
-    // secure: true
-  }
-})
+// Actions.
+
+export const getUser = redux.action(
+  (id) => http => http.get(`https://my-api.cloud-provider.com/users/${id}`),
+  'user'
+)
+
+export const updateUser = redux.action(
+  (id, values) => http => http.put(`https://my-api.cloud-provider.com/users/${id}`, values)
+)
 ```
-</details>
 
-####
-
-The modern approach is to query API by an absolute URL (through CORS) in a cloud. In this case all URLs are transformed from relative ones into absolute ones by the `http.transformURL(path)` parameter configured in `react-website.js`.
+After:
 
 ```js
+// Actions.
+
+export const getUser = redux.action(
+  (id) => http => http.get(`api://users/${id}`),
+  'user'
+)
+
+export const updateUser = redux.action(
+  (id, values) => http => http.put(`api://users/${id}`, values)
+)
+
+// Settings.
+
 {
+  ...
   http: {
-    transformURL: path => `https://my-api.cloud.com${path}`
+    transformURL: (url) => `https://my-api.cloud-provider.com/${url.slice('api://'.length)}`
   }
 }
 ```
+</details>
 
 ### File upload
 
