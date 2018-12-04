@@ -66,7 +66,7 @@ export default async function renderOnServer({
 // to be returned as an Http response status code (404, etc)
 function getHttpResponseStatusCodeForTheRoute(matchedRoutes)
 {
-	return matchedRoutes.reduce((previous, current) => (current && current.status) || (previous && current.status))
+	return matchedRoutes.reduce((previous, current) => (current && current.status) || (previous && current.status), null)
 }
 
 // Returns a complete path
