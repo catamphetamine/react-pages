@@ -1,7 +1,6 @@
 // Makes @preload() decorator work.
 // (preloads data required for displaying a page before actually navigating to it)
 
-import deep_equal from 'deep-equal'
 import getRouteParams from 'react-router/lib/getRouteParams'
 
 import { location_url, strip_basename } from '../../location'

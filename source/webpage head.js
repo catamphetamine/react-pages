@@ -11,7 +11,7 @@ export function Title({ children })
 	// // Replaces only webpage title
 	// return <DocumentMeta title={ children } extend/>
 
-	return <Helmet><title>{ children }</title></Helmet>
+	return <Helmet title={children}/>
 }
 
 Title.propTypes =
@@ -51,13 +51,17 @@ export function Meta({ children })
 		}
 	}
 
-	// The old way (deprecated)
+	// The old way.
+	// Still works.
 	if (the_old_way)
 	{
 		return <Helmet meta={ children }/>
 	}
 
-	// The new way
+	// The new way.
+	// Doesn't work.
+	// Don't use.
+	// https://github.com/nfl/react-helmet/issues/373
 	return <Helmet>{ children }</Helmet>
 }
 

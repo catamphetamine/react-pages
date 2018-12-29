@@ -8,7 +8,7 @@
 		{
 			"follow_symlinks": true,
 			"path": ".",
-			"folder_exclude_patterns": ["react-isomorphic-render/node_modules", "react-isomorphic-render/coverage", "react-isomorphic-render/build", "react-isomorphic-render/build", "react-isomorphic-render/es6", "react-isomorphic-render/project.sublime-workspace"]
+			"folder_exclude_patterns": ["node_modules", "react-isomorphic-render/coverage", "react-isomorphic-render/build", "build", "es6", "react-isomorphic-render/project.sublime-workspace"]
 		}
 	]
 }
