@@ -4,6 +4,7 @@ nunjucks.configure({ autoescape: true })
 
 export function renderBeforeContent({
 	assets,
+	locale,
 	meta,
 	head,
 	bodyStart
@@ -13,6 +14,7 @@ export function renderBeforeContent({
 	({
 		icon : assets.icon,
 		style_urls : assets.entries.map(entry => assets.styles && assets.styles[entry]).filter(url => url),
+		locale,
 		meta,
 		head,
 		bodyStart
@@ -51,7 +53,7 @@ export function safeJsonStringify(json)
 const TEMPLATE_BEFORE_CONTENT = nunjucks.compile
 (`
 	<!doctype html>
-	<html>
+	<html {% if locale %} lang="{{locale}}" {% endif %}>
 		<head>
 			{# <title/> and <meta/> tags, properly escaped #}
 			{{ meta | safe }}
@@ -101,11 +103,7 @@ const TEMPLATE_AFTER_CONTENT = nunjucks.compile
 				{% endif %}
 			</script>
 
-			{#
-				Locale for international messages
-				(is only used in client-side Ajax "translate"
-				 the existence of which is questionable).
-			#}
+			{# User's preferred locales (based on the "Accept-Locale" HTTP request header). #}
 			{% if locales %}
 				<script>
 					window._react_website_locales = {{ safeJsonStringify(locales) | safe }}

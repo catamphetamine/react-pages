@@ -360,3 +360,7 @@ export function expandObjects(meta) {
 	}
 	return [meta]
 }
+
+export function convertOpenGraphLocaleToLanguageTag(ogLocale) {
+	return ogLocale.replace('_', '-')
+}

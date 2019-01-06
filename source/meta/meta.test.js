@@ -4,7 +4,8 @@ import
 	generateMetaTagsMarkup,
 	expandObjects,
 	expandArrays,
-	convertMeta
+	convertMeta,
+	convertOpenGraphLocaleToLanguageTag
 }
 from './meta'
 
@@ -189,5 +190,10 @@ describe(`@meta`, () =>
 			['key:subkey6:subsubkey3', 'subsubvalue3'],
 			['key:subkey6:subsubkey4', 'subsubvalue4']
 		])
+	})
+
+	it('should convert locales', () => {
+		convertOpenGraphLocaleToLanguageTag('ru_RU').should.equal('ru-RU')
+		convertOpenGraphLocaleToLanguageTag('ru').should.equal('ru')
 	})
 })
