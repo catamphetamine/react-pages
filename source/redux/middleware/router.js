@@ -15,16 +15,25 @@ import {
 	resetInstantBack
 } from '../client/instantBack'
 
-export default function routerMiddleware(routes, codeSplit, onNavigate, reportStats)
-{
+export default function routerMiddleware(
+	routes,
+	codeSplit,
+	onNavigate,
+	reportStats,
+	defaultMeta
+) {
 	let startedAt
 	let previousLocation
 	let previousRouteIndices
 
 	function updateMetaTags(routeIndices, state) {
 		const routeChain = getRoutesByPath(routeIndices, routes)
-		const meta = codeSplit ? getCodeSplitMeta(routeChain, state) : getComponentsMeta(routeChain.map(_ => _.Component), state)
-		updateMeta(mergeMeta(meta))
+		// Get `<meta/>` for the route.
+		let meta = codeSplit ? getCodeSplitMeta(routeChain, state) : getComponentsMeta(routeChain.map(_ => _.Component), state)
+		meta = mergeMeta(meta)
+		meta = { ...defaultMeta, ...meta }
+		// Update `<meta/>`.
+		updateMeta(meta)
 	}
 
 	return ({ dispatch, getState }) =>

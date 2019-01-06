@@ -9,7 +9,7 @@ import timer from '../timer'
 import { getLocationUrl, parseLocation } from '../location'
 import reduxRender from '../redux/server/render'
 import { initialize as reduxInitialize } from '../redux/server/server'
-import { generateMetaTagsMarkup, DEFAULT_META, convertOpenGraphLocaleToLanguageTag } from '../meta/meta'
+import { generateMetaTagsMarkup, mergeMeta, convertOpenGraphLocaleToLanguageTag } from '../meta/meta'
 
 export default async function(settings, {
 	initialize,
@@ -27,6 +27,7 @@ export default async function(settings, {
 	const {
 		routes,
 		container,
+		meta: defaultMeta,
 		authentication,
 		onError,
 		codeSplit
@@ -120,7 +121,11 @@ export default async function(settings, {
 		{
 			renderContent = false
 
-			const [ beforeContent, afterContent ] = generateOuterHtml(DEFAULT_META)
+			// Get `<meta/>` for the route.
+			const [ beforeContent, afterContent ] = generateOuterHtml({
+				...defaultMeta,
+				...mergeMeta([])
+			})
 
 			return {
 				route: '/react-website-base',
@@ -142,7 +147,8 @@ export default async function(settings, {
 		} = await render({
 			...parameters,
 			routes,
-			codeSplit
+			codeSplit,
+			defaultMeta
 		})
 
 		if (redirect) {

@@ -30,6 +30,7 @@ export default function _createStore(settings, data, createHistoryProtocol, http
 		onError,
 		getLocale,
 		codeSplit,
+		meta,
 		showPreloadInitially
 	}
 	= settings
@@ -79,7 +80,8 @@ export default function _createStore(settings, data, createHistoryProtocol, http
 			routes,
 			codeSplit,
 			onNavigate,
-			stats
+			stats,
+			meta
 		))
 	}
 

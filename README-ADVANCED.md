@@ -286,6 +286,10 @@ const { status, content, contentType } = renderError(error)
   showPreloadInitially: true/false
 
   // (optional)
+  // Default `@meta()` (applies to all pages).
+  meta: { ... }
+
+  // (optional)
   // User can add custom Redux middleware
   reduxMiddleware: () => [...]
 

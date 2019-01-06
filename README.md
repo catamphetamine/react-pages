@@ -1171,6 +1171,20 @@ export default class Page extends React.Component {
 
 `@meta()` decorator discards all other `<meta/>` set by any other means, e.g. if there are any `<meta/>` tags in `index.html` template then all of them will be dicarded if using `@meta()` decorator so don't mix `@meta()` decorator with `<meta/>` tags inserted manually into `index.html`.
 
+To set default `<meta/>` (for example, `og:site_name`, `og:description`, `og:locale`) define `meta` property in `react-website.js` settings file:
+
+```js
+{
+  routes: ...,
+  reducers: ...,
+  meta: {
+    site_name: 'WebSite',
+    description: 'A generic web application',
+    locale: 'en_US'
+  }
+}
+```
+
 ### Get current location
 
 Inside `@preload()`: use the `location` parameter.

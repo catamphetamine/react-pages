@@ -10,7 +10,8 @@ import { createRouterElement } from '../../router/server'
 export default async function renderOnServer({
 	store,
 	routes,
-	codeSplit
+	codeSplit,
+	defaultMeta
 }) {
 	// Routing only takes a couple of milliseconds
 	// const routingTimer = timer()
@@ -38,6 +39,11 @@ export default async function renderOnServer({
 		// Gather `<title/>` and `<meta/>` tags for this route path
 		const { routes, elements } = renderArgs
 
+		// Get `<meta/>` for the route.
+		let meta = codeSplit ? getCodeSplitMeta(routes, store.getState()) : getComponentsMeta(elements.map(_ => _.type), store.getState())
+		meta = mergeMeta(meta)
+		meta = { ...defaultMeta, ...meta }
+
 		// Return HTTP status code and the rendered page
 		return {
 			// Concatenated `react-router` route string.
@@ -45,7 +51,7 @@ export default async function renderOnServer({
 			route   : getRoutePath(routes),
 			status  : getHttpResponseStatusCodeForTheRoute(routes),
 			content : createRouterElement(renderArgs),
-			meta    : mergeMeta(codeSplit ? getCodeSplitMeta(routes, store.getState()) : getComponentsMeta(elements.map(_ => _.type), store.getState())),
+			meta,
 			containerProps : { store },
 			time
 		}

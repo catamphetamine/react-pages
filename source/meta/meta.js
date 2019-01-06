@@ -8,7 +8,7 @@ import { getDisplayName } from '../utility'
 
 const browserDocument = new BrowserDocument()
 
-export const DEFAULT_META =
+const DEFAULT_META =
 {
 	charset  : 'utf-8',
 	// Fixes CSS screen width on mobile devices.
@@ -48,6 +48,7 @@ export default function meta(getMeta)
 /**
  * Gathers `<title/>` and `<meta/>` tags (inside `<head/>`)
  * defined for this route (`components` array).
+ * @param {object[]} meta — An array of meta objects.
  * @return {object}
  */
 export function mergeMeta(meta)
@@ -59,7 +60,7 @@ export function mergeMeta(meta)
 		...meta,
 		...componentMeta
 	}),
-	DEFAULT_META)
+	{ ...DEFAULT_META })
 
 	// Remove `locale` from `locales`.
 	if (meta.locale && meta.locales) {
