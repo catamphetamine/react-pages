@@ -1,4 +1,4 @@
-import { UPDATE_MATCH, RESOLVE_MATCH, getRoutesByPath, getRoutePath } from '../../router'
+import { UPDATE_MATCH, RESOLVE_MATCH, _RESOLVE_MATCH, getRoutesByPath, getRoutePath } from '../../router'
 import { getComponentsMeta, mergeMeta, updateMeta, getCodeSplitMeta } from '../../meta/meta'
 import { getLocationUrl } from '../../location'
 
@@ -50,6 +50,12 @@ export default function routerMiddleware(
 
 			switch (event.type) {
 				case UPDATE_MATCH:
+					// Store `event.payload` for the future `_UPDATE_MATCH` event.
+					if (!window._server_side_render) {
+						window._react_website_update_match_payload = event.payload
+					}
+
+					// Measure `@preload()` time.
 					startedAt = Date.now()
 
 					// If it's an instant "Back"/"Forward" navigation
@@ -93,6 +99,7 @@ export default function routerMiddleware(
 
 					// // `RESOLVE_MATCH` is not being emitted
 					// // for the first render for some reason.
+					// // https://github.com/4Catalyzer/found/issues/202
 					// const isFirstRender = !previousLocation
 					// if (isFirstRender) {
 					// 	updateMetaTags(routeIndices, getState())
@@ -108,7 +115,19 @@ export default function routerMiddleware(
 					previousRouteIndices = routeIndices
 					break
 
+				// `RESOLVE_MATCH` is not being dispatched
+				// for the first render for some reason.
+				// https://github.com/4Catalyzer/found/issues/202
+				// With server-side rendering enabled
+				// initially there are two rendering passes
+				// and therefore `RESOLVE_MATCH` does get dispatched
+				// after the page is initialized and rendered.
+				// With server-side rendering disabled
+				// `RESOLVE_MATCH` does not get dispatched
+				// therefore a custom `_RESOLVE_MATCH` event is
+				// dispatched manually.
 				case RESOLVE_MATCH:
+				case _RESOLVE_MATCH:
 					window._react_website_router_rendered = true
 
 					updateMetaTags(routeIndices, getState())

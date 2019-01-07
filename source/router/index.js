@@ -157,3 +157,5 @@ function skipPreload() {
 
 export const UPDATE_MATCH = FoundActionTypes.UPDATE_MATCH
 export const RESOLVE_MATCH = FoundActionTypes.RESOLVE_MATCH
+
+export const _RESOLVE_MATCH = '@@react-website/RESOLVE_MATCH'

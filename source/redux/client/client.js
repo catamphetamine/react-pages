@@ -10,7 +10,7 @@ import { resetInstantBack } from './instantBack'
 import { getLocationUrl } from '../../location'
 import { convertRoutes } from '../../router'
 import { createHistoryProtocol } from '../../router/client'
-import { redirect } from '../../router'
+import { redirect, _RESOLVE_MATCH } from '../../router'
 
 // This function is what's gonna be called from the project's code on the client-side.
 //
@@ -61,8 +61,10 @@ export default function setUpAndRender(settings, options = {}) {
 	// The first pass of initial client-side render
 	// is to render the markup which matches server-side one.
 	// The second pass will be to render after resolving `getData`.
-	window._react_website_initial_prerender = true
-	window._react_website_skip_preload = true
+	if (window._server_side_render) {
+		window._react_website_initial_prerender = true
+		window._react_website_skip_preload = true
+	}
 
 	// Create Redux store
 	store = createStore(settings, getState(true), createHistoryProtocol, httpClient, {
@@ -93,7 +95,11 @@ export default function setUpAndRender(settings, options = {}) {
 		onStoreCreated(store)
 	}
 
-	// Render the page
+	// Render the page.
+	// If it's a server-side rendering case then that will be the
+	// first pass, without preloading data, just for `React.hydrate()`.
+	// If it's a client-side rendering case then that will be the
+	// first pass with preloading data.
 	return clientSideRender({
 		container: settings.container,
 		render,
@@ -105,7 +111,25 @@ export default function setUpAndRender(settings, options = {}) {
 		// Perform the second pass of initial client-side rendering.
 		// The second pass resolves `getData` on `<Route/>`s.
 		// (which means it resolves all client-side `@preload()`s)
-		store.dispatch(redirect(document.location))
+		if (window._server_side_render) {
+			store.dispatch(redirect(document.location))
+		} else {
+			// `RESOLVE_MATCH` is not being dispatched
+			// for the first render for some reason.
+			// https://github.com/4Catalyzer/found/issues/202
+			// With server-side rendering enabled
+			// initially there are two rendering passes
+			// and therefore `RESOLVE_MATCH` does get dispatched
+			// after the page is initialized and rendered.
+			// With server-side rendering disabled
+			// `RESOLVE_MATCH` does not get dispatched
+			// therefore a custom `_RESOLVE_MATCH` event is
+			// dispatched manually.
+			store.dispatch({
+				type: _RESOLVE_MATCH,
+				payload: window._react_website_update_match_payload
+			})
+		}
 		return result
 	})
 }

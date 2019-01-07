@@ -23,8 +23,10 @@ export default function render({ store })
 		// The first pass of initial client-side render
 		// was to render the markup which matches server-side one.
 		// The second pass will be to render after resolving `getData`.
-		window._react_website_initial_prerender = false
-		window._react_website_skip_preload = false
+		if (window._server_side_render) {
+			window._react_website_initial_prerender = false
+			window._react_website_skip_preload = false
+		}
 
 		// `routes` are used when comparing `instantBack` chain items
 		// for resetting `instantBack` chain when the same route is encountered twice.

@@ -1,3 +1,22 @@
+<!--
+As the project grows the `webpack-react-redux-server-side-render-example` setup
+gets slow hot-reload times because the rendering service is being re-launched
+on every code change and starting up the Node.js process starks taking a long time.
+This could be changed into the rendering service being run not via `nodemon`
+but via the standard `node` instead meaning that it wouldn't re-launch on every code change.
+Instead, the rendering service would always return a dummy `index.html` file contents
+like it would in case of client-side-only rendering.
+In that case rendering service won't perform any routing or preloading.
+It would just return the base HTML structure without any route-specific stuff.
+-->
+
+3.1.0 / 07.01.2019
+==================
+
+  * Added `meta` setting for default `@meta()` (which applies to all pages).
+
+  * (experimental) Fixed `.render()` being called before `@preload()`s took place in cases when server-side rendering is not being used.
+
 3.0.0 / 04.09.2018
 ==================
 
