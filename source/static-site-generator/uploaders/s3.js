@@ -1,6 +1,6 @@
 import s3 from 's3'
 
-export default function S3Uploader({ accessKeyId, secretAccessKey, region, bucket })
+export default function S3Uploader({ accessKeyId, secretAccessKey, region, bucket, ACL })
 {
 	return function upload(directory, { started, progress })
 	{
@@ -10,6 +10,7 @@ export default function S3Uploader({ accessKeyId, secretAccessKey, region, bucke
 			deleteRemoved: true, // default false, whether to remove s3 objects
 			s3Params:
 			{
+				ACL: ACL, // 'public-read',
 				Bucket: bucket
 			}
 		}
