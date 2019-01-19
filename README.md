@@ -1006,10 +1006,26 @@ async function run() {
   await copy(path.resolve(__dirname, '../robots.txt'), path.resolve(generatedSitePath, 'robots.txt'))
 
   // Upload the website to an Amazon S3 bucket.
-  // The default `ACL` option value for the files being uploaded is "public-read".
-  // The ACL for the bucket itself must have "List objects" set to "Yes",
-  // otherwise the website will return "403 Forbidden" error.
   await upload(generatedSitePath, S3Uploader({
+    // Setting an `ACL` for the files being uploaded is optional.
+    // Alternatively a bucket-wide policy could be set up instead:
+    //
+    // {
+    //   "Version": "2012-10-17",
+    //   "Statement": [{
+    //     "Sid": "AddPerm",
+    //     "Effect": "Allow",
+    //     "Principal": "*",
+    //     "Action": "s3:GetObject",
+    //     "Resource": "arn:aws:s3:::[bucket-name]/*"
+    //   }]
+    // }
+    //
+    // If not setting a bucket-wide policy then the ACL for the
+    // bucket itself should also have "List objects" set to "Yes",
+    // otherwise the website would return "403 Forbidden" error.
+    //
+    ACL: 'public-read',
     bucket: confiugration.s3.bucket,
     accessKeyId: configuration.s3.accessKeyId,
     secretAccessKey: configuration.s3.secretAccessKey,
