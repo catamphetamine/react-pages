@@ -10,6 +10,11 @@ In that case rendering service won't perform any routing or preloading.
 It would just return the base HTML structure without any route-specific stuff.
 -->
 
+3.1.1 / 19.01.2019
+==================
+
+  * Added `ACL` option for S3 static site upload.
+
 3.1.0 / 07.01.2019
 ==================
 
