@@ -1005,7 +1005,10 @@ async function run() {
   await copy(path.resolve(__dirname, '../build/assets'), path.resolve(generatedSitePath, 'assets'))
   await copy(path.resolve(__dirname, '../robots.txt'), path.resolve(generatedSitePath, 'robots.txt'))
 
-  // Upload the website to Amazon S3.
+  // Upload the website to an Amazon S3 bucket.
+  // The default `ACL` option value for the files being uploaded is "public-read".
+  // The ACL for the bucket itself must have "List objects" set to "Yes",
+  // otherwise the website will return "403 Forbidden" error.
   await upload(generatedSitePath, S3Uploader({
     bucket: confiugration.s3.bucket,
     accessKeyId: configuration.s3.accessKeyId,
