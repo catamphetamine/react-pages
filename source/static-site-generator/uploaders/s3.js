@@ -10,7 +10,7 @@ export default function S3Uploader({ accessKeyId, secretAccessKey, region, bucke
 			deleteRemoved: true, // default false, whether to remove s3 objects
 			s3Params:
 			{
-				ACL: ACL, // 'public-read',
+				ACL: ACL,
 				Bucket: bucket
 			}
 		}
