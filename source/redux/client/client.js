@@ -2,6 +2,7 @@ import React from 'react'
 import ReactDOM from 'react-dom'
 
 import clientSideRender from '../../client/render'
+import { isServerSidePreloaded } from '../../client/flags'
 import render from './render'
 import createHttpClient from '../HttpClient'
 import normalizeSettings from '../normalize'
@@ -61,7 +62,7 @@ export default function setUpAndRender(settings, options = {}) {
 	// The first pass of initial client-side render
 	// is to render the markup which matches server-side one.
 	// The second pass will be to render after resolving `getData`.
-	if (window._server_side_render) {
+	if (isServerSidePreloaded()) {
 		window._react_website_initial_prerender = true
 		window._react_website_skip_preload = true
 	}
@@ -111,7 +112,7 @@ export default function setUpAndRender(settings, options = {}) {
 		// Perform the second pass of initial client-side rendering.
 		// The second pass resolves `getData` on `<Route/>`s.
 		// (which means it resolves all client-side `@preload()`s)
-		if (window._server_side_render) {
+		if (isServerSidePreloaded()) {
 			store.dispatch(redirect(document.location))
 		} else {
 			// `RESOLVE_MATCH` is not being dispatched

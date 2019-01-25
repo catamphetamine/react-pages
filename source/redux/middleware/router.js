@@ -15,6 +15,8 @@ import {
 	resetInstantBack
 } from '../client/instantBack'
 
+import { isServerSidePreloaded } from '../../client/flags'
+
 export default function routerMiddleware(
 	routes,
 	codeSplit,
@@ -51,7 +53,7 @@ export default function routerMiddleware(
 			switch (event.type) {
 				case UPDATE_MATCH:
 					// Store `event.payload` for the future `_UPDATE_MATCH` event.
-					if (!window._server_side_render) {
+					if (!isServerSidePreloaded()) {
 						window._react_website_update_match_payload = event.payload
 					}
 

@@ -1,3 +1,5 @@
+import { isServerSidePreloaded } from '../../client/flags'
+
 // Returns function returning a Promise
 // which resolves when all the required preload()s are resolved.
 //
@@ -68,7 +70,7 @@ function setUpPreloader(preloader, preload_arguments, server)
 
 	// If Server-Side Rendering is not being used at all
 	// then all `@preload()`s must be marked as client-side ones.
-	if (!server && !window._server_side_render) {
+	if (!server && !isServerSidePreloaded()) {
 		preloader.options.client = true
 	}
 }

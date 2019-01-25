@@ -1,6 +1,8 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
 
+import { isServerSideRendered } from './flags'
+
 // Performs client-side React application rendering.
 // Takes `render()` function which renders the actual page.
 // Then this rendered page is rendered in a `container`
@@ -49,7 +51,7 @@ export default function render({ render, renderParameters = {}, container }) {
 // Renders React element to a DOM node
 function renderReactElementTree(element, to) {
 	// If using React >= 16 and the content is Server-Side Rendered.
-	if (ReactDOM.hydrate && window._server_side_render && !window._empty_server_side_render) {
+	if (isServerSideRendered() && ReactDOM.hydrate) {
 		// New API introduced in React 16
 		// for "hydrating" Server-Side Rendered markup.
 		return ReactDOM.hydrate(element, to)

@@ -3,6 +3,7 @@ import React from 'react'
 import { getLocationUrl } from '../../location'
 import { matchRoutes } from '../../router'
 import { createRouterElement } from '../../router/client'
+import { isServerSidePreloaded } from '../../client/flags'
 
 // Renders the current page React element inside the `to` DOM element.
 //
@@ -23,7 +24,7 @@ export default function render({ store })
 		// The first pass of initial client-side render
 		// was to render the markup which matches server-side one.
 		// The second pass will be to render after resolving `getData`.
-		if (window._server_side_render) {
+		if (isServerSidePreloaded()) {
 			window._react_website_initial_prerender = false
 			window._react_website_skip_preload = false
 		}
