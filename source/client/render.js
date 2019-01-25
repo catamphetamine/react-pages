@@ -1,7 +1,7 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
 
-import { isServerSideRendered } from './flags'
+import { isServerSidePreloaded, isServerSideRendered } from './flags'
 
 // Performs client-side React application rendering.
 // Takes `render()` function which renders the actual page.
@@ -51,10 +51,18 @@ export default function render({ render, renderParameters = {}, container }) {
 // Renders React element to a DOM node
 function renderReactElementTree(element, to) {
 	// If using React >= 16 and the content is Server-Side Rendered.
-	if (isServerSideRendered() && ReactDOM.hydrate) {
+	if (isServerSidePreloaded() && isServerSideRendered() && ReactDOM.hydrate) {
 		// New API introduced in React 16
 		// for "hydrating" Server-Side Rendered markup.
+		// https://reactjs.org/docs/react-dom.html#hydrate
 		return ReactDOM.hydrate(element, to)
+	}
+	// Clears `element` to prevent React warning:
+	// "Calling ReactDOM.render() to hydrate server-rendered markup
+	//  will stop working in React v17. Replace the ReactDOM.render() call
+	//  with ReactDOM.hydrate() if you want React to attach to the server HTML."
+	while (to.firstChild) {
+		to.removeChild(to.firstChild)
 	}
 	return ReactDOM.render(element, to)
 }

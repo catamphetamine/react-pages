@@ -5,8 +5,29 @@ import ProgressBar from 'progress'
 import download from './download'
 
 // Snapshots all pages (URLs).
-export default async function snapshot_website({ host, port, pages, outputPath })
-{
+export default async function snapshotWebsite(options) {
+	return snapshot({
+		...options,
+		transformContent: (content) => {
+			if (options.transformContent) {
+				content = options.transformContent(content)
+			}
+			if (options.reloadData) {
+				content = addReloadDataFlag(content)
+			}
+			return content
+		}
+	})
+}
+
+// Snapshots all pages (URLs).
+export async function snapshot({
+	host,
+	port,
+	pages,
+	outputPath,
+	transformContent
+}) {
 	// Could be `null`, not just `undefined`.
 	if (!pages) {
 		pages = []
@@ -18,7 +39,7 @@ export default async function snapshot_website({ host, port, pages, outputPath }
 	pages.unshift('/react-website-base')
 
 	// The progress meter for the website snapshotting process.
-	const snapshot_progress = new ProgressBar(' Snapshotting [:bar] :total :percent :etas',
+	const snapshotProgress = new ProgressBar(' Snapshotting [:bar] :total :percent :etas',
 	{
 		complete   : '=',
 		incomplete : ' ',
@@ -27,13 +48,14 @@ export default async function snapshot_website({ host, port, pages, outputPath }
 	})
 
 	// Start the website snapshotting process
-	await snapshot
+	await snapshotPages
 	(
 		host,
 		port,
 		pages,
 		outputPath,
-		() => snapshot_progress.tick()
+		transformContent,
+		() => snapshotProgress.tick()
 	)
 
 	// Move `./react-website-base/index.html` to `./base.html`.
@@ -41,7 +63,7 @@ export default async function snapshot_website({ host, port, pages, outputPath }
 	fs.removeSync(path.join(outputPath, 'react-website-base'))
 }
 
-async function snapshot(host, port, pages, outputPath, tick)
+async function snapshotPages(host, port, pages, outputPath, transformContent, tick)
 {
 	// Clear the output folder
 	await remove(outputPath)
@@ -49,6 +71,13 @@ async function snapshot(host, port, pages, outputPath, tick)
 	// Snapshot every page and put it into the output folder
 	for (const page of pages)
 	{
+		await snapshotPage(host, port, page, outputPath, transformContent)
+		tick()
+	}
+}
+
+async function snapshotPage(host, port, page, outputPath, transformContent)
+{
 		let url = page
 		let targetStatusCode = 200
 
@@ -66,12 +95,19 @@ async function snapshot(host, port, pages, outputPath, tick)
 			throw new Error(`Expected ${targetStatusCode} HTTP status code for "${_url}". Got ${status}.`);
 		}
 
-		fs.outputFileSync(path.join(outputPath, url, '/index.html'), content)
-		tick()
-	}
+		fs.outputFileSync(path.join(outputPath, url, '/index.html'), transformContent ? transformContent(content) : content)
 }
 
-function remove(path)
-{
+function remove(path) {
 	return new Promise((resolve, reject) => fs.remove(path, error => error ? reject(error) : resolve()))
+}
+
+function addReloadDataFlag(content) {
+	const headEndsAt = content.indexOf('</head>')
+	if (headEndsAt < 0) {
+		throw new Error('</head> not found')
+	}
+	return content.slice(0, headEndsAt) +
+		'<script> window._react_website_reload_data = true </script>' +
+		content.slice(headEndsAt)
 }
