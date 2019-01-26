@@ -1,3 +1,13 @@
+// Copy-pasted from `robust-websocket` library:
+// https://github.com/appuri/robust-websocket/blob/master/robust-websocket.js
+// A copy from October 9th 2017.
+//
+// Changes:
+//
+// * `robust-websocket` uses `CustomEvent` which is not supported in Internet Explorer: replaced it with `./CustomEvent.js` polyfill.
+//
+// * Rewrote it with a proper ES6 export. Otherwise it would throw `navigator is undefined` on server side. https://github.com/appuri/robust-websocket/issues/9
+
 // `robust-websocket` uses `CustomEvent`
 // which is not supported in Internet Explorer.
 import PolyfillCustomEvent from './CustomEvent'
@@ -17,15 +27,6 @@ if (typeof window !== 'undefined')
   PolyfillCustomEvent()
 }
 
-// The code below is copy-pasted from `robust-websocket` library:
-// https://github.com/appuri/robust-websocket/blob/master/robust-websocket.js
-// A copy from October 9th 2017.
-// 
-// Rewrote it with a proper ES6 export
-// https://github.com/appuri/robust-websocket/issues/9
-//
-// Otherwise it would throw `navigator is undefined` on server side.
-//
 export default function RobustWebSocket(url, protocols, userOptions) {
   var realWs = { close: function() {} },
       connectTimeout,
