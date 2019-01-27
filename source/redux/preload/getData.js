@@ -14,7 +14,7 @@ import preload from './preload'
 
 export default function createGetDataForPreload(codeSplit, server, onError, getLocale, getConvertedRoutes) {
 	return function({ params, context: { dispatch, getState } }) {
-		if (!server && window._react_website_skip_preload) {
+		if (!server && window._react_website_skip_preload || window._react_website_hot_reload) {
 			return Promise.resolve()
 		}
 		const { location, previousLocation } = getLocations(getState())

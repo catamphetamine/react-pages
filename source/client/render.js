@@ -3,6 +3,8 @@ import ReactDOM from 'react-dom'
 
 import { isServerSidePreloaded, isServerSideRendered } from './flags'
 
+let firstRender = true
+
 // Performs client-side React application rendering.
 // Takes `render()` function which renders the actual page.
 // Then this rendered page is rendered in a `container`
@@ -17,26 +19,27 @@ export default function render({ render, renderParameters = {}, container }) {
 	// Returns a Promise for an object holding
 	// `render` function for development mode hot reload,
 	// and also `store` (if Redux is used).
-	function renderPage()
-	{
+	function renderPage() {
+		if (firstRender) {
+			firstRender = false
+		} else {
+			window._react_website_hot_reload = true
+		}
 		return render(renderParameters).then(({ element, containerProps, ...rest }) => {
 			// if (locale) {
 			// 	containerProps.locale = locale
 			// }
-
 			renderReactElementTree(
 				// Render page `element` inside a container element.
 				// E.g. Redux context `<Provider/>`, and others.
 				React.createElement(container, containerProps, element),
-
 				// DOM element to which React markup will be rendered
 				getReactContainerElement()
 			)
-
+			window._react_website_hot_reload = false
 			return rest
 		})
 	}
-
 	// Render the page on the client side.
 	return renderPage().then((result) => ({
 		// Redux `store`, for example.
@@ -61,8 +64,10 @@ function renderReactElementTree(element, to) {
 	// "Calling ReactDOM.render() to hydrate server-rendered markup
 	//  will stop working in React v17. Replace the ReactDOM.render() call
 	//  with ReactDOM.hydrate() if you want React to attach to the server HTML."
-	while (to.firstChild) {
-		to.removeChild(to.firstChild)
+	if (!window._react_website_hot_reload) {
+		while (to.firstChild) {
+			to.removeChild(to.firstChild)
+		}
 	}
 	return ReactDOM.render(element, to)
 }
