@@ -2,6 +2,8 @@ import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import Link from 'found/lib/Link'
 
+import { markImmediateNavigationAsInstantBack } from './client/instantBack'
+
 export default class HyperLink extends Component
 {
 	static propTypes = {
@@ -15,9 +17,7 @@ export default class HyperLink extends Component
 			onClick(event)
 		}
 
-		window._react_website_instant_back = instantBack
-		// Is reset in `./redux/middleware/router.js`
-		setTimeout(() => window._react_website_instant_back = false, 0)
+		markImmediateNavigationAsInstantBack(instantBack)
 	}
 
 	render() {

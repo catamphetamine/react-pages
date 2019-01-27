@@ -149,7 +149,6 @@ function findSameRoutesLocationIndex(chain, routes)
 	return -1
 }
 
-// Returns `http` utility on client side.
 // Can be used to find out if the current page
 // transition was an "instant" one.
 // E.g. an Algolia "Instant Search" component
@@ -163,4 +162,10 @@ export function setInstantNavigationFlag(value) {
 	if (typeof window !== 'undefined') {
 		window._react_website_was_instant_navigation = value
 	}
+}
+
+export function markImmediateNavigationAsInstantBack(instantBack) {
+	window._react_website_instant_back = instantBack
+	// Is reset in `./redux/middleware/router.js`
+	setTimeout(() => window._react_website_instant_back = false, 0)
 }

@@ -17,6 +17,8 @@ import createHistoryEnhancer from 'farce/lib/createHistoryEnhancer'
 import createBasenameMiddleware from 'farce/lib/createBasenameMiddleware'
 import queryMiddleware from 'farce/lib/queryMiddleware'
 
+import { markImmediateNavigationAsInstantBack } from '../redux/client/instantBack'
+
 export function createRouterStoreEnhancers(routes, createHistoryProtocol, options = {}) {
 	const middlewares = [
 		queryMiddleware
@@ -129,7 +131,13 @@ export function initializeRouter(store) {
 }
 
 export const redirect = Actions.replace
-export const goto = Actions.push
+
+export const goto = (location, options = {}) => {
+	if (options.instantBack) {
+		markImmediateNavigationAsInstantBack(options.instantBack)
+	}
+	return Actions.push(location)
+}
 
 export const REDIRECT_ACTION_TYPE = ActionTypes.REPLACE
 export const GOTO_ACTION_TYPE = ActionTypes.PUSH

@@ -1240,6 +1240,10 @@ class Page extends Component {
 }
 ```
 
+<!--
+Advanced: `goto()` can also take `{ instantBack: true }` option.
+-->
+
 If the current location needs to be changed while still staying at the same page (e.g. a checkbox has been ticked and the corresponding URL query parameter must be added), then use `dispatch(pushLocation(location))` or `dispatch(replaceLocation(location))` Redux actions.
 
 ```javascript
