@@ -8,6 +8,7 @@ import Matcher from 'found/lib/Matcher'
 import makeRouteConfig from 'found/lib/makeRouteConfig'
 import getStoreRenderArgs from 'found/lib/getStoreRenderArgs'
 import RedirectException from 'found/lib/RedirectException'
+import HttpError from 'found/lib/HttpError'
 import resolver from 'found/lib/resolver'
 import FoundActionTypes from 'found/lib/ActionTypes'
 
@@ -52,6 +53,18 @@ export function matchRoutes(store) {
 	.then(
 		(renderArgs) => {
 			if (renderArgs.error) {
+				if (renderArgs.error instanceof HttpError) {
+					const status = renderArgs.error.status
+					const routeConfig = renderArgs.router.matcher.routeConfig
+					const route = findRouteByStatus(routeConfig, status) ||
+						findRouteByStatus(routeConfig, 500)
+					if (route) {
+						const path = '/' + trimSlashes(route.path)
+						return {
+							redirect: store.farce.createHref(path)
+						}
+					}
+				}
 				throw renderArgs.error
 			}
 			return {
@@ -167,3 +180,22 @@ export const UPDATE_MATCH = FoundActionTypes.UPDATE_MATCH
 export const RESOLVE_MATCH = FoundActionTypes.RESOLVE_MATCH
 
 export const _RESOLVE_MATCH = '@@react-website/RESOLVE_MATCH'
+
+/**
+ * Finds a first-level route with a given `status`.
+ * @param  {object[]} routeConfig - `found` `routeConfig`
+ * @param  {number} status - HTTP Status
+ * @return {object}
+ */
+function findRouteByStatus(routeConfig, status) {
+	for (const route of routeConfig[0].children) {
+		if (route.status === status) {
+			return route
+		}
+	}
+}
+
+// Trim trailing slash.
+function trimSlashes(path) {
+	return path.replace(/^\//, '').replace(/\/$/, '')
+}

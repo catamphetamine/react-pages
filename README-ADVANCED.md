@@ -432,6 +432,8 @@ const { status, content, contentType } = renderError(error)
   }
 
   // (optional)
+  // Prepend "base path" to all URLs.
+  // Can be used, for example, for hosting a website on GitHub pages.
   basename: '/path'
 
   // (optional)
