@@ -49,12 +49,21 @@ export default function _createStore(settings, data, createHistoryProtocol, http
 	const getConvertedRoutes = () => convertedRoutes
 
 	// Add `@preload()` data hook.
-	routes = React.cloneElement(routes, {
-		getData: createGetDataForPreload(codeSplit, server, onError, getLocale, getConvertedRoutes)
-	})
-
-	// Convert `found` `<Route/>`s to a JSON structure.
-	routes = convertRoutes(routes)
+	const getData = createGetDataForPreload(codeSplit, server, onError, getLocale, getConvertedRoutes)
+	if (Array.isArray(routes)) {
+		if (routes[0].getData) {
+			throw new Error('[react-website] `getData` found on the root route')
+		}
+		routes[0].getData = getData
+	} else {
+		// Set `getData`.
+		if (routes.props.getData) {
+			throw new Error('[react-website] `getData` found on the root route')
+		}
+		routes = React.cloneElement(routes, { getData })
+		// Convert `found` `<Route/>`s to a JSON structure.
+		routes = convertRoutes(routes)
+	}
 	convertedRoutes = routes
 
 	// Redux middleware.
