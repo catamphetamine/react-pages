@@ -43,6 +43,7 @@ export default function routerMiddleware(
 		return next => event =>
 		{
 			// Skip the first pass of the initial client-side render.
+			// for the case when server-side rendering is used.
 			if (window._react_website_initial_prerender) {
 				return next(event)
 			}
@@ -111,7 +112,13 @@ export default function routerMiddleware(
 					// }
 
 					// Show page loading indicator.
-					dispatch({ type: PRELOAD_STARTED })
+					if (!isServerSidePreloaded() && !window._react_website_router_rendered) {
+						// Don't show page loading indicator
+						// because it's already being shown manually.
+					} else {
+						// Show page loading indicator.
+						dispatch({ type: PRELOAD_STARTED })
+					}
 
 					previousLocation = location
 					previousRouteIndices = routeIndices

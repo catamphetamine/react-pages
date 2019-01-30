@@ -10,6 +10,11 @@ In that case rendering service won't perform any routing or preloading.
 It would just return the base HTML structure without any route-specific stuff.
 -->
 
+3.1.7 / 30.01.2019
+==================
+
+  * Fixed `showPreloadInitially` for client-side-only rendering case.
+
 3.1.1 / 19.01.2019
 ==================
 

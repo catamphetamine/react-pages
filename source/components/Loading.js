@@ -6,13 +6,7 @@ import classNames from 'classnames'
 import LoadingIndicator from './LoadingIndicator'
 import FadeInOut from './FadeInOut'
 
-@connect(({ preload }) =>
-({
-	initial   : preload.initial,
-	pending   : preload.pending,
-	immediate : preload.immediate
-}))
-export default class Loading extends React.Component
+export class Loading extends React.Component
 {
 	static propTypes =
 	{
@@ -56,3 +50,9 @@ export default class Loading extends React.Component
 		)
 	}
 }
+
+export default connect(({ preload }) => ({
+	initial   : preload.initial,
+	pending   : preload.pending,
+	immediate : preload.immediate
+}))(Loading)

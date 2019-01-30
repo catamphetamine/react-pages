@@ -1,6 +1,3 @@
-import React from 'react'
-import ReactDOM from 'react-dom'
-
 import clientSideRender from '../../client/render'
 import { isServerSidePreloaded } from '../../client/flags'
 import render from './render'
@@ -12,6 +9,7 @@ import { getLocationUrl } from '../../location'
 import { convertRoutes } from '../../router'
 import { createHistoryProtocol } from '../../router/client'
 import { redirect, _RESOLVE_MATCH } from '../../router'
+import { showInitialPreload, hideInitialPreload } from './initialPreload'
 
 // This function is what's gonna be called from the project's code on the client-side.
 //
@@ -59,12 +57,20 @@ export default function setUpAndRender(settings, options = {}) {
 	// and therefore it survives page reload.
 	resetInstantBack()
 
+	// `showPreloadInitially` is handled in a special way
+	// in case of client-side-only rendering.
+	const showPreloadInitially = settings.showPreloadInitially
+
 	// The first pass of initial client-side render
 	// is to render the markup which matches server-side one.
 	// The second pass will be to render after resolving `getData`.
 	if (isServerSidePreloaded()) {
 		window._react_website_initial_prerender = true
 		window._react_website_skip_preload = true
+	} else {
+		if (showPreloadInitially) {
+			settings.showPreloadInitially = false
+		}
 	}
 
 	// Create Redux store
@@ -96,6 +102,13 @@ export default function setUpAndRender(settings, options = {}) {
 		onStoreCreated(store)
 	}
 
+	// Render loading indicator in case of client-side-only rendering
+	// because the main application React tree won't be rendered
+	// until `@preload`s finish.
+	if (!isServerSidePreloaded() && showPreloadInitially) {
+		showInitialPreload()
+	}
+
 	// Render the page.
 	// If it's a server-side rendering case then that will be the
 	// first pass, without preloading data, just for `React.hydrate()`.
@@ -115,6 +128,10 @@ export default function setUpAndRender(settings, options = {}) {
 		if (isServerSidePreloaded()) {
 			store.dispatch(redirect(document.location))
 		} else {
+			// Hide the "initial" loading indicator.
+			if (showPreloadInitially) {
+				hideInitialPreload()
+			}
 			// `RESOLVE_MATCH` is not being dispatched
 			// for the first render for some reason.
 			// https://github.com/4Catalyzer/found/issues/202
@@ -132,6 +149,11 @@ export default function setUpAndRender(settings, options = {}) {
 			})
 		}
 		return result
+	}, (error) => {
+		// Hide the "initial" loading indicator.
+		if (!isServerSidePreloaded() && showPreloadInitially) {
+			hideInitialPreload()
+		}
 	})
 }
 

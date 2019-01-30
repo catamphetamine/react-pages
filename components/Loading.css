@@ -47,6 +47,19 @@
 	transition-delay : 0ms;
 }
 
+.react-website__loading--initial
+{
+	background-color : transparent;
+}
+
+.react-website__loading--initial .react-website__loading-spinner
+{
+	/* The current implementation for the spinner is 4 stacked arcs,
+	   so not using transparency here. */
+	/*color : rgba(0, 0, 0, 0.25);*/
+	color : #cfcfcf;
+}
+
 /*
 .react-website__loading--shown .rrui__activity-indicator-circle-container,
 .react-website__loading--shown .rrui__activity-indicator-circle
