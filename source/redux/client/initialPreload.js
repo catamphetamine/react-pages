@@ -31,6 +31,6 @@ export function showInitialPreload() {
 
 export function hideInitialPreload() {
 	ref.setState({ loading: false }, () => {
-		setTimeout(() => document.body.removeChild(node), 1000)
+		setTimeout(() => document.body.removeChild(node), 160)
 	})
 }
