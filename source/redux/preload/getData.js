@@ -21,6 +21,16 @@ export default function createGetDataForPreload(codeSplit, server, onError, getL
 		}
 		const { location, previousLocation } = getLocations(getState())
 		const isInitialClientSideNavigation = !server && !previousLocation
+		// Prevent executing `@preload()`s on "anchor" link click.
+		// https://github.com/4Catalyzer/found/issues/239
+		if (!isInitialClientSideNavigation) {
+			if (location.origin === previousLocation.origin &&
+				location.pathname === previousLocation.pathname &&
+				location.search === previousLocation.search) {
+				return Promise.resolve()
+			}
+		}
+		// Execute `@preload()`s.
 		return preload(
 			location,
 			isInitialClientSideNavigation ? undefined : previousLocation,
@@ -37,8 +47,8 @@ export default function createGetDataForPreload(codeSplit, server, onError, getL
 			getState
 		)
 		.then(
-			result => result,
-			error => {
+			() => {},
+			(error) => {
 				// Possibly handle the error (for example, redirect to an error page).
 				if (onError) {
 					onError(error, {
