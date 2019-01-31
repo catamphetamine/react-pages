@@ -49,7 +49,7 @@
     "react": ">= 16.0.0",
     "react-dom": ">= 16.0.0",
     "redux": ">= 4.0.0",
-    "react-redux": "*"
+    "react-redux": "^5.1.1"
   },
   "sideEffects": [
     "*.css"
