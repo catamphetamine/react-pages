@@ -1,6 +1,15 @@
 import { eventName, underscoredToCamelCase, DEFAULT_REDUX_EVENT_NAMING } from './naming'
 import { RESULT_ACTION_PROPERTY, ERROR_ACTION_PROPERTY } from './middleware/asynchronous'
 
+// Sometimes modules for one project are imported from another project directory.
+// For example, Redux actions from one project may be imported into another project.
+// In such cases `Counter` is not enough because Redux event names would collide
+// because actions from the first project use different `node_modules` and therefore
+// use different `react-website` modules having their own `Counter`.
+// In such cases it's mandatory to pass Redux event name to `.action()` and `.simpleAction()`.
+// Otherwise there will be Redux event name collisions.
+// Importing packages from two different `node_modules` is not a good practice.
+
 // Deprecated. Use `new ReduxModule()` instead.
 export function createReduxModule(namespace, settings)
 {
