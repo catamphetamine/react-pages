@@ -12,11 +12,12 @@ export default class HyperLink extends Component
 
 	onClick = (event) => {
 		const { instantBack, onClick } = this.props
-
 		if (onClick) {
 			onClick(event)
 		}
-
+		if (event.defaultPrevented) {
+			return
+		}
 		markImmediateNavigationAsInstantBack(instantBack)
 	}
 
