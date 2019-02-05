@@ -159,9 +159,9 @@ export function goBack() {
 	return Actions.go(-1)
 }
 
-export function pushLocation(location) {
+export function pushLocation(location, options) {
 	skipPreload()
-	return goto(location)
+	return goto(location, options)
 }
 
 export function replaceLocation(location) {
