@@ -6,7 +6,7 @@ import normalizeSettings from '../normalize'
 import createStore from '../store'
 import { resetInstantBack } from './instantBack'
 import { createHistoryProtocol } from '../../router/client'
-import { redirect, _RESOLVE_MATCH } from '../../router'
+import { redirect, _RESOLVE_MATCH, pushLocation, RedirectException } from '../../router'
 import { showInitialPreload, hideInitialPreload } from './initialPreload'
 
 // This function is what's gonna be called from the project's code on the client-side.
@@ -65,18 +65,22 @@ export default function setUpAndRender(settings, options = {}) {
 	if (isServerSidePreloaded()) {
 		window._react_website_initial_prerender = true
 		window._react_website_skip_preload = true
-	} else {
-		if (showPreloadInitially) {
-			settings.showPreloadInitially = false
-		}
 	}
 
 	// Create Redux store
-	store = createStore(settings, getState(true), createHistoryProtocol, httpClient, {
-		devtools,
-		stats,
-		onNavigate
-	})
+	store = createStore(
+		{
+			...settings,
+			showPreloadInitially: !isServerSidePreloaded() && showPreloadInitially ? false : showPreloadInitially
+		},
+		getState(true),
+		createHistoryProtocol,
+		httpClient, {
+			devtools,
+			stats,
+			onNavigate
+		}
+	)
 
 	// `onStoreCreated(store)` is called here.
 	//
@@ -152,6 +156,21 @@ export default function setUpAndRender(settings, options = {}) {
 		if (!isServerSidePreloaded() && showPreloadInitially) {
 			hideInitialPreload()
 		}
+		// Catches redirects from `@preload()`s,
+		// redirects from `onError` and from `<Redirect/>` routes.
+		if (error instanceof RedirectException) {
+			// Change current location.
+			store.dispatch(pushLocation(error.location))
+			// Reset all `react-website` flags.
+			for (const key in window) {
+				if (key.indexOf('_react_website_') === 0 && key !== '_react_website_locales') {
+					window[key] = undefined
+				}
+			}
+			// Re-render.
+			return setUpAndRender(settings, options)
+		}
+		throw error
 	})
 }
 

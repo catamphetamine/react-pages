@@ -7,7 +7,8 @@ import {
 	getMatchedRoutesParams,
 	getRouteParams,
 	getCurrentlyMatchedLocation,
-	getPreviouslyMatchedLocation
+	getPreviouslyMatchedLocation,
+	RedirectException
 } from '../../router'
 
 import preload from './preload'
@@ -15,19 +16,25 @@ import preload from './preload'
 export default function createGetDataForPreload(codeSplit, server, onError, getLocale, getConvertedRoutes) {
 	return function({ params, context: { dispatch, getState } }) {
 		if (!server) {
-			if (window._react_website_skip_preload || window._react_website_hot_reload) {
-				return Promise.resolve()
+			if (window._react_website_skip_preload ||
+				window._react_website_skip_preload_update_location ||
+				window._react_website_hot_reload) {
+				// Reset "skip @preload()" flag for `pushLocation()` and `replaceLocation()`.
+				if (window._react_website_skip_preload_update_location) {
+					window._react_website_skip_preload_update_location = false;
+				}
+				return
 			}
 		}
 		const { location, previousLocation } = getLocations(getState())
 		const isInitialClientSideNavigation = !server && !previousLocation
 		// Prevent executing `@preload()`s on "anchor" link click.
 		// https://github.com/4Catalyzer/found/issues/239
-		if (!isInitialClientSideNavigation) {
+		if (!server && !isInitialClientSideNavigation) {
 			if (location.origin === previousLocation.origin &&
 				location.pathname === previousLocation.pathname &&
 				location.search === previousLocation.search) {
-				return Promise.resolve()
+				return
 			}
 		}
 		// Execute `@preload()`s.
@@ -50,18 +57,22 @@ export default function createGetDataForPreload(codeSplit, server, onError, getL
 			() => {},
 			(error) => {
 				// Possibly handle the error (for example, redirect to an error page).
-				if (onError) {
-					onError(error, {
-						path : location.pathname,
-						url  : getLocationUrl(location),
-						// Using `redirect` instead of `goto` here
-						// so that the user can't go "Back" to the page being preloaded
-						// in case of an error because it would be in inconsistent state
-						// due to `@preload()` being interrupted.
-						redirect : to => dispatch(redirect(to)),
-						getState,
-						server
-					})
+				if (!(error instanceof RedirectException)) {
+					if (onError) {
+						onError(error, {
+							path : location.pathname,
+							url  : getLocationUrl(location),
+							// Using `redirect` instead of `goto` here
+							// so that the user can't go "Back" to the page being preloaded
+							// in case of an error because it would be in inconsistent state
+							// due to `@preload()` being interrupted.
+							redirect(to) {
+								throw new RedirectException(to)
+							},
+							getState,
+							server
+						})
+					}
 				}
 				throw error
 			}

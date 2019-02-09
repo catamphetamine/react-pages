@@ -19,10 +19,8 @@ import {
 
 export default function _createStore(settings, data, createHistoryProtocol, httpClient, options)
 {
-	let
-	{
+	const {
 		reducers,
-		routes,
 		reduxMiddleware,
 		reduxStoreEnhancers,
 		reduxEventNaming,
@@ -32,17 +30,18 @@ export default function _createStore(settings, data, createHistoryProtocol, http
 		codeSplit,
 		meta,
 		showPreloadInitially
-	}
-	= settings
+	} = settings
 
-	const
-	{
+	let {
+		routes
+	} = settings
+
+	const {
 		server,
 		devtools,
 		stats,
 		onNavigate
-	}
-	= options
+	} = options
 
 	// `routes` will be converted.
 	let convertedRoutes
@@ -51,15 +50,19 @@ export default function _createStore(settings, data, createHistoryProtocol, http
 	// Add `@preload()` data hook.
 	const getData = createGetDataForPreload(codeSplit, server, onError, getLocale, getConvertedRoutes)
 	if (Array.isArray(routes)) {
-		if (routes[0].getData) {
-			throw new Error('[react-website] `getData` found on the root route')
-		}
+		// If there's an error on client side in `setUpAndRender()` then it's called again.
+		// And in that case `getData` is set and this error will be thrown.
+		// if (routes[0].getData) {
+		// 	throw new Error('[react-website] `getData` found on the root route')
+		// }
 		routes[0].getData = getData
 	} else {
 		// Set `getData`.
-		if (routes.props.getData) {
-			throw new Error('[react-website] `getData` found on the root route')
-		}
+		// If there's an error on client side in `setUpAndRender()` then it's called again.
+		// And in that case `getData` is set and this error will be thrown.
+		// if (routes.props.getData) {
+		// 	throw new Error('[react-website] `getData` found on the root route')
+		// }
 		routes = React.cloneElement(routes, { getData })
 		// Convert `found` `<Route/>`s to a JSON structure.
 		routes = convertRoutes(routes)
@@ -71,11 +74,9 @@ export default function _createStore(settings, data, createHistoryProtocol, http
 	const middleware = reduxMiddleware ? reduxMiddleware() : []
 
 	// Built-in middleware.
-	middleware.push
-	(
+	middleware.push(
 		// Asynchronous middleware (e.g. for HTTP Ajax calls).
-		asynchronousMiddleware
-		(
+		asynchronousMiddleware(
 			httpClient,
 			reduxEventNaming,
 			server,

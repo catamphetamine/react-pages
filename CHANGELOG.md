@@ -10,6 +10,15 @@ In that case rendering service won't perform any routing or preloading.
 It would just return the base HTML structure without any route-specific stuff.
 -->
 
+3.1.11 / 08.02.2019
+===================
+
+  * (unlikely a breaking change) Removed `initialize` parameter function which was used previously to set up Redux state before rendering a page. Now if `initialize` parameter function is passed then an error is thrown at startup. I suppose any `initialize` can be replaced with a root-level `@preload()`.
+
+  * (unlikely a breaking change) `dispatch(goto())` and `dispatch(redirect())` now throw a special "redirect exception". The only difference is that `dispatch(goto())` and `dispatch(redirect())` will always `return` and any code below them won't be executed.
+
+  * Removed a duplicate `onError` call on server side.
+
 3.1.7 / 30.01.2019
 ==================
 

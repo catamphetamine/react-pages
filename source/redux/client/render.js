@@ -13,14 +13,7 @@ import { isServerSidePreloaded } from '../../client/flags'
 //
 export default function render({ store })
 {
-	return matchRoutes(store).then(({ redirect, renderArgs }) =>
-	{
-		// In case of a `react-router` `<Redirect/>`
-		if (redirect) {
-			window.location = getLocationUrl(redirect)
-			throw new Error(`[react-website] (Not an error) Redirecting to ${getLocationUrl(redirect)}`)
-		}
-
+	return matchRoutes(store).then((renderArgs) => {
 		// The first pass of initial client-side render
 		// was to render the markup which matches server-side one.
 		// The second pass will be to render after resolving `getData`.

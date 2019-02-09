@@ -2,7 +2,6 @@ import UglifyJS from 'uglify-js'
 
 import { ISO_date_regexp } from '../../parseDates'
 import { safeJsonStringify } from '../../server/html'
-import render from './render'
 import createStore from '../store'
 import createHttpClient from '../HttpClient'
 import { createHistoryProtocol } from '../../router/server'
@@ -10,10 +9,8 @@ import { createHistoryProtocol } from '../../router/server'
 export async function initialize(settings, {
 	proxy,
 	cookies,
-	initialize,
 	url
-})
-{
+}) {
 	// Redux store
 	let store
 
@@ -23,18 +20,10 @@ export async function initialize(settings, {
 		cookies
 	})
 
-	// Create Redux store
+	// Initial Redux state.
+	const initialState = {}
 
-	// Initial store data
-	let initialState = {}
-
-	// Supports custom preloading before the page is rendered
-	// (for example to authenticate the user and retrieve user selected language)
-	if (initialize) {
-		initialState = await initialize(httpClient)
-	}
-
-	// Create Redux store
+	// Create Redux store.
 	store = createStore(settings, initialState, () => createHistoryProtocol(url), httpClient, {
 		server : true
 	})

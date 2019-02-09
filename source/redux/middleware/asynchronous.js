@@ -140,9 +140,6 @@ export default function asynchronousMiddleware(
 						// The Promise returned from `dispatch()` call
 						// is rejected with this error.
 
-						// Only checks `http` calls which are not part of `@preload()`
-						// so that they don't get "error handled" twice
-						// (doesn't affect anything, just a minor optimization).
 						// Also only checks `http` calls on client side
 						// because on server side `http` calls can be
 						// either part of `@preload` of part of `initialize`
@@ -150,7 +147,7 @@ export default function asynchronousMiddleware(
 						// On the client side though, an `http` call
 						// may be performed via some user input,
 						// so it needs this separate case "error handler".
-						if (!server && onError && !action.preloading) {
+						if (!server && onError) {
 
 							const location = getState().location
 

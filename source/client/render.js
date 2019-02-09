@@ -3,8 +3,6 @@ import ReactDOM from 'react-dom'
 
 import { isServerSidePreloaded, isServerSideRendered } from './flags'
 
-let firstRender = true
-
 // Performs client-side React application rendering.
 // Takes `render()` function which renders the actual page.
 // Then this rendered page is rendered in a `container`
@@ -15,6 +13,7 @@ let firstRender = true
 // (e.g. Redux + React-router, React-router).
 //
 export default function render({ render, renderParameters = {}, container }) {
+	let firstRender = true
 	// Renders current React page (inside a container).
 	// Returns a Promise for an object holding
 	// `render` function for development mode hot reload,

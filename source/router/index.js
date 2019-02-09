@@ -2,12 +2,12 @@ export { default as foundReducer } from 'found/lib/foundReducer'
 export { default as Route } from 'found/lib/Route'
 export { default as Redirect } from 'found/lib/Redirect'
 export { default as withRouter } from 'found/lib/withRouter'
+export { default as RedirectException } from 'found/lib/RedirectException'
 
 import createMatchEnhancer from 'found/lib/createMatchEnhancer'
 import Matcher from 'found/lib/Matcher'
 import makeRouteConfig from 'found/lib/makeRouteConfig'
 import getStoreRenderArgs from 'found/lib/getStoreRenderArgs'
-import RedirectException from 'found/lib/RedirectException'
 import HttpError from 'found/lib/HttpError'
 import resolver from 'found/lib/resolver'
 import FoundActionTypes from 'found/lib/ActionTypes'
@@ -50,40 +50,15 @@ export function matchRoutes(store) {
 			getState: store.getState
 		}
 	})
-	.then(
-		(renderArgs) => {
-			if (renderArgs.error) {
-				if (renderArgs.error instanceof HttpError) {
-					const status = renderArgs.error.status
-					const routeConfig = renderArgs.router.matcher.routeConfig
-					const route = findRouteByStatus(routeConfig, status) ||
-						findRouteByStatus(routeConfig, 500)
-					if (route) {
-						const path = '/' + trimSlashes(route.path)
-						return {
-							redirect: store.farce.createHref(path)
-						}
-					}
-				}
-				throw renderArgs.error
-			}
-			return {
-				renderArgs
-			}
-		},
-		(error) => {
-			if (error instanceof RedirectException) {
-				return {
-					redirect: store.farce.createHref(error.location)
-				}
-			}
-			throw error
+	.then((renderArgs) => {
+		if (renderArgs.error) {
+			throw renderArgs.error
 		}
-	)
+		return renderArgs
+	})
 }
 
-export function getRoutesByPath(routeIndices, routes)
-{
+export function getRoutesByPath(routeIndices, routes) {
 	const matchedRoutes = []
 	for (const i of routeIndices) {
 		matchedRoutes.push(routes[i])
@@ -92,8 +67,7 @@ export function getRoutesByPath(routeIndices, routes)
 	return matchedRoutes
 }
 
-export function getMatchedRoutes(state, routes)
-{
+export function getMatchedRoutes(state, routes) {
 	return getRoutesByPath(state.found.match.routeIndices, routes)
 }
 
@@ -160,42 +134,16 @@ export function goBack() {
 }
 
 export function pushLocation(location, options) {
-	skipPreload()
+	window._react_website_skip_preload_update_location = true
 	return goto(location, options)
 }
 
 export function replaceLocation(location) {
-	skipPreload()
+	window._react_website_skip_preload_update_location = true
 	return redirect(location)
-}
-
-function skipPreload() {
-	if (typeof window !== 'undefined') {
-		window._react_website_skip_preload = true
-		setTimeout(() => window._react_website_skip_preload = false)
-	}
 }
 
 export const UPDATE_MATCH = FoundActionTypes.UPDATE_MATCH
 export const RESOLVE_MATCH = FoundActionTypes.RESOLVE_MATCH
 
 export const _RESOLVE_MATCH = '@@react-website/RESOLVE_MATCH'
-
-/**
- * Finds a first-level route with a given `status`.
- * @param  {object[]} routeConfig - `found` `routeConfig`
- * @param  {number} status - HTTP Status
- * @return {object}
- */
-function findRouteByStatus(routeConfig, status) {
-	for (const route of routeConfig[0].children) {
-		if (route.status === status) {
-			return route
-		}
-	}
-}
-
-// Trim trailing slash.
-function trimSlashes(path) {
-	return path.replace(/^\//, '').replace(/\/$/, '')
-}

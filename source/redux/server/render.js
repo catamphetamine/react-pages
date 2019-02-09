@@ -2,69 +2,59 @@ import React from 'react'
 
 import timer from '../../timer'
 import { mergeMeta, getComponentsMeta, getCodeSplitMeta } from '../../meta/meta'
-import { matchRoutes } from '../../router'
+import { matchRoutes, RedirectException } from '../../router'
 import { createRouterElement } from '../../router/server'
 
 // Returns a Promise resolving to { status, content, redirect }.
 //
 export default async function renderOnServer({
 	store,
-	routes,
+	// routes,
 	codeSplit,
 	defaultMeta
 }) {
 	// Routing only takes a couple of milliseconds
 	// const routingTimer = timer()
 
-	// Perform routing for this URL
+	// Profiling
+	const time = {}
+
+	const preloadTimer = timer()
+
+	let renderArgs
 	try {
-		// Profiling
-		const time = {}
-
-		const preloadTimer = timer()
-
-		const { redirect, renderArgs } = await matchRoutes(store)
-
-		// routingTimer()
-
-		// In case of a routing redirect.
-		if (redirect) {
-			return {
-				redirect
-			}
-		}
-
-		time.preload = preloadTimer()
-
-		// Gather `<title/>` and `<meta/>` tags for this route path
-		const { routes, elements } = renderArgs
-
-		// Get `<meta/>` for the route.
-		let meta = codeSplit ? getCodeSplitMeta(routes, store.getState()) : getComponentsMeta(elements.map(_ => _.type), store.getState())
-		meta = mergeMeta(meta)
-		meta = { ...defaultMeta, ...meta }
-
-		// Return HTTP status code and the rendered page
-		return {
-			// Concatenated `react-router` route string.
-			// E.g. "/user/:user_id/post/:post_id"
-			route   : getRoutePath(routes),
-			status  : getHttpResponseStatusCodeForTheRoute(routes),
-			content : createRouterElement(renderArgs),
-			meta,
-			containerProps : { store },
-			time
-		}
+		renderArgs = await matchRoutes(store)
 	} catch (error) {
-		// If an HTTP redirect is required, then abort all further actions.
-		// That's a hacky way to implement redirects but it seems to work.
-		if (error._redirect) {
+		// Catches redirects from `@preload()`s,
+		// redirects from `onError` and from `<Redirect/>` routes.
+		if (error instanceof RedirectException) {
 			return {
-				redirect: error._redirect
+				redirect: error.location
 			}
 		}
-		// Otherwise, throw this error up the call stack.
 		throw error
+	}
+
+	time.preload = preloadTimer()
+
+	// Gather `<title/>` and `<meta/>` tags for this route path
+	const { routes, elements } = renderArgs
+
+	// Get `<meta/>` for the route.
+	let meta = codeSplit ? getCodeSplitMeta(routes, store.getState()) : getComponentsMeta(elements.map(_ => _.type), store.getState())
+	meta = mergeMeta(meta)
+	meta = { ...defaultMeta, ...meta }
+
+	// Return HTTP status code and the rendered page
+	return {
+		// Concatenated `react-router` route string.
+		// E.g. "/user/:user_id/post/:post_id"
+		route   : getRoutePath(routes),
+		status  : getHttpResponseStatusCodeForTheRoute(routes),
+		content : createRouterElement(renderArgs),
+		meta,
+		containerProps : { store },
+		time
 	}
 }
 

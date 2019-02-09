@@ -1,12 +1,11 @@
 import isEqual from 'lodash/isEqual'
 
-import throwRedirectError from '../../serverRedirect'
-
 import {
 	redirect,
 	goto,
 	REDIRECT_ACTION_TYPE,
-	GOTO_ACTION_TYPE
+	GOTO_ACTION_TYPE,
+	RedirectException
 } from '../../router'
 
 import { isInstantTransition } from '../client/instantBack'
@@ -53,7 +52,7 @@ export default function _preload(
 		// If on the client side, then store the current pending navigation,
 		// so that it can be cancelled when a new navigation process takes place
 		// before the current navigation process finishes.
-
+		//
 		// If there's preceeding navigation pending,
 		// then cancel that previous navigation.
 		if (previousPreloading && previousPreloading.pending && !previousPreloading.cancelled) {
@@ -137,10 +136,8 @@ export default function _preload(
 	preloading.pending = true
 
 	// Preloading process cancellation
-	preloading.cancel = () =>
-	{
+	preloading.cancel = () => {
 		preloading.cancelled = true
-
 		// If `bluebird` is used,
 		// and promise cancellation has been set up,
 		// then cancel the `Promise`.
@@ -155,7 +152,6 @@ export default function _preload(
 		// Navigate to the new page
 		() => {
 			preloading.pending = false
-
 			// If this navigation process was cancelled
 			// before @preload() finished its work,
 			// then don't take any further steps on this cancelled navigation.
@@ -165,8 +161,7 @@ export default function _preload(
 				return false
 			}
 		},
-		(error) =>
-		{
+		(error) => {
 			// If this navigation process was cancelled
 			// before @preload() finished its work,
 			// then don't take any further steps on this cancelled navigation.
@@ -177,17 +172,9 @@ export default function _preload(
 				// Page loading indicator could listen for this event
 				dispatch({ type: PRELOAD_FAILED, error })
 			}
-
-			// If the error was a redirection exception (not a error)
-			// then just pass it up the stack.
-			// (happens only on server side)
-			if (server) {
-				throw error
-			}
-
 			// Update preload status object
 			preloading.pending = false
-
+			// May be a server-side special "redirect" error.
 			throw error
 		}
 	)
@@ -202,26 +189,15 @@ function instrumentDispatch(dispatch, server, preloading) {
 			// In case of navigation from @preload().
 			case REDIRECT_ACTION_TYPE:
 			case GOTO_ACTION_TYPE:
-				if (server) {
-					// `throw`s a special redirection `Error` on server side.
-					throwRedirectError(event.payload)
-				} else {
-					// On client side.
-					// Discard the currently ongoing preloading.
-					if (preloading.cancel) {
-						preloading.cancel()
-					}
+				// Discard the currently ongoing preloading.
+				// (if some kind of a `bluebird` is used)
+				if (preloading.cancel) {
+					preloading.cancel()
 				}
+				throw new RedirectException(event.payload)
 			default:
 				// Proceed normally.
 				return dispatch(event)
-		}
-		if (!server) {
-			// Mark `http` calls so that they don't get "error handled" twice.
-			// (doesn't affect anything, just a minor optimization)
-			if (typeof event.promise === 'function') {
-				event.preloading = true
-			}
 		}
 	}
 }

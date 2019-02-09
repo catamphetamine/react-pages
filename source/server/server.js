@@ -9,6 +9,9 @@ import { getPreferredLocales } from './locale'
 
 export default function server(settings, options)
 {
+	if (options.initialize) {
+		throw new Error('[react-website] "initialize" server-side parameter function was removed. Use a root-level @preload() instead.')
+	}
 	return (options.secure ? https : http).createServer((request, response) => {
 		// Render the page (and handle errors, if any)
 		respondWithPage(request, response, settings, options)
@@ -53,7 +56,6 @@ export async function renderPage(url, headers, settings, options)
 		proxy,
 		assets,
 		authentication,
-		initialize,
 		renderContent,
 		html,
 		stats
@@ -67,7 +69,6 @@ export async function renderPage(url, headers, settings, options)
 		proxy,
 		assets,
 		authentication,
-		initialize,
 		renderContent,
 		html,
 		url,
