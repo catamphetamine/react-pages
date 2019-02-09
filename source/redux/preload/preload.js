@@ -194,6 +194,9 @@ function instrumentDispatch(dispatch, server, preloading) {
 				if (preloading.cancel) {
 					preloading.cancel()
 				}
+				// if (!server && window._react_website_skip_preload_update_location) {
+				// 	console.warn('Looks like you\'re calling `dispatch(pushLocation())` or `dispatch(replaceLocation())` inside `@preload()`. Call them in `@onPageLoaded()` instead.')
+				// }
 				throw new RedirectException(event.payload)
 			default:
 				// Proceed normally.
