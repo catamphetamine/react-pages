@@ -1,6 +1,7 @@
 import { UPDATE_MATCH, RESOLVE_MATCH, _RESOLVE_MATCH, getRoutesByPath, getRoutePath } from '../../router'
 import { getComponentsMeta, mergeMeta, updateMeta, getCodeSplitMeta } from '../../meta/meta'
 import { getLocationUrl } from '../../location'
+import { ON_PAGE_LOADED_METHOD_NAME } from '../client/onPageLoaded'
 
 import {
 	PRELOAD_STARTED,
@@ -17,6 +18,7 @@ import {
 
 import { isServerSidePreloaded } from '../../client/flags'
 
+// Any events listened to here are being dispatched on client side.
 export default function routerMiddleware(
 	routes,
 	codeSplit,
@@ -27,16 +29,6 @@ export default function routerMiddleware(
 	let startedAt
 	let previousLocation
 	let previousRouteIndices
-
-	function updateMetaTags(routeIndices, state) {
-		const routeChain = getRoutesByPath(routeIndices, routes)
-		// Get `<meta/>` for the route.
-		let meta = codeSplit ? getCodeSplitMeta(routeChain, state) : getComponentsMeta(routeChain.map(_ => _.Component), state)
-		meta = mergeMeta(meta)
-		meta = { ...defaultMeta, ...meta }
-		// Update `<meta/>`.
-		updateMeta(meta)
-	}
 
 	return ({ dispatch, getState }) =>
 	{
@@ -105,7 +97,15 @@ export default function routerMiddleware(
 					// // https://github.com/4Catalyzer/found/issues/202
 					// const isFirstRender = !previousLocation
 					// if (isFirstRender) {
-					// 	updateMetaTags(routeIndices, getState())
+					// 	updateMetaTags(
+					// 		routeIndices,
+					// 		getState(),
+					// 		{
+					// 			routes,
+					// 			codeSplit,
+					// 			defaultMeta
+					// 		}
+					// 	)
 					// } else {
 					// 	// Show page loading indicator.
 					// 	dispatch({ type: PRELOAD_STARTED })
@@ -139,7 +139,28 @@ export default function routerMiddleware(
 				case _RESOLVE_MATCH:
 					window._react_website_router_rendered = true
 
-					updateMetaTags(routeIndices, getState())
+					// Call `@onPageLoaded()`.
+					if (!codeSplit) {
+						const routeChain = getRoutesByPath(routeIndices, routes)
+						const pageRoute = routeChain[routeChain.length - 1]
+						// Routes don't have `.Component` property
+						// set when using `codeSplit` feature.
+						const onPageLoaded = pageRoute.Component[ON_PAGE_LOADED_METHOD_NAME]
+						if (onPageLoaded) {
+							onPageLoaded({ dispatch, getState, location })
+						}
+					}
+
+					// Update `<meta/>`.
+					updateMetaTags(
+						routeIndices,
+						getState(),
+						{
+							routes,
+							codeSplit,
+							defaultMeta
+						}
+					)
 
 					// Report preloading time.
 					// This preloading time will be longer then
@@ -177,4 +198,14 @@ export default function routerMiddleware(
 			return next(event)
 		}
 	}
+}
+
+function updateMetaTags(routeIndices, state, { routes, codeSplit, defaultMeta }) {
+	const routeChain = getRoutesByPath(routeIndices, routes)
+	// Get `<meta/>` for the route.
+	let meta = codeSplit ? getCodeSplitMeta(routeChain, state) : getComponentsMeta(routeChain.map(_ => _.Component), state)
+	meta = mergeMeta(meta)
+	meta = { ...defaultMeta, ...meta }
+	// Update `<meta/>`.
+	updateMeta(meta)
 }

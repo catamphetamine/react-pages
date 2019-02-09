@@ -10,6 +10,11 @@ In that case rendering service won't perform any routing or preloading.
 It would just return the base HTML structure without any route-specific stuff.
 -->
 
+3.1.12 / 09.02.2019
+===================
+
+  * Fixed `@onPageLoaded`. `@onPageLoaded` doesn't receive `params` parameter. `@onPageLoaded()` decorator won't work when `codeSplit: true` setting is configured.
+
 3.1.11 / 08.02.2019
 ===================
 
