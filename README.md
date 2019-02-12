@@ -138,7 +138,10 @@ And the `index.html` would look like this:
 <html>
   <head>
     <title>Example</title>
+    <!-- Fix encoding. -->
     <meta charset="utf-8">
+    <!-- Fix document width for mobile devices. -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
   </head>
   <body>
     <script src="/bundle.js"></script>
@@ -190,7 +193,10 @@ module.exports = {
 <html>
   <head>
     <title>Example</title>
+    <!-- Fix encoding. -->
     <meta charset="utf-8">
+    <!-- Fix document width for mobile devices. -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
   </head>
   <body>
     <!-- HtmlWebpackPlugin will insert a <script> tag here. -->
