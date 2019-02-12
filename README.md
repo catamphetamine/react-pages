@@ -138,6 +138,7 @@ And the `index.html` would look like this:
 <html>
   <head>
     <title>Example</title>
+    <meta charset="utf-8">
   </head>
   <body>
     <script src="/bundle.js"></script>
@@ -150,6 +151,55 @@ Where `bundle.js` is the `./src/index.js` file built with Webpack (or you could 
 Now, `index.html` and `bundle.js` files must be served over HTTP(S).
 
 If you're using Webpack then add [`HtmlWebpackPlugin`](https://webpack.js.org/plugins/html-webpack-plugin/) to generate `index.html`, and run [`webpack-dev-server`](https://webpack.js.org/configuration/dev-server/) with [`historyApiFallback`](https://webpack.js.org/configuration/dev-server/#devserver-historyapifallback) to serve the generated `index.html` and `bundle.js` files over HTTP on `localhost:8080`.
+
+<details>
+<summary>See <code>HtmlWebpackPlugin</code> configuration example</summary>
+
+#### webpack.config.js
+
+```js
+const HtmlWebpackPlugin = require('html-webpack-plugin')
+
+const buildOutputPath = '...'
+const devServerPort = 8080 // Any port number.
+
+module.exports = {
+  output: {
+    path: buildOutputPath,
+    publicPath: `http://localhost:${devServerPort}`,
+    ...
+  },
+  ...,
+  plugins: [
+    new HtmlWebpackPlugin({
+      template: 'src/index.html' // Path to `index.html` file.
+    }),
+    ...
+  ],
+  devServer: {
+    port: devServerPort,
+    contentBase: buildOutputPath,
+    historyApiFallback : true
+  }
+}
+```
+
+#### src/index.html
+
+```html
+<html>
+  <head>
+    <title>Example</title>
+    <meta charset="utf-8">
+  </head>
+  <body>
+    <!-- HtmlWebpackPlugin will insert a <script> tag here. -->
+  </body>
+</html>
+```
+</details>
+
+####
 
 If you're using [Parcel](https://parceljs.org/) then it's much simpler than Webpack: see the [basic example project](https://github.com/catamphetamine/react-website-basic-example) for the setup required in order to generate and serve `index.html` and `bundle.js` files over HTTP on `localhost:1234`.
 
@@ -568,6 +618,7 @@ redux.action(id => http => http.get(`/items/${id}`), 'item')
 
 and in this case `redux` will autogenerate the namespace and the action name, something like `REACT_WEBSITE_12345` and `REACT_WEBSITE_ACTION_12345`.
 
+<!--
 <details>
 <summary>
   There's a single rare use-case though when Redux action name autogeneration doesn't work.
@@ -579,6 +630,7 @@ Sometimes modules for one project are imported from another project, and both th
 </details>
 
 ####
+-->
 
 <details>
 <summary>
