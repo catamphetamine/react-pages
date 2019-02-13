@@ -1,5 +1,4 @@
-const get = () => window._react_website_instant_back_chain || []
-const set = (chain) => window._react_website_instant_back_chain = chain
+let instantBackChain = []
 
 /**
  * Is called when a `<Link/>` with `instantBack` property set is clicked.
@@ -27,7 +26,7 @@ export function addInstantBack(
 	previousLocationRouteComponents
 )
 {
-	let chain = get()
+	let chain = instantBackChain
 
 	// If there is already an "instant" transition in the chain
 	// then insert this transition into the chain
@@ -83,7 +82,7 @@ export function addInstantBack(
 	})
 
 	// Save the chain.
-	set(chain)
+	instantBackChain = chain
 }
 
 /**
@@ -96,14 +95,14 @@ export function addInstantBack(
  */
 export function isInstantTransition(fromLocation, toLocation)
 {
-	return indexOfByKey(get(), getLocationKey(fromLocation)) >= 0 &&
-		indexOfByKey(get(), getLocationKey(toLocation)) >= 0
+	return indexOfByKey(instantBackChain, getLocationKey(fromLocation)) >= 0 &&
+		indexOfByKey(instantBackChain, getLocationKey(toLocation)) >= 0
 }
 
 /**
  * Clears any "instant back" history.
  */
-export const resetInstantBack = () => set()
+export const resetInstantBack = () => instantBackChain = []
 
 /**
  * Each history `location` has a randomly generated `key`.
@@ -164,8 +163,19 @@ export function setInstantNavigationFlag(value) {
 	}
 }
 
+/**
+ * This function is also called with `false`
+ * in order to set the flag to `false`.
+ * Theoretically that might make sense in case of
+ * two immediately consequtive `goto()` calls or something.
+ * Though it's not a sane use case and may be considered invalid.
+ * @param  {boolean} [instantBack]
+ * @return
+ */
 export function markImmediateNavigationAsInstantBack(instantBack) {
-	window._react_website_instant_back = instantBack
-	// Is reset in `./redux/middleware/router.js`
-	setTimeout(() => window._react_website_instant_back = false, 0)
+	// Is being read in `./redux/middleware/router.js`
+	window._react_website_instant_back_navigation = instantBack
+	if (instantBack) {
+		setTimeout(() => window._react_website_instant_back_navigation = false, 0)
+	}
 }

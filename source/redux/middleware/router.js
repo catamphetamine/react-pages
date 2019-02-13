@@ -1,6 +1,6 @@
 import { UPDATE_MATCH, RESOLVE_MATCH, _RESOLVE_MATCH, getRoutesByPath, getRoutePath } from '../../router'
 import { getComponentsMeta, mergeMeta, updateMeta, getCodeSplitMeta } from '../../meta/meta'
-import { getLocationUrl } from '../../location'
+import { getLocationUrl, isAnchorLinkNavigation } from '../../location'
 import { ON_PAGE_LOADED_METHOD_NAME } from '../client/onPageLoaded'
 
 import {
@@ -45,9 +45,20 @@ export default function routerMiddleware(
 
 			switch (event.type) {
 				case UPDATE_MATCH:
+					// A workaround for `found` router bug:
+					// https://github.com/4Catalyzer/found/issues/239
+					// Skip `@preload()` and other stuff for anchor link navigation.
+					if (previousLocation && isAnchorLinkNavigation(previousLocation, location)) {
+						// I guess this workaround won't work with `codeSplit: true`
+						// because it doesn't use the global `getData` preloader.
+						if (!codeSplit) {
+							break
+						}
+					}
+
 					// Store `event.payload` for the future `_UPDATE_MATCH` event.
-					if (!isServerSidePreloaded()) {
-						window._react_website_update_match_payload = event.payload
+					if (!window._react_website_router_rendered && !isServerSidePreloaded()) {
+						window._react_website_update_match_event_payload = event.payload
 					}
 
 					// Measure `@preload()` time.
@@ -69,7 +80,7 @@ export default function routerMiddleware(
 					}
 
 					// Indicates whether an `instantBack` `<Link/>` was clicked.
-					const instantBack = window._react_website_instant_back
+					const instantBack = window._react_website_instant_back_navigation
 
 					// Update instant back navigation chain.
 					if (instantBack) {
@@ -120,8 +131,6 @@ export default function routerMiddleware(
 						dispatch({ type: PRELOAD_STARTED })
 					}
 
-					previousLocation = location
-					previousRouteIndices = routeIndices
 					break
 
 				// `RESOLVE_MATCH` is not being dispatched
@@ -137,7 +146,25 @@ export default function routerMiddleware(
 				// dispatched manually.
 				case RESOLVE_MATCH:
 				case _RESOLVE_MATCH:
-					window._react_website_router_rendered = true
+					// A workaround for `found` router bug:
+					// https://github.com/4Catalyzer/found/issues/239
+					// Skip `@preload()` and other stuff for anchor link navigation.
+					if (previousLocation && isAnchorLinkNavigation(previousLocation, location)) {
+						// I guess this workaround won't work with `codeSplit: true`
+						// because it doesn't use the global `getData` preloader.
+						if (!codeSplit) {
+							break
+						}
+					}
+
+					// `previousLocation` is only used for "instant back" navigation.
+					// Therefore it can be skipped in case of anchor link navigation.
+					previousLocation = location
+					previousRouteIndices = routeIndices
+
+					if (!window._react_website_router_rendered) {
+						window._react_website_router_rendered = true
+					}
 
 					// Call `@onPageLoaded()`.
 					if (!codeSplit) {

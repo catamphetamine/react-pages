@@ -147,7 +147,7 @@ export default function setUpAndRender(settings, options = {}) {
 			// dispatched manually.
 			store.dispatch({
 				type: _RESOLVE_MATCH,
-				payload: window._react_website_update_match_payload
+				payload: window._react_website_update_match_event_payload
 			})
 		}
 		return result

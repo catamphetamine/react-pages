@@ -120,9 +120,7 @@ export function initializeRouter(store) {
 export const redirect = Actions.replace
 
 export const goto = (location, options = {}) => {
-	if (options.instantBack) {
-		markImmediateNavigationAsInstantBack(options.instantBack)
-	}
+	markImmediateNavigationAsInstantBack(options.instantBack)
 	return Actions.push(location)
 }
 

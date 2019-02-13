@@ -62,3 +62,9 @@ export function parseLocation(location)
 
 	return { origin, pathname, search, hash }
 }
+
+export function isAnchorLinkNavigation(fromLocation, toLocation) {
+	return toLocation.origin === fromLocation.origin &&
+		toLocation.pathname === fromLocation.pathname &&
+		toLocation.search === fromLocation.search
+}

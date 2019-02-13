@@ -1,4 +1,4 @@
-import { getLocationUrl } from '../../location'
+import { getLocationUrl, isAnchorLinkNavigation } from '../../location'
 
 import {
 	redirect,
@@ -28,12 +28,11 @@ export default function createGetDataForPreload(codeSplit, server, onError, getL
 		}
 		const { location, previousLocation } = getLocations(getState())
 		const isInitialClientSideNavigation = !server && !previousLocation
-		// Prevent executing `@preload()`s on "anchor" link click.
+		// A workaround for `found` router bug:
 		// https://github.com/4Catalyzer/found/issues/239
+		// Prevent executing `@preload()`s on "anchor" link click.
 		if (!server && !isInitialClientSideNavigation) {
-			if (location.origin === previousLocation.origin &&
-				location.pathname === previousLocation.pathname &&
-				location.search === previousLocation.search) {
+			if (isAnchorLinkNavigation(previousLocation, location)) {
 				return
 			}
 		}
