@@ -38,9 +38,9 @@ export default function createHttpClient(settings, get_store, options = {})
 	{
 		get_access_token = (getCookie, helpers) =>
 		{
-			return settings.authentication.accessToken(getCookie,
-			{
+			return settings.authentication.accessToken({
 				...helpers,
+				getCookie,
 				store: get_store()
 			})
 		}
