@@ -35,8 +35,6 @@ export default async function(settings, {
 	// Else render for pure React.
 	const render = reduxRender
 
-	const initializeTimer = timer()
-
 	// `parameters` are used for `assets` and `html` modifiers.
 	const {
 		cookies: cookiesToSet,
@@ -50,8 +48,6 @@ export default async function(settings, {
 
 	const location = parseLocation(url)
 	const path = location.pathname
-
-	const initializeTime = initializeTimer()
 
 	function generateOuterHtml(meta) {
 		// `html` modifiers
@@ -155,10 +151,7 @@ export default async function(settings, {
 		route,
 		status,
 		content: combineStreams(streams),
-		time: {
-			...time,
-			initialize: initializeTime
-		},
+		time,
 		cookies: cookiesToSet
 	}
 }

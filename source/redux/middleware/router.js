@@ -206,7 +206,7 @@ export default function routerMiddleware(
 							// E.g. "/user/:user_id/post/:post_id"
 							route: getRoutePath(getRoutesByPath(routeIndices, routes)),
 							time: {
-								preload: Date.now() - startedAt
+								preloadAndRender: Date.now() - startedAt
 							}
 						})
 					}
@@ -216,7 +216,7 @@ export default function routerMiddleware(
 
 					// Report preload time in console for debugging.
 					if (Date.now() - startedAt > 30) {
-						console.log(`[react-website] "${location.pathname}" loaded in ${Date.now() - startedAt} ms`)
+						console.log(`[react-website] "${location.pathname}" loaded and rendered in ${Date.now() - startedAt} ms`)
 					}
 
 					break

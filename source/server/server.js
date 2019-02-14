@@ -63,8 +63,6 @@ export async function renderPage(url, headers, settings, options)
 
 	const cookies = headers.cookie ? cookie.parse(headers.cookie) : {}
 
-	const totalTimer = timer()
-
 	let { status, content, redirect, route, time, cookies: cookiesToSet } = await render(settings, {
 		proxy,
 		assets,
@@ -94,10 +92,7 @@ export async function renderPage(url, headers, settings, options)
 		stats({
 			url,
 			route,
-			time: {
-				...time,
-				total: totalTimer()
-			}
+			time
 		})
 	}
 

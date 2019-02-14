@@ -1384,8 +1384,8 @@ For each page being rendered stats are reported if `stats()` parameter is passed
 {
   ...
 
-  stats({ url, route, time: { initialize, preload, total } }) {
-    if (total > 1000) { // in milliseconds
+  stats({ url, route, time: { preload } }) {
+    if (preload > 1000) { // in milliseconds
       db.query('insert into server_side_rendering_stats ...')
     }
   }
@@ -1394,11 +1394,12 @@ For each page being rendered stats are reported if `stats()` parameter is passed
 
 The arguments for the `stats()` function are:
 
- * `url` — the requested URL (without the `protocol://host:port` part)
- * `route` — the route path (e.g. `/user/:userId/post/:postId`)
- * `time.initialize` — server side `initialize()` function execution time (if defined)
- * `time.preload` — page preload time
- * `time.total` — total time spent preloading and rendering the page
+ * `url` — The requested URL (without the `protocol://host:port` part)
+ * `route` — The route path (e.g. `/user/:userId/post/:postId`)
+ * `time.preload` — The time for executing all `@preload()`s.
+ <!--
+ `time.preloadAndRender` — (client side only) The time for executing all `@preload()`s. On client side `@preload()`s not only preload the page, they also perform page rendering when "success" Redux action is dispatched. So it's not just the time to load page data, it's also the time to render the data.
+ -->
 
 Rendering a complex React page (having more than 1000 components) takes about 30ms (as of 2017).
 
