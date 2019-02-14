@@ -148,9 +148,7 @@ export default function asynchronousMiddleware(
 						// may be performed via some user input,
 						// so it needs this separate case "error handler".
 						if (!server && onError) {
-
-							const location = getState().location
-
+							const location = getState().found.resolvedMatch.location
 							// Report the error
 							// (for example, redirect to a login page
 							//  if a JWT "access token" expired)
