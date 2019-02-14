@@ -41,7 +41,7 @@ export default function createHttpClient(settings, get_store, options = {})
 			return settings.authentication.accessToken({
 				...helpers,
 				getCookie,
-				store: get_store()
+				getState: get_store().getState
 			})
 		}
 	}

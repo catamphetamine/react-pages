@@ -57,7 +57,7 @@ It would just return the base HTML structure without any route-specific stuff.
 
 * (breaking change) `http.url()` parameter function renamed to `http.transformURL()`.
 
-* (breaking change) `authentication.accessToken()` parameter function now receives a single `{ getState, path, url, getCookie }` argument instead of the two `(getCookie, { store, path, url })` arguments. The reason is that cookies are no longer relevant because access tokens are stored in most cases in `localStorage`. Also it's just `getState` parameter now instead of the old `store` parameter.
+* (breaking change) `authentication.accessToken()` parameter function now receives a single `{ getState, url, requestedURL, getCookie }` argument instead of the two `(getCookie, { store, path, url })` arguments. The reason is that cookies are no longer relevant because access tokens are stored in most cases in `localStorage`. Also it's just `getState` parameter now instead of the old `store` parameter.
 
 * (breaking change) `http.request` parameter removed for now. If the need for it arises it might be reconsidered.
 
