@@ -107,8 +107,10 @@ export default function setUpAndRender(settings, options = {}) {
 	// Render loading indicator in case of client-side-only rendering
 	// because the main application React tree won't be rendered
 	// until `@preload`s finish.
+	let showingInitialPreload = false
 	if (!isServerSidePreloaded() && showPreloadInitially) {
 		showInitialPreload()
+		showingInitialPreload = true
 	}
 
 	// Render the page.
@@ -131,7 +133,7 @@ export default function setUpAndRender(settings, options = {}) {
 			store.dispatch(redirect(document.location))
 		} else {
 			// Hide the "initial" loading indicator.
-			if (showPreloadInitially) {
+			if (showingInitialPreload) {
 				hideInitialPreload()
 			}
 			// `RESOLVE_MATCH` is not being dispatched
@@ -153,7 +155,7 @@ export default function setUpAndRender(settings, options = {}) {
 		return result
 	}, (error) => {
 		// Hide the "initial" loading indicator.
-		if (!isServerSidePreloaded() && showPreloadInitially) {
+		if (showingInitialPreload) {
 			hideInitialPreload()
 		}
 		// Catches redirects from `@preload()`s,
