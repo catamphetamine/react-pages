@@ -115,8 +115,8 @@ The reducers:
 ```js
 // For those who're unfamiliar with Redux,
 // a reducer is a function `(state, action) => state`.
-export { default as homePage } from './homePageReducer'
-export { default as aboutPage } from './aboutPageReducer'
+export { default as reducer1 } from './reducer1'
+export { default as reducer2 } from './reducer2'
 ...
 ```
 
@@ -215,6 +215,7 @@ The website (`index.html`, `bundle.js`, CSS stylesheets and images, etc) can now
 
 ## Server Side Rendering
 
+<!--
 ### Search engines
 
 Search engine crawlers like Google bot won't wait for a page to make its asynchronous HTTP calls to an API server for data: they would simply abort all **asynchronous** javascript and index the page as is. Don't mistake it for web crawlers not being able to execute javascript — they're [perfectly fine](http://andrewhfarmer.com/react-seo/) with doing that ([watch out though](https://blog.codaxy.com/debugging-googlebot-crawl-errors-for-javascript-applications-5d9134c06ee7) for using the latest javascript language features and always use polyfills for the older browsers since web crawlers may be using those under the hood).
@@ -230,7 +231,7 @@ Another argument in favour of Server-Side Rendering is that even if a website do
 ### Adding server-side rendering
 
 Not everyone needs server-side rendering for their apps. E.g. if search engine indexing is not a priority, or if a website is a "static" one, like a "promosite" or a "personal portfolio" (just build it with a bundler and host it as a bunch of files in a cloud).
-
+-->
 Adding server-side rendering to the setup is quite simple though requiring a Node.js process running which increases hosting costs and maintenance complexity.
 
 In case of server-side rendering `index.html` is being generated on-the-fly by page rendering server for each incoming HTTP request, so the `index.html` file may be deleted as it's of no use now.
