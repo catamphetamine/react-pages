@@ -821,9 +821,34 @@ In order for `http` utility to send an authentication token as part of an HTTP r
 ```js
 {
   authentication: {
-    accessToken({ getState, url, getCookie }) {
-      // It's recommended to check the `url` to make sure that the access token
+    accessToken({ getState, getCookie }) {
+      return localStorage.getItem('accessToken')
+      return getCookie('accessToken')
+      return getState().authentication.accessToken
+    }
+  }
+}
+```
+
+<details>
+<summary>Protecting the access token from being leaked to a 3rd party</summary>
+
+####
+
+```js
+{
+  authentication: {
+    accessToken({ getState, url, requestedURL, getCookie }) {
+      // It's recommended to check the URL to make sure that the access token
       // is not leaked to a third party: only send it to your own servers.
+      //
+      // When supplying `transformURL()` parameter function the `requestedURL`
+      // parameter is the originally requested URL (for example, `/users/123`)
+      // and `url` is the result of calling `transformURL(requestedURL)`.
+      //
+      // When not supplying `transformURL()` parameter function
+      // `requestedURL` and `url` are the same.
+      //
       if (url.indexOf('https://my.api.com/') === 0) {
         return localStorage.getItem('accessToken')
         return getCookie('accessToken')
@@ -833,6 +858,9 @@ In order for `http` utility to send an authentication token as part of an HTTP r
   }
 }
 ```
+</details>
+
+####
 
 <details>
 <summary>Authentication and authorization using access tokens</summary>
