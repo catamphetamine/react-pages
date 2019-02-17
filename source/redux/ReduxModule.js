@@ -75,19 +75,21 @@ export default class ReduxModule
 
 	action(event, action, result, options)
 	{
-		// Autogenerate `event` name.
-		if (typeof event !== 'string')
-		{
+		if (event && typeof event !== 'string') {
 			options = result
 			result = action
 			action = event
+			event = undefined
+		}
+
+		// Autogenerate `event` name.
+		if (!event) {
 			event = generateReduxEventName(counter.next())
 		}
 
 		options = options || {}
 
-		if (typeof action !== 'function')
-		{
+		if (typeof action !== 'function') {
 			throw new Error('[react-website] One must pass an `action()` argument (the second one) to Redux module action creator: `reduxModule(event, action, result, options = {})`.')
 		}
 
@@ -96,14 +98,25 @@ export default class ReduxModule
 
 	simpleAction(event, action, result, options)
 	{
-		if (typeof event === 'string') {
-			options = options || {}
-			options.sync = true
-		} else {
-			result = result || {}
-			result.sync = true
+		if (event && typeof event !== 'string') {
+			options = result
+			result = action
+			action = event
+			event = undefined
 		}
-
+		// `action` argument is currently a useless one:
+		// taking arguments and converting them into an object.
+		// This feature substitutes a missing `action` argument with a passthrough.
+		// Deprecated: remove `action` argument in some future major version.
+		if (action) {
+			if (typeof result !== 'string' && typeof result !== 'function') {
+				options = result
+				result = action
+				action = object => object
+			}
+		}
+		options = options || {}
+		options.sync = true
 		return this.action(event, action, result, options)
 	}
 
@@ -196,27 +209,26 @@ function create_action(event, action, result, options, redux)
 {
 	const namespace = redux.namespace
 
-	const
-	{
+	const {
 		sync,
 		cancelPrevious
-	}
-	= options
+	} = options
 
 	// If `result` is a property name,
 	// then add that property to `connectXxx()`.
-	if (typeof result === 'string')
-	{
+	if (typeof result === 'string') {
 		redux.add_state_properties(result)
 	}
 	// If `result` is an object of property getters,
 	// then add those properties to `connectXxx()`.
-	else if (typeof result === 'object')
-	{
+	else if (typeof result === 'object') {
 		redux.add_state_properties(...Object.keys(result))
 	}
 
-	// Default "on result" handler is a reducer that does nothing
+	// Default "on result" handler is a reducer that does nothing.
+	// Actually, I guess it should throw an error instead.
+	// Deprecated: throw an error in some future major version
+	// instead of using a "no op" reducer.
 	result = result || (state => state)
 
 	// Synchronous action

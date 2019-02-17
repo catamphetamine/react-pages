@@ -10,6 +10,11 @@ In that case rendering service won't perform any routing or preloading.
 It would just return the base HTML structure without any route-specific stuff.
 -->
 
+3.1.18 / 17.02.2019
+===================
+
+  * `ReduxModule.simpleAction()`'s `action` argument is deprecated: it was a "no op" anyway. Instead the reducer receives the action's argument as the second argument (in such case `action` is a "no op" `object => object`).
+
 3.1.12 / 09.02.2019
 ===================
 

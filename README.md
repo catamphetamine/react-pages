@@ -203,6 +203,10 @@ module.exports = {
   </body>
 </html>
 ```
+
+```
+webpack-dev-server --hot --config webpack.config.js
+```
 </details>
 
 ####
@@ -801,9 +805,7 @@ const redux = new ReduxModule('NOTIFICATIONS')
 export const notify = redux.simpleAction(
   // (optional) Redux event name.
   'NOTIFY',
-  // The action.
-  (text) => formatMessage(text),
-  // The Redux state reducer for the action's return value.
+  // The Redux reducer:
   (state, message) => ({ ...state, message }),
   // The Redux reducer above could be also defined as:
   // 'message'
@@ -812,6 +814,10 @@ export const notify = redux.simpleAction(
 // This is the Redux reducer which now
 // handles the actions defined above.
 export default redux.reducer()
+```
+
+```js
+notify('Test')
 ```
 </details>
 
