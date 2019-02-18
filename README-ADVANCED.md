@@ -630,6 +630,9 @@ const { status, content, contentType } = renderError(error)
   // happened to have such binding, so I added this feature.
   // Still this technique cuts down on a lot of redundant "wiring" code.
   //
+  // Don't use `redirect`/`goto` "pre-bound" in such a way
+  // inside `@preload()` because they won't work correctly there.
+  //
   onStoreCreated: (store) => {}
 
   // (optional)
