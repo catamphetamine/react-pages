@@ -35,6 +35,10 @@ export default function normalizeSettings(settings)
 		}
 	}
 
+	if (settings.hot) {
+		settings.container = settings.hot(module)(settings.container)
+	}
+
 	// Default value for `parseDates` is `true`
 	if (settings.parseDates !== false) {
 		settings.parseDates = true

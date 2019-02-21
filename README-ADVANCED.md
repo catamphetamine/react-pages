@@ -278,12 +278,21 @@ const { status, content, contentType } = renderError(error)
   // https://github.com/catamphetamine/react-website/blob/master/README-CODE-SPLITTING.md
   codeSplit: true/false
 
-  // When using `codeSplit` with `getComponent`
+  // When using `@preload()`s in a client-side-only set up
+  // `showPreloadInitially: true` will show a spinner on initial page load.
+  // Also, when using `codeSplit` with `getComponent`
   // `<Route/>` components are loaded after the initial page render.
   // To hide webpage content until all `<Route/>` components
-  // are resolved one may set `showPreloadInitially` to `true`
-  // and use the exported `<Loading/>` component on the website.
+  // are resolved one may set `showPreloadInitially` to `true`.
+  // When setting `showPreloadInitially` to `true` also import the styles:
+  // import 'react-website/components/Loading.css'
+  // import 'react-website/components/LoadingIndicator.css'
   showPreloadInitially: true/false
+
+  // When using `react-hot-loader` one can pass `hot` as a configuration parameter
+  // instead of passing a custom `container` component just for enabling `react-hot-loader`.
+  // import { hot } from 'react-hot-loader'
+  hot: hot,
 
   // (optional)
   // Default `@meta()` (applies to all pages).
