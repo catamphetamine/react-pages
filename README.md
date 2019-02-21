@@ -28,8 +28,10 @@ These are the docs for the latest version `3.x`. For version `2.x` (legacy proje
 First, install Redux:
 
 ```bash
-$ npm install redux react-redux --save
+$ npm install redux react-redux@5 --save
 ```
+
+> Note: `react-redux@6` is incompatible with `found@0.3` and won't work [#69](https://github.com/catamphetamine/react-website/issues/69)
 
 Then, install `react-website`:
 
