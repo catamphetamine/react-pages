@@ -1238,6 +1238,7 @@ import { meta } from 'react-website'
   description: 'Muscles',
 
   // `<meta property="og:image" .../>`
+  // https://iamturns.com/open-graph-image-size/
   image: 'https://cdn.google.com/logo.png',
 
   // Objects are expanded.
