@@ -9,7 +9,7 @@
 
 	background-color : rgba(0, 0, 0, 0.08);
 
-	z-index : 0;
+	z-index : -1;
 	opacity : 0;
 
 	transition : background-color 0ms linear 160ms, opacity 160ms ease-out, z-index 160ms step-end;
