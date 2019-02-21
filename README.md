@@ -213,6 +213,8 @@ webpack-dev-server --hot --config webpack.config.js
 
 ####
 
+See the [Webpack example project](https://github.com/catamphetamine/react-website-webpack-example).
+
 If you're using [Parcel](https://parceljs.org/) then it's much simpler than Webpack: see the [basic example project](https://github.com/catamphetamine/react-website-basic-example) for the setup required in order to generate and serve `index.html` and `bundle.js` files over HTTP on `localhost:1234`.
 
 So now the website should be fully working.
