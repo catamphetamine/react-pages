@@ -10,6 +10,11 @@ In that case rendering service won't perform any routing or preloading.
 It would just return the base HTML structure without any route-specific stuff.
 -->
 
+3.1.23 / 28.02.2019
+===================
+
+  * Added the third `{ dispatch, getState }` argument to `onNavigate()`.
+
 3.1.18 / 17.02.2019
 ===================
 

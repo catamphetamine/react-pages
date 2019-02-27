@@ -186,7 +186,7 @@ export default function routerMiddleware(
 					)
 
 					if (onNavigate) {
-						onNavigate(getLocationUrl(location), location)
+						onNavigate(getLocationUrl(location), location, { dispatch, getState })
 					}
 
 					// Report preloading time.
