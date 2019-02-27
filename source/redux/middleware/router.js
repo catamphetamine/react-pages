@@ -75,10 +75,6 @@ export default function routerMiddleware(
 					// Set the flag for `wasInstantNavigation()`.
 					setInstantNavigationFlag(_isInstantTransition)
 
-					if (onNavigate) {
-						onNavigate(getLocationUrl(location), location)
-					}
-
 					// Indicates whether an `instantBack` `<Link/>` was clicked.
 					const instantBack = window._react_website_instant_back_navigation
 
@@ -188,6 +184,10 @@ export default function routerMiddleware(
 							defaultMeta
 						}
 					)
+
+					if (onNavigate) {
+						onNavigate(getLocationUrl(location), location)
+					}
 
 					// Report preloading time.
 					// This preloading time will be longer then
