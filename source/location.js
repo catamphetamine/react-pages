@@ -63,8 +63,22 @@ export function parseLocation(location)
 	return { origin, pathname, search, hash }
 }
 
-export function isAnchorLinkNavigation(fromLocation, toLocation) {
+function isSameLocationIgnoreHash(fromLocation, toLocation) {
 	return toLocation.origin === fromLocation.origin &&
 		toLocation.pathname === fromLocation.pathname &&
 		toLocation.search === fromLocation.search
+}
+
+// A workaround for `found` router bug:
+// https://github.com/4Catalyzer/found/issues/239
+// Skip `@preload()` and other stuff for anchor link navigation.
+export function shouldSkipPreloadForNavigation(fromLocation, toLocation) {
+	if (isSameLocationIgnoreHash(fromLocation, toLocation)) {
+		// If a "hash" link has been clicked,
+		// or if it's a Back/Forward navigation
+		// then `@preload()` should be skipped.
+		if (toLocation.hash || toLocation.action === 'POP') {
+			return true
+		}
+	}
 }

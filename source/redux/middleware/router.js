@@ -1,6 +1,6 @@
 import { UPDATE_MATCH, RESOLVE_MATCH, _RESOLVE_MATCH, getRoutesByPath, getRoutePath } from '../../router'
 import { getComponentsMeta, mergeMeta, updateMeta, getCodeSplitMeta } from '../../meta/meta'
-import { getLocationUrl, isAnchorLinkNavigation } from '../../location'
+import { getLocationUrl, shouldSkipPreloadForNavigation } from '../../location'
 import { ON_PAGE_LOADED_METHOD_NAME } from '../client/onPageLoaded'
 
 import {
@@ -48,7 +48,7 @@ export default function routerMiddleware(
 					// A workaround for `found` router bug:
 					// https://github.com/4Catalyzer/found/issues/239
 					// Skip `@preload()` and other stuff for anchor link navigation.
-					if (previousLocation && isAnchorLinkNavigation(previousLocation, location)) {
+					if (previousLocation && shouldSkipPreloadForNavigation(previousLocation, location)) {
 						// I guess this workaround won't work with `codeSplit: true`
 						// because it doesn't use the global `getData` preloader.
 						if (!codeSplit) {
@@ -145,7 +145,7 @@ export default function routerMiddleware(
 					// A workaround for `found` router bug:
 					// https://github.com/4Catalyzer/found/issues/239
 					// Skip `@preload()` and other stuff for anchor link navigation.
-					if (previousLocation && isAnchorLinkNavigation(previousLocation, location)) {
+					if (previousLocation && shouldSkipPreloadForNavigation(previousLocation, location)) {
 						// I guess this workaround won't work with `codeSplit: true`
 						// because it doesn't use the global `getData` preloader.
 						if (!codeSplit) {
