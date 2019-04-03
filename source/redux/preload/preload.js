@@ -24,6 +24,7 @@ export default function _preload(
 	routerArgs,
 	codeSplit,
 	server,
+	getCookie,
 	getLocale,
 	dispatch,
 	getState
@@ -99,6 +100,7 @@ export default function _preload(
 			dispatch,
 			location,
 			params,
+			getCookie,
 			preloading
 		)
 	}

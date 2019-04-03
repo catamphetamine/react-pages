@@ -42,7 +42,8 @@ export default function _createStore(settings, data, createHistoryProtocol, http
 		server,
 		devtools,
 		stats,
-		onNavigate
+		onNavigate,
+		getCookie
 	} = options
 
 	// `routes` will be converted.
@@ -50,7 +51,7 @@ export default function _createStore(settings, data, createHistoryProtocol, http
 	const getConvertedRoutes = () => convertedRoutes
 
 	// Add `@preload()` data hook.
-	const getData = createGetDataForPreload(codeSplit, server, onError, getLocale, getConvertedRoutes)
+	const getData = createGetDataForPreload(codeSplit, server, onError, getLocale, getConvertedRoutes, getCookie)
 	if (Array.isArray(routes)) {
 		// If there's an error on client side in `setUpAndRender()` then it's called again.
 		// And in that case `getData` is set and this error will be thrown.

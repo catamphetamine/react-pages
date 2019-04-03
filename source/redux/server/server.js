@@ -25,7 +25,8 @@ export async function initialize(settings, {
 
 	// Create Redux store.
 	store = createStore(settings, initialState, () => createHistoryProtocol(url), httpClient, {
-		server : true
+		getCookie: name => cookies[name],
+		server: true
 	})
 
 	return {

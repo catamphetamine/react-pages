@@ -13,7 +13,7 @@ import {
 
 import preload from './preload'
 
-export default function createGetDataForPreload(codeSplit, server, onError, getLocale, getConvertedRoutes) {
+export default function createGetDataForPreload(codeSplit, server, onError, getLocale, getConvertedRoutes, getCookie) {
 	return function({ params, context: { dispatch, getState } }) {
 		if (!server) {
 			if (window._react_website_skip_preload ||
@@ -48,6 +48,7 @@ export default function createGetDataForPreload(codeSplit, server, onError, getL
 			},
 			codeSplit,
 			server,
+			getCookie,
 			getLocale,
 			dispatch,
 			getState

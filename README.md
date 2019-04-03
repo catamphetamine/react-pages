@@ -348,17 +348,22 @@ In this example the `@preload()` decorator is used to preload a page before it i
 ```javascript
 @preload(async (preloadArguments) => {
   const = {
-    // Redux `dispatch()`
+    // Can `dispatch()` Redux actions.
     dispatch,
-    // Get Redux state
+    // Returns Redux state.
     getState,
-    // Current page location
+    // Current page location (object).
     location,
-    // `react-router` URL `params`
-    // (e.g. '/users/:id')
+    // Route URL parameters.
+    // For example, for route "/users/:id"
+    // and URL "/users/barackobama"
+    // `params` will be `{ id: "barackobama" }`.
     params,
-    // Is this server side rendering
-    server
+    // Is this server-side rendering?
+    server,
+    // (utility)
+    // Returns cookie value by name.
+    getCookie
   }
   = preloadArguments
 

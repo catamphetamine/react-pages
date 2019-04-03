@@ -1,5 +1,6 @@
 import clientSideRender from '../../client/render'
 import { isServerSidePreloaded } from '../../client/flags'
+import { getCookie } from '../../client/cookies'
 import render from './render'
 import createHttpClient from '../HttpClient'
 import normalizeSettings from '../normalize'
@@ -78,7 +79,8 @@ export default function setUpAndRender(settings, options = {}) {
 		httpClient, {
 			devtools,
 			stats,
-			onNavigate
+			onNavigate,
+			getCookie
 		}
 	)
 
