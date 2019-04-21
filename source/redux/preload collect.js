@@ -126,7 +126,12 @@ function set_up_preloader(preloader, preload_arguments, server)
 
 	// If Server-Side Rendering is not being used at all
 	// then all `@preload()`s must be marked as client-side ones.
-	if (!server && !window._server_side_render)
+	// The `window._server_side_render` flag is actually never set in this library.
+	// CC public website relies on it not being set so that all 
+	// `@preload()`s re-run on client side for AWS S3 static hosted website.
+	// If `window._server_side_render` flag is ever modified to be set (though unlikely)
+	// then CC public website should set `window._react_website_reload_data` to `true`.
+	if (!server && (!window._server_side_render || window._react_website_reload_data))
 	{
 		preloader.options.client = true
 	}
