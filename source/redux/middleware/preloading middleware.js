@@ -160,7 +160,7 @@ export default function preloading_middleware(server, error_handler, preload_on_
 			const { routes, components, location, params } = router_state
 
 			// Preload all the required data for this route (page)
-			const preload = generate_preload_chain
+			let preload = generate_preload_chain
 			(
 				action.initial,
 				server,
@@ -178,14 +178,8 @@ export default function preloading_middleware(server, error_handler, preload_on_
 				preloading
 			)
 
-			// If nothing to preload, just move to the next middleware
-			if (!preload)
-			{
-				after_preload(dispatch, getState, components, params, action, server, get_history, previous_location)
-				// Explicitly return `undefined`
-				// (not `false` by accident)
-				return
-			}
+			const preloadIsEmpty = !preload
+			preload = preload || (() => Promise.resolve())
 
 			// Page loading indicator could listen for this event
 			dispatch({ type: Preload_started })
@@ -222,7 +216,7 @@ export default function preloading_middleware(server, error_handler, preload_on_
 					preloading.pending = false
 
 					// Report stats to the web browser console
-					if (!server)
+					if (!server && !preloadIsEmpty)
 					{
 						console.log(`[react-isomorphic-render] @preload() took ${preload_timer()} milliseconds for ${action.location.pathname}`)
 					}
@@ -241,7 +235,9 @@ export default function preloading_middleware(server, error_handler, preload_on_
 					dispatch({ type: Preload_finished })
 
 					// Report preloading time
-					report_preload_stats(Date.now() - started_at, route)
+					if (!preloadIsEmpty) {
+						report_preload_stats(Date.now() - started_at, route)
+					}
 
 					after_preload(dispatch, getState, components, params, action, server, get_history, previous_location)
 				},
