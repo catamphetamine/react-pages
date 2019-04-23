@@ -130,7 +130,9 @@ function set_up_preloader(preloader, preload_arguments, server)
 	// CC public website relies on it not being set so that all 
 	// `@preload()`s re-run on client side for AWS S3 static hosted website.
 	// If `window._server_side_render` flag is ever modified to be set (though unlikely)
-	// then CC public website should set `window._react_website_reload_data` to `true`.
+	// then check that CC public website has `window._react_website_reload_data` set to `true`.
+	// `window._react_website_reload_data` is automatically set to `true` 
+	// by `react-website@latest`'s `static-site-generator` when it snapshots pages.
 	if (!server && (!window._server_side_render || window._react_website_reload_data))
 	{
 		preloader.options.client = true
