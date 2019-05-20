@@ -18,7 +18,9 @@ export default async function(settings, {
 	renderContent,
 	html = {},
 	cookies,
-	locales
+	locales,
+	headers,
+	getInitialState
 }) {
 	settings = normalizeSettings(settings)
 
@@ -43,7 +45,10 @@ export default async function(settings, {
 	} = await reduxInitialize(settings, {
 		proxy,
 		cookies,
-		url
+		headers,
+		locales,
+		url,
+		getInitialState
 	})
 
 	const location = parseLocation(url)

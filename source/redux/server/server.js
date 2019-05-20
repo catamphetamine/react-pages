@@ -9,7 +9,10 @@ import { createHistoryProtocol } from '../../router/server'
 export async function initialize(settings, {
 	proxy,
 	cookies,
-	url
+	headers,
+	locales,
+	url,
+	getInitialState
 }) {
 	// Redux store
 	let store
@@ -21,7 +24,13 @@ export async function initialize(settings, {
 	})
 
 	// Initial Redux state.
-	const initialState = {}
+	// `User-Agent` and `Accept-Language` headers were requested:
+	// https://github.com/catamphetamine/react-website/issues/72
+	const initialState = getInitialState ? getInitialState({
+		cookies,
+		headers,
+		locales
+	}) : {}
 
 	// Create Redux store.
 	store = createStore(settings, initialState, () => createHistoryProtocol(url), httpClient, {

@@ -48,7 +48,7 @@ async function respondWithPage(request, response, settings, options)
 }
 
 // Renders a webpage.
-// `headers`: `{ cookie, accept-language, host }`.
+// `headers`: `{ cookie, accept-language, host, user-agent }`.
 export async function renderPage(url, headers, settings, options)
 {
 	const {
@@ -58,7 +58,8 @@ export async function renderPage(url, headers, settings, options)
 		authentication,
 		renderContent,
 		html,
-		stats
+		stats,
+		getInitialState
 	} = options
 
 	const cookies = headers.cookie ? cookie.parse(headers.cookie) : {}
@@ -72,7 +73,11 @@ export async function renderPage(url, headers, settings, options)
 		url,
 		// Cookies for making `http` requests on server.
 		cookies,
-		locales: getPreferredLocales(headers, cookies)
+		locales: getPreferredLocales(headers),
+		// Headers are used in `getInitialState()`.
+		// https://github.com/catamphetamine/react-website/issues/72
+		getInitialState,
+		headers
 	})
 
 	// If a redirect happened perform an HTTP redirect

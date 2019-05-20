@@ -10,6 +10,13 @@ In that case rendering service won't perform any routing or preloading.
 It would just return the base HTML structure without any route-specific stuff.
 -->
 
+3.1.26 / 20.05.2019
+===================
+
+  * The undocumented `window._react_website_locales` variable no longer contains the `"locale"` cookie value. Maybe this variable will be removed in some future because it's not clear how could one use it in an app.
+
+  * Added server-side option `getInitialState({ cookies, headers, locales })`.
+
 3.1.23 / 28.02.2019
 ===================
 

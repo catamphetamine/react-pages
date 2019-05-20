@@ -1745,6 +1745,10 @@ If the application is being built with a bundler (most likely Webpack) and Serve
 
 Code splitting is supported. See [README-CODE-SPLITTING](https://github.com/catamphetamine/react-website/blob/master/README-CODE-SPLITTING.md)
 
+## `Accept-Language` and `User-Agent` HTTP headers
+
+When server-side rendering is enabled `Accept-Language` and `User-Agent` HTTP headers are accessible inside `getInitialState({ cookies, headers, locales })` function which can be passed as an option to `webpageServer(settings, options)`. `locales` are parsed from the `Accept-Language` HTTP header.
+
 ## Advanced
 
 At some point in time this README became huge so I extracted some less relevant parts of it into [README-ADVANCED](https://github.com/catamphetamine/react-website/blob/master/README-ADVANCED.md) (including the list of all possible settings and options). If you're a first timer then just skip that one - you don't need it for sure.
