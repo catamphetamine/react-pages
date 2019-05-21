@@ -341,6 +341,20 @@ const { status, content, contentType } = renderError(error)
     // into longer ones like `https://my-api.cloud-provider.com/`.
 
     // (optional)
+    //
+    // Is called before the HTTP request is sent.
+    // Developers can set custom HTTP headers here
+    // or change the HTTP request `Content-Type`.
+    //
+    // * `request` is a `superagent` `request` that can be modified
+    //   (for example, to set an HTTP header: `request.set(headerName, headerValue)`).
+    // * `requestedURL` is the URL argument of the `http` utility call.
+    // * `url` is the `requestedURL` transformed by `http.transformURL()`
+    //   (if no `http.transformURL()` is configured then `url` is the same as the `requestedURL`).
+    //
+    onRequest: (request, { url, requestedURL, getState }) => {}
+
+    // (optional)
     onError: (error, { url, path, redirect, dispatch, getState }) => console.error(error)
     //
     // Is called when `http` calls either fail or return an error.
@@ -575,14 +589,11 @@ const { status, content, contentType } = renderError(error)
   }
 
   // (optional)
-  // Initializes Redux state before performing
-  // page preloading and rendering.
-  //
-  // If defined, this function must return an object
-  // which is gonna be the initial Redux state.
-  //
-  initialize: async (httpClient) => ({})
-  // (or same without `async`: (httpClient) => Promise.resolve({})
+  // When server-side rendering is enabled
+  // `Accept-Language` and `User-Agent` HTTP headers
+  // are  accessible inside this function.
+  // `locales` are parsed from the `Accept-Language` HTTP header.
+  getInitialState: ({ cookies, headers, locales }) => Object
 
   // Is React Server Side Rendering enabled?
   // (is `true` by default)
@@ -594,11 +605,7 @@ const { status, content, contentType } = renderError(error)
   // from the server side to the client's web browser
   // (as a performance optimization) by setting it to `false`.
   //
-  render: `true`/`false`
-
-  // (optional)
-  // A custom `log`
-  log: bunyan.createLogger(...)
+  renderContent: `true`/`false`
 }
 ```
 

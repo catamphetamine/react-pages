@@ -10,6 +10,10 @@ In that case rendering service won't perform any routing or preloading.
 It would just return the base HTML structure without any route-specific stuff.
 -->
 
+3.1.27 / 21.05.2019
+===================
+* Added `http.onRequest(request, { url, requestedURL, getState })` settings function parameter [as requested](https://github.com/catamphetamine/react-website/issues/73). It was previously called `http.request()`.
+
 3.1.26 / 20.05.2019
 ===================
 
@@ -76,7 +80,7 @@ It would just return the base HTML structure without any route-specific stuff.
 
 * (breaking change) `authentication.accessToken()` parameter function now receives a single `{ getState, url, requestedURL, getCookie }` argument instead of the two `(getCookie, { store, path, url })` arguments. The reason is that cookies are no longer relevant because access tokens are stored in most cases in `localStorage`. Also it's just `getState` parameter now instead of the old `store` parameter.
 
-* (breaking change) `http.request` parameter removed for now. If the need for it arises it might be reconsidered.
+* (breaking change) `http.request()` parameter renamed to `http.onRequest()`. Also added `url` and `requestedURL` properties to its second argument.
 
 * (breaking change) `store` parameter removed from `http.catch` parameters for now. If the need for it arises it might be reconsidered.
 

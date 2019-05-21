@@ -140,11 +140,15 @@ export default class HttpClient
 						request.add_cookies(cookies, this.set_cookies)
 					}
 
-					// Allows customizing HTTP requests
-					// (for example, setting some HTTP headers)
-					if (on_before_send)
-					{
-						on_before_send(request.request)
+					// Allows customizing HTTP requests.
+					// (for example, setting some HTTP headers,
+					//  or changing HTTP request `Content-Type`).
+					// https://github.com/catamphetamine/react-website/issues/73
+					if (on_before_send) {
+						on_before_send(request.request, {
+							url,
+							requestedURL: path
+						})
 					}
 
 					// File upload progress metering

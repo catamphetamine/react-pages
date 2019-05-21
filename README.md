@@ -532,6 +532,18 @@ The possible `options` (the third argument of all `http` methods) are
   * `progress(percent, event)` — Use for tracking HTTP request progress (e.g. file upload).
   * `onResponseHeaders(headers)` – Use for examining HTTP response headers (e.g. [Amazon S3](http://docs.aws.amazon.com/AmazonS3/latest/API/RESTObjectPUT.html#RESTObjectPUT-responses-response-headers) file upload).
 
+<details>
+<summary>To set custom HTTP headers or to change HTTP request <code>Content-Type</code></summary>
+
+###
+
+For that use the `http.onRequest(request, { url, requestedURL, getState })` setting in `./react-website.js` where:
+
+* `request` is a [`superagent`](https://visionmedia.github.io/superagent/) `request` that can be modified. For example, to set an HTTP header: `request.set(headerName, headerValue)`.
+* `requestedURL` is the URL argument of the `http` utility call.
+* `url` is the `requestedURL` transformed by `http.transformURL()` settings function. If no `http.transformURL()` is configured then `url` is the same as the `requestedURL`.
+</details>
+
 <!--
   (removed)
   * `onRequest(request)` – for capturing `superagent` request (there was [a feature request](https://github.com/catamphetamine/react-website/issues/46) to provide a way for aborting running HTTP requests via `request.abort()`)
@@ -854,16 +866,13 @@ In order for `http` utility to send an authentication token as part of an HTTP r
 ```js
 {
   authentication: {
-    accessToken({ getState, url, requestedURL, getCookie }) {
+    accessToken({ getState, getCookie, url, requestedURL }) {
       // It's recommended to check the URL to make sure that the access token
       // is not leaked to a third party: only send it to your own servers.
       //
-      // When supplying `transformURL()` parameter function the `requestedURL`
-      // parameter is the originally requested URL (for example, `/users/123`)
-      // and `url` is the result of calling `transformURL(requestedURL)`.
-      //
-      // When not supplying `transformURL()` parameter function
-      // `requestedURL` and `url` are the same.
+      // `requestedURL` is the URL argument of the `http` utility call.
+      // `url` is the `requestedURL` transformed by `http.transformURL()` settings function.
+      // If no `http.transformURL()` is configured then `url` is the same as the `requestedURL`.
       //
       if (url.indexOf('https://my.api.com/') === 0) {
         return localStorage.getItem('accessToken')
