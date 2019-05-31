@@ -792,10 +792,10 @@ export default class BlogPostPage extends Component {
 
 ####
 
-Redux module can also handle synchronous actions along with asynchronous ones, should the need arise.
-
 <details>
-<summary>See how</summary>
+<summary>Redux module can also handle the conventional "synchronous" actions via <code>export const action = redux.simpleAction((state, actionArgument) => newState)</code></summary>
+
+####
 
 ```js
 import { ReduxModule } from 'react-website'
