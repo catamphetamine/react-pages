@@ -436,7 +436,7 @@ class SearchResultsPage extends Component {
 }
 ```
 
-One can also use the exported `wasInstantNavigation()` function (on client side) to find out if the current page was navigated to "instantly". This can be used, for example, for Algolia "Instant Search" component to reset cached search results if it's not an instant "Back" navigation.
+One can also use the exported `wasInstantNavigation()` function (on client side) to find out if the current page was navigated to "instantly". This can be used, for example, to restore a "state" of a widget on instant "Back" navigation so that it renders immediately with the previously cached "results" or something.
 </details>
 
 ## `@preload()` indicator
