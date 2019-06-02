@@ -415,6 +415,8 @@ On the client side, in order for `@preload` to work all `<Link/>`s imported from
 <details>
 <summary><code>@preload</code> also works for Back/Forward navigation. To disable page <code>@preload</code> on Back navigation pass <code>instantBack</code> property to a <code>&lt;Link/&gt;</code>.</summary>
 
+####
+
 For example, consider a search results page preloading some data (could be search results themselves, could be anything else unrelated). A user navigates to this page, waits for `@preload` to finish and then sees a list of items. Without `instantBack` if the user clicks on an item he's taken to the item's page. Then the user clicks "Back" and is taken back to the search results page but has to wait for that `@preload` again. With `instantBack` though the "Back" transition occurs instantly without having to wait for that `@preload` again. Same goes then for the reverse "Forward" navigation from the search results page back to the item's page, but that's just a small complementary feature. The main benefit is the instantaneous "Back" navigation creating a much better UX where a user can freely explore a list of results without getting penalized for it with a waiting period on each click.
 
 ```js
@@ -436,7 +438,11 @@ class SearchResultsPage extends Component {
 }
 ```
 
+There's also `instantBack: true` option available for `goto(location, options)` which has the same behavior.
+
 One can also use the exported `wasInstantNavigation()` function (on client side) to find out if the current page was navigated to "instantly". This can be used, for example, to restore a "state" of a widget on instant "Back" navigation so that it renders immediately with the previously cached "results" or something.
+
+There's also an `isInstantBackAbleNavigation()` function (on client side) which tells if the currently ongoing navigation process is performed with `instantBack` option (for example, if `<Link instantBack/>` is clicked or `goto(location, { instantBack: true })` is called). It can be used in `componentWillUnmount()` to save the current page state for later restoring it if the user navigates "Back" instantly.
 </details>
 
 ## `@preload()` indicator

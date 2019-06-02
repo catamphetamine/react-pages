@@ -62,7 +62,8 @@ from './modules/locale'
 
 export
 {
-	wasInstantNavigation
+	wasInstantNavigation,
+	isInstantBackAbleNavigation
 }
 from './modules/redux/client/instantBack'
 

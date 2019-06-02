@@ -75,7 +75,8 @@ export default function routerMiddleware(
 					// Set the flag for `wasInstantNavigation()`.
 					setInstantNavigationFlag(_isInstantTransition)
 
-					// Indicates whether an `instantBack` `<Link/>` was clicked.
+					// Indicates whether an `instantBack` `<Link/>` has been clicked.
+					// (or if `goto()` has been called with `instantBack: true` option)
 					const instantBack = window._react_website_instant_back_navigation
 
 					// Update instant back navigation chain.
@@ -97,6 +98,13 @@ export default function routerMiddleware(
 						// Once a regular navigation takes place
 						// all previous "instant back" possibilities are discarded.
 						resetInstantBack()
+					}
+
+					// Set the flag for `isInstantBackAbleNavigation()`.
+					// `instantBack` is for a "forward" instant-back-able navigation.
+					// `_isInstantTransition` is for a "backwards" instant-back-able navigation.
+					if (instantBack || _isInstantTransition) {
+						window._react_website_is_instant_back_able_navigation = true
 					}
 
 					// // `RESOLVE_MATCH` is not being emitted
@@ -188,6 +196,9 @@ export default function routerMiddleware(
 					if (onNavigate) {
 						onNavigate(getLocationUrl(location), location, { dispatch, getState })
 					}
+
+					// Reset the flag for `isInstantBackAbleNavigation()`.
+					window._react_website_is_instant_back_able_navigation = false
 
 					// Report preloading time.
 					// This preloading time will be longer then
