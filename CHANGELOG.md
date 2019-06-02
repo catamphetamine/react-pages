@@ -10,6 +10,12 @@ In that case rendering service won't perform any routing or preloading.
 It would just return the base HTML structure without any route-specific stuff.
 -->
 
+<!--
+Set `http.alwaysSetContentType` to `false` by default in the next major version update.
+-->
+
+<!-- Update `found` to `0.4` and remove `react-redux` version restriction from `package.json` and README. -->
+
 3.1.27 / 21.05.2019
 ===================
 * Added `http.onRequest(request, { url, requestedURL, getState })` settings function parameter [as requested](https://github.com/catamphetamine/react-website/issues/73). It was previously called `http.request()`.
