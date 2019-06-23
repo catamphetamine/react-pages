@@ -174,9 +174,13 @@ export function generateMetaTagsMarkup(meta)
  * @param {string} value
  * @return {string}
  */
-function generateMetaTagMarkup(name, value)
-{
-	return `<meta ${getMetaAttributeFor(name)}="${name}" content="${escapeHTML(value)}"/>`
+function generateMetaTagMarkup(name, value) {
+	if (typeof value === 'boolean' || typeof value === 'number') {
+		value = String(value)
+	} else {
+		value = escapeHTML(String(value))
+	}
+	return `<meta ${getMetaAttributeFor(name)}="${name}" content="${value}"/>`
 }
 
 /**
