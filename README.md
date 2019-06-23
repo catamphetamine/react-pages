@@ -932,8 +932,10 @@ A real-world (advanced) example for handling "Unauthenticated"/"Unauthorized" er
       }
     } else {
       // Report the error
-      console.error(`Error while preloading "${url}"`);
-      console.error(error);
+      console.error('--------------------------------');
+      console.error(`Error while loading "${url}"`);
+      console.error('--------------------------------');
+      console.error(error.stack);
     }
   },
   http: {
