@@ -1094,7 +1094,7 @@ Then run the following Node.js script which is gonna snapshot the currently runn
 
 ```sh
 # If the website will be hosted on Amazon S3
-npm install s3 --save
+npm install @auth0/s3 --save
 ```
 
 ```js

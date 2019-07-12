@@ -1,4 +1,4 @@
-import s3 from 's3'
+import s3 from '@auth0/s3'
 
 export default function S3Uploader({ accessKeyId, secretAccessKey, region, bucket, ACL })
 {
