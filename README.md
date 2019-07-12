@@ -844,7 +844,7 @@ export default redux.reducer()
 ```
 
 ```js
-notify('Test')
+dispatch(notify('Test'))
 ```
 </details>
 
