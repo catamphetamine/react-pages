@@ -269,7 +269,11 @@ const { status, content, contentType } = renderError(error)
   //
   // By default it just wraps everything with Redux `<Provider/>`:
   //
-  // export default ({ store, children }) => <Provider store={ store }>{ children }</Provider>
+  // export default ({ store, children }) => (
+  //   <Provider store={store}>
+  //     {children}
+  //   </Provider>
+  // )
   //
   container: require('./src/Container')
 

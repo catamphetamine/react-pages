@@ -97,7 +97,7 @@ export
 {
   Redirect,
   Route,
-  withRouter,
+  useRouter,
 	goto,
 	redirect,
 	pushLocation,

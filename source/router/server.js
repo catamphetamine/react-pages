@@ -8,7 +8,7 @@ import render from './render'
 
 export function createRouterElement(renderArgs) {
 	return (
-		<RouterProvider router={renderArgs.router}>
+		<RouterProvider renderArgs={renderArgs}>
 			{render(renderArgs)}
 		</RouterProvider>
 	)

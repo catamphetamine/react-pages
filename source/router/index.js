@@ -1,7 +1,7 @@
 export { default as foundReducer } from 'found/lib/foundReducer'
 export { default as Route } from 'found/lib/Route'
 export { default as Redirect } from 'found/lib/Redirect'
-export { default as withRouter } from 'found/lib/withRouter'
+export { default as useRouter } from 'found/lib/useRouter'
 export { default as RedirectException } from 'found/lib/RedirectException'
 
 import createMatchEnhancer from 'found/lib/createMatchEnhancer'

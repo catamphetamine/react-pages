@@ -1426,18 +1426,15 @@ class Page extends Component {
 }
 ```
 
-If someone prefers interacting with [`found`](https://github.com/4Catalyzer/found) `router` directly instead then it is available on all pages as a `router` property, or via [`@withRouter`](https://github.com/4Catalyzer/found#programmatic-navigation) decorator.
+If someone prefers interacting with [`found`](https://github.com/4Catalyzer/found) `router` directly instead then it is available on all pages as a `router` property, or via [`useRouter`](https://github.com/4Catalyzer/found#programmatic-navigation) hook.
 
 ```js
 import React from 'react'
-import { withRouter } from 'found'
+import { useRouter } from 'react-pages'
 
-@withRouter
-export default class Component extends React.Component {
-  render() {
-    const { router } = this.props
-    ...
-  }
+export default function Component() {
+  const { match, router } = useRouter()
+  ...
 }
 ```
 

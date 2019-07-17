@@ -33,7 +33,7 @@ import
 	Loading,
 	Route,
 	Redirect,
-	withRouter
+	useRouter
 }
 from '../index'
 
@@ -70,7 +70,7 @@ describe(`exports`, function()
 		Link.should.be.a('function')
 		Route.should.be.a('function')
 		Redirect.should.be.a('function')
-		withRouter.should.be.a('function')
+		useRouter.should.be.a('function')
 
 		getCookie.should.be.a('function')
 		getPreferredLocales.should.be.a('function')
@@ -118,7 +118,7 @@ describe(`exports`, function()
 		_.Link.should.be.a('function')
 		_.Route.should.be.a('function')
 		_.Redirect.should.be.a('function')
-		_.withRouter.should.be.a('function')
+		_.useRouter.should.be.a('function')
 
 		_.getCookie.should.be.a('function')
 		_.getPreferredLocales.should.be.a('function')

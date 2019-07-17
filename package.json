@@ -41,15 +41,15 @@
     "nyc": "^11.6.0",
     "react": "^16",
     "react-dom": "^16",
-    "react-redux": "^4.4.5",
+    "react-redux": "^7.1.0",
     "redux": "^3.5.2",
     "rimraf": "^2.5.0"
   },
   "peerDependencies": {
-    "react": ">= 16.0.0",
-    "react-dom": ">= 16.0.0",
+    "react": ">= 16.8.0",
+    "react-dom": ">= 16.8.0",
     "redux": ">= 4.0.0",
-    "react-redux": "^5.1.1"
+    "react-redux": ">= 7.1.0"
   },
   "sideEffects": [
     "*.css"

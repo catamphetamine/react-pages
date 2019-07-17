@@ -44,7 +44,7 @@ exports.getCookie = require('./commonjs/client/cookies').getCookie
 
 exports.Route = require('./commonjs/router').Route
 exports.Redirect = require('./commonjs/router').Redirect
-exports.withRouter = require('./commonjs/router').withRouter
+exports.useRouter = require('./commonjs/router').useRouter
 exports.goto = require('./commonjs/router').goto
 exports.redirect = require('./commonjs/router').redirect
 exports.pushLocation = require('./commonjs/router').pushLocation
