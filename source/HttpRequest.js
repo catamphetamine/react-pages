@@ -137,18 +137,18 @@ export default class HttpRequest
 				if (response.headers['set-cookie']) {
 					this.onAddCookies(response.headers['set-cookie'])
 				}
-			}
-			// If HTTP response status is "204 - No content"
-			// (PUT, DELETE) then resolve with an empty result.
-			if (response.statusCode !== 204) {
-				return this.getResponseData(response)
+				// If HTTP response status is "204 - No content"
+				// (PUT, DELETE) then resolve with an empty result.
+				if (response.statusCode !== 204) {
+					return this.getResponseData(response)
+				}
 			},
 			(error) => {
 				// Infer additional `error` properties from the HTTP response.
 				this.populateErrorData(error)
 				throw error
 			}
-		})
+		)
 	}
 
 	populateErrorData(error) {
