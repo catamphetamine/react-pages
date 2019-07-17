@@ -8,7 +8,7 @@
     "babel-runtime": "^6.6.1",
     "classnames": "^2.2.5",
     "cookie": "^0.3.1",
-    "found": "^0.3.12",
+    "found": "^0.4.4",
     "found-scroll": "^0.1.5",
     "fs-extra": "^2.1.2",
     "hoist-non-react-statics": "^2.5.5",

@@ -16,6 +16,17 @@ Set `http.alwaysSetContentType` to `false` by default in the next major version 
 
 <!-- Update `found` to `0.4` and remove `react-redux` version restriction from `package.json` and README. -->
 
+<!-- Remove all deprecations. -->
+
+<!-- Maybe replace ActivityIndicator with something else (not requiring ems for width, using percentages instead). -->
+
+1.0.0 / ...
+===========
+
+* Updated `found` to `0.4.x` which updates `react-redux` to `>= 0.6.x`.
+
+* `react-website@4` is now called `react-pages@1`.
+
 3.1.27 / 21.05.2019
 ===================
 * Added `http.onRequest(request, { url, requestedURL, getState })` settings function parameter [as requested](https://github.com/catamphetamine/react-website/issues/73). It was previously called `http.request()`.

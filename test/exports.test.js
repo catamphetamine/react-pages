@@ -45,6 +45,7 @@ describe(`exports`, function()
 		indicateLoading.should.be.a('function')
 		Loading.should.be.a('function')
 
+		console.log('@')
 		render.should.be.a('function')
 		getState.should.be.a('function')
 		getHttpClient.should.be.a('function')

@@ -10,14 +10,11 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import classNames from 'classnames'
 
-export default function ActivityIndicator(props)
-{
-	const { className } = props
-
+export default function ActivityIndicator(props) {
 	return (
 		<div
-			{ ...props }
-			className={ classNames('rrui__activity-indicator', className) }>
+			{...props}
+			className={classNames('rrui__activity-indicator', props.className)}>
 			<div className="rrui__activity-indicator__arc"/>
 			<div className="rrui__activity-indicator__arc"/>
 			<div className="rrui__activity-indicator__arc"/>
@@ -26,11 +23,7 @@ export default function ActivityIndicator(props)
 	)
 }
 
-ActivityIndicator.propTypes =
-{
+ActivityIndicator.propTypes = {
 	// CSS class
-	className : PropTypes.string,
-
-	// CSS style object
-	style     : PropTypes.object
+	className: PropTypes.string
 }
