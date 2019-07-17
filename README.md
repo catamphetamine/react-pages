@@ -395,10 +395,10 @@ The available options are:
 
 ####
 
-Note: `transform-decorators-legacy` Babel plugin is needed at the moment to make decorators work with Babel:
+Note: [`babel-plugin-proposal-decorators`](https://babeljs.io/docs/en/babel-plugin-proposal-decorators) Babel plugin is needed at the moment to make decorators work with Babel:
 
 ```sh
-npm install babel-plugin-transform-decorators-legacy --save
+npm install @babel/plugin-proposal-decorators --save
 ```
 
 #### .babelrc
@@ -407,7 +407,7 @@ npm install babel-plugin-transform-decorators-legacy --save
 {
   ...
   "plugins": [
-    "transform-decorators-legacy",
+    ["@babel/plugin-proposal-decorators", { "legacy": true }],
     ...
   ]
 }
