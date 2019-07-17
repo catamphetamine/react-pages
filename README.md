@@ -2,7 +2,6 @@
 
 [![npm version](https://img.shields.io/npm/v/react-pages.svg?style=flat-square)](https://www.npmjs.com/package/react-pages)
 [![npm downloads](https://img.shields.io/npm/dm/react-isomorphic-render.svg?style=flat-square)](https://www.npmjs.com/package/react-pages)
-[![npm downloads](https://img.shields.io/npm/dm/react-pages.svg?style=flat-square)](https://www.npmjs.com/package/react-pages)
 
 A complete solution for building a React/Redux application
 
