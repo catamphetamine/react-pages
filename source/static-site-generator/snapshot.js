@@ -39,17 +39,15 @@ export async function snapshot({
 	pages.unshift('/react-pages-base')
 
 	// The progress meter for the website snapshotting process.
-	const snapshotProgress = new ProgressBar(' Snapshotting [:bar] :total :percent :etas',
-	{
-		complete   : '=',
-		incomplete : ' ',
-		width      : 50,
-		total      : pages.length
+	const snapshotProgress = new ProgressBar(' Snapshotting [:bar] :total :percent :etas', {
+		complete: '=',
+		incomplete: ' ',
+		width: 50,
+		total: pages.length
 	})
 
 	// Start the website snapshotting process
-	await snapshotPages
-	(
+	await snapshotPages(
 		host,
 		port,
 		pages,
@@ -63,26 +61,21 @@ export async function snapshot({
 	fs.removeSync(path.join(outputPath, 'react-pages-base'))
 }
 
-async function snapshotPages(host, port, pages, outputPath, transformContent, tick)
-{
+async function snapshotPages(host, port, pages, outputPath, transformContent, tick) {
 	// Clear the output folder
-	await remove(outputPath)
-
+	await fs.remove(outputPath)
 	// Snapshot every page and put it into the output folder
-	for (const page of pages)
-	{
+	for (const page of pages) {
 		await snapshotPage(host, port, page, outputPath, transformContent)
 		tick()
 	}
 }
 
-async function snapshotPage(host, port, page, outputPath, transformContent)
-{
+async function snapshotPage(host, port, page, outputPath, transformContent) {
 		let url = page
 		let targetStatusCode = 200
 
-		if (typeof page !== 'string' && page.status)
-		{
+		if (typeof page !== 'string' && page.status) {
 			url = page.url
 			targetStatusCode = page.status
 		}
@@ -90,16 +83,11 @@ async function snapshotPage(host, port, page, outputPath, transformContent)
 		const _url = `http://${host}:${port}${url}`
 		const { status, content } = await download(_url)
 
-		if (status !== targetStatusCode)
-		{
+		if (status !== targetStatusCode) {
 			throw new Error(`Expected ${targetStatusCode} HTTP status code for "${_url}". Got ${status}.`);
 		}
 
 		fs.outputFileSync(path.join(outputPath, url, '/index.html'), transformContent ? transformContent(content) : content)
-}
-
-function remove(path) {
-	return new Promise((resolve, reject) => fs.remove(path, error => error ? reject(error) : resolve()))
 }
 
 function addReloadDataFlag(content) {

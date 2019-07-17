@@ -9,14 +9,19 @@
 * Page components no longer receive `params` property in `found@0.4.x` (in case anyone used that property, but I guess no one did).
 * For those who used `withRouter()` decorator previously now there's a better alternative — `useRouter()` hook: `const { match, router } = useRouter()`. This library no longer re-exports `found`'s `withRouter` decorator though `found` still does export it.
 * Seding `GET` or `multipart/form-data` requests using `http` utility [no longer](https://github.com/catamphetamine/react-website/issues/74) adds `Content-Type` header. This shouldn't be an issue for most users. `Content-Type` header can be set [manually](https://github.com/catamphetamine/react-website/issues/74#issuecomment-496443987) via `http.onRequest(request)` setting.
-* `superagent` HTTP library has been updated from `2.x` to `5.x`. There shouldn't be any breaking changes.
 * Removed `Promise` cancellation and the `cancelPrevious: true` Redux action parameter.
+
+Update Babel from `6` to `7`.
 
 Check that sending forms with files (single, multiple) via `http` works.
 
 Check that the refactored http.request() populateErrorData() works (emulate an error on server side).
 
 Maybe check setting server-side cookies.
+
+https://github.com/feross/multistream/issues/42
+
+https://github.com/feross/string-to-stream/issues/9
 
 ### Renames
 
@@ -29,3 +34,12 @@ Maybe check setting server-side cookies.
 
 * `http.allowAbsoluteURLs` settings has been removed.
 * `redux.v2` `v2` -> `v3` migration parameter has been removed.
+
+### Non-breaking dependency updates
+
+* Updated `superagent` HTTP library from `2.x` to `5.x`. There shouldn't be any breaking changes.
+* Updated Babel from `6` to `7`. No breaking changes.
+* Updated `multistream` server-side library from `2.x` to `3.x`. No breaking changes.
+* Updated `string-to-stream` server-side library from `1.x` to `2.x`. No breaking changes.
+* Updated `cookie` server-side library from `0.3.x` to `0.4.x`. No breaking changes.
+* Updated `fs-extra` server-side library from `2.x` to `8.x`. No breaking changes.

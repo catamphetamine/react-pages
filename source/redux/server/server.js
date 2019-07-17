@@ -1,4 +1,4 @@
-import UglifyJS from 'uglify-js'
+import Terser from 'terser'
 
 import { ISO_date_regexp } from '../../parseDates'
 import { safeJsonStringify } from '../../server/html'
@@ -67,8 +67,7 @@ function generateJavascript(store, settings) {
 // JSON date deserializer.
 // Use as the second, 'reviver' argument to `JSON.parse(json, JSON.dateParser)`.
 // http://stackoverflow.com/questions/14488745/javascript-json-date-deserialization/23691273#23691273
-const DEFINE_JSON_DATE_PARSER = UglifyJS.minify
-(`
+const DEFINE_JSON_DATE_PARSER = Terser.minify(`
 if (!JSON.dateParser) {
 	JSON.dateParser = function(key, value) {
 		if (typeof value === 'string' && /^${ISO_date_regexp}$/.test(value)) {
@@ -76,8 +75,7 @@ if (!JSON.dateParser) {
 		}
 		return value
 	}
-}
-`, { fromString: true }).code
+}`).code
 
 // Just to be extra safe from XSS attacks
 if (DEFINE_JSON_DATE_PARSER.indexOf('<') !== -1) {
