@@ -35,8 +35,8 @@ export function createRouterStoreEnhancers(routes, createHistoryProtocol, option
 			middlewares
 		}),
 		createMatchEnhancer(
-			// new Matcher(hotRouteConfig(routes), { matchStemRoutes: false })
-			new Matcher(routes, { matchStemRoutes: false })
+			// new Matcher(hotRouteConfig(routes))
+			new Matcher(routes)
 		)
 	]
 }
