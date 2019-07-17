@@ -22,19 +22,12 @@ export default function asynchronousMiddleware(
 ) {
 	reduxEventNaming = reduxEventNaming || DEFAULT_REDUX_EVENT_NAMING
 
-	return ({ dispatch, getState }) =>
-	{
-		// Can cancel previous actions of the same `type` (if configured).
-		// E.g. for an AJAX autocomplete.
-		const cancellablePromises = {}
-
-		return next => action =>
-		{
+	return ({ dispatch, getState }) => {
+		return next => action => {
 			let {
 				promise,
 				event,
 				events,
-				cancelPrevious,
 				...rest
 			} = action
 
@@ -74,18 +67,6 @@ export default function asynchronousMiddleware(
 				throw new Error('Redux action\'s "promise" function must return a Promise.')
 			}
 
-			// Is the action promise cancellable
-			const cancellable = !server && cancelPrevious && typeof promised.cancel === 'function'
-
-			// Cancel previous action of the same `type` (if configured).
-			// E.g. for an AJAX autocomplete.
-			if (cancellable) {
-				if (cancellablePromises[Request]) {
-					cancellablePromises[Request].cancel()
-				}
-				cancellablePromises[Request] = promised
-			}
-
 			// Returning the result like this,
 			// because if returned the `promised.then()` chain directly
 			// then it wouldn't get detected as an "Unhandled rejection"
@@ -98,11 +79,6 @@ export default function asynchronousMiddleware(
 					// If the Promise resolved
 					// (e.g. an HTTP request succeeded)
 					(result) => {
-						// The default `Promise` implementation has no `.finally()`
-						if (cancellable) {
-							delete cancellablePromises[Request]
-						}
-
 						// Dispatch the `success` event to the Redux store
 						dispatch({
 							...rest,
@@ -125,11 +101,6 @@ export default function asynchronousMiddleware(
 					// (Http status !== 20x
 					//  or the Http response JSON object has an `error` field)
 					(error) => {
-						// The default `Promise` implementation has no `.finally()`
-						if (cancellable) {
-							delete cancellablePromises[Request]
-						}
-
 						// Dispatch the `failure` event to the Redux store
 						dispatch({
 							...rest,
@@ -153,15 +124,15 @@ export default function asynchronousMiddleware(
 							// (for example, redirect to a login page
 							//  if a JWT "access token" expired)
 							onError(error, {
-								path : location.pathname,
-								url  : getLocationUrl(location),
+								path: location.pathname,
+								url: getLocationUrl(location),
 								// Using `goto` instead of `redirect` here
 								// because it's not part of `@preload()`
 								// and is therefore part of some kind of an HTTP request
 								// triggered by user input (e.g. form submission)
 								// which means it is convenient to be able to
 								// go "Back" to the page on which the error originated.
-								redirect : to => dispatch(goto(to)),
+								redirect: to => dispatch(goto(to)),
 								dispatch,
 								getState,
 								server

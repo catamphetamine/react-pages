@@ -64,7 +64,14 @@ export async function renderPage(url, headers, settings, options)
 
 	const cookies = headers.cookie ? cookie.parse(headers.cookie) : {}
 
-	let { status, content, redirect, route, time, cookies: cookiesToSet } = await render(settings, {
+	let {
+		status,
+		content,
+		redirect,
+		route,
+		time,
+		cookies: newCookies
+	} = await render(settings, {
 		proxy,
 		assets,
 		authentication,
@@ -102,7 +109,7 @@ export async function renderPage(url, headers, settings, options)
 	}
 
 	return {
-		cookies: cookiesToSet,
+		cookies: newCookies,
 		status,
 		content
 	}

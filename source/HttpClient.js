@@ -2,75 +2,64 @@ import superagent from 'superagent'
 
 import { starts_with } from './helpers'
 import { getCookie as _getCookie } from './client/cookies'
-import HttpRequest, { get_cookie_key_value } from './HttpRequest'
+import HttpRequest, { getCookieKeyAndValue } from './HttpRequest'
+
+const HTTP_METHODS = [
+	'get',
+	'post',
+	'put',
+	'patch',
+	'delete',
+	'head',
+	'options'
+]
 
 // This is an isomorphic (universal) HTTP client
 // which works both on Node.js and in the web browser,
 // and therefore can be used in Redux actions (for HTTP requests)
-export default class HttpClient
-{
+export default class HttpClient {
 	// `Set-Cookie` HTTP headers
 	// (in case any cookies are set)
-	// set_cookies = new Set()
-	set_cookies = []
+	// cookiesSetOnServer = new Set()
+	cookiesSetOnServer = []
 
 	// Constructs a new instance of Http client.
 	// Optionally takes an Http Request as a reference to mimic
 	// (in this case, cookies, to make authentication work on the server-side).
-	constructor(options = {})
-	{
-		const
-		{
+	constructor(options = {}) {
+		const {
 			proxy,
 			headers,
 			cookies,
-			authentication_token_header,
-			on_before_send,
-			catch_to_retry,
-			get_access_token,
-			allow_absolute_urls
-		}
-		= options
+			authTokenHeader,
+			onBeforeSend,
+			catchToRetry,
+			getAuthToken
+		} = options
 
-		const parse_json_dates = options.parseDates !== false
+		const shouldParseJsonDates = options.parseDates !== false
 
-		const transform_url = options.transform_url || this.proxy_url.bind(this)
+		const transformUrl = options.transformUrl || this.proxyUrl.bind(this)
 
 		// Clone HTTP request cookies on the server-side
 		// (to make authentication work)
-		if (cookies)
-		{
+		if (cookies) {
 			this.server = true
 		}
 
 		this.proxy = proxy
 
-		const http_methods =
-		[
-			'get',
-			'post',
-			'put',
-			'patch',
-			'delete',
-			'head',
-			'options'
-		]
-
 		// "Get cookie value by name" helper (works both on client and server)
 		const getCookie = this.server
 		?
-		((name) =>
-		{
+		((name) => {
 			// If this cookie was set dynamically then return it
-			for (const cookie_raw of this.set_cookies)
-			{
-				if (cookie_raw.indexOf(`${name}=`) === 0)
-				{
-					const [key, value] = get_cookie_key_value(cookie_raw)
+			for (const cookieRaw of this.cookiesSetOnServer) {
+				if (cookieRaw.indexOf(`${name}=`) === 0) {
+					const [key, value] = getCookieKeyAndValue(cookieRaw)
 					return value
 				}
 			}
-
 			// Return the original request cookie
 			return cookies[name]
 		})
@@ -82,41 +71,34 @@ export default class HttpClient
 		const agent = this.server ? superagent.agent() : superagent
 
 		// Define HTTP methods on this `http` utility instance
-		for (const method of http_methods)
-		{
-			this[method] = (path, data, options = {}) =>
-			{
+		for (const method of HTTP_METHODS) {
+			this[method] = (path, data, options = {}) => {
 				// `url` will be absolute for server-side
-				const url = transform_url(path, this.server)
+				const url = transformUrl(path, this.server)
 
 				// Is incremented on each retry
-				let retry_count = -1
+				let retryCount = -1
 
 				// Performs an HTTP request to the given `url`.
 				// Can retry itself.
-				const perform_http_request = () =>
-				{
+				const performHttpRequest = () => {
 					// Create Http request
-					const request = new HttpRequest(method, url, data,
-					{
+					const request = new HttpRequest(method, url, data, {
 						agent,
-						parse_json_dates,
-						on_response_headers : options.onResponseHeaders,
-						headers : { ...headers, ...options.headers },
-						new_cookies_added : (cookies) =>
-						{
-							if (this.server)
-							{
+						shouldParseJsonDates,
+						onResponseHeaders: options.onResponseHeaders,
+						headers: { ...headers, ...options.headers },
+						onAddCookies: (cookies) => {
+							if (this.server) {
 								// Cookies will be duplicated here
 								// because `superagent.agent()` persists
 								// `Set-Cookie`s between subsequent requests
 								// (i.e. for the same `HttpClient` instance).
 								// Therefore using a `Set` instead of an array.
-								for (const cookie of cookies)
-								{
-									// this.set_cookies.add(cookie)
-									if (this.set_cookies.indexOf(cookie) < 0) {
-										this.set_cookies.push(cookie)
+								for (const cookie of cookies) {
+									// this.cookiesSetOnServer.add(cookie)
+									if (this.cookiesSetOnServer.indexOf(cookie) < 0) {
+										this.cookiesSetOnServer.push(cookie)
 									}
 								}
 							}
@@ -124,28 +106,26 @@ export default class HttpClient
 					})
 
 					// Sets `Authorization: Bearer ${token}` in HTTP request header
-					request.add_authentication
-					(
-						authentication_token_header,
+					request.addAuthenticationToken(
+						authTokenHeader,
 						options.authentication,
-						get_access_token,
+						getAuthToken,
 						getCookie,
 						url,
 						path
 					)
 
 					// On server side, add cookies to relative HTTP requests.
-					if (this.server && is_relative_url(path))
-					{
-						request.add_cookies(cookies, this.set_cookies)
+					if (this.server && isRelativeUrl(path)) {
+						request.addCookies(cookies, this.cookiesSetOnServer)
 					}
 
 					// Allows customizing HTTP requests.
 					// (for example, setting some HTTP headers,
 					//  or changing HTTP request `Content-Type`).
 					// https://github.com/catamphetamine/react-website/issues/73
-					if (on_before_send) {
-						on_before_send(request.request, {
+					if (onBeforeSend) {
+						onBeforeSend(request.request, {
 							url,
 							requestedURL: path
 						})
@@ -153,99 +133,49 @@ export default class HttpClient
 
 					// File upload progress metering
 					// https://developer.mozilla.org/en/docs/Web/API/XMLHttpRequest/Using_XMLHttpRequest
-					if (options.progress)
-					{
+					if (options.progress) {
 						request.progress(options.progress)
 					}
 
-					// If using `bluebird` and `Promise` cancellation is configured
-					// http://bluebirdjs.com/docs/api/cancellation.html
-					return new Promise((resolve, reject, onCancel) =>
-					{
-						// Send HTTP request
-						request.send().then(resolve, reject)
-
-						// If using `bluebird` and `Promise` cancellation is configured
-						// http://bluebirdjs.com/docs/api/cancellation.html
-						// https://github.com/petkaantonov/bluebird/issues/1323
-						if (Promise.version && onCancel)
-						{
-							onCancel(() => request.request.abort())
-						}
-
-						// // One could store the `request` to later `.abort()` it.
-						// // https://github.com/catamphetamine/react-website/issues/46
-						// if (options.onRequest)
-						// {
-						// 	options.onRequest(request.request)
-						// }
-					})
-					.then
-					(
+					return request.send().then(
 						(response) => response,
-						(error) =>
-						{
+						(error) => {
 							// `superagent` would have already output the error to console
 							// console.error(error.stack)
-
-							// (legacy)
-							//
-							// this turned out to be a lame way of handling cookies,
-							// because cookies are sent in request
-							// with no additional parameters
-							// such as `path`, `httpOnly` and `expires`,
-							// so there were cookie duplication issues.
-							//
-							// if (response)
-							// {
-							// 	if (response.get('set-cookie'))
-							// 	{
-							// 		this.cookies_raw = response.get('set-cookie')
-							// 	}
-							// }
-
 							// Can optionally retry an HTTP request in case of an error
-							// (e.g. if an Auth0 access token expired and has to be refreshed).
+							// (e.g. if a JWT access token expired and has to be refreshed using a "refresh" token).
 							// https://auth0.com/blog/refresh-tokens-what-are-they-and-when-to-use-them/
-							if (catch_to_retry)
-							{
-								retry_count++
-
-								return catch_to_retry(error, retry_count,
-								{
+							if (catchToRetry) {
+								retryCount++
+								return catchToRetry(error, retryCount, {
 									getCookie,
 									http: this
 								})
-								.then(perform_http_request)
+								.then(performHttpRequest)
 							}
-
 							// HTTP request failed with an `error`
-							return Promise.reject(error)
+							throw error
 						}
 					)
 				}
 
-				return perform_http_request()
+				return performHttpRequest()
 			}
 		}
 	}
 
 	// Validates the requested URL,
 	// and also prepends host and port to it on the server side.
-	proxy_url(path, server)
-	{
+	proxyUrl(path, server) {
 		// Prepend host and port on the server side
-		if (this.proxy && server)
-		{
+		if (this.proxy && server) {
 			const protocol = this.proxy.secure ? 'https' : 'http'
 			return `${protocol}://${this.proxy.host}:${this.proxy.port || '80'}${path}`
 		}
-
 		return path
 	}
 }
 
-function is_relative_url(path)
-{
+function isRelativeUrl(path) {
 	return starts_with(path, '/') && !starts_with(path, '//')
 }

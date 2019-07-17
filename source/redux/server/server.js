@@ -41,7 +41,7 @@ export async function initialize(settings, {
 	return {
 		store,
 		generateJavascript: () => generateJavascript(store, settings),
-		cookies: httpClient.set_cookies
+		cookies: httpClient.cookiesSetOnServer
 	}
 }
 

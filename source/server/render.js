@@ -39,7 +39,7 @@ export default async function(settings, {
 
 	// `parameters` are used for `assets` and `html` modifiers.
 	const {
-		cookies: cookiesToSet,
+		cookies: newCookies,
 		generateJavascript,
 		...parameters
 	} = await reduxInitialize(settings, {
@@ -157,6 +157,6 @@ export default async function(settings, {
 		status,
 		content: combineStreams(streams),
 		time,
-		cookies: cookiesToSet
+		cookies: newCookies
 	}
 }

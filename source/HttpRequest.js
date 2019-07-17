@@ -10,13 +10,13 @@ export default class HttpRequest
 		{
 			agent,
 			headers,
-			parse_json_dates,
-			new_cookies_added,
-			on_response_headers
+			shouldParseJsonDates,
+			onAddCookies,
+			onResponseHeaders
 		}
 		= options
 
-		this.new_cookies_added = new_cookies_added
+		this.onAddCookies = onAddCookies
 
 		// Create Http request.
 		this.request = agent[method](url)
@@ -37,8 +37,11 @@ export default class HttpRequest
 				case 'patch':
 				case 'head':
 				case 'options':
-					isMultipartFormData = has_binary_data(data)
-					this.request.send(isMultipartFormData ? construct_form_data(data) : data)
+					if (hasBinaryData(data)) {
+						addMultipartData(this.request, data)
+					} else {
+						this.request.send(data)
+					}
 					break
 
 				case 'delete':
@@ -65,149 +68,106 @@ export default class HttpRequest
 		}
 
 		// `true`/`false`
-		this.parse_json_dates = parse_json_dates
+		this.shouldParseJsonDates = shouldParseJsonDates
 
 		// Can be used for examining HTTP response headers
 		// (e.g. Amazon S3 file upload)
-		this.on_response_headers = on_response_headers
+		this.onResponseHeaders = onResponseHeaders
 	}
 
 	// Sets `Authorization: Bearer ${token}` in HTTP request header
-	add_authentication(authentication_token_header, authentication, get_access_token, getCookie, url, path)
-	{
+	addAuthenticationToken(authTokenHeader, authentication, getAuthToken, getCookie, url, path) {
 		let token
-
-		if (typeof authentication === 'string')
-		{
+		if (typeof authentication === 'string') {
 			token = authentication
-		}
-		else if (get_access_token)
-		{
-			token = get_access_token(getCookie, {
+		} else if (getAuthToken) {
+			token = getAuthToken(getCookie, {
 				url,
 				// `path` is deprecated, use `requestedURL` instead.
 				path,
 				requestedURL: path
 			})
 		}
-
-		if (token && authentication !== false)
-		{
-			this.request.set(authentication_token_header || 'Authorization', `Bearer ${token}`)
+		if (token && authentication !== false) {
+			this.request.set(authTokenHeader || 'Authorization', `Bearer ${token}`)
 		}
 	}
 
 	// Server side only
 	// (copies user authentication cookies to retain session specific data)
-	add_cookies(cookies, set_cookies)
-	{
-		// Merge the initial HTTP request `cookies` and `set_cookies` (a `Set`)
-		if (set_cookies.size > 0)
-		{
+	addCookies(cookies, cookiesToAdd) {
+		// Merge the initial HTTP request `cookies` and `cookiesToAdd` (a `Set`)
+		if (cookiesToAdd.size > 0) {
 			cookies = { ...cookies }
-
-			for (const cookie_raw of set_cookies)
-			{
-				const [key, value] = get_cookie_key_value(cookie_raw)
+			for (const cookieRaw of cookiesToAdd) {
+				const [key, value] = getCookieKeyAndValue(cookieRaw)
 				cookies[key] = value
 			}
 		}
-
-		if (Object.keys(cookies).length > 0)
-		{
+		if (Object.keys(cookies).length > 0) {
 			this.request.set('cookie', Object.keys(cookies).map(key => `${key}=${cookies[key]}`).join(';'))
 		}
 	}
 
 	// File upload progress metering
 	// https://developer.mozilla.org/en/docs/Web/API/XMLHttpRequest/Using_XMLHttpRequest
-	progress(progress)
-	{
-		this.request.on('progress', function(event)
-		{
-			if (event.direction !== 'upload')
-			{
+	progress(progress) {
+		this.request.on('progress', function(event) {
+			if (event.direction !== 'upload') {
 				// Only interested in file upload progress metering
 				return
 			}
-
-			if (!event.lengthComputable)
-			{
+			if (!event.lengthComputable) {
 				// Unable to compute progress information since the total size is unknown
 				return
 			}
-
 			progress(event.percent, event)
 		})
 	}
 
-	send()
-	{
-		return new Promise((resolve, reject) =>
-		{
-			this.request.end((error, response) =>
-			{
-				if (response)
-				{
-					if (this.on_response_headers)
-					{
-						this.on_response_headers(response.headers)
-					}
-
-					// (on the server)
-					// If any cookies were set then track them (for later).
-					// `response.headers['set-cookie']` is an array of `String`s.
-					if (response.headers['set-cookie'])
-					{
-						this.new_cookies_added(response.headers['set-cookie'])
-					}
+	send() {
+		return this.request.then(
+			(response) => {
+				if (this.onResponseHeaders) {
+					this.onResponseHeaders(response.headers)
 				}
-
-				if (error)
-				{
-					// Infer additional `error` properties from the HTTP response
-					if (response)
-					{
-						this.populate_error_data(error, response)
-					}
-
-					return reject(error)
+				// (on the server)
+				// If any cookies were set then track them (for later).
+				// `response.headers['set-cookie']` is an array of `String`s.
+				if (response.headers['set-cookie']) {
+					this.onAddCookies(response.headers['set-cookie'])
 				}
-
-				// If HTTP response status is "204 - No content"
-				// (e.g. PUT, DELETE)
-				// then resolve with an empty result.
-				if (response.statusCode === 204)
-				{
-					return resolve()
-				}
-
-				resolve(this.get_response_data(response))
-			})
+			}
+			// If HTTP response status is "204 - No content"
+			// (PUT, DELETE) then resolve with an empty result.
+			if (response.statusCode !== 204) {
+				return this.getResponseData(response)
+			},
+			(error) => {
+				// Infer additional `error` properties from the HTTP response.
+				this.populateErrorData(error)
+				throw error
+			}
 		})
 	}
 
-	populate_error_data(error, response)
-	{
+	populateErrorData(error) {
+		const response = error.response
+		const responseData = this.getResponseData(response)
+
 		// Set `error.status` to HTTP response status code
 		error.status = response.statusCode
 
-		const response_data = this.get_response_data(response)
-
-		switch (response.type)
-		{
+		switch (response.type) {
 			// Set error `data` from response body,
 			case 'application/json':
 			// http://jsonapi.org/
 			case 'application/vnd.api+json':
-				error.data = response_data
-
+				error.data = responseData
 				// Set the more meaningful message for the error (if available)
-				if (error.data.message)
-				{
+				if (error.data.message) {
 					error.message = error.data.message
 				}
-
 				break
 
 			// If the HTTP response was not a JSON object,
@@ -216,36 +176,29 @@ export default class HttpRequest
 			// for future reference (e.g. easier debugging).
 
 			case 'text/plain':
-				error.message = response_data
+				error.message = responseData
 				break
 
 			case 'text/html':
-				error.html = response_data
-
+				error.html = responseData
 				// Recover the original error message (if any)
-				if (response.headers['x-error-message'])
-				{
+				if (response.headers['x-error-message']) {
 					error.message = response.headers['x-error-message']
 				}
-
 				// Recover the original error stack trace (if any)
-				if (response.headers['x-error-stack-trace'])
-				{
+				if (response.headers['x-error-stack-trace']) {
 					error.stack = JSON.parse(response.headers['x-error-stack-trace'])
 				}
-
 				break
 		}
 	}
 
-	get_response_data(response)
-	{
-		switch (response.type)
-		{
+	getResponseData(response) {
+		switch (response.type) {
 			case 'application/json':
 			// http://jsonapi.org/
 			case 'application/vnd.api+json':
-				if (this.parse_json_dates) {
+				if (this.shouldParseJsonDates) {
 					return parseDates(response.body)
 				}
 				return response.body
@@ -259,84 +212,53 @@ export default class HttpRequest
 }
 
 // Returns `[key, value]` from a raw cookie string
-export function get_cookie_key_value(cookie_raw)
-{
-	const semicolon_index = cookie_raw.indexOf(';')
-
-	if (semicolon_index >= 0)
-	{
-		cookie_raw = cookie_raw.slice(0, semicolon_index)
+export function getCookieKeyAndValue(cookieRaw) {
+	const semicolonIndex = cookieRaw.indexOf(';')
+	if (semicolonIndex >= 0) {
+		cookieRaw = cookieRaw.slice(0, semicolonIndex)
 	}
-
-	return cookie_raw.trim().split('=')
+	return cookieRaw.trim().split('=')
 }
 
-function construct_form_data(data)
-{
-	// Just in case (who knows)
-	if (typeof FormData === 'undefined')
-	{
-		// Silent fallback
-		return data
-	}
-
-	const form_data = new FormData()
-
-	for (const key of Object.keys(data))
-	{
+function addMultipartData(request, data) {
+	for (const key of Object.keys(data)) {
 		let parameter = data[key]
-
 		// For an `<input type="file"/>` DOM element just take its `.files`
-		if (typeof HTMLInputElement !== 'undefined' && parameter instanceof HTMLInputElement)
-		{
+		if (typeof HTMLInputElement !== 'undefined' && parameter instanceof HTMLInputElement) {
 			parameter = parameter.files
 		}
-
 		// For a `FileList` parameter (e.g. `multiple` file upload),
 		// iterate the `File`s in the `FileList`
 		// and add them to the form data as a `[File]` array.
-		if (typeof FileList !== 'undefined' && parameter instanceof FileList)
-		{
+		if (typeof FileList !== 'undefined' && parameter instanceof FileList) {
 			let i = 0
-			while (i < parameter.length)
-			{
-				form_data.append(key, parameter[i])
+			while (i < parameter.length) {
+				request.attach(key, parameter[i])
 				i++
 			}
-			continue
+		} else if (typeof File !== 'undefined' && parameter instanceof File) {
+			request.attach(key, parameter)
+		} else {
+			request.field(key, parameter)
 		}
-
-		form_data.append(key, parameter)
 	}
-
-	return form_data
 }
 
-function has_binary_data(data)
-{
-	if (!isObject(data))
-	{
+function hasBinaryData(data) {
+	if (!isObject(data)) {
 		return false
 	}
-
-	for (const key of Object.keys(data))
-	{
+	for (const key of Object.keys(data)) {
 		const parameter = data[key]
-
-		if (typeof HTMLInputElement !== 'undefined' && parameter instanceof HTMLInputElement)
-		{
+		if (typeof HTMLInputElement !== 'undefined' && parameter instanceof HTMLInputElement) {
 			return true
 		}
-
-		if (typeof FileList !== 'undefined' && parameter instanceof FileList)
-		{
+		if (typeof FileList !== 'undefined' && parameter instanceof FileList) {
 			return true
 		}
-
 		// `File` is a subclass of `Blob`
 		// https://developer.mozilla.org/en-US/docs/Web/API/Blob
-		if (typeof Blob !== 'undefined' && parameter instanceof Blob)
-		{
+		if (typeof Blob !== 'undefined' && parameter instanceof Blob) {
 			return true
 		}
 	}

@@ -93,7 +93,7 @@ export default class ReduxModule
 			throw new Error('[react-pages] One must pass an `action()` argument (the second one) to Redux module action creator: `reduxModule(event, action, result, options = {})`.')
 		}
 
-		return create_action(event, action, result, options, this)
+		return createAction(event, action, result, options, this)
 	}
 
 	simpleAction(event, action, result, options)
@@ -205,14 +205,9 @@ export default class ReduxModule
 }
 
 // Returns Redux action creator.
-function create_action(event, action, result, options, redux)
-{
+function createAction(event, action, result, options, redux) {
 	const namespace = redux.namespace
-
-	const {
-		sync,
-		cancelPrevious
-	} = options
+	const { sync } = options
 
 	// If `result` is a property name,
 	// then add that property to `connectXxx()`.
@@ -232,14 +227,11 @@ function create_action(event, action, result, options, redux)
 	result = result || (state => state)
 
 	// Synchronous action
-	if (sync)
-	{
+	if (sync) {
 		// Reducer
 		redux.on(eventName(namespace, event), get_action_value_reducer(result))
-
 		// Redux "action creator"
-		return (...parameters) =>
-		({
+		return (...parameters) => ({
 			type : eventName(namespace, event),
 			[RESULT_ACTION_PROPERTY] : action.apply(this, parameters)
 		})
@@ -256,20 +248,11 @@ function create_action(event, action, result, options, redux)
 	add_asynchronous_action_reducers(redux, namespace, event, get_action_value_reducer(result))
 
 	// Redux "action creator"
-	return (...parameters) =>
-	({
-		event   : eventName(namespace, event),
+	return (...parameters) => ({
+		event: eventName(namespace, event),
 		// `dispatch` and `getState` arguments are deprecated
 		// and will be removed in some future major version release.
-		promise : (http, dispatch, getState) =>
-		{
-			if (redux.v2) {
-				// For gradual migration from version "2.x" syntax.
-				return action.apply(this, [{ http, dispatch, getState }].concat(parameters))
-			}
-			return action.apply(this, parameters)(http)
-		},
-		cancelPrevious
+		promise: (http, dispatch, getState) => action.apply(this, parameters)(http)
 	})
 }
 

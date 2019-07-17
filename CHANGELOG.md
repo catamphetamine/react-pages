@@ -20,12 +20,12 @@ Set `http.alwaysSetContentType` to `false` by default in the next major version 
 
 <!-- Maybe replace ActivityIndicator with something else (not requiring ems for width, using percentages instead). -->
 
+<!-- Maybe replace @page, @meta, @onPageLoad with just static methods. How will multiple @preload()s with options ({ client: true }, ...) will be handled. -->
+
 1.0.0 / ...
 ===========
 
-* Updated `found` to `0.4.x` which updates `react-redux` to `>= 0.6.x`.
-
-* `react-website@4` is now called `react-pages@1`.
+* `react-website@4` is now called `react-pages@1`. See the [migration notes](https://github.com/catamphetamine/react-pages/MIGRATION.md).
 
 3.1.27 / 21.05.2019
 ===================

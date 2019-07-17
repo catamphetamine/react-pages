@@ -32,6 +32,7 @@ import { onPageLoaded, replaceLocation } from 'react-pages'
 
 In most applications some routes are only accessible by a specific group of users. One may ask what route restriction mechanisms does this library provide. The answer is: you actually don't need them. For example, in my projects the `@preload()` function itself serves as a guard by querying a REST API endpoint which performs user authentication internally and throws a "403 Access Denied" error if a user doesn't have the permission to view the page.
 
+<!--
 ## Cancelling previous action
 
 E.g. for an autocomplete component querying backend for matches it can be useful to be able to abort the previous search for matches when the user enters additional characters. In this case `Promise` cancellation feature can be employed which requires using `bluebird` `Promise` implementation being [configured](http://bluebirdjs.com/docs/api/cancellation.html) for `Promise` cancellation and passing `cancelPrevious: true` flag in an asynchronous Redux "action".
@@ -58,6 +59,7 @@ function autocompleteMatch(inputValue) {
   }
 }
 ```
+-->
 
 ## Redux module event and property naming
 
