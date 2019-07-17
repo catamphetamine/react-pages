@@ -1,5 +1,5 @@
 export function isServerSidePreloaded() {
-	return window._server_side_render && !window._react_website_reload_data
+	return window._server_side_render && !window._react_pages_reload_data
 }
 
 export function isServerSideRendered() {

@@ -16,12 +16,12 @@ import preload from './preload'
 export default function createGetDataForPreload(codeSplit, server, onError, getLocale, getConvertedRoutes, getCookie) {
 	return function({ params, context: { dispatch, getState } }) {
 		if (!server) {
-			if (window._react_website_skip_preload ||
-				window._react_website_skip_preload_update_location ||
-				window._react_website_hot_reload) {
+			if (window._react_pages_skip_preload ||
+				window._react_pages_skip_preload_update_location ||
+				window._react_pages_hot_reload) {
 				// Reset "skip @preload()" flag for `pushLocation()` and `replaceLocation()`.
-				if (window._react_website_skip_preload_update_location) {
-					window._react_website_skip_preload_update_location = false;
+				if (window._react_pages_skip_preload_update_location) {
+					window._react_pages_skip_preload_update_location = false;
 				}
 				return
 			}
@@ -84,6 +84,6 @@ function getLocations(state) {
 	const server = typeof window === 'undefined'
 	return {
 		location: getCurrentlyMatchedLocation(state),
-		previousLocation: (server || !window._react_website_router_rendered) ? undefined : getPreviouslyMatchedLocation(state)
+		previousLocation: (server || !window._react_pages_router_rendered) ? undefined : getPreviouslyMatchedLocation(state)
 	}
 }

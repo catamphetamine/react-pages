@@ -48,7 +48,7 @@ export default function setUpAndRender(settings, options = {}) {
 	// Create HTTP client (Redux action creator `http` utility)
 	const httpClient = createHttpClient(settings, () => store)
 	// E.g. for WebSocket message handlers, since they only run on the client side.
-	window._react_website_http_client = httpClient
+	window._react_pages_http_client = httpClient
 
 	// Reset "instant back" on page reload
 	// since Redux state is cleared.
@@ -64,8 +64,8 @@ export default function setUpAndRender(settings, options = {}) {
 	// is to render the markup which matches server-side one.
 	// The second pass will be to render after resolving `getData`.
 	if (isServerSidePreloaded()) {
-		window._react_website_initial_prerender = true
-		window._react_website_skip_preload = true
+		window._react_pages_initial_prerender = true
+		window._react_pages_skip_preload = true
 	}
 
 	// Create Redux store
@@ -151,7 +151,7 @@ export default function setUpAndRender(settings, options = {}) {
 			// dispatched manually.
 			store.dispatch({
 				type: _RESOLVE_MATCH,
-				payload: window._react_website_update_match_event_payload
+				payload: window._react_pages_update_match_event_payload
 			})
 		}
 		return result
@@ -165,9 +165,9 @@ export default function setUpAndRender(settings, options = {}) {
 		if (error instanceof RedirectException) {
 			// Change current location.
 			store.dispatch(pushLocation(error.location))
-			// Reset all `react-website` flags.
+			// Reset all `react-pages` flags.
 			for (const key in window) {
-				if (key.indexOf('_react_website_') === 0 && key !== '_react_website_locales') {
+				if (key.indexOf('_react_pages_') === 0 && key !== '_react_pages_locales') {
 					window[key] = undefined
 				}
 			}
@@ -194,5 +194,5 @@ export function getState(erase) {
 // Can be used in WebSocket message handlers,
 // since they only run on the client side.
 export function getHttpClient() {
-	return window._react_website_http_client
+	return window._react_pages_http_client
 }

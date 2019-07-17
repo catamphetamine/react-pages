@@ -5,7 +5,7 @@
 .babelrc
 
 # testing package
-/react-website-*.tgz
+/react-pages-*.tgz
 
 # Travis CI
 .travis.yml

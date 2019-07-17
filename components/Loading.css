@@ -1,4 +1,4 @@
-.react-website__loading
+.react-pages__loading
 {
 	position : fixed;
 
@@ -15,7 +15,7 @@
 	transition : background-color 0ms linear 160ms, opacity 160ms ease-out, z-index 160ms step-end;
 }
 
-.react-website__loading-spinner
+.react-pages__loading-spinner
 {
 	position   : absolute;
 	left       : calc(50% - 2rem);
@@ -27,12 +27,12 @@
 	transition : color 0ms linear 160ms;
 }
 
-.react-website__loading--initial .react-website__loading-spinner
+.react-pages__loading--initial .react-pages__loading-spinner
 {
 	transition : none;
 }
 
-.react-website__loading--shown
+.react-pages__loading--shown
 {
 	z-index : 1000;
 	opacity : 1;
@@ -42,17 +42,17 @@
 	cursor : wait;
 }
 
-.react-website__loading--immediate
+.react-pages__loading--immediate
 {
 	transition-delay : 0ms;
 }
 
-.react-website__loading--initial
+.react-pages__loading--initial
 {
 	background-color : transparent;
 }
 
-.react-website__loading--initial .react-website__loading-spinner
+.react-pages__loading--initial .react-pages__loading-spinner
 {
 	/* The current implementation for the spinner is 4 stacked arcs,
 	   so not using transparency here. */
@@ -61,14 +61,14 @@
 }
 
 /*
-.react-website__loading--shown .rrui__activity-indicator-circle-container,
-.react-website__loading--shown .rrui__activity-indicator-circle
+.react-pages__loading--shown .rrui__activity-indicator-circle-container,
+.react-pages__loading--shown .rrui__activity-indicator-circle
 {
 	animation-delay : 500ms;
 }
 
-.react-website__loading--immediate .rrui__activity-indicator-circle-container,
-.react-website__loading--immediate .rrui__activity-indicator-circle
+.react-pages__loading--immediate .rrui__activity-indicator-circle-container,
+.react-pages__loading--immediate .rrui__activity-indicator-circle
 {
 	animation-delay : 0ms;
 }

@@ -98,7 +98,7 @@ export default async function(settings, {
 
 	// A special `base.html` page for static sites.
 	// (e.g. the ones hosted on Amazon S3)
-	if (path.replace(/\/$/, '') === '/react-website-base') {
+	if (path.replace(/\/$/, '') === '/react-pages-base') {
 		renderContent = false
 		// Get `<meta/>` for the route.
 		const [ beforeContent, afterContent ] = generateOuterHtml({
@@ -106,7 +106,7 @@ export default async function(settings, {
 			...mergeMeta([])
 		})
 		return {
-			route: '/react-website-base',
+			route: '/react-pages-base',
 			status: 200,
 			content: createStringStream(beforeContent + afterContent),
 			cookies: []

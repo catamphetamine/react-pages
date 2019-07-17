@@ -20,13 +20,13 @@ export default function renderError(error, options)
 				}
 			}
 		} catch (error) {
-			console.log('[react-website] Couldn\'t render error stack trace.')
+			console.log('[react-pages] Couldn\'t render error stack trace.')
 			console.log(error.stack || error)
 		}
 	}
 
 	// Log the error
-	console.log('[react-website] Rendering service error')
+	console.log('[react-pages] Rendering service error')
 	// console.error(error)
 
 	return {

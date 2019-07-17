@@ -22,7 +22,7 @@ export default function render({ render, renderParameters = {}, container }) {
 		if (firstRender) {
 			firstRender = false
 		} else {
-			window._react_website_hot_reload = true
+			window._react_pages_hot_reload = true
 		}
 		return render(renderParameters).then(({ element, containerProps, ...rest }) => {
 			// if (locale) {
@@ -35,7 +35,7 @@ export default function render({ render, renderParameters = {}, container }) {
 				// DOM element to which React markup will be rendered
 				getReactContainerElement()
 			)
-			window._react_website_hot_reload = false
+			window._react_pages_hot_reload = false
 			return rest
 		})
 	}
@@ -63,7 +63,7 @@ function renderReactElementTree(element, to) {
 	// "Calling ReactDOM.render() to hydrate server-rendered markup
 	//  will stop working in React v17. Replace the ReactDOM.render() call
 	//  with ReactDOM.hydrate() if you want React to attach to the server HTML."
-	if (!window._react_website_hot_reload) {
+	if (!window._react_pages_hot_reload) {
 		while (to.firstChild) {
 			to.removeChild(to.firstChild)
 		}

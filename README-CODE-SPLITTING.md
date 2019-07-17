@@ -10,7 +10,7 @@ To circumvent such performance issues on low-power mobile devices one can employ
 
 First, set "code splitting" mode to "ON".
 
-#### ./src/react-website.js
+#### ./src/react-pages.js
 
 ```js
 export default {

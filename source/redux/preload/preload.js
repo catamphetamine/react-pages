@@ -83,8 +83,8 @@ export default function _preload(
 			} else {
 				_components = filterByChangedRoutes(_components, routeIndices, routeParams)
 			}
-			window._react_website_previous_routes = routeIndices
-			window._react_website_previous_routes_parameters = routeParams
+			window._react_pages_previous_routes = routeIndices
+			window._react_pages_previous_routes_parameters = routeParams
 		}
 
 		// Get all `preload` methods on the React-Router component chain
@@ -196,7 +196,7 @@ function instrumentDispatch(dispatch, server, preloading) {
 				if (preloading.cancel) {
 					preloading.cancel()
 				}
-				// if (!server && window._react_website_skip_preload_update_location) {
+				// if (!server && window._react_pages_skip_preload_update_location) {
 				// 	console.warn('Looks like you\'re calling `dispatch(pushLocation())` or `dispatch(replaceLocation())` inside `@preload()`. Call them in `@onPageLoaded()` instead.')
 				// }
 				throw new RedirectException(event.payload)
@@ -316,10 +316,10 @@ function filterByChangedRoutes(filtered, routes, routeParams)
 {
 	let filteredByChangedRoutes = filtered
 
-	if (window._react_website_previous_routes)
+	if (window._react_pages_previous_routes)
 	{
-		const previous_routes = window._react_website_previous_routes
-		const previous_routes_parameters = window._react_website_previous_routes_parameters
+		const previous_routes = window._react_pages_previous_routes
+		const previous_routes_parameters = window._react_pages_previous_routes_parameters
 
 		let i = 0
 		while (i < routes.length - 1 &&

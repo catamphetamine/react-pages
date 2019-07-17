@@ -1,8 +1,8 @@
-# react-website
+# react-pages
 
-[![npm version](https://img.shields.io/npm/v/react-website.svg?style=flat-square)](https://www.npmjs.com/package/react-website)
-[![npm downloads](https://img.shields.io/npm/dm/react-isomorphic-render.svg?style=flat-square)](https://www.npmjs.com/package/react-website)
-[![npm downloads](https://img.shields.io/npm/dm/react-website.svg?style=flat-square)](https://www.npmjs.com/package/react-website)
+[![npm version](https://img.shields.io/npm/v/react-pages.svg?style=flat-square)](https://www.npmjs.com/package/react-pages)
+[![npm downloads](https://img.shields.io/npm/dm/react-isomorphic-render.svg?style=flat-square)](https://www.npmjs.com/package/react-pages)
+[![npm downloads](https://img.shields.io/npm/dm/react-pages.svg?style=flat-square)](https://www.npmjs.com/package/react-pages)
 
 A complete solution for building a React/Redux application
 
@@ -17,9 +17,13 @@ A complete solution for building a React/Redux application
 * HTTP Cookies
 * etc
 
-# 2.x
+# `react-website`
 
-These are the docs for the latest version `3.x`. For version `2.x` (legacy projects) docs see the [README of the `2.x` branch](https://github.com/catamphetamine/react-website/tree/2.x).
+For the latest `react-website` release docs see the [`3.x` branch readme](https://github.com/catamphetamine/react-website/tree/3.x). This branch (`master`) is for the next (still work in progress) release of `react-website@4.x` which will be called `react-pages@1.x`. It's not ready yet so use [`react-website@3.x`](https://github.com/catamphetamine/react-website/tree/3.x) for now.
+
+# `react-pages` vs `react-website`
+
+`react-pages` will be the new name for the former [`react-website`](https://github.com/catamphetamine/react-website/) package: it's just a better name, so basically `react-pages@1.x` will be what `react-website@4.x` was going to be. The breaking change is that `react-website@3.x` comes with `found@0.3.x` router and `react-redux@5.x` while `react-pages@1.x` will update those to `found@0.4.x` and `react-redux@6.x`: this is required for React Hooks and for the future React 17 release. Currently `react-pages` is still at version `0.1.0` indicating that *this is still an "alpha" release* and the API is subject to change as `found` is being migrated from `0.3.x` to `0.4.x` and `react-redux` is being migrated from `5.x` to `6.x`. When the migration is finished version `1.0.0` will be released. There also will be a [migration guide from `react-website@3.x` to `react-pages@1.x`](https://github.com/catamphetamine/react-pages/MIGRATION.md).
 
 # Introduction
 
@@ -33,15 +37,15 @@ $ npm install redux react-redux@5 --save
 
 > Note: `react-redux@6` is incompatible with `found@0.3` and won't work [#69](https://github.com/catamphetamine/react-website/issues/69)
 
-Then, install `react-website`:
+Then, install `react-pages`:
 
 ```bash
-$ npm install react-website --save
+$ npm install react-pages --save
 ```
 
-Start by creating `react-website` configuration file.
+Start by creating `react-pages` configuration file.
 
-#### ./src/react-website.js
+#### ./src/react-pages.js
 
 ```javascript
 import routes from './routes'
@@ -62,7 +66,7 @@ The routes:
 
 ```js
 import React from 'react'
-import { Route } from 'react-website'
+import { Route } from 'react-pages'
 
 import App from '../pages/App'
 import Home from '../pages/Home'
@@ -80,7 +84,7 @@ export default (
 
 ```js
 import React from 'react'
-import { Link } from 'react-website'
+import { Link } from 'react-pages'
 
 export default ({ children }) => (
   <div>
@@ -107,7 +111,7 @@ export default () => <div> This is a home page </div>
 ```js
 import React from 'react'
 
-export default () => <div> Made using `react-website` </div>
+export default () => <div> Made using `react-pages` </div>
 ```
 
 The reducers:
@@ -127,8 +131,8 @@ Then call `render()` in the main client-side javascript file.
 #### ./src/index.js
 
 ```javascript
-import { render } from 'react-website'
-import settings from './react-website'
+import { render } from 'react-pages'
+import settings from './react-pages'
 
 // Render the page in web browser
 render(settings)
@@ -213,9 +217,9 @@ webpack-dev-server --hot --config webpack.config.js
 
 ####
 
-See the [Webpack example project](https://github.com/catamphetamine/react-website-webpack-example).
+See the [Webpack example project](https://github.com/catamphetamine/react-pages-webpack-example).
 
-If you're using [Parcel](https://parceljs.org/) then it's much simpler than Webpack: see the [basic example project](https://github.com/catamphetamine/react-website-basic-example) for the setup required in order to generate and serve `index.html` and `bundle.js` files over HTTP on `localhost:1234`.
+If you're using [Parcel](https://parceljs.org/) then it's much simpler than Webpack: see the [basic example project](https://github.com/catamphetamine/react-pages-basic-example) for the setup required in order to generate and serve `index.html` and `bundle.js` files over HTTP on `localhost:1234`.
 
 So now the website should be fully working.
 
@@ -247,8 +251,8 @@ In case of server-side rendering `index.html` is being generated on-the-fly by p
 #### ./rendering-server.js
 
 ```javascript
-import webpageServer from 'react-website/server'
-import settings from './react-website'
+import webpageServer from 'react-pages/server'
+import settings from './react-pages'
 
 // Create webpage rendering server
 const server = webpageServer(settings, {
@@ -259,7 +263,7 @@ const server = webpageServer(settings, {
   // as <script src="..."/> and <link rel="style" href="..."/>.
   // (this is for the main application JS and CSS bundles only,
   //  for injecting 3rd party JS and CSS use `html` settings instead:
-  //  https://github.com/catamphetamine/react-website/blob/master/README-ADVANCED.md#all-webpage-rendering-server-options)
+  //  https://github.com/catamphetamine/react-pages/blob/master/README-ADVANCED.md#all-webpage-rendering-server-options)
   assets() {
     return {
       // Assuming that it's being tested on a local computer first
@@ -297,7 +301,7 @@ This concludes the introductory part of the README and the rest is the descripti
 
 A working example illustrating Server-Side Rendering and all other things can be found here: [webpack-react-redux-isomorphic-render-example](https://github.com/catamphetamine/webpack-react-redux-isomorphic-render-example).
 
-A much simpler and smaller example (using Parcel instead of Webpack) can be found here: [react-website-basic-example](https://github.com/catamphetamine/react-website-basic-example).
+A much simpler and smaller example (using Parcel instead of Webpack) can be found here: [react-pages-basic-example](https://github.com/catamphetamine/react-pages-basic-example).
 
 # Documentation
 
@@ -307,7 +311,7 @@ For page preloading use the `@preload()` decorator to load the neccessary data b
 
 ```javascript
 import { connect } from 'react-redux'
-import { preload } from 'react-website'
+import { preload } from 'react-pages'
 
 // Redux "asynchronous action",
 // explained later in this document.
@@ -410,7 +414,7 @@ npm install babel-plugin-transform-decorators-legacy --save
 }
 ```
 
-On the client side, in order for `@preload` to work all `<Link/>`s imported from `react-router` **must** be instead imported from `react-website`. Upon a click on a `<Link/>` first it waits for the next page to preload, and then, when the next page is fully loaded, `react-router` navigation itself takes place.
+On the client side, in order for `@preload` to work all `<Link/>`s imported from `react-router` **must** be instead imported from `react-pages`. Upon a click on a `<Link/>` first it waits for the next page to preload, and then, when the next page is fully loaded, `react-router` navigation itself takes place.
 
 <details>
 <summary><code>@preload</code> also works for Back/Forward navigation. To disable page <code>@preload</code> on Back navigation pass <code>instantBack</code> property to a <code>&lt;Link/&gt;</code>.</summary>
@@ -450,10 +454,10 @@ There's also an `isInstantBackAbleNavigation()` function (on client side) which 
 Sometimes preloading a page can take some time so one may want to (and actually should) add some kind of a "spinner" to inform the user that the application isn't frozen and that the navigation process needs some more time to finish. This can be achieved by adding the built-in `<Loading/>` component on a page:
 
 ```javascript
-import { Loading } from 'react-website'
+import { Loading } from 'react-pages'
 // Using Webpack CSS loader
-import 'react-website/components/Loading.css'
-import 'react-website/components/LoadingIndicator.css'
+import 'react-pages/components/Loading.css'
+import 'react-pages/components/LoadingIndicator.css'
 
 export default function Application() {
   return (
@@ -543,7 +547,7 @@ The possible `options` (the third argument of all `http` methods) are
 
 ###
 
-For that use the `http.onRequest(request, { url, requestedURL, getState })` setting in `./react-website.js` where:
+For that use the `http.onRequest(request, { url, requestedURL, getState })` setting in `./react-pages.js` where:
 
 * `request` is a [`superagent`](https://visionmedia.github.io/superagent/) `request` that can be modified. For example, to set an HTTP header: `request.set(headerName, headerValue)`.
 * `requestedURL` is the URL argument of the `http` utility call.
@@ -611,7 +615,7 @@ export default function(state = {}, action = {}) {
 After:
 
 ```js
-import { ReduxModule } from 'react-website'
+import { ReduxModule } from 'react-pages'
 
 const redux = new ReduxModule('FRIENDS')
 
@@ -678,7 +682,7 @@ Sometimes modules for one project are imported from another project, and both th
 #### redux/blogPost.js
 
 ```js
-import { ReduxModule } from 'react-website'
+import { ReduxModule } from 'react-pages'
 
 const redux = new ReduxModule('BLOG_POST')
 
@@ -744,7 +748,7 @@ The React Component would look like this
 ```js
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
-import { preload } from 'react-website'
+import { preload } from 'react-pages'
 import { connectComments, getComments, postComment } from './redux/blogPost'
 
 // Preload comments before showing the page
@@ -804,7 +808,7 @@ export default class BlogPostPage extends Component {
 ####
 
 ```js
-import { ReduxModule } from 'react-website'
+import { ReduxModule } from 'react-pages'
 
 const redux = new ReduxModule('NOTIFICATIONS')
 
@@ -850,7 +854,7 @@ dispatch(notify('Test'))
 
 ### HTTP authentication
 
-In order for `http` utility to send an authentication token as part of an HTTP request (the `Authorization: Bearer ${token}` HTTP header) the `authentication.accessToken()` function must be specified in `react-website.js`.
+In order for `http` utility to send an authentication token as part of an HTTP request (the `Authorization: Bearer ${token}` HTTP header) the `authentication.accessToken()` function must be specified in `react-pages.js`.
 
 ```js
 {
@@ -898,13 +902,13 @@ In order for `http` utility to send an authentication token as part of an HTTP r
 
 #####
 
-The `accessToken` is initially obtained when a user signs in: the web browser sends HTTP POST request to `/sign-in` API endpoint with `{ email, password }` parameters and gets `{ userInfo, accessToken }` as a response, which is then stored in `localStorage` (or in Redux `state`, or in a `cookie`) and all subsequent HTTP requests use that `accessToken` to call the API endpoints. The `accessToken` itself is usually a [JSON Web Token](https://jwt.io/introduction/) signed on the server side and holding the list of the user's priviliges ("roles"). Hence authentication and authorization are completely covered. [Refresh tokens](https://auth0.com/blog/refresh-tokens-what-are-they-and-when-to-use-them/) are also [supported](https://github.com/catamphetamine/react-website/blob/master/README-ADVANCED.md#all-react-websitejs-settings).
+The `accessToken` is initially obtained when a user signs in: the web browser sends HTTP POST request to `/sign-in` API endpoint with `{ email, password }` parameters and gets `{ userInfo, accessToken }` as a response, which is then stored in `localStorage` (or in Redux `state`, or in a `cookie`) and all subsequent HTTP requests use that `accessToken` to call the API endpoints. The `accessToken` itself is usually a [JSON Web Token](https://jwt.io/introduction/) signed on the server side and holding the list of the user's priviliges ("roles"). Hence authentication and authorization are completely covered. [Refresh tokens](https://auth0.com/blog/refresh-tokens-what-are-they-and-when-to-use-them/) are also [supported](https://github.com/catamphetamine/react-pages/blob/master/README-ADVANCED.md#all-react-pagesjs-settings).
 
 This kind of an authentication and authorization scheme is self-sufficient and doesn't require "restricting" any routes: if a route's `@preload()` uses `http` utility for querying an API endpoint then this API endpoint must check if the user is signed in and if the user has the necessary priviliges. If yes then the route is displayed. If not then the user is redirected to either a "Sign In Required" page or "Access Denied" page.
 
 A real-world (advanced) example for handling "Unauthenticated"/"Unauthorized" errors happening in `@preload()`s and during `http` calls:
 
-#### ./react-website.js
+#### ./react-pages.js
 
 ```js
 {
@@ -1113,7 +1117,7 @@ import {
   // Downloads data from a URL into an object
   // of shape `{ status: Number, content: String }`.
   download
-} from 'react-website/static-site-generator'
+} from 'react-pages/static-site-generator'
 
 import configuration from '../configuration'
 
@@ -1212,7 +1216,7 @@ The snapshotting approach works not only for classical web "documents" (a blog, 
 
 ```js
 import React, { Component } from 'react'
-import { preload } from 'react-website'
+import { preload } from 'react-pages'
 
 @preload(async ({ dispatch }) => await dispatch(loadCourseInfo()))
 @preload(async ({ dispatch }) => await dispatch(loadCoursePrice()), { client: true })
@@ -1224,7 +1228,7 @@ export default class Course extends Component {
 In this example `loadCourseInfo()` will be executed while snapshotting and therefore course info will be present on the snapshotted page. But course price won't be present on the snapshotted page because it's being loaded inside `@preload(..., { client: true })` which only gets called in a user's web browser. When a user opens the course page in his web browser it will show the snapshotted page with course info with a "loading" spinner on top of it as it is loading the course price. After the course price has been loaded the "loading" spinner disappears and the user sees the fully rendered course page.
 
 <!--
-The "client-side-only" `@preload()`s have a catch though: for [technical reasons](https://github.com/catamphetamine/react-website/blob/master/source/redux/client/client.js#L15) they aren't executed when the application is first rendered in a web browser. After the initial page load, the application is first rendered without resolving "client-side-only" `@preload()`s and only after this "first rendering pass" finishes does it resolve all "client-side-only" `@preload()`s and re-renders itself. This limitation is inherent to how React server-side rendering works. It can be simplified for cases where `index.html` approach is used, and this workaround will probably get implemented in some future version.
+The "client-side-only" `@preload()`s have a catch though: for [technical reasons](https://github.com/catamphetamine/react-pages/blob/master/source/redux/client/client.js#L15) they aren't executed when the application is first rendered in a web browser. After the initial page load, the application is first rendered without resolving "client-side-only" `@preload()`s and only after this "first rendering pass" finishes does it resolve all "client-side-only" `@preload()`s and re-renders itself. This limitation is inherent to how React server-side rendering works. It can be simplified for cases where `index.html` approach is used, and this workaround will probably get implemented in some future version.
 -->
 </details>
 
@@ -1248,7 +1252,7 @@ export default (
 Use `@meta(state) => ...)` decorator for adding `<title/>` and `<meta/>` tags:
 
 ```js
-import { meta } from 'react-website'
+import { meta } from 'react-pages'
 
 @meta(state) => ({
   // `<meta property="og:site_name" .../>`
@@ -1324,7 +1328,7 @@ export default class Page extends React.Component {
 
 `@meta()` decorator discards all other `<meta/>` set by any other means, e.g. if there are any `<meta/>` tags in `index.html` template then all of them will be dicarded if using `@meta()` decorator so don't mix `@meta()` decorator with `<meta/>` tags inserted manually into `index.html`.
 
-To set default `<meta/>` (for example, `og:site_name`, `og:description`, `og:locale`) define `meta` property in `react-website.js` settings file:
+To set default `<meta/>` (for example, `og:site_name`, `og:description`, `og:locale`) define `meta` property in `react-pages.js` settings file:
 
 ```js
 {
@@ -1356,7 +1360,7 @@ Anywhere in a React component: use the `found` property in Redux state.
 Dispatch `goto`/`redirect` Redux action to change current location (both on client and server).
 
 ```javascript
-import { goto, redirect } from 'react-website'
+import { goto, redirect } from 'react-pages'
 import { connect } from 'react-redux'
 
 // Usage example
@@ -1379,7 +1383,7 @@ Advanced: `goto()` can also take `{ instantBack: true }` option.
 If the current location needs to be changed while still staying at the same page (e.g. a checkbox has been ticked and the corresponding URL query parameter must be added), then use `dispatch(pushLocation(location))` or `dispatch(replaceLocation(location))` Redux actions.
 
 ```javascript
-import { pushLocation, replaceLocation } from 'react-website'
+import { pushLocation, replaceLocation } from 'react-pages'
 
 @connect(() => ({
   ...
@@ -1403,7 +1407,7 @@ class Page extends Component {
 To go "Back"
 
 ```javascript
-import { goBack } from 'react-website'
+import { goBack } from 'react-pages'
 
 @connect(() => ({
   ...
@@ -1517,12 +1521,12 @@ HMR setup for Redux reducers is as simple as adding `store.hotReload()` (as show
 #### application.js
 
 ```js
-import { render } from 'react-website'
-import settings from './react-website'
+import { render } from 'react-pages'
+import settings from './react-pages'
 
 render(settings).then(({ store, rerender }) => {
   if (module.hot) {
-    module.hot.accept('./react-website', () => {
+    module.hot.accept('./react-pages', () => {
       rerender()
       // Update reducer
       store.hotReload(settings.reducers)
@@ -1580,8 +1584,8 @@ Then start [`webpack-dev-server`](https://github.com/webpack/webpack-dev-server)
 `websocket()` helper sets up a WebSocket connection.
 
 ```js
-import { render } from 'react-website'
-import websocket from 'react-website/websocket'
+import { render } from 'react-pages'
+import websocket from 'react-pages/websocket'
 
 render(settings).then(({ store }) => {
   websocket({
@@ -1760,7 +1764,7 @@ If the application is being built with a bundler (most likely Webpack) and Serve
 
 ## Code splitting
 
-Code splitting is supported. See [README-CODE-SPLITTING](https://github.com/catamphetamine/react-website/blob/master/README-CODE-SPLITTING.md)
+Code splitting is supported. See [README-CODE-SPLITTING](https://github.com/catamphetamine/react-pages/blob/master/README-CODE-SPLITTING.md)
 
 ## `Accept-Language` and `User-Agent` HTTP headers
 
@@ -1768,7 +1772,7 @@ When server-side rendering is enabled `Accept-Language` and `User-Agent` HTTP he
 
 ## Advanced
 
-At some point in time this README became huge so I extracted some less relevant parts of it into [README-ADVANCED](https://github.com/catamphetamine/react-website/blob/master/README-ADVANCED.md) (including the list of all possible settings and options). If you're a first timer then just skip that one - you don't need it for sure.
+At some point in time this README became huge so I extracted some less relevant parts of it into [README-ADVANCED](https://github.com/catamphetamine/react-pages/blob/master/README-ADVANCED.md) (including the list of all possible settings and options). If you're a first timer then just skip that one - you don't need it for sure.
 
 ## License
 

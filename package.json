@@ -1,6 +1,6 @@
 {
-  "name": "react-website",
-  "version": "3.1.31",
+  "name": "react-pages",
+  "version": "1.0.0",
   "description": "A complete solution for building a React/Redux application: routing, page preloading, (optional) server-side rendering, asynchronous HTTP requests, document metadata, internationalization, etc.",
   "main": "index.commonjs.js",
   "module": "index.js",
@@ -74,7 +74,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/catamphetamine/react-website.git"
+    "url": "git+https://github.com/catamphetamine/react-pages.git"
   },
   "keywords": [
     "react",
@@ -85,7 +85,7 @@
   "author": "catamphetamine <purecatamphetamine@gmail.com>",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/catamphetamine/react-website/issues"
+    "url": "https://github.com/catamphetamine/react-pages/issues"
   },
-  "homepage": "https://github.com/catamphetamine/react-website#readme"
+  "homepage": "https://github.com/catamphetamine/react-pages#readme"
 }

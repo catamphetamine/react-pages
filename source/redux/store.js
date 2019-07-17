@@ -56,7 +56,7 @@ export default function _createStore(settings, data, createHistoryProtocol, http
 		// If there's an error on client side in `setUpAndRender()` then it's called again.
 		// And in that case `getData` is set and this error will be thrown.
 		// if (routes[0].getData) {
-		// 	throw new Error('[react-website] `getData` found on the root route')
+		// 	throw new Error('[react-pages] `getData` found on the root route')
 		// }
 		routes[0].getData = getData
 	} else {
@@ -64,7 +64,7 @@ export default function _createStore(settings, data, createHistoryProtocol, http
 		// If there's an error on client side in `setUpAndRender()` then it's called again.
 		// And in that case `getData` is set and this error will be thrown.
 		// if (routes.props.getData) {
-		// 	throw new Error('[react-website] `getData` found on the root route')
+		// 	throw new Error('[react-pages] `getData` found on the root route')
 		// }
 		routes = React.cloneElement(routes, { getData })
 		// Convert `found` `<Route/>`s to a JSON structure.

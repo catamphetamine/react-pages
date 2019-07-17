@@ -23,5 +23,5 @@ export function getPreferredLocale()
 }
 
 export function getPreferredLocales() {
-	return window._react_website_locales || []
+	return window._react_pages_locales || []
 }

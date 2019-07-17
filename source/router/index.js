@@ -132,16 +132,16 @@ export function goBack() {
 }
 
 export function pushLocation(location, options) {
-	window._react_website_skip_preload_update_location = true
+	window._react_pages_skip_preload_update_location = true
 	return goto(location, options)
 }
 
 export function replaceLocation(location) {
-	window._react_website_skip_preload_update_location = true
+	window._react_pages_skip_preload_update_location = true
 	return redirect(location)
 }
 
 export const UPDATE_MATCH = FoundActionTypes.UPDATE_MATCH
 export const RESOLVE_MATCH = FoundActionTypes.RESOLVE_MATCH
 
-export const _RESOLVE_MATCH = '@@react-website/RESOLVE_MATCH'
+export const _RESOLVE_MATCH = '@@react-pages/RESOLVE_MATCH'

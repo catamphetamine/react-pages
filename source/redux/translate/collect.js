@@ -17,7 +17,7 @@ export default function collectTranslations(components, routes, routeIndices, co
 		.filter(_ => _.getTranslation)
 	if (translations.length > 0) {
 		return () => Promise.all(translations.map(({ path, getTranslation }) => {
-			return getTranslation().then((translation) => dispatch('@@react-website/translation', {
+			return getTranslation().then((translation) => dispatch('@@react-pages/translation', {
 				path,
 				translation
 			}))

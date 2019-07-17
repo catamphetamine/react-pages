@@ -36,7 +36,7 @@ export async function snapshot({
 	// Add the "base" page which is an empty page
 	// which will be rendered in user's browser on client side.
 	// This should be the "fallback" page.
-	pages.unshift('/react-website-base')
+	pages.unshift('/react-pages-base')
 
 	// The progress meter for the website snapshotting process.
 	const snapshotProgress = new ProgressBar(' Snapshotting [:bar] :total :percent :etas',
@@ -58,9 +58,9 @@ export async function snapshot({
 		() => snapshotProgress.tick()
 	)
 
-	// Move `./react-website-base/index.html` to `./base.html`.
-	fs.moveSync(path.join(outputPath, 'react-website-base/index.html'), path.join(outputPath, 'base.html'))
-	fs.removeSync(path.join(outputPath, 'react-website-base'))
+	// Move `./react-pages-base/index.html` to `./base.html`.
+	fs.moveSync(path.join(outputPath, 'react-pages-base/index.html'), path.join(outputPath, 'base.html'))
+	fs.removeSync(path.join(outputPath, 'react-pages-base'))
 }
 
 async function snapshotPages(host, port, pages, outputPath, transformContent, tick)
@@ -108,6 +108,6 @@ function addReloadDataFlag(content) {
 		throw new Error('</head> not found')
 	}
 	return content.slice(0, headEndsAt) +
-		'<script> window._react_website_reload_data = true </script>' +
+		'<script> window._react_pages_reload_data = true </script>' +
 		content.slice(headEndsAt)
 }

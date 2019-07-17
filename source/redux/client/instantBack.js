@@ -47,7 +47,7 @@ export function addInstantBack(
 		}
 		else
 		{
-			// console.error('[react-website] Error: previous location not found in an already existing instant back navigation chain', getLocationKey(previousLocation), chain)
+			// console.error('[react-pages] Error: previous location not found in an already existing instant back navigation chain', getLocationKey(previousLocation), chain)
 			// Anomaly detected.
 			// Reset the chain.
 			// return resetInstantBack()
@@ -154,16 +154,16 @@ function findSameRoutesLocationIndex(chain, routes)
 // could reset the stored cached `resultsState`
 // if the transition was not an "instant" one.
 export function wasInstantNavigation() {
-	return typeof window !== 'undefined' && window._react_website_was_instant_navigation === true
+	return typeof window !== 'undefined' && window._react_pages_was_instant_navigation === true
 }
 
 export function isInstantBackAbleNavigation() {
-	return typeof window !== 'undefined' && window._react_website_is_instant_back_able_navigation
+	return typeof window !== 'undefined' && window._react_pages_is_instant_back_able_navigation
 }
 
 export function setInstantNavigationFlag(value) {
 	if (typeof window !== 'undefined') {
-		window._react_website_was_instant_navigation = value
+		window._react_pages_was_instant_navigation = value
 	}
 }
 
@@ -178,12 +178,12 @@ export function setInstantNavigationFlag(value) {
  */
 export function markImmediateNavigationAsInstantBack(instantBack) {
 	// Is being read in `./redux/middleware/router.js`
-	window._react_website_instant_back_navigation = instantBack
+	window._react_pages_instant_back_navigation = instantBack
 	if (instantBack) {
 		// Resetting the flag immediately after it's processed in router's POP event listener.
 		// Could reset it there too.
 		// Not resetting on some "on navigation finished" event because
 		// `@preload()` could throw and the navigation wouldn't conclude in that case.
-		setTimeout(() => window._react_website_instant_back_navigation = false, 0)
+		setTimeout(() => window._react_pages_instant_back_navigation = false, 0)
 	}
 }

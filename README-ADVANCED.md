@@ -19,7 +19,7 @@ So, **javascript is required** on the client side in order for this CSRF attacks
 When using `{ client: true }` `@preload()`s it's sometimes required to perform some actions (e.g. adjust the current URL) after those `@preload()`s finish (and after the browser navigates to the preloaded page). While with regular `@preload()`s it could be done using `componentDidMount()` such an approach wouldn't work for `{ client: true }` `@preload()`s because they're executed after `componentDidMount()`. The solution is `@onPageLoaded()` decorator which is called after all `@preload()`s finish on client side. `@onPageLoaded()` decorator won't work when `codeSplit: true` setting is configured. <!-- (could be implemented as some `onPageLoaded` route attribute) -->
 
 ```js
-import { onPageLoaded, replaceLocation } from 'react-website'
+import { onPageLoaded, replaceLocation } from 'react-pages'
 
 @onPageLoaded(({ dispatch, getState, location }) => {
   if (isAnIdURL(location.pathname)) {
@@ -63,10 +63,10 @@ function autocompleteMatch(inputValue) {
 
 By default it generates `"_PENDING"`, `"_SUCCESS"` and `"_ERROR"` Redux events along with the corresponding camelCase properties in Redux state. One can customize that by supplying custom `reduxEventNaming` and `reduxPropertyNaming` functions.
 
-#### react-website.js
+#### react-pages.js
 
 ```js
-import reduxSettings from './react-website-redux'
+import reduxSettings from './react-pages-redux'
 
 export default {
   // All the settings as before
@@ -75,10 +75,10 @@ export default {
 }
 ```
 
-#### react-website-redux.js
+#### react-pages-redux.js
 
 ```js
-import { underscoredToCamelCase } from 'react-website'
+import { underscoredToCamelCase } from 'react-pages'
 
 export default {
   // When supplying `event` instead of `events`
@@ -101,14 +101,14 @@ export default {
 #### redux/blogPost.js
 
 ```js
-import { ReduxModule, eventName } from 'react-website'
-import reduxSettings from './react-website-redux'
+import { ReduxModule, eventName } from 'react-pages'
+import reduxSettings from './react-pages-redux'
 
 const redux = new ReduxModule('BLOG_POST', reduxSettings)
 ...
 ```
 
-Notice the extraction of these two configuration parameters (`reduxEventNaming` and `reduxPropertyNaming`) into a separate file `react-website-redux.js`: this is done to break circular dependency on `./react-website.js` file because the `routes` parameter inside `./react-website.js` is the `./routes.js` file which `import`s React page components which in turn `import` action creators which in turn would import `./react-website.js` hence the circular (recursive) dependency (same goes for the `reducers` parameter inside `./react-website.js`).
+Notice the extraction of these two configuration parameters (`reduxEventNaming` and `reduxPropertyNaming`) into a separate file `react-pages-redux.js`: this is done to break circular dependency on `./react-pages.js` file because the `routes` parameter inside `./react-pages.js` is the `./routes.js` file which `import`s React page components which in turn `import` action creators which in turn would import `./react-pages.js` hence the circular (recursive) dependency (same goes for the `reducers` parameter inside `./react-pages.js`).
 
 ## `@preload()`
 
@@ -121,7 +121,7 @@ On client side there are a couple utility functions available for localization p
 `getPreferredLocales()` function returns user's "preferred locales" (taken from `locale` cookie and `Accept-Language` HTTP header) if server-side rendering is enabled.
 
 ```js
-import { getPreferredLocales } from 'react-website'
+import { getPreferredLocales } from 'react-pages'
 
 getPreferredLocales()
 // E.g. ["ru", "ru-RU", "en-US", "en"]
@@ -130,7 +130,7 @@ getPreferredLocales()
 When server-side rendering is disabled then use `getPreferredLocale()` function which returns the preferred locale of user's web browser (taken from `navigator.language`).
 
 ```js
-import { getPreferredLocale } from 'react-website'
+import { getPreferredLocale } from 'react-pages'
 
 getPreferredLocale()
 // E.g. "ru-RU", "en".
@@ -139,7 +139,7 @@ getPreferredLocale()
 To convert locale to language use `getLanguageFromLocale()` function.
 
 ```js
-import { getLanguageFromLocale } from 'react-website'
+import { getLanguageFromLocale } from 'react-pages'
 
 getLanguageFromLocale('ru-RU')
 // Outputs: "ru".
@@ -219,8 +219,8 @@ The modern way is not using any "proxy servers" at all. Instead everything is di
 For some advanced use cases (though most likely no one's using this) the internal `render()` function is exposed.
 
 ```js
-import { render } from 'react-website/server'
-import settings from './react-website'
+import { render } from 'react-pages/server'
+import settings from './react-pages'
 
 // Returns a Promise.
 //
@@ -240,7 +240,7 @@ const { redirect, cookies, status, content } = await render(
 The `await render()` function call can be wrapped in a `try/catch` block and for the `catch` block there's also the exported `renderError(error)` function.
 
 ```js
-import { renderError } from 'react-website/server'
+import { renderError } from 'react-pages/server'
 
 // status  - HTTP response status.
 // content - rendered error (a string).
@@ -249,7 +249,7 @@ import { renderError } from 'react-website/server'
 const { status, content, contentType } = renderError(error)
 ```
 
-## All `react-website.js` settings
+## All `react-pages.js` settings
 
 ```javascript
 {
@@ -275,7 +275,7 @@ const { status, content, contentType } = renderError(error)
 
   // Use this flag to enable "code splitting" mode.
   // See `README-CODE-SPLITTING` for more info.
-  // https://github.com/catamphetamine/react-website/blob/master/README-CODE-SPLITTING.md
+  // https://github.com/catamphetamine/react-pages/blob/master/README-CODE-SPLITTING.md
   codeSplit: true/false
 
   // When using `@preload()`s in a client-side-only set up
@@ -285,8 +285,8 @@ const { status, content, contentType } = renderError(error)
   // To hide webpage content until all `<Route/>` components
   // are resolved one may set `showPreloadInitially` to `true`.
   // When setting `showPreloadInitially` to `true` also import the styles:
-  // import 'react-website/components/Loading.css'
-  // import 'react-website/components/LoadingIndicator.css'
+  // import 'react-pages/components/Loading.css'
+  // import 'react-pages/components/LoadingIndicator.css'
   showPreloadInitially: true/false
 
   // When using `react-hot-loader` one can pass `hot` as a configuration parameter

@@ -109,7 +109,7 @@ const TEMPLATE_AFTER_CONTENT = nunjucks.compile
 			{% if locales %}
 				<script>
 					{# If renaming this variable don't reset it in "./redux/client/client.js" #}
-					window._react_website_locales = {{ safeJsonStringify(locales) | safe }}
+					window._react_pages_locales = {{ safeJsonStringify(locales) | safe }}
 				</script>
 			{% endif %}
 

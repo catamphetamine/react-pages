@@ -36,7 +36,7 @@ export default function routerMiddleware(
 		{
 			// Skip the first pass of the initial client-side render.
 			// for the case when server-side rendering is used.
-			if (window._react_website_initial_prerender) {
+			if (window._react_pages_initial_prerender) {
 				return next(event)
 			}
 
@@ -57,8 +57,8 @@ export default function routerMiddleware(
 					}
 
 					// Store `event.payload` for the future `_UPDATE_MATCH` event.
-					if (!window._react_website_router_rendered && !isServerSidePreloaded()) {
-						window._react_website_update_match_event_payload = event.payload
+					if (!window._react_pages_router_rendered && !isServerSidePreloaded()) {
+						window._react_pages_update_match_event_payload = event.payload
 					}
 
 					// Measure `@preload()` time.
@@ -77,7 +77,7 @@ export default function routerMiddleware(
 
 					// Indicates whether an `instantBack` `<Link/>` has been clicked.
 					// (or if `goto()` has been called with `instantBack: true` option)
-					const instantBack = window._react_website_instant_back_navigation
+					const instantBack = window._react_pages_instant_back_navigation
 
 					// Update instant back navigation chain.
 					if (instantBack) {
@@ -104,7 +104,7 @@ export default function routerMiddleware(
 					// `instantBack` is for a "forward" instant-back-able navigation.
 					// `_isInstantTransition` is for a "backwards" instant-back-able navigation.
 					if (instantBack || _isInstantTransition) {
-						window._react_website_is_instant_back_able_navigation = true
+						window._react_pages_is_instant_back_able_navigation = true
 					}
 
 					// // `RESOLVE_MATCH` is not being emitted
@@ -127,7 +127,7 @@ export default function routerMiddleware(
 					// }
 
 					// Show page loading indicator.
-					if (!isServerSidePreloaded() && !window._react_website_router_rendered) {
+					if (!isServerSidePreloaded() && !window._react_pages_router_rendered) {
 						// Don't show page loading indicator
 						// because it's already being shown manually.
 					} else {
@@ -166,8 +166,8 @@ export default function routerMiddleware(
 					previousLocation = location
 					previousRouteIndices = routeIndices
 
-					if (!window._react_website_router_rendered) {
-						window._react_website_router_rendered = true
+					if (!window._react_pages_router_rendered) {
+						window._react_pages_router_rendered = true
 					}
 
 					// Call `@onPageLoaded()`.
@@ -198,7 +198,7 @@ export default function routerMiddleware(
 					}
 
 					// Reset the flag for `isInstantBackAbleNavigation()`.
-					window._react_website_is_instant_back_able_navigation = false
+					window._react_pages_is_instant_back_able_navigation = false
 
 					// Report preloading time.
 					// This preloading time will be longer then
@@ -227,7 +227,7 @@ export default function routerMiddleware(
 
 					// Report preload time in console for debugging.
 					if (Date.now() - startedAt > 30) {
-						console.log(`[react-website] "${location.pathname}" loaded and rendered in ${Date.now() - startedAt} ms`)
+						console.log(`[react-pages] "${location.pathname}" loaded and rendered in ${Date.now() - startedAt} ms`)
 					}
 
 					break
