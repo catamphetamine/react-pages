@@ -20,7 +20,7 @@
     "prop-types": "^15.5.6",
     "redux-devtools-extension": "^2.13.2",
     "string-to-stream": "^1.1.0",
-    "superagent": "^2.1.0",
+    "superagent": "^5.1.0",
     "uglify-js": "^2.7.5"
   },
   "devDependencies": {
