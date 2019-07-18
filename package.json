@@ -11,7 +11,6 @@
     "found": "^0.4.4",
     "found-scroll": "^0.1.5",
     "fs-extra": "^8.1.0",
-    "hoist-non-react-statics": "^3.3.0",
     "lodash": "^4.17.5",
     "multistream": "^3.0.0",
     "nunjucks": "^3.0.0",

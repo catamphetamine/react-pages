@@ -1248,12 +1248,12 @@ export default (
 
 ### Setting <title/> and <meta/> tags
 
-Use `@meta(state) => ...)` decorator for adding `<title/>` and `<meta/>` tags:
+Use `@meta(state => ...)` decorator for adding `<title/>` and `<meta/>` tags:
 
 ```js
 import { meta } from 'react-pages'
 
-@meta(state) => ({
+@meta((state) => ({
   // `<meta property="og:site_name" .../>`
   site_name: 'International Bodybuilders Club',
 

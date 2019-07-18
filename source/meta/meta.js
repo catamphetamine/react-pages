@@ -1,16 +1,12 @@
-import React, { Component } from 'react'
-import hoistNonReactStatics from 'hoist-non-react-statics'
 import flatten from 'lodash/flatten'
 import compact from 'lodash/compact'
 
 import BrowserDocument, { getMetaAttributeFor } from './BrowserDocument'
-import { getDisplayName } from '../utility'
 
 const browserDocument = new BrowserDocument()
 
-const DEFAULT_META =
-{
-	charset  : 'utf-8',
+const DEFAULT_META = {
+	charset: 'utf-8',
 	// Fixes CSS screen width on mobile devices.
 	// Otherwise media queries would not be applied initially
 	// and it would show desktop version design.
@@ -18,7 +14,7 @@ const DEFAULT_META =
 	// needs to be present in markup as the default one
 	// because `/react-pages-base` page doesn't collect
 	// meta from page components.
-	viewport : 'width=device-width, initial-scale=1.0'
+	viewport: 'width=device-width, initial-scale=1.0'
 }
 
 const META_METHOD_NAME = '__meta__'
@@ -29,19 +25,14 @@ const META_METHOD_NAME = '__meta__'
  * @example
  * @meta(({ state }) => ({ title: `${state.user.name}'s profile` }))
  */
-export default function meta(getMeta)
-{
-	return function(DecoratedComponent)
-	{
-		class Meta extends Component {
-			render() {
-				return <DecoratedComponent {...this.props} />
-			}
-		}
-
-		Meta[META_METHOD_NAME] = getMeta
-		Meta.displayName = `Meta(${getDisplayName(DecoratedComponent)})`
-		return hoistNonReactStatics(Meta, DecoratedComponent)
+export default function meta(getMeta) {
+	if (typeof getMeta === 'object') {
+		const meta = getMeta
+		getMeta = () => meta
+	}
+	return function(Component) {
+		Component[META_METHOD_NAME] = getMeta
+		return Component
 	}
 }
 
@@ -51,8 +42,7 @@ export default function meta(getMeta)
  * @param {object[]} meta — An array of meta objects.
  * @return {object}
  */
-export function mergeMeta(meta)
-{
+export function mergeMeta(meta) {
 	// // `Object.assign` is not supported in Internet Explorer.
 	// return Object.assign({}, DEFAULT_META, ...)
 
@@ -77,8 +67,7 @@ export function mergeMeta(meta)
  * Gets `React.Component` chain meta.
  * @return {object[]}
  */
-export function getComponentsMeta(components, state)
-{
+export function getComponentsMeta(components, state) {
 	return components
 		// `.filter(_ => _)` here just in case someone forgets to set
 		// `codeSplit: true` for `<Route/>`s with `getComponent`.
@@ -107,8 +96,7 @@ export function getCodeSplitMeta(routes, state) {
 /**
  * Updates `<title/>` and `<meta/>` tags (inside `<head/>`).
  */
-export function updateMeta(meta, document = browserDocument)
-{
+export function updateMeta(meta, document = browserDocument) {
 	const { title, charset } = meta
 	meta = normalizeMeta(meta)
 
@@ -150,8 +138,7 @@ export function updateMeta(meta, document = browserDocument)
  * @param  {object[]} meta
  * @return {string[]}
  */
-export function generateMetaTagsMarkup(meta)
-{
+export function generateMetaTagsMarkup(meta) {
 	const { title, charset } = meta
 	meta = normalizeMeta(meta)
 
@@ -189,8 +176,7 @@ function generateMetaTagMarkup(name, value) {
  * Also filters out `charset`.
  * @return {string}
  */
-function getMetaKeyAliases(key)
-{
+function getMetaKeyAliases(key) {
 	switch (key)
 	{
 		// `<meta charset/>` is handled specially
@@ -239,15 +225,11 @@ function getMetaKeyAliases(key)
  * @param {Document} document - `BrowserDocument` or `TestDocument`.
  * @return {boolean?}
  */
-function updateMetaTag(document, meta_tags, name, value)
-{
+function updateMetaTag(document, meta_tags, name, value) {
 	let i = 0
-	while (i < meta_tags.length)
-	{
+	while (i < meta_tags.length) {
 		const meta_tag = meta_tags[i]
-
-		if (document.isMetaTag(meta_tag, name))
-		{
+		if (document.isMetaTag(meta_tag, name)) {
 			// Update `<meta/>` tag `value`.
 			if (document.getMetaTagValue(meta_tag) !== value) {
 				document.setMetaTagValue(meta_tag, value)
@@ -257,7 +239,6 @@ function updateMetaTag(document, meta_tags, name, value)
 			// Updated.
 			return true
 		}
-
 		i++
 	}
 }
@@ -266,8 +247,7 @@ function updateMetaTag(document, meta_tags, name, value)
  * Escapes a string so that it's kinda safe to insert into HTML.
  * @return {string}
  */
-function escapeHTML(string)
-{
+function escapeHTML(string) {
 	return string && string
 		.replace('&', '&amp;')
 		.replace('<', '&lt;')
@@ -283,8 +263,7 @@ function escapeHTML(string)
  * `<meta/>` tag `name`s and `property`es.
  * @return Array of arrays having shape `[key, value]`.
  */
-function normalizeMetaKeys(meta)
-{
+function normalizeMetaKeys(meta) {
 	return Object.keys(meta).reduce((all, key) => {
 		for (const alias of getMetaKeyAliases(key)) {
 			all.push([alias, meta[key]])
@@ -297,8 +276,7 @@ function normalizeMeta(meta) {
 	return convertMeta(normalizeMetaKeys(meta))
 }
 
-function dropUndefinedProperties(object)
-{
+function dropUndefinedProperties(object) {
 	const keys = Object.keys(object)
 	for (const key of keys) {
 		if (object[key] === undefined) {

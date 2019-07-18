@@ -10,10 +10,6 @@ Therefore the API should only read "remember me" token from an HTTP header. The 
 
 So, **javascript is required** on the client side in order for this CSRF attacks protection to work (because only javascript can set HTTP headers). If a developer instead prefers to run a website for javascript-disabled users (like [Tor](https://www.deepdotweb.com/)) then the only way is to authenticate users in REST API endpoints by a "remember me" cookie rather than `Authorization` HTTP header. This will open the website users to various possible javascriptless CSRF attacks.
 
-## `@preload()`
-
-`@preload()` decorator seems not working for no reason (though it definitely works) then try to place it on top of all other decorators. Internally it adds a special static method to your `Route`'s `component` and some 3rd party decorators on top of it may not retain that static method (though all proper decorators nowadays do retain static methods and variables of the decorated components using [`hoist-non-react-statics`](https://github.com/mridgway/hoist-non-react-statics)).
-
 ## `@onPageLoaded()`
 
 When using `{ client: true }` `@preload()`s it's sometimes required to perform some actions (e.g. adjust the current URL) after those `@preload()`s finish (and after the browser navigates to the preloaded page). While with regular `@preload()`s it could be done using `componentDidMount()` such an approach wouldn't work for `{ client: true }` `@preload()`s because they're executed after `componentDidMount()`. The solution is `@onPageLoaded()` decorator which is called after all `@preload()`s finish on client side. `@onPageLoaded()` decorator won't work when `codeSplit: true` setting is configured. <!-- (could be implemented as some `onPageLoaded` route attribute) -->

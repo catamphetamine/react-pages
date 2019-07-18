@@ -1,8 +1,3 @@
-import React, { Component } from 'react'
-import hoistNonReactStatics from 'hoist-non-react-statics'
-
-import { getDisplayName } from '../../utility'
-
 export const PRELOAD_METHOD_NAME  = '__preload__'
 export const PRELOAD_OPTIONS_NAME = '__preload_options__'
 
@@ -33,27 +28,16 @@ export const PRELOAD_OPTIONS_NAME = '__preload_options__'
 //                if part of initial page preloading then on server side and
 //                if part of subsequent preloading (e.g. navigation) then on client side.
 //
-export default function preload(preload, options = {})
-{
-	return function(DecoratedComponent) {
-		class PreloadedComponent extends Component {
-			render() {
-				return <DecoratedComponent {...this.props} />
-			}
-		}
-
+export default function preload(preload, options = {}) {
+	return function(Component) {
 		// Since there can be several `@preload()`s
 		// on a single component, using arrays here.
-		PreloadedComponent[PRELOAD_METHOD_NAME]  = DecoratedComponent[PRELOAD_METHOD_NAME]  || []
-		PreloadedComponent[PRELOAD_OPTIONS_NAME] = DecoratedComponent[PRELOAD_OPTIONS_NAME] || []
+		Component[PRELOAD_METHOD_NAME]  = Component[PRELOAD_METHOD_NAME]  || []
+		Component[PRELOAD_OPTIONS_NAME] = Component[PRELOAD_OPTIONS_NAME] || []
 
-		PreloadedComponent[PRELOAD_METHOD_NAME].unshift(preload)
-		PreloadedComponent[PRELOAD_OPTIONS_NAME].unshift(options)
+		Component[PRELOAD_METHOD_NAME].unshift(preload)
+		Component[PRELOAD_OPTIONS_NAME].unshift(options)
 
-		// Component naming for React DevTools
-		PreloadedComponent.displayName = `Preload(${getDisplayName(DecoratedComponent)})`
-
-		// Keep all non-React-specific static methods
-		return hoistNonReactStatics(PreloadedComponent, DecoratedComponent)
+		return Component
 	}
 }

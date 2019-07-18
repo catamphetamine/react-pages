@@ -10,6 +10,7 @@
 * For those who used `withRouter()` decorator previously now there's a better alternative — `useRouter()` hook: `const { match, router } = useRouter()`. This library no longer re-exports `found`'s `withRouter` decorator though `found` still does export it.
 * Seding `GET` or `multipart/form-data` requests using `http` utility [no longer](https://github.com/catamphetamine/react-website/issues/74) adds `Content-Type` header. This shouldn't be an issue for most users. `Content-Type` header can be set [manually](https://github.com/catamphetamine/react-website/issues/74#issuecomment-496443987) via `http.onRequest(request)` setting.
 * Removed `Promise` cancellation and the `cancelPrevious: true` Redux action parameter.
+* Rewrote `@meta()`, `@preload()` and `@onPageLoaded()` as functions setting static properties on a component rather than wrapping React components. There shouldn't be any breaking changes.
 
 Update Babel from `6` to `7`.
 
@@ -18,6 +19,8 @@ Check that sending forms with files (single, multiple) via `http` works.
 Check that the refactored http.request() populateErrorData() works (emulate an error on server side).
 
 Maybe check setting server-side cookies.
+
+Create `react-pages-basic-example` analogous to `react-website-basic-example`.
 
 https://github.com/feross/multistream/issues/42
 
