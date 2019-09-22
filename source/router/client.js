@@ -14,7 +14,7 @@ export function createRouterElement(renderArgs, { dispatch, getState }) {
 			// Force re-mount the last `<Route/>` component on location path change.
 			// https://github.com/4Catalyzer/found/issues/199#issuecomment-415616836
 			const elements = renderArgs.elements
-			if (elements && window.reactWebsiteRemountOnNavigate !== false) {
+			if (elements && window.reactPagesRemountOnNavigate !== false) {
 				elements[elements.length - 1] = React.cloneElement(elements[elements.length - 1], { key: renderArgs.location.pathname })
 			}
 			return (
