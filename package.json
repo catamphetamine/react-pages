@@ -5,6 +5,7 @@
   "main": "index.commonjs.js",
   "module": "index.js",
   "dependencies": {
+    "@babel/runtime": "^7.6.0",
     "classnames": "^2.2.5",
     "cookie": "^0.4.0",
     "found": "^0.4.7",
@@ -27,6 +28,7 @@
     "@babel/plugin-proposal-class-properties": "^7.5.5",
     "@babel/plugin-proposal-object-rest-spread": "^7.5.5",
     "@babel/plugin-transform-destructuring": "^7.6.0",
+    "@babel/plugin-transform-runtime": "^7.6.0",
     "@babel/preset-env": "^7.6.0",
     "@babel/preset-react": "^7.0.0",
     "@babel/register": "^7.6.0",
