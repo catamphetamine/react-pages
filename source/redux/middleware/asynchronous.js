@@ -113,7 +113,7 @@ export default function asynchronousMiddleware(
 
 						// Also only checks `http` calls on client side
 						// because on server side `http` calls can be
-						// either part of `@preload` of part of `initialize`
+						// either part of `load` of part of `initialize`
 						// which are already "error handled".
 						// On the client side though, an `http` call
 						// may be performed via some user input,
@@ -127,7 +127,7 @@ export default function asynchronousMiddleware(
 								path: location.pathname,
 								url: getLocationUrl(location),
 								// Using `goto` instead of `redirect` here
-								// because it's not part of `@preload()`
+								// because it's not part of `load`
 								// and is therefore part of some kind of an HTTP request
 								// triggered by user input (e.g. form submission)
 								// which means it is convenient to be able to

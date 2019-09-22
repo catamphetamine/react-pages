@@ -11,7 +11,7 @@ from './meta'
 
 import TestDocument from './TestDocument'
 
-describe(`@meta`, () =>
+describe(`meta`, () =>
 {
 	it(`should update meta`, () =>
 	{
@@ -50,6 +50,24 @@ describe(`@meta`, () =>
 		])
 
 		document.getTitle().should.equal('Test')
+	})
+
+	it(`should transform "siteName" to "site_name"`, () =>
+	{
+		const document = new TestDocument
+		([
+			['charset', 'utf-8'],
+			['og:locale', 'en'],
+		])
+
+		updateMeta({
+			siteName: 'Testing'
+		}, document)
+
+		document.getMetaTags().should.deep.equal
+		([
+			['og:site_name', 'Testing']
+		])
 	})
 
 	it(`should update meta without title and charset`, () =>

@@ -10,14 +10,22 @@ Therefore the API should only read "remember me" token from an HTTP header. The 
 
 So, **javascript is required** on the client side in order for this CSRF attacks protection to work (because only javascript can set HTTP headers). If a developer instead prefers to run a website for javascript-disabled users (like [Tor](https://www.deepdotweb.com/)) then the only way is to authenticate users in REST API endpoints by a "remember me" cookie rather than `Authorization` HTTP header. This will open the website users to various possible javascriptless CSRF attacks.
 
-## `@onPageLoaded()`
+## `onLoaded`
 
-When using `{ client: true }` `@preload()`s it's sometimes required to perform some actions (e.g. adjust the current URL) after those `@preload()`s finish (and after the browser navigates to the preloaded page). While with regular `@preload()`s it could be done using `componentDidMount()` such an approach wouldn't work for `{ client: true }` `@preload()`s because they're executed after `componentDidMount()`. The solution is `@onPageLoaded()` decorator which is called after all `@preload()`s finish on client side. `@onPageLoaded()` decorator won't work when `codeSplit: true` setting is configured. <!-- (could be implemented as some `onPageLoaded` route attribute) -->
+When using `load` static property on a page component with `{ client: true }` option it's sometimes required to perform some actions (e.g. adjust the current URL) after those `load`ers finish (and after the browser navigates to the preloaded page). While with regular `load`ers it could be done using `componentDidMount()` such an approach wouldn't work for `{ client: true }` `load`ers because they're executed after `componentDidMount()`. The solution is `onLoaded` static property which is called after all `load`ers finish on client side. `onLoaded` static property won't work when `codeSplit: true` setting is configured. <!-- (could be implemented as some `onPageLoaded` route attribute) -->
 
 ```js
-import { onPageLoaded, replaceLocation } from 'react-pages'
+import { replaceLocation } from 'react-pages'
 
-@onPageLoaded(({ dispatch, getState, location }) => {
+function Page() {
+  return (
+    <section>
+      ...
+    </section>
+  )
+}
+
+Page.onLoaded = ({ dispatch, getState, location }) => {
   if (isAnIdURL(location.pathname)) {
     dispatch(replaceLocation(replaceIdWithAnAlias(location, getState().userProfilePage.userProfile)))
   }
@@ -26,7 +34,7 @@ import { onPageLoaded, replaceLocation } from 'react-pages'
 
 ## Restricted routes
 
-In most applications some routes are only accessible by a specific group of users. One may ask what route restriction mechanisms does this library provide. The answer is: you actually don't need them. For example, in my projects the `@preload()` function itself serves as a guard by querying a REST API endpoint which performs user authentication internally and throws a "403 Access Denied" error if a user doesn't have the permission to view the page.
+In most applications some routes are only accessible by a specific group of users. One may ask what route restriction mechanisms does this library provide. The answer is: you actually don't need them. For example, in my projects the `load` function itself serves as a guard by querying a REST API endpoint which performs user authentication internally and throws a "403 Access Denied" error if a user doesn't have the permission to view the page.
 
 <!--
 ## Cancelling previous action
@@ -107,10 +115,6 @@ const redux = new ReduxModule('BLOG_POST', reduxSettings)
 ```
 
 Notice the extraction of these two configuration parameters (`reduxEventNaming` and `reduxPropertyNaming`) into a separate file `react-pages-redux.js`: this is done to break circular dependency on `./react-pages.js` file because the `routes` parameter inside `./react-pages.js` is the `./routes.js` file which `import`s React page components which in turn `import` action creators which in turn would import `./react-pages.js` hence the circular (recursive) dependency (same goes for the `reducers` parameter inside `./react-pages.js`).
-
-## `@preload()`
-
-If one `@preload()` is in progress and another `@preload()` starts (e.g. Back/Forward browser buttons) the first `@preload()` will be cancelled if `bluebird` `Promise`s are used in the project and also if `bluebird` is configured for [`Promise` cancellation](http://bluebirdjs.com/docs/api/cancellation.html) (this is an advanced feature and is not required for operation).
 
 ## Locales
 
@@ -280,16 +284,16 @@ const { status, content, contentType } = renderError(error)
   // https://github.com/catamphetamine/react-pages/blob/master/README-CODE-SPLITTING.md
   codeSplit: true/false
 
-  // When using `@preload()`s in a client-side-only set up
-  // `showPreloadInitially: true` will show a spinner on initial page load.
+  // When using `load`s in a client-side-only set up
+  // `showLoadingInitially: true` will show a spinner on initial page load.
   // Also, when using `codeSplit` with `getComponent`
-  // `<Route/>` components are loaded after the initial page render.
-  // To hide webpage content until all `<Route/>` components
-  // are resolved one may set `showPreloadInitially` to `true`.
-  // When setting `showPreloadInitially` to `true` also import the styles:
+  // route components are loaded after the initial page render.
+  // To hide webpage content until all route components
+  // are resolved one may set `showLoadingInitially` to `true`.
+  // When setting `showLoadingInitially` to `true` also import the styles:
   // import 'react-pages/components/Loading.css'
   // import 'react-pages/components/LoadingIndicator.css'
-  showPreloadInitially: true/false
+  showLoadingInitially: true/false
 
   // When using `react-hot-loader` one can pass `hot` as a configuration parameter
   // instead of passing a custom `container` component just for enabling `react-hot-loader`.
@@ -297,7 +301,7 @@ const { status, content, contentType } = renderError(error)
   hot: hot,
 
   // (optional)
-  // Default `@meta()` (applies to all pages).
+  // Default `<meta/>` (applies to all pages).
   meta: { ... }
 
   // (optional)
@@ -311,12 +315,12 @@ const { status, content, contentType } = renderError(error)
   // (optional)
   // Is called for errors happening during the initial page render
   // (which means during Server-Side Rendering
-  //  and the initial client-side render `@preload()`s).
+  //  and the initial client-side render `load`s).
   //
   // For example, Auth0 users may listen for
   // JWT token expiration here and redirect to a login page.
   //
-  // Or, if `@preload()` throws an "Unauthorized" error
+  // Or, if `load` throws an "Unauthorized" error
   // then a redirect to "/unauthorized" page can be made here.
   //
   // `path` is `url` without `?...` parameters.
@@ -601,7 +605,7 @@ const { status, content, contentType } = renderError(error)
   // (is `true` by default)
   //
   // (does not affect server side routing
-  //  and server side page preloading)
+  //  and server side page loading)
   //
   // Can be used to offload React server-side rendering
   // from the server side to the client's web browser
@@ -649,7 +653,7 @@ const { status, content, contentType } = renderError(error)
   // Still this technique cuts down on a lot of redundant "wiring" code.
   //
   // Don't use `redirect`/`goto` "pre-bound" in such a way
-  // inside `@preload()` because they won't work correctly there.
+  // inside `load` because they won't work correctly there.
   //
   onStoreCreated: (store) => {}
 
@@ -686,7 +690,3 @@ Client-side `render` function returns a `Promise` resolving to an object
   rerender // Rerender React application (use it in development mode for hot reload)
 }
 ```
-
-## To do
-
-* (minor) Server-side `@preload()` redirection could be rewritten from `throw`ing special "redirection" `Error`s into `.listen()`ing the server-side `MemoryHistory` but since the current "special redirection errors" approach works and has no operational downsides I think that there's no need in such a rewrite.

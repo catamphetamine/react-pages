@@ -1,6 +1,8 @@
-export const PRELOAD_METHOD_NAME  = '__preload__'
-export const PRELOAD_OPTIONS_NAME = '__preload_options__'
+export const PRELOAD_METHOD_NAME = 'load'
 
+// This decorator is deprecated, use `load`
+// static property on a page component instead.
+//
 // `@preload(preloader, [options])` decorator.
 //
 // `preloader` function must return a `Promise` (or be `async`):
@@ -9,12 +11,12 @@ export const PRELOAD_OPTIONS_NAME = '__preload_options__'
 //
 // The decorator also receives an optional `options` argument (advanced topic):
 //
-// * `blocking` — If `false` then all child `<Route/>`'s  `@preload()`s will not
+// * `blocking` — If `false` then all child routes  `@preload()`s will not
 //                wait for this `@preload()` to finish in order to get executed
 //                (is `true` by default).
 //
 // * `blockingSibling` — If `true` then all further adjacent (sibling) `@preload()`s
-//                       for the same `<Route/>`'s component will wait for this
+//                       for the same routes component will wait for this
 //                       `@preload()` to finish in order to get executed.
 //                       (is `true` by default).
 //
@@ -28,16 +30,15 @@ export const PRELOAD_OPTIONS_NAME = '__preload_options__'
 //                if part of initial page preloading then on server side and
 //                if part of subsequent preloading (e.g. navigation) then on client side.
 //
-export default function preload(preload, options = {}) {
+export default function preload(load, options) {
 	return function(Component) {
 		// Since there can be several `@preload()`s
 		// on a single component, using arrays here.
-		Component[PRELOAD_METHOD_NAME]  = Component[PRELOAD_METHOD_NAME]  || []
-		Component[PRELOAD_OPTIONS_NAME] = Component[PRELOAD_OPTIONS_NAME] || []
-
-		Component[PRELOAD_METHOD_NAME].unshift(preload)
-		Component[PRELOAD_OPTIONS_NAME].unshift(options)
-
+		Component[PRELOAD_METHOD_NAME] = Component[PRELOAD_METHOD_NAME] || []
+		Component[PRELOAD_METHOD_NAME].unshift({
+			load,
+			...options
+		})
 		return Component
 	}
 }

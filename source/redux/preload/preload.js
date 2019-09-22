@@ -16,7 +16,7 @@ import { PRELOAD_FAILED } from './actions'
 
 import collectTranslations from '../translate/collect'
 
-import { PRELOAD_METHOD_NAME, PRELOAD_OPTIONS_NAME } from './decorator'
+import { PRELOAD_METHOD_NAME } from './decorator'
 
 export default function _preload(
 	location,
@@ -30,7 +30,7 @@ export default function _preload(
 	getState
 ) {
 	// If it's an instant "Back"/"Forward" navigation
-	// then navigate to the page without preloading it.
+	// then navigate to the page without loading it.
 	// (has been previously preloaded and is in Redux state)
 	const _isInstantTransition = !server &&
 		location.action === 'POP' &&
@@ -66,7 +66,7 @@ export default function _preload(
 
 	// Instrument `dispatch`.
 	// `dispatch` for server side `throw`s a special "redirect error" on redirect.
-	// `dispatch` for client side cancels current `@preload()` on redirect.
+	// `dispatch` for client side cancels current `load` on redirect.
 	dispatch = instrumentDispatch(dispatch, server, preloading)
 
 	// Preload all the required data for this route (page)
@@ -76,7 +76,7 @@ export default function _preload(
 		let _components = components
 
 		// Client-side optimization.
-		// Skips `@preloads()` for `<Route/>`s that didn't change as a result of navigation.
+		// Skips `load`s for routes that didn't change as a result of navigation.
 		if (!server) {
 			if (codeSplit) {
 				_routes = filterByChangedRoutes(_routes, routeIndices, routeParams)
@@ -155,7 +155,7 @@ export default function _preload(
 		() => {
 			preloading.pending = false
 			// If this navigation process was cancelled
-			// before @preload() finished its work,
+			// before `load` finished its work,
 			// then don't take any further steps on this cancelled navigation.
 			if (preloading.cancelled) {
 				// Return `false` out of the `Promise`
@@ -165,7 +165,7 @@ export default function _preload(
 		},
 		(error) => {
 			// If this navigation process was cancelled
-			// before @preload() finished its work,
+			// before `load` finished its work,
 			// then don't take any further steps on this cancelled navigation.
 			if (!preloading.cancelled) {
 				if (!server) {
@@ -184,11 +184,11 @@ export default function _preload(
 
 // Instrument `dispatch`.
 // `dispatch` for server side `throw`s a special "redirect error" on redirect.
-// `dispatch` for client side cancels current `@preload()` on redirect.
+// `dispatch` for client side cancels current `load` on redirect.
 function instrumentDispatch(dispatch, server, preloading) {
 	return (event) => {
 		switch (event.type) {
-			// In case of navigation from @preload().
+			// In case of navigation from `load`.
 			case REDIRECT_ACTION_TYPE:
 			case GOTO_ACTION_TYPE:
 				// Discard the currently ongoing preloading.
@@ -197,7 +197,7 @@ function instrumentDispatch(dispatch, server, preloading) {
 					preloading.cancel()
 				}
 				// if (!server && window._react_pages_skip_preload_update_location) {
-				// 	console.warn('Looks like you\'re calling `dispatch(pushLocation())` or `dispatch(replaceLocation())` inside `@preload()`. Call them in `@onPageLoaded()` instead.')
+				// 	console.warn('Looks like you\'re calling `dispatch(pushLocation())` or `dispatch(replaceLocation())` inside `load`. Call them in `onLoaded()` instead.')
 				// }
 				throw new RedirectException(event.payload)
 			default:
@@ -210,11 +210,11 @@ function instrumentDispatch(dispatch, server, preloading) {
 // Finds all `preload` (or `preload_deferred`) methods
 // (they will be executed in parallel).
 //
-// @parameter components - `react-router` matched components
+// @parameter components - matched routes' components.
 //
 // @returns an array of `component_preloaders`.
 // `component_preloaders` is an array of all
-// `@preload()`s for a particular React component:
+// `load`s for a particular React component:
 // objects having shape `{ preload(), options }`.
 // Therefore the returned value is an array of arrays.
 //
@@ -222,60 +222,41 @@ export function collectPreloadersFromComponents(components)
 {
 	// Find all static `preload` methods on the route component chain
 	return components
-		// Some wrapper `<Route/>`s can have no `component`.
-		// Select all components having `@preload()`.
+		// Some wrapper routes can have no `component`.
+		// Select all components having `load`s.
 		.filter(component => component && component[PRELOAD_METHOD_NAME])
-		// Extract `@preload()` functions and their options.
-		.map((component) => component[PRELOAD_METHOD_NAME].map((preload, i) => ({
-			preload,
-			options: component[PRELOAD_OPTIONS_NAME][i]
+		// Extract `load` functions and their options.
+		.map((component) => component[PRELOAD_METHOD_NAME].map(({ load, ...rest }, i) => ({
+			preload: load,
+			options: rest
 		})))
-		// // Flatten `@preload()` functions and their options.
+		// // Flatten `load` functions and their options.
 		// .reduce((all, preload_and_options) => all.concat(preload_and_options), [])
 }
 
 function collectPreloadersFromRoutes(routes) {
 	// Find all preload properties on the route chain.
 	return routes
-		.map((route) => {
-			const preloads = []
-			if (route.preload) {
-				const preload = route.preload
-				preloads.push({
-					preload,
-					options: preload.options || {}
-				})
+		.map(_ => _.load)
+		.filter(_ => _)
+		.map((load) => {
+			if (typeof load === 'function') {
+				load = { load }
 			}
-			if (route.preloadClient) {
-				const preload = route.preloadClient
-				preloads.push({
-					preload,
-					options: {
-						...preload.options,
-						client: true
-					}
-				})
+			if (!Array.isArray(load)) {
+				load = [load]
 			}
-			if (route.preloadClientAfter) {
-				const preload = route.preloadClientAfter
-				preloads.push({
-					preload,
-					options: {
-						...preload.options,
-						client: true,
-						blockingSibling: true
-					}
-				})
-			}
-			return preloads
+			return load.map(({ load, ...rest }) => ({
+				preload: load,
+				options: rest
+			}))
 		})
-		.filter(_ => _.length > 0)
 		// Flatten the array.
 		// .reduce((all, preload_and_options) => all.concat(preload_and_options), [])
 }
 
-// A minor optimization for skipping `@preload()`s
-// for those parent `<Route/>`s which haven't changed
+// A minor optimization for skipping `load`s
+// for those parent routes which haven't changed
 // as a result of a client-side navigation.
 //
 // On client side:
@@ -289,27 +270,24 @@ function collectPreloadersFromRoutes(routes) {
 // (both having the same component classes
 //  and having the same parameters).
 //
-// Therefore @preload() methods could be skipped
+// Therefore `load`s could be skipped
 // for those top level components which remain
 // the same (and in the same state).
 // This would be an optimization.
 //
-// (e.g. the main <Route/> could be @preload()ed only once - on the server side)
+// (e.g. the main route could be `load`ed only once - on the server side)
 //
 // At the same time, at least one component should be preloaded:
 // even if navigating to the same page it still kinda makes sense to reload it.
 // (assuming it's not an "anchor" hyperlink navigation)
 //
-// Parameters for each `<Route/>` component can be found using this helper method:
-// https://github.com/ReactTraining/react-router/blob/master/modules/getRouteParams.js
-//
 // Also, GET query parameters would also need to be compared, I guess.
 // But, I guess, it would make sense to assume that GET parameters
-// only affect the last `<Route/>` component in the chain.
+// only affect the last routes component in the chain.
 // And, in general, GET query parameters should be avoided,
 // but that's not the case for example with search forms.
 // So here we assume that GET query parameters only
-// influence the last `<Route/>` component in the chain
+// influence the last route component in the chain
 // which is gonna be reloaded anyway.
 //
 function filterByChangedRoutes(filtered, routes, routeParams)

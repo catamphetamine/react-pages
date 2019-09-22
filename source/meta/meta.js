@@ -17,19 +17,16 @@ const DEFAULT_META = {
 	viewport: 'width=device-width, initial-scale=1.0'
 }
 
-const META_METHOD_NAME = '__meta__'
+const META_METHOD_NAME = 'meta'
 
 /**
+ * (This decorator is deprecated, set static `meta` property on a page component instead)
  * `@meta()` decorator used for adding `<title/>` and <meta/>` tags to a React page.
  * @param  {function} getMeta - A function of `state` returning this page's meta object.
  * @example
  * @meta(({ state }) => ({ title: `${state.user.name}'s profile` }))
  */
 export default function meta(getMeta) {
-	if (typeof getMeta === 'object') {
-		const meta = getMeta
-		getMeta = () => meta
-	}
 	return function(Component) {
 		Component[META_METHOD_NAME] = getMeta
 		return Component
@@ -70,17 +67,19 @@ export function mergeMeta(meta) {
 export function getComponentsMeta(components, state) {
 	return components
 		// `.filter(_ => _)` here just in case someone forgets to set
-		// `codeSplit: true` for `<Route/>`s with `getComponent`.
+		// `codeSplit: true` for routes with `getComponent`.
 		.filter(_ => _)
 		.map(_ => _[META_METHOD_NAME])
 		.filter(_ => _)
+		// Convert objects to functions
+		.map(_ => typeof _ === 'object' ? () => _ : _)
 		.map(_ => dropUndefinedProperties(_(state)))
 }
 
 /**
- * Gathers `meta` from `<Route/>`s chain.
- * Meta could have been provided via the standard `@meta()` decorator instead
- * but `found` router doesn't provide the actual React Components for `<Route/>`s
+ * Gathers `meta` from routes chain.
+ * Meta could have been provided via the standard static `meta` property instead
+ * but `found` router doesn't provide the actual React Components for routes
  * which are resolved through `getComponent` so there's currently no way
  * of getting the actual Route component classes, hence the `meta` property workaround.
  *
@@ -192,6 +191,8 @@ function getMetaKeyAliases(key) {
 		// https://indieweb.org/The-Open-Graph-protocol#How_to_set_description
 		case 'description':
 			return [key, `og:${key}`]
+		case 'siteName':
+			return [`og:site_name`]
 		case 'site_name':
 		// `title` property of `meta` object is
 		// handled specially via a `<title/>` tag.

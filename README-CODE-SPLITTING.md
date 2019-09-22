@@ -4,7 +4,7 @@
 
 Suppose an app is being developed. First it's small and so is its bundle so no code splitting is used. After a couple of years though many new pages are added which don't relate to each other but are still part of the app (e.g. user settings pages vs the actual website content). As a result, the javascript (and CSS) bundle grows in size reaching several megabytes. While it might seem like no big deal on PCs it is noticeable on non-flagship smartphones for example. Not only the time it takes to download the whole bundle until the website is operational but also the time to parse this bundle by the javascript engine (and the CSS engine too).
 
-To circumvent such performance issues on low-power mobile devices one can employ a "code splitting" strategy where each `<Route/>` (code + CSS) is downloaded separately as it's being accessed. With this approach a bundler creates a separate "chunk" for each page and it is then loaded dynamically via `import(url).then(...)`.
+To circumvent such performance issues on low-power mobile devices one can employ a "code splitting" strategy where each route (code + CSS) is downloaded separately as it's being accessed. With this approach a bundler creates a separate "chunk" for each page and it is then loaded dynamically via `import(url).then(...)`.
 
 ## Implementation
 
@@ -20,16 +20,16 @@ export default {
 }
 ```
 
-Then, in routes, replace some or all `Component={...}` with `getComponent={() => import(...).then(_ => _.default)}` and replace **all** `@preload()` and `@meta()` decorators on page components with `preload` and `meta` properties on `<Route/>`s themselves.
+Then, in routes, replace some or all `Component={...}` with `getComponent={() => import(...).then(_ => _.default)}` and replace **all** `load` and `meta` static properties on page components with `load` and `meta` properties on routes themselves.
 
 ```js
-<Route
-	path="/"
-	getComponent={() => import('./Application.js').then(_ => _.default)}
-	meta={state => ({ title: '...' }))
-	preload={async ({ dispatch, getState, params, ... }) => ...}>
+{
+	path: '/',
+	getComponent: () => import('./Application.js').then(_ => _.default),
+	meta: state => ({ title: '...' }),
+	load: async ({ dispatch, getState, params, ... }) => ...,
 	...
-</Route>
+}
 ```
 
 <!-- getTranslation={{ ru: () => import('./Application.ru.json'), ... }} -->
@@ -38,7 +38,7 @@ The file structure can be:
 
 * `./src/pages/Page.js` for the React page component.
 
-* `./src/pages/Page.data.js` for `preload`.
+* `./src/pages/Page.data.js` for `load`.
 
 * `./src/pages/Page.meta.js` for `meta`.
 
@@ -100,14 +100,14 @@ export default {
 ```
 -->
 
-Since `@preload()` decorator is not used on `<Route/>`s for code splitting there are three `<Route/>` properties to emulate `@preload()` behaviour:
+Since `load` property is not used on route components for code splitting there are three route properties to emulate the `load` property behavior:
 
-* `preload` — the equivalent of `@preload(...)`, is called both on client and server.
+* `load` — the equivalent of `load` property on route components, is called both on client and server.
 
-* `preloadClient` — the equivalent of `@preload(..., { client: true })`, is only called on client.
+* `loadClient` — the equivalent of `load = { load(), client: true }`, is only called on client.
 
-* `preloadClientAfter` — the equivalent of `@preload(..., { client: true, blockingSibling: true })`, is only called on client and after `preload` and `preloadClient` finish.
+* `loadClientAfter` — the equivalent of `load = { load(), client: true, blockingSibling: true }`, is only called on client and after `load` and `loadClient` have finished.
 
-Each of the preload functions can also have a static `options` property where `options` are the same as the `options` for `@preload()`.
+Each of the loading functions can also have a static `options` property where available options are same as for `load` property normally set on route components: `{ client, blocking, blockingSibling }`.
 
 See the [example project](https://github.com/catamphetamine/webpack-react-redux-server-side-render-example/pull/40) showcasing "code splitting".

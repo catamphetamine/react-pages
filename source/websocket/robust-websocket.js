@@ -17,7 +17,7 @@ import PolyfillCustomEvent from './CustomEvent'
 // `window` is `undefined` on server side.
 // This file will still be included on server side
 // because server side still uses common utilities like
-// `@meta()`, `@preload()`, `redirect()`, `goto()`, etc,
+// `meta`, `load`, `redirect()`, `goto()`, etc,
 // and therefore it does `require('react-pages')`
 // which executes `react-pages/index.common.js`
 // which in turn executes this `if` condition.

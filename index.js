@@ -7,8 +7,7 @@ export { default as meta } from './modules/meta/meta'
 export
 {
 	default as preload,
-	PRELOAD_METHOD_NAME,
-	PRELOAD_OPTIONS_NAME
+	// PRELOAD_METHOD_NAME
 }
 from './modules/redux/preload/decorator'
 

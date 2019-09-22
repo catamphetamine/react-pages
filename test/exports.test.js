@@ -14,8 +14,7 @@ import
 	PRELOAD_STARTED,
 	PRELOAD_FINISHED,
 	PRELOAD_FAILED,
-	PRELOAD_METHOD_NAME,
-	PRELOAD_OPTIONS_NAME,
+	// PRELOAD_METHOD_NAME,
 	ReduxModule,
 	// Deprecated. Use `new ReduxModule()` instead.
 	reduxModule,
@@ -59,8 +58,7 @@ describe(`exports`, function()
 		PRELOAD_FINISHED.should.be.a('string')
 		PRELOAD_FAILED.should.be.a('string')
 
-		PRELOAD_METHOD_NAME.should.be.a('string')
-		PRELOAD_OPTIONS_NAME.should.be.a('string')
+		// PRELOAD_METHOD_NAME.should.be.a('string')
 
 		reduxModule.should.be.a('function')
 
@@ -106,8 +104,7 @@ describe(`exports`, function()
 		_.PRELOAD_FINISHED.should.be.a('string')
 		_.PRELOAD_FAILED.should.be.a('string')
 
-		_.PRELOAD_METHOD_NAME.should.be.a('string')
-		_.PRELOAD_OPTIONS_NAME.should.be.a('string')
+		// _.PRELOAD_METHOD_NAME.should.be.a('string')
 
 		_.reduxModule.should.be.a('function')
 		_.ReduxModule.should.be.a('function')

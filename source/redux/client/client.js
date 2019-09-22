@@ -18,13 +18,13 @@ import { showInitialPreload, hideInitialPreload } from './initialPreload'
 // the server-side React rendering results, character-by-character.
 // Otherwise it complains.
 // That's the reason why the application on client side first performs
-// a "dummy" rendering without resolving any `@preload`s, just to complete
+// a "dummy" rendering without resolving any `load`s, just to complete
 // the React "hydration" process, and only when the "hydration" process finishes
 // does it perform the second pass of rendering the page,
-// now resolving all client-side `@preload`s.
+// now resolving all client-side `load`s.
 // Therefore, the first pass of `.render()` always happens with data missing
-// if that data is loaded in "client-side only" `@preload`s.
-// (that is, the `@preload`s configured with `{ client: true }`).
+// if that data is loaded in "client-side only" `load`s.
+// (that is, the `load`s configured with `{ client: true }`).
 //
 // If React "re-hydration" step didn't exist
 // then the library would first execute all client-side preloads
@@ -56,9 +56,9 @@ export default function setUpAndRender(settings, options = {}) {
 	// and therefore it survives page reload.
 	resetInstantBack()
 
-	// `showPreloadInitially` is handled in a special way
+	// `showLoadingInitially` is handled in a special way
 	// in case of client-side-only rendering.
-	const showPreloadInitially = settings.showPreloadInitially
+	const showLoadingInitially = settings.showLoadingInitially
 
 	// The first pass of initial client-side render
 	// is to render the markup which matches server-side one.
@@ -72,7 +72,7 @@ export default function setUpAndRender(settings, options = {}) {
 	store = createStore(
 		{
 			...settings,
-			showPreloadInitially: !isServerSidePreloaded() && showPreloadInitially ? false : showPreloadInitially
+			showLoadingInitially: !isServerSidePreloaded() && showLoadingInitially ? false : showLoadingInitially
 		},
 		getState(true),
 		createHistoryProtocol,
@@ -108,18 +108,18 @@ export default function setUpAndRender(settings, options = {}) {
 
 	// Render loading indicator in case of client-side-only rendering
 	// because the main application React tree won't be rendered
-	// until `@preload`s finish.
+	// until `load`s finish.
 	let showingInitialPreload = false
-	if (!isServerSidePreloaded() && showPreloadInitially) {
+	if (!isServerSidePreloaded() && showLoadingInitially) {
 		showInitialPreload()
 		showingInitialPreload = true
 	}
 
 	// Render the page.
 	// If it's a server-side rendering case then that will be the
-	// first pass, without preloading data, just for `React.hydrate()`.
+	// first pass, without loading data, just for `React.hydrate()`.
 	// If it's a client-side rendering case then that will be the
-	// first pass with preloading data.
+	// first pass with loading data.
 	return clientSideRender({
 		container: settings.container,
 		render,
@@ -129,8 +129,8 @@ export default function setUpAndRender(settings, options = {}) {
 	})
 	.then((result) => {
 		// Perform the second pass of initial client-side rendering.
-		// The second pass resolves `getData` on `<Route/>`s.
-		// (which means it resolves all client-side `@preload()`s)
+		// The second pass resolves `getData` on routes.
+		// (which means it resolves all client-side `load`s)
 		if (isServerSidePreloaded()) {
 			store.dispatch(redirect(document.location))
 		} else {
@@ -160,7 +160,7 @@ export default function setUpAndRender(settings, options = {}) {
 		if (showingInitialPreload) {
 			hideInitialPreload()
 		}
-		// Catches redirects from `@preload()`s,
+		// Catches redirects from `load`s,
 		// redirects from `onError` and from `<Redirect/>` routes.
 		if (error instanceof RedirectException) {
 			// Change current location.

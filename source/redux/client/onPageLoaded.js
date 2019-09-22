@@ -1,6 +1,7 @@
-export const ON_PAGE_LOADED_METHOD_NAME = '__on_page_loaded__'
+export const ON_PAGE_LOADED_METHOD_NAME = 'onLoaded'
 
-// `@onPageLoaded()` decorator.
+// `@onPageLoaded()` decorator is deprecated, set a static
+// `onLoaded` property on a page component instead.
 //
 // `function onPageLoaded({ dispatch, getState, location, params, server })`.
 //

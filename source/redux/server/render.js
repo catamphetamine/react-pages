@@ -25,7 +25,7 @@ export default async function renderOnServer({
 	try {
 		renderArgs = await matchRoutes(store)
 	} catch (error) {
-		// Catches redirects from `@preload()`s,
+		// Catches redirects from `load`s,
 		// redirects from `onError` and from `<Redirect/>` routes.
 		if (error instanceof RedirectException) {
 			return {
@@ -35,7 +35,7 @@ export default async function renderOnServer({
 		throw error
 	}
 
-	time.preload = preloadTimer()
+	time.load = preloadTimer()
 
 	// Gather `<title/>` and `<meta/>` tags for this route path
 	const { routes, elements } = renderArgs
@@ -47,7 +47,7 @@ export default async function renderOnServer({
 
 	// Return HTTP status code and the rendered page
 	return {
-		// Concatenated `react-router` route string.
+		// Concatenated route `path` string.
 		// E.g. "/user/:user_id/post/:post_id"
 		route   : getRoutePath(routes),
 		status  : getHttpResponseStatusCodeForTheRoute(routes),
@@ -58,25 +58,24 @@ export default async function renderOnServer({
 	}
 }
 
-// One can set a `status` prop for a react-router `Route`
+// One can set a `status` prop for a route
 // to be returned as an Http response status code (404, etc)
 function getHttpResponseStatusCodeForTheRoute(matchedRoutes)
 {
 	return matchedRoutes.reduce((previous, current) => (current && current.status) || (previous && current.status), null)
 }
 
-// Returns a complete path
-// for matched `react-router` `<Route/>` chain.
+// Returns a complete `path` for matched route chain.
 // E.g. returns "/user/:user_id/post/:post_id"
 // for matched URL "/user/1/post/123?key=value".
 function getRoutePath(routes)
 {
 	return routes
-		// Select `<Route/>`s having `path` React property set.
+		// Select routes having `path` React property set.
 		.filter(route => route.path)
 		// Trim leading and trailing slashes (`/`)
-		// from each `<Route/>` `path` React property.
+		// from each route `path` React property.
 		.map(route => route.path.replace(/^\//, '').replace(/\/$/, ''))
-		// Join `<Route/>` `path`s with slashes (`/`).
+		// Join route `path`s with slashes (`/`).
 		.join('/') || '/'
 }

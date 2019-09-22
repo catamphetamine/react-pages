@@ -31,7 +31,7 @@ export default function _createStore(settings, data, createHistoryProtocol, http
 		getLocale,
 		codeSplit,
 		meta,
-		showPreloadInitially
+		showLoadingInitially
 	} = settings
 
 	let {
@@ -50,7 +50,7 @@ export default function _createStore(settings, data, createHistoryProtocol, http
 	let convertedRoutes
 	const getConvertedRoutes = () => convertedRoutes
 
-	// Add `@preload()` data hook.
+	// Add `load` data hook.
 	const getData = createGetDataForPreload(codeSplit, server, onError, getLocale, getConvertedRoutes, getCookie)
 	if (Array.isArray(routes)) {
 		// If there's an error on client side in `setUpAndRender()` then it's called again.
@@ -115,13 +115,13 @@ export default function _createStore(settings, data, createHistoryProtocol, http
 	storeEnhancers.push(applyMiddleware(...middleware))
 
 	// Create Redux store.
-	const store = getStoreEnhancersComposer(server, devtools)(...storeEnhancers)(createStore)(createReducer(reducers, showPreloadInitially), data)
+	const store = getStoreEnhancersComposer(server, devtools)(...storeEnhancers)(createStore)(createReducer(reducers, showLoadingInitially), data)
 
 	// On the client side, add `hotReload()` function to the `store`.
 	// (could just add this function to `window` but adding it to the `store` fits more)
 	if (!server) {
 		// `hotReload` helper function gives the web application means to hot reload its Redux reducers
-		store.hotReload = (reducers) => store.replaceReducer(createReducer(reducers, showPreloadInitially))
+		store.hotReload = (reducers) => store.replaceReducer(createReducer(reducers, showLoadingInitially))
 	}
 
 	// Initialize `found`.
@@ -131,7 +131,7 @@ export default function _createStore(settings, data, createHistoryProtocol, http
 	return store
 }
 
-function createReducer(reducers, showPreloadInitially)
+function createReducer(reducers, showLoadingInitially)
 {
 	// Check for reserved reducer names.
 	for (const reducerName of RESERVED_REDUCER_NAMES) {
@@ -145,8 +145,8 @@ function createReducer(reducers, showPreloadInitially)
 	reducers = { ...reducers }
 	// Add `found` reducer.
 	reducers.found = foundReducer
-	// Add `@preload()` status reducer.
-	reducers.preload = preloadReducer(showPreloadInitially)
+	// Add `load` status reducer.
+	reducers.preload = preloadReducer(showLoadingInitially)
 	// // Add `@translate()` reducer.
 	// reducers.translation = translateReducer
 	// Create the compound reducer.

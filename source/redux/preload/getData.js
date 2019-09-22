@@ -19,7 +19,7 @@ export default function createGetDataForPreload(codeSplit, server, onError, getL
 			if (window._react_pages_skip_preload ||
 				window._react_pages_skip_preload_update_location ||
 				window._react_pages_hot_reload) {
-				// Reset "skip @preload()" flag for `pushLocation()` and `replaceLocation()`.
+				// Reset "skip `load`" flag for `pushLocation()` and `replaceLocation()`.
 				if (window._react_pages_skip_preload_update_location) {
 					window._react_pages_skip_preload_update_location = false;
 				}
@@ -30,13 +30,13 @@ export default function createGetDataForPreload(codeSplit, server, onError, getL
 		const isInitialClientSideNavigation = !server && !previousLocation
 		// A workaround for `found` router bug:
 		// https://github.com/4Catalyzer/found/issues/239
-		// Prevent executing `@preload()`s on "anchor" link click.
+		// Prevent executing `load`s on "anchor" link click.
 		if (!server && !isInitialClientSideNavigation) {
 			if (shouldSkipPreloadForNavigation(previousLocation, location)) {
 				return
 			}
 		}
-		// Execute `@preload()`s.
+		// Execute `load`s.
 		return preload(
 			location,
 			isInitialClientSideNavigation ? undefined : previousLocation,
@@ -65,7 +65,7 @@ export default function createGetDataForPreload(codeSplit, server, onError, getL
 							// Using `redirect` instead of `goto` here
 							// so that the user can't go "Back" to the page being preloaded
 							// in case of an error because it would be in inconsistent state
-							// due to `@preload()` being interrupted.
+							// due to `load` being interrupted.
 							redirect(to) {
 								throw new RedirectException(to)
 							},

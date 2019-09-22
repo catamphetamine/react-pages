@@ -93,19 +93,18 @@ export function getPreviouslyMatchedLocation(state) {
 		state.found.resolvedMatch.location
 }
 
-// Returns a complete route path
-// for matched `<Route/>`s chain.
+// Returns a complete route path for matched routes chain.
 // E.g. returns "/user/:user_id/post/:post_id"
 // for matched URL "/user/1/post/123?key=value".
 export function getRoutePath(routes)
 {
 	return routes
-		// Select `<Route/>`s having `path` React property set.
+		// Select routes having `path` React property set.
 		.filter(route => route.path)
 		// Trim leading and trailing slashes (`/`)
-		// from each `<Route/>` `path` React property.
+		// from each route `path` React property.
 		.map(route => route.path.replace(/^\//, '').replace(/\/$/, ''))
-		// Join `<Route/>` `path`s with slashes (`/`).
+		// Join route `path`s with slashes (`/`).
 		.join('/') || '/'
 }
 

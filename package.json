@@ -1,7 +1,7 @@
 {
   "name": "react-pages",
-  "version": "1.0.0",
-  "description": "A complete solution for building a React/Redux application: routing, page preloading, (optional) server-side rendering, asynchronous HTTP requests, document metadata, internationalization, etc.",
+  "version": "0.2.0",
+  "description": "A complete solution for building a React/Redux application: routing, page loading, (optional) server-side rendering, asynchronous HTTP requests, document metadata, internationalization, etc.",
   "main": "index.commonjs.js",
   "module": "index.js",
   "dependencies": {

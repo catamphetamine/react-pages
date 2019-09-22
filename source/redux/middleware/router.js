@@ -47,10 +47,10 @@ export default function routerMiddleware(
 				case UPDATE_MATCH:
 					// A workaround for `found` router bug:
 					// https://github.com/4Catalyzer/found/issues/239
-					// Skip `@preload()` and other stuff for anchor link navigation.
+					// Skip `load` and other stuff for anchor link navigation.
 					if (previousLocation && shouldSkipPreloadForNavigation(previousLocation, location)) {
 						// I guess this workaround won't work with `codeSplit: true`
-						// because it doesn't use the global `getData` preloader.
+						// because it doesn't use the global `getData` loader.
 						if (!codeSplit) {
 							break
 						}
@@ -61,11 +61,11 @@ export default function routerMiddleware(
 						window._react_pages_update_match_event_payload = event.payload
 					}
 
-					// Measure `@preload()` time.
+					// Measure `load` and `render` time.
 					startedAt = Date.now()
 
 					// If it's an instant "Back"/"Forward" navigation
-					// then navigate to the page without preloading it.
+					// then navigate to the page without loading it.
 					// (has been previously preloaded and is in Redux state)
 					const _isInstantTransition =
 						location.action === 'POP' &&
@@ -152,10 +152,10 @@ export default function routerMiddleware(
 				case _RESOLVE_MATCH:
 					// A workaround for `found` router bug:
 					// https://github.com/4Catalyzer/found/issues/239
-					// Skip `@preload()` and other stuff for anchor link navigation.
+					// Skip `load` and other stuff for anchor link navigation.
 					if (previousLocation && shouldSkipPreloadForNavigation(previousLocation, location)) {
 						// I guess this workaround won't work with `codeSplit: true`
-						// because it doesn't use the global `getData` preloader.
+						// because it doesn't use the global `getData` loader.
 						if (!codeSplit) {
 							break
 						}
@@ -170,7 +170,7 @@ export default function routerMiddleware(
 						window._react_pages_router_rendered = true
 					}
 
-					// Call `@onPageLoaded()`.
+					// Call `onLoaded`.
 					if (!codeSplit) {
 						const routeChain = getRoutesByPath(routeIndices, routes)
 						const pageRoute = routeChain[routeChain.length - 1]
@@ -200,24 +200,24 @@ export default function routerMiddleware(
 					// Reset the flag for `isInstantBackAbleNavigation()`.
 					window._react_pages_is_instant_back_able_navigation = false
 
-					// Report preloading time.
-					// This preloading time will be longer then
+					// Report page loading time.
+					// This loading time will be longer then
 					// the server-side one, say, by 10 milliseconds,
 					// probably because the web browser making
 					// an asynchronous HTTP request is slower
 					// than the Node.js server making a regular HTTP request.
 					// Also this includes network latency
 					// for a particular website user, etc.
-					// So this `preload` time doesn't actually describe
+					// So this `load` time doesn't actually describe
 					// the server-side performance.
 					if (reportStats) {
 						reportStats({
 							url: getLocationUrl(location),
-							// Concatenated `react-router` route string.
+							// Concatenated route `path` string.
 							// E.g. "/user/:user_id/post/:post_id"
 							route: getRoutePath(getRoutesByPath(routeIndices, routes)),
 							time: {
-								preloadAndRender: Date.now() - startedAt
+								loadAndRender: Date.now() - startedAt
 							}
 						})
 					}
@@ -225,7 +225,7 @@ export default function routerMiddleware(
 					// Hide page loading indicator.
 					dispatch({ type: PRELOAD_FINISHED })
 
-					// Report preload time in console for debugging.
+					// Report loading time in console for debugging.
 					if (Date.now() - startedAt > 30) {
 						console.log(`[react-pages] "${location.pathname}" loaded and rendered in ${Date.now() - startedAt} ms`)
 					}

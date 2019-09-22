@@ -6,7 +6,7 @@
 A complete solution for building a React/Redux application
 
 * Routing
-* Page preloading
+* Page loading
 * (optional) Code splitting
 * (optional) Server-side rendering
 * Asynchronous HTTP requests
@@ -78,6 +78,17 @@ export default (
   </Route>
 )
 ```
+
+<!--
+export default [{
+  path: '/',
+  Component: App,
+  children: [
+    { Component: Home },
+    { path: 'about', Component: About }
+  ]
+}]
+-->
 
 #### ./src/pages/App.js
 
@@ -233,11 +244,11 @@ Search engine crawlers like Google bot won't wait for a page to make its asynchr
 
 So the only thing preventing a dynamic website from being indexed by a crawler is asynchronous HTTP queries for data, not javascript itself. This therefore brings two solutions: one is to perform everything (routing, data fetching, rendering) on the server side and the other is to perform routing and data fetching on the server side leaving rendering to the client's web browser. Both these approaches work with web crawlers. And this is what this library provides.
 
-While the first approach is more elegant and pure, while also delivering the fastest "time to first byte", currently it is a CPU intensive task to render a complex React page (takes about 30 milliseconds of blocking CPU single core time for complex pages having more than 1000 components, as of 2017). Therefore one may prefer the second approach: performing routing and page preloading on the server side while leaving page rendering to the client. This means that the user won't see any content until the javascript bundle is downloaded (which takes some time, especially with large applications not using "code splitting"), but it also means that the server's CPU is freed from rendering React. This mode is activated by passing `renderContent: false` flag to the rendering server.
+While the first approach is more elegant and pure, while also delivering the fastest "time to first byte", currently it is a CPU intensive task to render a complex React page (takes about 30 milliseconds of blocking CPU single core time for complex pages having more than 1000 components, as of 2017). Therefore one may prefer the second approach: performing routing and page loading on the server side while leaving page rendering to the client. This means that the user won't see any content until the javascript bundle is downloaded (which takes some time, especially with large applications not using "code splitting"), but it also means that the server's CPU is freed from rendering React. This mode is activated by passing `renderContent: false` flag to the rendering server.
 
 ### Page loading time
 
-Another argument in favour of Server-Side Rendering is that even if a website doesn't need search engine indexing it could still benefit from saving that additional asynchronous HTTP roundtrip from the web browser to the API server for fetching the page's data. And no matter how fast the API server is, [latency is unbeatable](https://www.igvita.com/2012/07/19/latency-the-new-web-performance-bottleneck/) being about 100ms. So, by performing routing and page preloading on the server side one can speed up website loading by about 100ms.
+Another argument in favour of Server-Side Rendering is that even if a website doesn't need search engine indexing it could still benefit from saving that additional asynchronous HTTP roundtrip from the web browser to the API server for fetching the page's data. And no matter how fast the API server is, [latency is unbeatable](https://www.igvita.com/2012/07/19/latency-the-new-web-performance-bottleneck/) being about 100ms. So, by performing routing and page loading on the server side one can speed up website loading by about 100ms.
 
 ### Adding server-side rendering
 
@@ -304,13 +315,13 @@ A much simpler and smaller example (using Parcel instead of Webpack) can be foun
 
 # Documentation
 
-## Preloading pages
+## Loading pages
 
-For page preloading use the `@preload()` decorator to load the neccessary data before the page is rendered.
+To "load" a page before it's rendered set a static `load` property on the page component.
 
 ```javascript
-import { connect } from 'react-redux'
-import { preload } from 'react-pages'
+import React from 'react'
+import { useSelector, useDispatch } from 'react-redux'
 
 // Redux "asynchronous action",
 // explained later in this document.
@@ -321,36 +332,30 @@ function fetchUsers() {
   }
 }
 
-@preload(async ({ dispatch }) => {
+function UsersPage({ users }) {
+  const users = useSelector(state => state.usersPage.users)
+  const dispatch = useDispatch()
+  return (
+    <div>
+      <ul> { users.map(user => <li> { user.name } </li>) } </ul>
+      <button onClick={ () => dispatch(fetchUsers) }> Refresh </button>
+    </div>
+  )
+}
+
+UsersPage.load = async ({ dispatch }) => {
   // Send HTTP request and wait for response
   await dispatch(fetchUsers())
-})
-@connect(
-  (state) => ({ users: state.usersPage.users }),
-  // Calls `bindActionCreators()`
-  // for the specified Redux action creators.
-  { fetchUsers }
-)
-export default class UsersPage extends Component {
-  render() {
-    const { users, fetchUsers } = this.props
-    return (
-      <div>
-        <ul> { users.map(user => <li> { user.name } </li>) } </ul>
-        <button onClick={ fetchUsers }> Refresh </button>
-      </div>
-    )
-  }
 }
 ```
 
-In this example the `@preload()` decorator is used to preload a page before it is displayed, i.e. before the page is rendered (both on server side and on client side).
+In this example the static `load` property is used to "load" a page before it is displayed, i.e. before the page is rendered (both on server side and on client side).
 
-`@preload()` decorator takes an `async`/`await` function which takes an object of arguments:
+The static `load` property is usually an `async`/`await` function that takes an object as an argument:
 
 ```javascript
-@preload(async (preloadArguments) => {
-  const = {
+Page.load = async (utility) => {
+  const {
     // Can `dispatch()` Redux actions.
     dispatch,
     // Returns Redux state.
@@ -367,78 +372,78 @@ In this example the `@preload()` decorator is used to preload a page before it i
     // (utility)
     // Returns cookie value by name.
     getCookie
-  }
-  = preloadArguments
+  } = utility
 
   // Send HTTP request and wait for response.
   await dispatch(fetchPageData(params.id))
-})
+}
 ```
 
 <details>
-<summary>The decorator also receives an optional `options` argument (advanced topic)</summary>
+<summary>Advanced topic: The static <code>load</code> property can also be an object having the <code>load()</code> function itself along with some options. It can also be an array of several <code>load</code>s.</summary>
 
 ```js
-@preload(async () => { ... }, options)
+// A single `load` example with options.
+Page.load = {
+  load: async () => { ... },
+  ...options
+}
+
+// Multiple `load`s example.
+Page.load = [
+  {
+    load: async () => { ... },
+    ...options
+  },
+  {
+    load: async () => { ... },
+    ...options
+  },
+  ...
+]
 ```
 
-The available options are:
+The available `options` are:
 
-* `blocking` — (defaults to `false`) If `true` then child `<Route/>`'s  `@preload()`s will wait for this `@preload()` to finish in order to get executed.
+* `blocking` — (defaults to `false`) If `true` then child route `load`s will wait for this `load` to finish in order to get called.
 
-* `blockingSibling` — (defaults to `false`) If `true` then all further adjacent (sibling) `@preload()`s for the same `<Route/>`'s component will wait for this `@preload()` to finish in order to get executed.
+* `blockingSibling` — (defaults to `false`) If `true` then all further adjacent (sibling) `load`s for the same route component will wait for this `load` to finish in order to get executed.
 
-* `client` — (defaults to `false`) If `true` then the `@preload()` will be executed only on client side. If `false` then this `@preload()` will be executed normally: if part of initial page preloading then on server side and if part of subsequent preloading (e.g. navigation) then on client side.
+* `client` — (defaults to `false`) If `true` then the `load` will be executed only on client side. If `false` then this `load` will be executed normally: if part of initial page "load" then on server side and if part of subsequent "load" (e.g. navigation) then on client side.
 
-* `server` — (defaults to `false`) If `true` then the `@preload()` will be executed only on server side. If `false` then this `@preload()` will be executed normally: if part of initial page preloading then on server side and if part of subsequent preloading (e.g. navigation) then on client side.
+* `server` — (defaults to `false`) If `true` then the `load` will be executed only on server side. If `false` then this `load` will be executed normally: if part of initial page "load" then on server side and if part of subsequent "load" (e.g. navigation) then on client side.
 </details>
 
-####
-
-Note: [`babel-plugin-proposal-decorators`](https://babeljs.io/docs/en/babel-plugin-proposal-decorators) Babel plugin is needed at the moment to make decorators work with Babel:
-
-```sh
-npm install @babel/plugin-proposal-decorators --save
-```
-
-#### .babelrc
-
-```js
-{
-  ...
-  "plugins": [
-    ["@babel/plugin-proposal-decorators", { "legacy": true }],
-    ...
-  ]
-}
-```
-
-On the client side, in order for `@preload` to work all `<Link/>`s imported from `react-router` **must** be instead imported from `react-pages`. Upon a click on a `<Link/>` first it waits for the next page to preload, and then, when the next page is fully loaded, `react-router` navigation itself takes place.
+On client side, in order for `load` to work all links **must** be created as the `<Link/>` component imported from `react-pages` package. Upon a click on a `<Link/>` first it waits for the next page to load, and then, when the next page is fully loaded, the navigation itself takes place.
 
 <details>
-<summary><code>@preload</code> also works for Back/Forward navigation. To disable page <code>@preload</code> on Back navigation pass <code>instantBack</code> property to a <code>&lt;Link/&gt;</code>.</summary>
+<summary><code>load</code> also works for Back/Forward navigation. To disable page <code>load</code> on Back navigation pass <code>instantBack</code> property to a <code>&lt;Link/&gt;</code>.</summary>
 
 ####
 
-For example, consider a search results page preloading some data (could be search results themselves, could be anything else unrelated). A user navigates to this page, waits for `@preload` to finish and then sees a list of items. Without `instantBack` if the user clicks on an item he's taken to the item's page. Then the user clicks "Back" and is taken back to the search results page but has to wait for that `@preload` again. With `instantBack` though the "Back" transition occurs instantly without having to wait for that `@preload` again. Same goes then for the reverse "Forward" navigation from the search results page back to the item's page, but that's just a small complementary feature. The main benefit is the instantaneous "Back" navigation creating a much better UX where a user can freely explore a list of results without getting penalized for it with a waiting period on each click.
+For example, consider a search results page loading some data (could be search results themselves, could be anything else unrelated). A user navigates to this page, waits for `load` to finish and then sees a list of items. Without `instantBack` if the user clicks on an item he's taken to the item's page. Then the user clicks "Back" and is taken back to the search results page but has to wait for that `load` again. With `instantBack` though the "Back" transition occurs instantly without having to wait for that `load` again. Same goes then for the reverse "Forward" navigation from the search results page back to the item's page, but that's just a small complementary feature. The main benefit is the instantaneous "Back" navigation creating a much better UX where a user can freely explore a list of results without getting penalized for it with a waiting period on each click.
 
 ```js
-@preload(async () => await fetchSomeData())
-class SearchResultsPage extends Component {
-  render() {
-    return (
-      <ul>
-        { results.map((item) => (
-          <li>
-            <Link to="/items/{item.id}" instantBack>
-              {item.name}
-            </Link>
-          </li>
-        ))) }
-      </ul>
-    )
-  }
+import React from 'react'
+import { useSelector } from 'react-redux'
+import { Link } from 'react-pages'
+
+function SearchResultsPage() {
+  const results = useSelector(state => state.searchPage.results)
+  return (
+    <ul>
+      { results.map((item) => (
+        <li>
+          <Link to="/items/{item.id}" instantBack>
+            {item.name}
+          </Link>
+        </li>
+      ))) }
+    </ul>
+  )
 }
+
+SearchResultsPage.load = async () => await fetchSomeData()
 ```
 
 There's also `instantBack: true` option available for `goto(location, options)` which has the same behavior.
@@ -448,9 +453,9 @@ One can also use the exported `wasInstantNavigation()` function (on client side)
 There's also an `isInstantBackAbleNavigation()` function (on client side) which tells if the currently ongoing navigation process is performed with `instantBack` option (for example, if `<Link instantBack/>` is clicked or `goto(location, { instantBack: true })` is called). It can be used in `componentWillUnmount()` to save the current page state for later restoring it if the user navigates "Back" instantly.
 </details>
 
-## `@preload()` indicator
+## `load` indicator
 
-Sometimes preloading a page can take some time so one may want to (and actually should) add some kind of a "spinner" to inform the user that the application isn't frozen and that the navigation process needs some more time to finish. This can be achieved by adding the built-in `<Loading/>` component on a page:
+Sometimes loading a page can take some time so one may want to (and actually should) add some kind of a "spinner" to inform the user that the application isn't frozen and that the navigation process needs some more time to finish. This can be achieved by adding the built-in `<Loading/>` component on a page:
 
 ```javascript
 import { Loading } from 'react-pages'
@@ -497,9 +502,9 @@ function asynchronousAction() {
 `dispatch(asynchronousAction())` call returns the `Promise` itself:
 
 ```js
-@preload(async ({ dispatch }) => {
+Page.load = async ({ dispatch }) => {
   await dispatch(asynchronousAction())
-})
+}
 ```
 
 ### HTTP utility
@@ -747,56 +752,35 @@ export { default as blogPost } from './blogPost'
 The React Component would look like this
 
 ```js
-import React, { Component } from 'react'
-import { connect } from 'react-redux'
-import { preload } from 'react-pages'
-import { connectComments, getComments, postComment } from './redux/blogPost'
+import React from 'react'
+import { getBlogPost, getComments, postComment } from './redux/blogPost'
 
-// Preload comments before showing the page
-// (see "Page preloading" section of this document)
-@preload(async ({ dispatch, params }) => {
-  // `params` are the URL parameters populated by `react-router`:
-  // `<Route path="/blog/:blogPostId"/>`.
-  await dispatch(getComments(params.blogPostId))
-})
-// See `react-redux` documentation on `@connect()` decorator
-@connect((state) => ({
-  userId: state.user.id,
-  comments: state.blogPost.comments
-}), {
-  postComment
-})
-export default class BlogPostPage extends Component {
-  render() {
-    const {
-      comments
-    } = this.props
-
-    return (
-      <div>
-        <ul>
-          { comments.map(comment => <li>{comment}</li>) }
-        </ul>
-        {this.renderPostCommentForm()}
-      </div>
-    )
-  }
-
-  renderPostCommentForm() {
-    // `params` are the URL parameters:
-    // `<Route path="/blog/:blogPostId"/>`.
-    const {
-      userId,
-      params,
-      postComment
-    } = this.props
-
-    return (
-      <button onClick={() => postComment(userId, params.blogPostId, 'text')}>
+export default function BlogPostPage() {
+  const userId = useSelector(state => state.user.id)
+  const blogPost = useSelector(state => state.blogPost.blogPost)
+  const comments = useSelector(state => state.blogPost.comments)
+  return (
+    <div>
+      <article>
+        { blogPost.text }
+      </article>
+      <ul>
+        { comments.map(comment => <li>{comment}</li>) }
+      </ul>
+      <button onClick={() => postComment(userId, blogPost.id, 'text')}>
         Post comment
       </button>
-    )
-  }
+    </div>
+  )
+}
+
+// Load blog post and comments before showing the page
+// (see "Page loading" section of this document)
+BlogPostPage.load = async ({ dispatch, params }) => {
+  // `params` are the URL parameters in route `path`.
+  // For example, "/blog/:blogPostId".
+  await dispatch(getBlogPost(params.blogPostId))
+  await dispatch(getComments(params.blogPostId))
 }
 ```
 </details>
@@ -930,9 +914,9 @@ In order for `http` utility to send an authentication token as part of an HTTP r
 
 The `accessToken` is initially obtained when a user signs in: the web browser sends HTTP POST request to `/sign-in` API endpoint with `{ email, password }` parameters and gets `{ userInfo, accessToken }` as a response, which is then stored in `localStorage` (or in Redux `state`, or in a `cookie`) and all subsequent HTTP requests use that `accessToken` to call the API endpoints. The `accessToken` itself is usually a [JSON Web Token](https://jwt.io/introduction/) signed on the server side and holding the list of the user's priviliges ("roles"). Hence authentication and authorization are completely covered. [Refresh tokens](https://auth0.com/blog/refresh-tokens-what-are-they-and-when-to-use-them/) are also [supported](https://github.com/catamphetamine/react-pages/blob/master/README-ADVANCED.md#all-react-pagesjs-settings).
 
-This kind of an authentication and authorization scheme is self-sufficient and doesn't require "restricting" any routes: if a route's `@preload()` uses `http` utility for querying an API endpoint then this API endpoint must check if the user is signed in and if the user has the necessary priviliges. If yes then the route is displayed. If not then the user is redirected to either a "Sign In Required" page or "Access Denied" page.
+This kind of an authentication and authorization scheme is self-sufficient and doesn't require "restricting" any routes: if a route's `load` uses `http` utility for querying an API endpoint then this API endpoint must check if the user is signed in and if the user has the necessary priviliges. If yes then the route is displayed. If not then the user is redirected to either a "Sign In Required" page or "Access Denied" page.
 
-A real-world (advanced) example for handling "Unauthenticated"/"Unauthorized" errors happening in `@preload()`s and during `http` calls:
+A real-world (advanced) example for handling "Unauthenticated"/"Unauthorized" errors happening in `load`s and during `http` calls:
 
 #### ./react-pages.js
 
@@ -981,7 +965,7 @@ A real-world (advanced) example for handling "Unauthenticated"/"Unauthorized" er
 
 function handleUnauthenticatedError(error, url, redirect) {
   // Prevent double redirection to `/unauthenticated`.
-  // (e.g. when two parallel `Promise`s load inside `@preload()`
+  // (e.g. when two parallel `Promise`s load inside `load`
   //  and both get Status 401 HTTP Response)
   if (typeof window !== 'undefined' && window.location.pathname === '/unauthenticated') {
     return;
@@ -1238,51 +1222,64 @@ The `snapshot()` function snapshots the list of `pages` to `.html` files and the
 The snapshotting approach works not only for classical web "documents" (a blog, a book, a portfolio, a showcase) but also for dynamic applications. Consider an online education portal where users (students) can search for online courses and the prices are different for each user (student) based on their institution. Now, an online course description itself is static (must be indexed by Google) and the actual course price is dynamic (must not be indexed by Google).
 
 <details>
-<summary>The solution is to add two <code>@preload()</code>s for the course page: one for static data (which runs while snapshotting) and another for dynamic data (which runs only in a user's web browser).</summary>
+<summary>The solution is to add two <code>load</code>s for the course page: one for static data (which runs while snapshotting) and another for dynamic data (which runs only in a user's web browser).</summary>
 
 ```js
-import React, { Component } from 'react'
-import { preload } from 'react-pages'
+import React from 'react'
 
-@preload(async ({ dispatch }) => await dispatch(loadCourseInfo()))
-@preload(async ({ dispatch }) => await dispatch(loadCoursePrice()), { client: true })
-export default class Course extends Component {
+export default function CoursePage() {
   ...
 }
+
+CoursePage.load = [
+  async ({ dispatch }) => await dispatch(loadCourseInfo()),
+  {
+    load: async ({ dispatch }) => await dispatch(loadCoursePrice()),
+    client: true
+  }
+]
 ```
 
-In this example `loadCourseInfo()` will be executed while snapshotting and therefore course info will be present on the snapshotted page. But course price won't be present on the snapshotted page because it's being loaded inside `@preload(..., { client: true })` which only gets called in a user's web browser. When a user opens the course page in his web browser it will show the snapshotted page with course info with a "loading" spinner on top of it as it is loading the course price. After the course price has been loaded the "loading" spinner disappears and the user sees the fully rendered course page.
+In this example `loadCourseInfo()` will be executed while snapshotting and therefore course info will be present on the snapshotted page. But course price won't be present on the snapshotted page because it's being loaded inside the `client: true` `load` that only gets called in a user's web browser. When a user opens the course page in his web browser it will show the snapshotted page with course info with a "loading" spinner on top of it as it is loading the course price. After the course price has been loaded the "loading" spinner disappears and the user sees the fully rendered course page.
 
 <!--
-The "client-side-only" `@preload()`s have a catch though: for [technical reasons](https://github.com/catamphetamine/react-pages/blob/master/source/redux/client/client.js#L15) they aren't executed when the application is first rendered in a web browser. After the initial page load, the application is first rendered without resolving "client-side-only" `@preload()`s and only after this "first rendering pass" finishes does it resolve all "client-side-only" `@preload()`s and re-renders itself. This limitation is inherent to how React server-side rendering works. It can be simplified for cases where `index.html` approach is used, and this workaround will probably get implemented in some future version.
+The "client-side-only" `load`s have a catch though: for [technical reasons](https://github.com/catamphetamine/react-pages/blob/master/source/redux/client/client.js#L15) they aren't executed when the application is first rendered in a web browser. After the initial page load, the application is first rendered without resolving "client-side-only" `load`s and only after this "first rendering pass" finishes does it resolve all "client-side-only" `load`s and re-renders itself. This limitation is inherent to how React server-side rendering works. It can be simplified for cases where `index.html` approach is used, and this workaround will probably get implemented in some future version.
 -->
 </details>
 
 ## Page HTTP response status code
 
-To set a custom HTTP response status code for a specific route set the `status` property of that `<Route/>`.
+To set a custom HTTP response status code for a specific route set the `status` property of that route.
 
 ```javascript
-export default (
-  <Route path="/" Component={Layout}>
-    <Route Component={Home}/>
-    <Route path="blog"  Component={Blog}/>
-    <Route path="about" Component={About}/>
-    <Route path="*"     Component={PageNotFound} status={404}/>
-  </Route>
-)
+export default [{
+  path: '/',
+  Component: Application,
+  children: [
+    { Component: Home },
+    { path: 'blog', Component: Blog },
+    { path: 'about', Component: About },
+    { path: '*', Component: PageNotFound, status: 404 }
+  ]
+}]
 ```
 
 ### Setting <title/> and <meta/> tags
 
-Use `@meta(state => ...)` decorator for adding `<title/>` and `<meta/>` tags:
+Set `meta: (state) => object` static function on a page component to add `<title/>` and `<meta/>` tags to the page:
 
 ```js
-import { meta } from 'react-pages'
+function Page() {
+  return (
+    <section>
+      ...
+    </section>
+  )
+}
 
-@meta((state) => ({
+Page.meta = (state) => ({
   // `<meta property="og:site_name" .../>`
-  site_name: 'International Bodybuilders Club',
+  siteName: 'International Bodybuilders Club',
 
   // Webpage `<title/>` will be replaced with this one
   // and also `<meta property="og:title" .../>` will be added.
@@ -1346,13 +1343,10 @@ import { meta } from 'react-pages'
   // All other properties will be transformed directly to
   // either `<meta property="{property_name}" content="{property_value}/>`
   // or `<meta name="{property_name}" content="{property_value}/>`
-}))
-export default class Page extends React.Component {
-  ...
-}
+})
 ```
 
-`@meta()` decorator discards all other `<meta/>` set by any other means, e.g. if there are any `<meta/>` tags in `index.html` template then all of them will be dicarded if using `@meta()` decorator so don't mix `@meta()` decorator with `<meta/>` tags inserted manually into `index.html`.
+Setting `meta` property on a page component discards all other `<meta/>` set by any other means, e.g. if there are any `<meta/>` tags in `index.html` template then all of them will be dicarded if setting `meta` property so don't mix `meta` property with `<meta/>` tags in `index.html`.
 
 To set default `<meta/>` (for example, `og:site_name`, `og:description`, `og:locale`) define `meta` property in `react-pages.js` settings file:
 
@@ -1361,7 +1355,7 @@ To set default `<meta/>` (for example, `og:site_name`, `og:description`, `og:loc
   routes: ...,
   reducers: ...,
   meta: {
-    site_name: 'WebSite',
+    siteName: 'WebSite',
     description: 'A generic web application',
     locale: 'en_US'
   }
@@ -1370,7 +1364,7 @@ To set default `<meta/>` (for example, `og:site_name`, `og:description`, `og:loc
 
 ### Get current location
 
-Inside `@preload()`: use the `location` parameter.
+Inside a `load` function: use the `location` parameter.
 
 Anywhere in a React component: use the `found` property in Redux state.
 
@@ -1473,8 +1467,8 @@ For each page being rendered stats are reported if `stats()` parameter is passed
 {
   ...
 
-  stats({ url, route, time: { preload } }) {
-    if (preload > 1000) { // in milliseconds
+  stats({ url, route, time: { load } }) {
+    if (load > 1000) { // in milliseconds
       db.query('insert into server_side_rendering_stats ...')
     }
   }
@@ -1485,9 +1479,9 @@ The arguments for the `stats()` function are:
 
  * `url` — The requested URL (without the `protocol://host:port` part)
  * `route` — The route path (e.g. `/user/:userId/post/:postId`)
- * `time.preload` — The time for executing all `@preload()`s.
+ * `time.load` — The time for executing all `load`s.
  <!--
- `time.preloadAndRender` — (client side only) The time for executing all `@preload()`s. On client side `@preload()`s not only preload the page, they also perform page rendering when "success" Redux action is dispatched. So it's not just the time to load page data, it's also the time to render the data.
+ `time.loadAndRender` — (client side only) The time for executing all `load`s. On client side `load`s not only load the page, they also perform page rendering when "success" Redux action is dispatched. So it's not just the time to load page data, it's also the time to render the data.
  -->
 
 Rendering a complex React page (having more than 1000 components) takes about 30ms (as of 2017).
@@ -1499,11 +1493,11 @@ Rendering a complex React page (having more than 1000 components) takes about 30
 {
   ...
 
-  stats({ url, route, time: { initialize, preload, total } }) {
+  stats({ url, route, time: { initialize, load, total } }) {
     statsd.increment('count')
 
     statsd.timing('initialize', initialize)
-    statsd.timing('@preload()', preload)
+    statsd.timing('load', load)
     statsd.timing('total', total)
 
     if (total > 1000) { // in milliseconds
@@ -1517,8 +1511,8 @@ Where the metrics collected are
 
  * `count` — rendered pages count
  * `initialize` — server side `initialize()` function execution time (if defined)
- * `preload` — page preload time
- * `time` - total time spent preloading and rendering the page
+ * `load` — page loading time
+ * `time` - total time spent loading and rendering the page
 
 Speaking of StatsD itself, one could either install the conventional StatsD + Graphite bundle or, for example, use something like [Telegraf](https://github.com/influxdata/telegraf) + [InfluxDB](https://www.influxdata.com/) + [Grafana](http://grafana.org/).
 
@@ -1537,7 +1531,7 @@ telegraf -config telegraf.conf
 
 ## Webpack HMR
 
-Webpack's [Hot Module Replacement](https://webpack.github.io/docs/hot-module-replacement.html) (aka Hot Reload) works for React components and Redux reducers and Redux action creators (it just doesn't work for page `@preload()`s).
+Webpack's [Hot Module Replacement](https://webpack.github.io/docs/hot-module-replacement.html) (aka Hot Reload) works for React components and Redux reducers and Redux action creators (it just doesn't work for page `load`s).
 
 HMR setup for Redux reducers is as simple as adding `store.hotReload()` (as shown below). For enabling [HMR on React Components](https://webpack.js.org/guides/hmr-react/) (and Redux action creators) use [react-hot-loader](https://github.com/gaearon/react-hot-loader):
 

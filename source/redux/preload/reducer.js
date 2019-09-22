@@ -4,7 +4,7 @@ import {
 	PRELOAD_FAILED
 } from './actions'
 
-// `@preload()` reducer
+// `load` reducer
 export default function createPreloadReducer(showInitially = false)
 {
 	return function(state = {

@@ -71,12 +71,12 @@ function isSameLocationIgnoreHash(fromLocation, toLocation) {
 
 // A workaround for `found` router bug:
 // https://github.com/4Catalyzer/found/issues/239
-// Skip `@preload()` and other stuff for anchor link navigation.
+// Skip `load` and other stuff for anchor link navigation.
 export function shouldSkipPreloadForNavigation(fromLocation, toLocation) {
 	if (isSameLocationIgnoreHash(fromLocation, toLocation)) {
 		// If a "hash" link has been clicked,
 		// or if it's a Back/Forward navigation
-		// then `@preload()` should be skipped.
+		// then `load` should be skipped.
 		if (toLocation.hash || toLocation.action === 'POP') {
 			return true
 		}

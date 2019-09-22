@@ -183,7 +183,7 @@ export function markImmediateNavigationAsInstantBack(instantBack) {
 		// Resetting the flag immediately after it's processed in router's POP event listener.
 		// Could reset it there too.
 		// Not resetting on some "on navigation finished" event because
-		// `@preload()` could throw and the navigation wouldn't conclude in that case.
+		// `load` could throw and the navigation wouldn't conclude in that case.
 		setTimeout(() => window._react_pages_instant_back_navigation = false, 0)
 	}
 }

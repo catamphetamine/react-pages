@@ -5,7 +5,7 @@ import
 }
 from './chain'
 
-describe(`@preload`, function()
+describe(`load`, function()
 {
 	it(`should filter preloaders`, () =>
 	{

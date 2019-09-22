@@ -1,7 +1,7 @@
 import { TRANSLATE_LOCALES_PROPERTY } from '../translate/decorator'
 
 export default function collectTranslations(components, routes, routeIndices, codeSplit, locale, dispatch) {
-	// Set the `_key` for each `<Route/>`.
+	// Set the `_key` for each route.
 	// Each page component gets `route` property
 	// from which it can get the `_key`
 	// and using that `_key` it can get the

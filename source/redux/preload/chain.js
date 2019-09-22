@@ -1,7 +1,7 @@
 import { isServerSidePreloaded } from '../../client/flags'
 
 // Returns function returning a Promise
-// which resolves when all the required preload()s are resolved.
+// which resolves when all the required page `load`s are resolved.
 //
 // If no preloading is needed, then returns nothing.
 //
@@ -19,7 +19,7 @@ export default function generatePreloadChain
 )
 {
 	// Set `.preload({ ... })` function arguments,
-	// and also set default `@preload()` options.
+	// and also set default `load` options.
 	setUpPreloaders(
 		preloaders,
 		{
@@ -30,14 +30,14 @@ export default function generatePreloadChain
 			parameters,
 			params: parameters,
 			server,
-			// `getCookie` `@preload()` parameter was requested:
+			// `getCookie` `load` parameter has been requested:
 			// https://github.com/catamphetamine/react-website/issues/71
 			getCookie
 		},
 		server
 	)
 
-	// Only select those `@preload()`s which
+	// Only select those `load`s which
 	// should be run in current circumstances.
 	preloaders = filter_preloaders(preloaders, server, isInitialClientSidePreload)
 
@@ -45,7 +45,7 @@ export default function generatePreloadChain
 	// Because each of them could be either parallel or sequential.
 	const chain = chain_preloaders(preloaders)
 
-	// If there are no `@preload()`s for this route, then exit.
+	// If there are no `load`s for this route, then exit.
 	if (chain.length === 0) {
 		return
 	}
@@ -54,8 +54,8 @@ export default function generatePreloadChain
 	return () => promisify(chain, preloading)
 }
 
-// Applies default `@preload()` options
-// and sets `@preload()` function arguments.
+// Applies default `load` options
+// and sets `load` function arguments.
 function setUpPreloaders(preloaders, preload_arguments, server)
 {
 	for (const component_preloaders of preloaders) {
@@ -65,21 +65,21 @@ function setUpPreloaders(preloaders, preload_arguments, server)
 	}
 }
 
-// Applies default `@preload()` options
-// and sets `@preload()` function arguments.
+// Applies default `load` options
+// and sets `load` function arguments.
 function setUpPreloader(preloader, preload_arguments, server)
 {
 	const preload = preloader.preload
 	preloader.preload = () => preload(preload_arguments)
 
 	// If Server-Side Rendering is not being used at all
-	// then all `@preload()`s must be marked as client-side ones.
+	// then all `load`s must be marked as client-side ones.
 	if (!server && !isServerSidePreloaded()) {
 		preloader.options.client = true
 	}
 }
 
-// Selects only those `@preload()`s which
+// Selects only those `load`s which
 // should be run in current circumstances.
 export function filter_preloaders(preloaders, server, isInitialClientSidePreload)
 {
@@ -90,16 +90,16 @@ export function filter_preloaders(preloaders, server, isInitialClientSidePreload
 	{
 		preloaders[i] = preloaders[i].filter((preloader) =>
 		{
-			// Don't execute client-side-only `@preload()`s on server side
+			// Don't execute client-side-only `load`s on server side
 			if (preloader.options.client && server) {
 				return false
 			}
-			// Don't execute server-side-only `@preload()`s on client side
+			// Don't execute server-side-only `load`s on client side
 			if (preloader.options.server && !server) {
 				return false
 			}
 			// If it's initial client side preload (after the page has been loaded),
-			// then only execute those `@preload()`s marked as "client-side-only".
+			// then only execute those `load`s marked as "client-side-only".
 			if (isInitialClientSidePreload && !preloader.options.client) {
 				return false
 			}
@@ -114,7 +114,7 @@ export function filter_preloaders(preloaders, server, isInitialClientSidePreload
 //
 // @param `preloaders` is an array of `component_preloaders`.
 // `component_preloaders` is an array of all
-// `@preload()`s for a particular React component.
+// `load`s for a particular React component.
 // Therefore `preloaders` is an array of arrays.
 export function chain_preloaders(preloaders, chain = [], parallel = [])
 {
@@ -132,7 +132,7 @@ export function chain_preloaders(preloaders, chain = [], parallel = [])
 	}
 
 	// `component_preloaders` is an array of all
-	// `@preload()`s for a particular React component.
+	// `load`s for a particular React component.
 	const preloader = preloaders[0]
 	preloaders = preloaders.slice(1)
 
@@ -163,25 +163,25 @@ export function chain_preloaders(preloaders, chain = [], parallel = [])
 
 function get_preloader(preloader)
 {
-	// A list of same component's `@preload()`s
+	// A list of same component's `load`s
 	if (Array.isArray(preloader)) {
 		return chain_preloaders(preloader)
 	}
 
-	// Same component adjacent `@preload()`
+	// Same component adjacent `load`
 	return preloader.preload
 }
 
 function is_preloader_blocking(preloader)
 {
-	// A list of same component's `@preload()`s
+	// A list of same component's `load`s
 	if (Array.isArray(preloader))
 	{
 		// Determine the proper `blocking` option
-		// for this component's `@preload()`s.
+		// for this component's `load`s.
 		for (const sibling_preloader of preloader)
 		{
-			// If any of component's `@preload()`s are `blocking: true`
+			// If any of component's `load`s are `blocking: true`
 			// then all of them are `blocking: true`.
 			if (sibling_preloader.options.blocking)
 			{
@@ -192,7 +192,7 @@ function is_preloader_blocking(preloader)
 		return false
 	}
 
-	// Same component adjacent `@preload()`
+	// Same component adjacent `load`
 	return preloader.options.blockingSibling
 }
 

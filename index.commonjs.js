@@ -12,8 +12,7 @@ exports.PRELOAD_FAILED   = PreloadActions.PRELOAD_FAILED
 
 var preloadDecorator = require('./commonjs/redux/preload/decorator')
 
-exports.PRELOAD_METHOD_NAME  = preloadDecorator.PRELOAD_METHOD_NAME
-exports.PRELOAD_OPTIONS_NAME = preloadDecorator.PRELOAD_OPTIONS_NAME
+// exports.PRELOAD_METHOD_NAME  = preloadDecorator.PRELOAD_METHOD_NAME
 
 exports.preload = preloadDecorator.default
 exports.indicateLoading = PreloadActions.indicateLoading

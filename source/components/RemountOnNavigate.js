@@ -11,13 +11,13 @@ class RemountOnNavigate extends React.Component {
 
 	render() {
 		const {
-			preloading,
+			loading,
 			matchedLocation,
 			previousLocation,
 			children
 		} = this.props
 
-		const location = preloading ? previousLocation : matchedLocation
+		const location = loading ? previousLocation : matchedLocation
 
 		return (
 			<div
@@ -30,7 +30,7 @@ class RemountOnNavigate extends React.Component {
 }
 
 export default connect(({ preload, found }) => ({
-	preloading: preload.pending,
+	loading: preload.pending,
 	matchedLocation: found.match.location,
 	previousLocation: found.resolvedMatch.location
 }))(RemountOnNavigate)

@@ -6,12 +6,11 @@ from './preload'
 
 import
 {
-	PRELOAD_METHOD_NAME,
-	PRELOAD_OPTIONS_NAME
+	PRELOAD_METHOD_NAME
 }
 from './decorator'
 
-describe(`@preload`, function()
+describe(`load`, function()
 {
 	it(`should collect preloaders from React Components`, () =>
 	{
@@ -23,13 +22,20 @@ describe(`@preload`, function()
 		([
 			null,
 			{
-				[PRELOAD_METHOD_NAME]  : [preload_1],
-				[PRELOAD_OPTIONS_NAME] : [{ client : true }]
+				[PRELOAD_METHOD_NAME]: [{
+					load: preload_1,
+					client: true
+				}]
 			},
 			undefined,
 			{
-				[PRELOAD_METHOD_NAME]  : [preload_2, preload_3],
-				[PRELOAD_OPTIONS_NAME] : [{ blocking: false }, { server : true }]
+				[PRELOAD_METHOD_NAME]: [{
+					load: preload_2,
+					blocking: false
+				}, {
+					load: preload_3,
+					server : true
+				}]
 			},
 			{}
 		])
