@@ -28,8 +28,8 @@ export default function normalizeSettings(settings)
 		// By default it wraps everything with Redux `<Provider/>`.
 		settings.container = function Container({ store, children }) {
 			return (
-				<Provider store={ store }>
-					{ children }
+				<Provider store={store}>
+					{children}
 				</Provider>
 			)
 		}

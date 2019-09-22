@@ -226,7 +226,7 @@ export function collectPreloadersFromComponents(components)
 		// Select all components having `load`s.
 		.filter(component => component && component[PRELOAD_METHOD_NAME])
 		// Extract `load` functions and their options.
-		.map((component) => component[PRELOAD_METHOD_NAME].map(({ load, ...rest }, i) => ({
+		.map(component => normalizeLoad(component[PRELOAD_METHOD_NAME]).map(({ load, ...rest }) => ({
 			preload: load,
 			options: rest
 		})))
@@ -240,13 +240,7 @@ function collectPreloadersFromRoutes(routes) {
 		.map(_ => _.load)
 		.filter(_ => _)
 		.map((load) => {
-			if (typeof load === 'function') {
-				load = { load }
-			}
-			if (!Array.isArray(load)) {
-				load = [load]
-			}
-			return load.map(({ load, ...rest }) => ({
+			return normalizeLoad(load).map(({ load, ...rest }) => ({
 				preload: load,
 				options: rest
 			}))
@@ -311,4 +305,14 @@ function filterByChangedRoutes(filtered, routes, routeParams)
 	}
 
 	return filteredByChangedRoutes
+}
+
+function normalizeLoad(load) {
+	if (typeof load === 'function') {
+		load = { load }
+	}
+	if (!Array.isArray(load)) {
+		load = [load]
+	}
+	return load
 }
