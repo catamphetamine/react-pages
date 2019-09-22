@@ -67,6 +67,7 @@ function generateJavascript(store, settings) {
 // JSON date deserializer.
 // Use as the second, 'reviver' argument to `JSON.parse(json, JSON.dateParser)`.
 // http://stackoverflow.com/questions/14488745/javascript-json-date-deserialization/23691273#23691273
+// `JSON.parse(json, JSON.dateParser)` is about 2.5 times slower than `JSON.parse(json)` in Chrome.
 const DEFINE_JSON_DATE_PARSER = Terser.minify(`
 if (!JSON.dateParser) {
 	JSON.dateParser = function(key, value) {
