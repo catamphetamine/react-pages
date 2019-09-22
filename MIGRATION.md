@@ -27,8 +27,6 @@ http: {
 
 * Removed `Promise` cancellation and the `cancelPrevious: true` Redux action parameter.
 
-Create a `react-website@3.x` branch of `webpack-example-` and add the list to the branch to the 3.x README.
-
 Check that sending forms with files (single, multiple) via `http` works.
 
 Check that the refactored http.request() populateErrorData() works (emulate an error on server side).
