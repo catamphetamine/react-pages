@@ -295,7 +295,7 @@ Now [disable javascript in Chrome DevTools](http://stackoverflow.com/questions/1
 
 This concludes the introductory part of the README and the rest is the description of the various tools and techniques which come prepackaged with this library.
 
-A working example illustrating Server-Side Rendering and all other things can be found here: [webpack-react-redux-isomorphic-render-example](https://github.com/catamphetamine/webpack-react-redux-isomorphic-render-example).
+A working example illustrating Server-Side Rendering and all other things can be found here: [webpack-react-redux-isomorphic-render-example](https://github.com/catamphetamine/webpack-react-redux-server-side-render-example/tree/react-website-3.x).
 
 A much simpler and smaller example (using Parcel instead of Webpack) can be found here: [react-website-basic-example](https://github.com/catamphetamine/react-website-basic-example).
 
