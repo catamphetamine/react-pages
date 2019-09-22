@@ -2,32 +2,24 @@ import parseDates from './parseDates'
 import { isObject } from './helpers'
 
 // Performs HTTP requests
-export default class HttpRequest
-{
-	constructor(method, url, data, options)
-	{
-		const
-		{
+export default class HttpRequest {
+	constructor(method, url, data, options) {
+		const {
 			agent,
 			headers,
 			shouldParseJsonDates,
 			onAddCookies,
 			onResponseHeaders
-		}
-		= options
+		} = options
 
 		this.onAddCookies = onAddCookies
 
 		// Create Http request.
 		this.request = agent[method](url)
 
-		let isMultipartFormData
-
 		// Attach data to the outgoing HTTP request
-		if (data)
-		{
-			switch (method)
-			{
+		if (data) {
+			switch (method) {
 				case 'get':
 					this.request.query(data)
 					break
@@ -54,18 +46,6 @@ export default class HttpRequest
 
 		// Apply HTTP headers
 		this.request.set(headers)
-
-		// `superagent` is supposed to set `Content-Type` automatically
-		// when calling `.send()` but it doesn't get called for GET/HEAD/DELETE HTTP requests.
-		// Also, when `.send()` is called with `FormData` it also doesn't set
-		// any `Content-Type` HTTP header. So setting it here manually.
-		if (!this.request._header['content-type']) {
-			if (isMultipartFormData) {
-				this.request.type('multipart/form-data')
-			} else {
-				this.request.type('application/json')
-			}
-		}
 
 		// `true`/`false`
 		this.shouldParseJsonDates = shouldParseJsonDates
