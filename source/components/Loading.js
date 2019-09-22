@@ -6,14 +6,10 @@ import classNames from 'classnames'
 import LoadingIndicator from './LoadingIndicator'
 import FadeInOut from './FadeInOut'
 
-export default function Loading({
+export function Loading({
 	indicator: Indicator,
 	fadeOutDuration
 }) {
-	const initial = useSelector(({ preload }) => preload.initial)
-	const pending = useSelector(({ preload }) => preload.pending)
-	const immediate = useSelector(({ preload }) => preload.immediate)
-
 	return (
 		<div
 			className={classNames('rrui__fixed-full-width', 'react-pages__loading', {
@@ -36,4 +32,17 @@ Loading.propTypes = {
 Loading.defaultProps = {
 	indicator: LoadingIndicator,
 	fadeOutDuration: 160
+}
+
+export default function Loading_(props) {
+	const initial = useSelector(({ preload }) => preload.initial)
+	const pending = useSelector(({ preload }) => preload.pending)
+	const immediate = useSelector(({ preload }) => preload.immediate)
+	return (
+		<Loading
+			{...props}
+			initial={initial}
+			pending={pending}
+			immediate={immediate}/>
+	)
 }
