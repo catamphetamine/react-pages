@@ -16,13 +16,9 @@ A complete solution for building a React/Redux application
 * HTTP Cookies
 * etc
 
-# `react-website`
-
-For the latest `react-website` release docs see the [`3.x` branch readme](https://github.com/catamphetamine/react-website/tree/3.x). This branch (`master`) is for the next (still work in progress) release of `react-website@4.x` which will be called `react-pages@1.x`. It's not ready yet so use [`react-website@3.x`](https://github.com/catamphetamine/react-website/tree/3.x) for now.
-
 # `react-pages` vs `react-website`
 
-`react-pages` will be the new name for the former [`react-website`](https://github.com/catamphetamine/react-website/) package: it's just a better name, so basically `react-pages@1.x` will be what `react-website@4.x` was going to be. The breaking change is that `react-website@3.x` comes with `found@0.3.x` router and `react-redux@5.x` while `react-pages@1.x` will update those to `found@0.4.x` and `react-redux@6.x`: this is required for React Hooks and for the future React 17 release. Currently `react-pages` is still at version `0.1.0` indicating that *this is still an "alpha" release* and the API is subject to change as `found` is being migrated from `0.3.x` to `0.4.x` and `react-redux` is being migrated from `5.x` to `6.x`. When the migration is finished version `1.0.0` will be released. There also will be a [migration guide from `react-website@3.x` to `react-pages@1.x`](https://github.com/catamphetamine/react-pages/MIGRATION.md).
+Previously this library has been known as [`react-website`](https://github.com/catamphetamine/react-website/tree/3.x) but then I found a better (in my opinion) name for it and it's now called `react-pages`. For migrating from `react-website` to `react-pages` see the [migration guide](https://github.com/catamphetamine/react-pages/MIGRATION.md).
 
 # Introduction
 
@@ -1561,8 +1557,8 @@ import { hot } from 'react-hot-loader'
 
 function Container({ store, children }) {
   return (
-    <Provider store={ store }>
-      { children }
+    <Provider store={store}>
+      {children}
     </Provider>
   )
 }

@@ -1,6 +1,8 @@
 # Migration
 
-## Migration from `react-website@3.x` to `react-pages@1.x`
+`react-pages` is the new name for the former [`react-website`](https://github.com/catamphetamine/react-website/tree/3.x) package: it's just a better name, so basically `react-pages` is what `react-website@4.x` was going to be. The breaking change is that `react-website@3.x` comes with `found@0.3.x` router and `react-redux@5.x` while `react-pages` updates those to `found@0.4.x` and `react-redux@6.x`: this is required for React Hooks and for the future React 17 release. Currently `react-pages` is still in "beta" version (not `1.0.0` yet) indicating that it's still being tested and the API could theoretically change in some way.
+
+## Migration from `react-website@3.x` to `react-pages`
 
 ### Changes
 
