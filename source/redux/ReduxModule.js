@@ -21,83 +21,63 @@ import {
 // Importing packages from two different `node_modules` is not a good practice.
 
 // Deprecated. Use `new ReduxModule()` instead.
-export function createReduxModule(namespace, settings)
-{
+export function createReduxModule(namespace, settings) {
 	return new ReduxModule(namespace, settings)
 }
 
-export default class ReduxModule
-{
+export default class ReduxModule {
 	handlers = {}
 	registered_state_properties = []
 
-	constructor(namespace = generateReduxNamespace(counter.next()), settings = {})
-	{
+	constructor(namespace = generateReduxNamespace(counter.next()), settings = {}) {
 		this.namespace = namespace
-
 		this.settings = {
 			reduxEventNaming: settings.reduxEventNaming || DEFAULT_REDUX_EVENT_NAMING,
 			reduxPropertyNaming: settings.reduxPropertyNaming || underscoredToCamelCase
 		}
 	}
 
-	replace(event, handler)
-	{
-		if (!Array.isArray(handler))
-		{
+	replace(event, handler) {
+		if (!Array.isArray(handler)) {
 			handler = [handler]
 		}
-
 		this.handlers[event] = handler
 	}
 
-	on(namespace, event, handler)
-	{
-		if (typeof event === 'function')
-		{
+	on(namespace, event, handler) {
+		if (typeof event === 'function') {
 			handler = event
 			event = namespace
 			namespace = undefined
-		}
-		else
-		{
+		} else {
 			// Use "success" event name.
 			event = this.settings.reduxEventNaming(eventName(namespace, event))[1]
 		}
-
-		if (!this.handlers[event])
-		{
+		if (!this.handlers[event]) {
 			this.handlers[event] = []
 		}
-
 		this.handlers[event].push(handler)
 	}
 
-	action(event, action, result, options)
-	{
+	action(event, action, result, options) {
 		if (event && typeof event !== 'string') {
 			options = result
 			result = action
 			action = event
 			event = undefined
 		}
-
 		// Autogenerate `event` name.
 		if (!event) {
 			event = generateReduxEventName(counter.next())
 		}
-
 		options = options || {}
-
 		if (typeof action !== 'function') {
 			throw new Error('[react-pages] One must pass an `action()` argument (the second one) to Redux module action creator: `reduxModule(event, action, result, options = {})`.')
 		}
-
 		return createAction(event, action, result, options, this)
 	}
 
-	simpleAction(event, action, result, options)
-	{
+	simpleAction(event, action, result, options) {
 		if (event && typeof event !== 'string') {
 			options = result
 			result = action
@@ -118,38 +98,6 @@ export default class ReduxModule
 		options = options || {}
 		options.sync = true
 		return this.action(event, action, result, options)
-	}
-
-	// Returns Redux action creator for resetting error.
-	resetError(event)
-	{
-		const
-		[
-			pending_event_name,
-			success_event_name,
-			error_event_name
-		]
-		= this.settings.reduxEventNaming(event)
-
-		// Redux "action creator"
-		return () =>
-		({
-			type  : eventName(this.namespace, error_event_name),
-			error : undefined
-		})
-	}
-
-	// Deprecated.
-	getProperties = (state) =>
-	{
-		const properties = {}
-
-		for (const property_name of this.registered_state_properties)
-		{
-			properties[property_name] = state[property_name]
-		}
-
-		return properties
 	}
 
 	createReducer(initialState = {}) {
@@ -263,8 +211,7 @@ function createAction(event, action, result, options, redux) {
 //   * failed
 //   * reset error
 //
-function add_asynchronous_action_reducers(redux, namespace, event, result_reducer)
-{
+function add_asynchronous_action_reducers(redux, namespace, event, result_reducer) {
 	const
 	[
 		pending_event_name,
@@ -280,78 +227,44 @@ function add_asynchronous_action_reducers(redux, namespace, event, result_reduce
 	redux.add_state_properties(pending_property_name, error_property_name)
 
 	// When Promise is created: reset result variable, clear `error`, set `pending` flag.
-	redux.on(eventName(namespace, pending_event_name), (state) =>
-	{
-		const new_state =
-		{
+	redux.on(eventName(namespace, pending_event_name), (state) => {
+		state = {
 			...state,
 			// Set `pending` flag
 			[pending_property_name]: true
 		}
-
 		// Clear `error`
-		if (redux.v2) {
-			// For gradual migration from version "2.x" syntax.
-			new_state[error_property_name] = undefined
-		} else {
-			delete new_state[error_property_name]
-		}
-
-		return new_state
+		delete state[error_property_name]
+		return state
 	})
 
 	// When Promise succeeds: clear `pending` flag, set result variable.
-	redux.on(eventName(namespace, success_event_name), (state, result) =>
-	{
-		const new_state = result_reducer(state, result)
-
-		// Clear `pending` flag
-		if (redux.v2) {
-			// For gradual migration from version "2.x" syntax.
-			new_state[pending_property_name] = false
-		} else {
-			delete new_state[pending_property_name]
-		}
-
-		return new_state
+	redux.on(eventName(namespace, success_event_name), (state, result) => {
+		state = result_reducer(state, result)
+		delete state[pending_property_name]
+		return state
 	})
 
 	// When Promise fails, clear `pending` flag and set `error`.
 	// Can also clear `error` when no `error` is passed as part of an action.
-	redux.on(eventName(namespace, error_event_name), (state, error) =>
-	{
-		const new_state =
-		{
+	redux.on(eventName(namespace, error_event_name), (state, error) => {
+		state = {
 			...state,
-			[error_property_name] : error
+			[error_property_name]: error
 		}
-
 		// Clear `pending` flag
-		if (redux.v2) {
-			// For gradual migration from version "2.x" syntax.
-			new_state[pending_property_name] = false
-		} else {
-			delete new_state[pending_property_name]
-			// `resetError()`
-			if (!error) {
-				delete new_state[error_property_name]
-			}
-		}
-
-		return new_state
+		delete state[pending_property_name]
+		return state
 	})
 }
 
 // Returns a function
-function get_action_value_reducer(reducer)
-{
+function get_action_value_reducer(reducer) {
 	// If `reducer` is a property name,
 	// then the reducer will write action value
 	// to that property of Redux state.
-	if (typeof reducer === 'string')
-	{
-		return (state, value) =>
-		({
+	if (typeof reducer === 'string') {
+		return (state, value) => ({
 			...state,
 			[reducer]: value
 		})
@@ -359,16 +272,11 @@ function get_action_value_reducer(reducer)
 
 	// If `reducer` is an object of property getters
 	// then those properties will be added to Redux state.
-	if (typeof reducer === 'object')
-	{
-		return (state, value) =>
-		{
+	if (typeof reducer === 'object') {
+		return (state, value) => {
 			const updated_properties = {}
-
-			for (const property of Object.keys(reducer))
-			{
+			for (const property of Object.keys(reducer)) {
 				updated_properties[property] = reducer[property](value)
-
 				// Don't know why did I previously write it like:
 				// updated_properties =
 				// {
@@ -376,7 +284,6 @@ function get_action_value_reducer(reducer)
 				// 	...reducer[property](value)
 				// }
 			}
-
 			return {
 				...state,
 				...updated_properties
@@ -388,12 +295,9 @@ function get_action_value_reducer(reducer)
 	return reducer
 }
 
-class Counter
-{
+class Counter {
 	counter = 0
-
-	next()
-	{
+	next() {
 		if (this.counter < MAX_SAFE_INTEGER) {
 			this.counter++
 		} else {
