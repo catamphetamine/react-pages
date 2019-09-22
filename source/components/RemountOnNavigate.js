@@ -2,12 +2,7 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
 
-@connect(({ preload, found }) => ({
-	preloading: preload.pending,
-	matchedLocation: found.match.location,
-	previousLocation: found.resolvedMatch.location
-}))
-export default class RemountOnNavigate extends React.Component {
+class RemountOnNavigate extends React.Component {
 	static propTypes = {
 		matchedLocation: PropTypes.object.isRequired,
 		previousLocation: PropTypes.object.isRequired,
@@ -33,3 +28,9 @@ export default class RemountOnNavigate extends React.Component {
 		)
 	}
 }
+
+export default connect(({ preload, found }) => ({
+	preloading: preload.pending,
+	matchedLocation: found.match.location,
+	previousLocation: found.resolvedMatch.location
+}))(RemountOnNavigate)

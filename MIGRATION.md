@@ -6,13 +6,24 @@
 
 * Update `react-redux` to `>= 7.1`. Updating from `5.x` to `6.x` has only a [single breaking change](https://github.com/reduxjs/react-redux/issues/1104): `withRef` is replaced with `forwardRef`, and therefore any uses of `wrapperComponentInstance.getWrappedInstance()` are replaced with `actualComponentInstance`. Updating from `6.x` to `7.x` [has no breaking changes](https://github.com/reduxjs/react-redux/releases/tag/v7.0.1).
 * Update `react` and `react-dom` to `>= 16.8`.
+* `@meta()`, `@preload()`, `@onPageLoaded()` decorators are now deprecated because they [can't be used on functional components](https://github.com/tc39/proposal-decorators). Instead, there're now `meta`, `load` and `onLoaded` static properties: `meta` can be an object or a function returning an object; `load` can be a function, an object of shape `{ load, options }`, or an array of those; `onLoaded` can be a function. The `@meta()`, `@preload()` and `@onPageLoaded()` decorators still work, but also have been rewritten as functions setting static properties on a component rather than creating new "wrapper" React components (there shouldn't be any breaking changes).
 * Page components no longer receive `params` property in `found@0.4.x` (in case anyone used that property, but I guess no one did).
 * For those who used `withRouter()` decorator previously now there's a better alternative — `useRouter()` hook: `const { match, router } = useRouter()`. This library no longer re-exports `found`'s `withRouter` decorator though `found` still does export it.
-* Seding `GET` or `multipart/form-data` requests using `http` utility [no longer](https://github.com/catamphetamine/react-website/issues/74) adds `Content-Type` header. This shouldn't be an issue for most users. `Content-Type` header can be set [manually](https://github.com/catamphetamine/react-website/issues/74#issuecomment-496443987) via `http.onRequest(request)` setting.
-* Removed `Promise` cancellation and the `cancelPrevious: true` Redux action parameter.
-* Rewrote `@meta()`, `@preload()` and `@onPageLoaded()` as functions setting static properties on a component rather than wrapping React components. There shouldn't be any breaking changes.
+* Sending `GET` or `multipart/form-data` requests using `http` utility [no longer](https://github.com/catamphetamine/react-website/issues/74) adds `Content-Type` header. This shouldn't be an issue for most users. For cases when reverting to the old behavior is needed, the `Content-Type` header can be set [manually](https://github.com/catamphetamine/react-website/issues/74#issuecomment-496443987) via `http.onRequest(request)` hook:
 
-Update Babel from `6` to `7`.
+```js
+http: {
+  onRequest: (request) => {
+    if (!request.header['content-type']) {
+      request.set('application/json')
+    }
+  }
+}
+```
+
+* Removed `Promise` cancellation and the `cancelPrevious: true` Redux action parameter.
+
+Modify `meta`, `preload`, `onPageLoaded` decorators to add `load`, `meta` and `onLoaded` static properties.
 
 Check that sending forms with files (single, multiple) via `http` works.
 
@@ -20,11 +31,9 @@ Check that the refactored http.request() populateErrorData() works (emulate an e
 
 Maybe check setting server-side cookies.
 
+Create a `react-website@3.x` branch of `webpack-example-` and add the list to the branch to the 3.x README.
+
 Create `react-pages-basic-example` analogous to `react-website-basic-example`.
-
-https://github.com/feross/multistream/issues/42
-
-https://github.com/feross/string-to-stream/issues/9
 
 ### Renames
 
@@ -37,6 +46,8 @@ https://github.com/feross/string-to-stream/issues/9
 
 * `http.allowAbsoluteURLs` settings has been removed.
 * `redux.v2` `v2` -> `v3` migration parameter has been removed.
+* `redux.getProperties()` method has been removed.
+* `redux.resetError()` method has been removed.
 
 ### Non-breaking dependency updates
 
