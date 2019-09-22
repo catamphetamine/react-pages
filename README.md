@@ -675,7 +675,7 @@ Sometimes modules for one project are imported from another project, and both th
 
 <details>
 <summary>
-  Here's a more complex example: a comments section for a blog post page.
+  A more complex example: a comments section for a blog post page.
 </summary>
 
 #### redux/blogPost.js
@@ -715,11 +715,13 @@ export const getComments = redux.action(
   // (state, result) => ({ ...state, comments: result })
 )
 
-// A developer can listen to any event.
+// A developer can listen to any Redux event via
+// `redux.on('EVENT_NAME', (state, action) => state)`.
 // If two string arguments are passed
 // then the first one is namespace
 // and the second one is the event name
-// and the listener will be called "on success".
+// and the listener will be called in case of
+// a "success" event of a `redux.action()`.
 // If only one string argument is passed
 // then it is a raw Redux `action.type`.
 redux.on('BLOG_POST', 'CUSTOM_EVENT', (state, action) => ({
@@ -850,6 +852,31 @@ export default redux.reducer()
 dispatch(notify('Test'))
 ```
 </details>
+
+####
+
+<details>
+<summary>Redux module can also listen for events from other redux modules via <code>redux.on()</code></summary>
+
+####
+
+```js
+// A developer can listen to any Redux event via
+// `redux.on('EVENT_NAME', (state, action) => state)`.
+// If two string arguments are passed
+// then the first one is namespace
+// and the second one is the event name
+// and the listener will be called in case of
+// a "success" event of a `redux.action()`.
+// If only one string argument is passed
+// then it is a raw Redux `action.type`.
+redux.on('BLOG_POST', 'CUSTOM_EVENT', (state, action) => ({
+  ...state,
+  reduxStateProperty: action.value
+}))
+```
+</details>
+
 
 ### HTTP authentication
 
