@@ -40,7 +40,7 @@ describe(`exports`, function()
 	{
 		meta.should.be.a('function')
 		indicateLoading.should.be.a('function')
-		Loading.should.be.a('function')
+		Loading.WrappedComponent.should.be.a('function')
 
 		render.should.be.a('function')
 		getState.should.be.a('function')
@@ -82,7 +82,7 @@ describe(`exports`, function()
 
 		_.meta.should.be.a('function')
 		_.indicateLoading.should.be.a('function')
-		_.Loading.should.be.a('function')
+		_.Loading.WrappedComponent.should.be.a('function')
 
 		// Combined Redux exports
 
