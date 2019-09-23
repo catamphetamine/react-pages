@@ -25,6 +25,18 @@ http: {
 }
 ```
 
+* Renamed `requestedURL` parameter of `authentication.accessToken()` function to `originalUrl`.
+
+* Renamed `requestedURL` parameter of `http.onRequest()` function to `originalUrl`.
+
+* Renamed `http.transformURL()` configuration parameter to `http.transformUrl()`.
+
+* `http.transformUrl()` function's second argument changed from `server` to `{ server }`.
+
+* Removed `parameters` property of `@preload()`/`load()` page preloading function, use `params` property name instead.
+
+* The `promise()` function of an "asynchronous" Redux action (the one having `event` and `promise` properties defined) previously received three arguments: `http`, `dispatch` and `getState`. Now it receives a single argument and it's an object having shape `{ http }`.
+
 * Removed `Promise` cancellation and the `cancelPrevious: true` Redux action parameter.
 
 ### To do
@@ -53,6 +65,9 @@ https://github.com/catamphetamine/webpack-react-redux-server-side-render-example
 * `redux.v2` `v2` -> `v3` migration parameter has been removed.
 * `redux.getProperties()` method has been removed.
 * `redux.resetError()` method has been removed.
+* `authentication.accessToken()` method's `path` parameter has been removed (use `url` parameter name instead).
+* `reduxModule()` exported function has been removed, use `new ReduxModule()` notation instead.
+* `redux.simpleAction()`'s `action()` argument has been removed. It has been used to convert several arguments into a Redux action object. Instead, pass the Redux action object directly to the Redux function when `dispatch()`ing it.
 
 ### Non-breaking dependency updates
 

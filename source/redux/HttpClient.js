@@ -41,7 +41,7 @@ export default function createHttpClient(settings, getStore, options = {}) {
 		onBeforeSend,
 		catchToRetry,
 		getAuthToken,
-		transformUrl: settings.http.transformURL,
+		transformUrl: settings.http.transformUrl,
 		parseDates: settings.parseDates,
 		authTokenHeader: settings.authentication.header,
 		...options

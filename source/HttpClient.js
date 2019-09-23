@@ -72,9 +72,9 @@ export default class HttpClient {
 
 		// Define HTTP methods on this `http` utility instance
 		for (const method of HTTP_METHODS) {
-			this[method] = (path, data, options = {}) => {
+			this[method] = (originalUrl, data, options = {}) => {
 				// `url` will be absolute for server-side
-				const url = transformUrl(path, this.server)
+				const url = transformUrl(originalUrl, { server: this.server })
 
 				// Is incremented on each retry
 				let retryCount = -1
@@ -112,11 +112,13 @@ export default class HttpClient {
 						getAuthToken,
 						getCookie,
 						url,
-						path
+						originalUrl
 					)
 
-					// On server side, add cookies to relative HTTP requests.
-					if (this.server && isRelativeUrl(path)) {
+					// On server side, user's cookies are attached to **all** relative "original" URLs
+					// so `http.transformUrl(originalUrl)` must not transform relative URLs
+					// into absolute URLs, otherwise user's cookies would be leaked to a third party.
+					if (this.server && isRelativeUrl(originalUrl)) {
 						request.addCookies(cookies, this.cookiesSetOnServer)
 					}
 
@@ -127,7 +129,7 @@ export default class HttpClient {
 					if (onBeforeSend) {
 						onBeforeSend(request.request, {
 							url,
-							requestedURL: path
+							originalUrl
 						})
 					}
 
@@ -166,16 +168,16 @@ export default class HttpClient {
 
 	// Validates the requested URL,
 	// and also prepends host and port to it on the server side.
-	proxyUrl(path, server) {
+	proxyUrl(url, { server }) {
 		// Prepend host and port on the server side
-		if (this.proxy && server) {
+		if (this.proxy && server && isRelativeUrl(url)) {
 			const protocol = this.proxy.secure ? 'https' : 'http'
-			return `${protocol}://${this.proxy.host}:${this.proxy.port || '80'}${path}`
+			return `${protocol}://${this.proxy.host}:${this.proxy.port || '80'}${url}`
 		}
-		return path
+		return url
 	}
 }
 
-function isRelativeUrl(path) {
-	return starts_with(path, '/') && !starts_with(path, '//')
+function isRelativeUrl(url) {
+	return starts_with(url, '/') && !starts_with(url, '//')
 }

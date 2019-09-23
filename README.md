@@ -321,7 +321,7 @@ import { useSelector, useDispatch } from 'react-redux'
 // explained later in this document.
 function fetchUsers() {
   return {
-    promise: http => http.get('/api/users'),
+    promise: ({ http }) => http.get('/api/users'),
     events: ['FETCH_USERS_PENDING', 'FETCH_USERS_SUCCESS', 'FETCH_USERS_FAILURE']
   }
 }
@@ -503,7 +503,7 @@ Page.load = async ({ dispatch }) => {
 
 ### HTTP utility
 
-Because in almost all cases dispatching an "asynchronous action" means "making an HTTP request", the `promise` function described above always takes an `http` argument: `promise: http => ...`.
+Because in almost all cases dispatching an "asynchronous action" means "making an HTTP request", the `promise` function described above always takes an `{ http }` argument: `promise: ({ http }) => ...`.
 
 The `http` utility has the following methods:
 
@@ -525,7 +525,7 @@ So, API endpoints can be queried using `http` and ES6 `async/await` syntax like 
 ```js
 function fetchFriends(personId, gender) {
   return {
-    promise: http => http.get(`/api/person/${personId}/friends`, { gender }),
+    promise: ({ http }) => http.get(`/api/person/${personId}/friends`, { gender }),
     events: ['GET_FRIENDS_PENDING', 'GET_FRIENDS_SUCCESS', 'GET_FRIENDS_FAILURE']
   }
 }
@@ -545,11 +545,11 @@ The possible `options` (the third argument of all `http` methods) are
 
 ###
 
-For that use the `http.onRequest(request, { url, requestedURL, getState })` setting in `./react-pages.js` where:
+For that use the `http.onRequest(request, { url, originalUrl, getState })` setting in `./react-pages.js` where:
 
 * `request` is a [`superagent`](https://visionmedia.github.io/superagent/) `request` that can be modified. For example, to set an HTTP header: `request.set(headerName, headerValue)`.
-* `requestedURL` is the URL argument of the `http` utility call.
-* `url` is the `requestedURL` transformed by `http.transformURL()` settings function. If no `http.transformURL()` is configured then `url` is the same as the `requestedURL`.
+* `originalUrl` is the URL argument of the `http` utility call.
+* `url` is the `originalUrl` transformed by `http.transformUrl()` settings function. If no `http.transformUrl()` is configured then `url` is the same as the `originalUrl`.
 </details>
 
 <!--
@@ -578,7 +578,7 @@ Before:
 // ./actions/friends.js
 function fetchFriends(personId, gender) {
   return {
-    promise: http => http.get(`/api/person/${personId}/friends`, { gender }),
+    promise: ({ http }) => http.get(`/api/person/${personId}/friends`, { gender }),
     events: ['FETCH_FRIENDS_PENDING', 'FETCH_FRIENDS_SUCCESS', 'FETCH_FRIENDS_FAILURE']
   }
 }
@@ -880,13 +880,13 @@ In order for `http` utility to send an authentication token as part of an HTTP r
 ```js
 {
   authentication: {
-    accessToken({ getState, getCookie, url, requestedURL }) {
+    accessToken({ getState, getCookie, url, originalUrl }) {
       // It's recommended to check the URL to make sure that the access token
       // is not leaked to a third party: only send it to your own servers.
       //
-      // `requestedURL` is the URL argument of the `http` utility call.
-      // `url` is the `requestedURL` transformed by `http.transformURL()` settings function.
-      // If no `http.transformURL()` is configured then `url` is the same as the `requestedURL`.
+      // `originalUrl` is the URL argument of the `http` utility call.
+      // `url` is the `originalUrl` transformed by `http.transformUrl()` settings function.
+      // If no `http.transformUrl()` is configured then `url` is the same as the `originalUrl`.
       //
       if (url.indexOf('https://my.api.com/') === 0) {
         return localStorage.getItem('accessToken')
@@ -985,7 +985,7 @@ function handleUnauthenticatedError(error, url, redirect) {
 ### HTTP request URLs
 
 <details>
-<summary>When sending HTTP requests to API using the <code>http</code> utility it is recommended to set up <code>http.transformURL(url)</code> configuration setting to make the code a bit cleaner.</summary>
+<summary>When sending HTTP requests to API using the <code>http</code> utility it is recommended to set up <code>http.transformUrl(url)</code> configuration setting to make the code a bit cleaner.</summary>
 
 #####
 
@@ -1023,10 +1023,12 @@ export const updateUser = redux.action(
 {
   ...
   http: {
-    transformURL: (url) => `https://my-api.cloud-provider.com/${url.slice('api://'.length)}`
+    transformUrl: url => `https://my-api.cloud-provider.com/${url.slice('api://'.length)}`
   }
 }
 ```
+
+On server side, user's cookies are attached to **all** relative "original" URLs so `http.transformUrl(originalUrl)` must not transform relative URLs into absolute URLs, otherwise user's cookies would be leaked to a third party.
 </details>
 
 ### File upload
@@ -1072,7 +1074,7 @@ class ItemPage extends React.Component {
 // Redux action creator
 function uploadItemPhoto(itemId, file) {
   return {
-    promise: http => http.post(
+    promise: ({ http }) => http.post(
       '/item/photo',
       { itemId, file },
       { progress(percent) { console.log(percent) } }

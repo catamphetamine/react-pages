@@ -32,7 +32,6 @@ exports.getPreferredLocale    = require('./commonjs/client/locale').getPreferred
 exports.getLanguageFromLocale = require('./commonjs/locale').getLanguageFromLocale
 
 exports.ReduxModule = require('./commonjs/redux/ReduxModule').default
-exports.reduxModule = require('./commonjs/redux/ReduxModule').createReduxModule
 
 exports.underscoredToCamelCase = require('./commonjs/redux/naming').underscoredToCamelCase
 exports.eventName = require('./commonjs/redux/naming').eventName

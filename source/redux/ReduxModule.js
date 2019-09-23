@@ -20,11 +20,6 @@ import {
 // Otherwise there will be Redux event name collisions.
 // Importing packages from two different `node_modules` is not a good practice.
 
-// Deprecated. Use `new ReduxModule()` instead.
-export function createReduxModule(namespace, settings) {
-	return new ReduxModule(namespace, settings)
-}
-
 export default class ReduxModule {
 	handlers = {}
 	registered_state_properties = []
@@ -83,17 +78,6 @@ export default class ReduxModule {
 			result = action
 			action = event
 			event = undefined
-		}
-		// `action` argument is currently a useless one:
-		// taking arguments and converting them into an object.
-		// This feature substitutes a missing `action` argument with a passthrough.
-		// Deprecated: remove `action` argument in some future major version.
-		if (action) {
-			if (typeof result !== 'string' && typeof result !== 'function') {
-				options = result
-				result = action
-				action = object => object
-			}
 		}
 		options = options || {}
 		options.sync = true
@@ -169,9 +153,8 @@ function createAction(event, action, result, options, redux) {
 	}
 
 	// Default "on result" handler is a reducer that does nothing.
-	// Actually, I guess it should throw an error instead.
-	// Deprecated: throw an error in some future major version
-	// instead of using a "no op" reducer.
+	// For example, when Redux action result is ignored.
+	// (I guess those would be rare cases, like "send log message")
 	result = result || (state => state)
 
 	// Synchronous action
@@ -198,9 +181,7 @@ function createAction(event, action, result, options, redux) {
 	// Redux "action creator"
 	return (...parameters) => ({
 		event: eventName(namespace, event),
-		// `dispatch` and `getState` arguments are deprecated
-		// and will be removed in some future major version release.
-		promise: (http, dispatch, getState) => action.apply(this, parameters)(http)
+		promise: ({ http }) => action.apply(this, parameters)(http)
 	})
 }
 

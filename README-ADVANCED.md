@@ -338,13 +338,10 @@ const { status, content, contentType } = renderError(error)
   http:
   {
     // (optional)
-    transformURL: (url, server: true/false) => url
-    // Using `http.transformURL(url)` configuration parameter
-    // one can call API endpoints like `http.post('/api')`
-    // and such relative paths would be transformed
-    // into absolute URLs automatically.
-    // Or it could transform shortcut URLs like `api://`
-    // into longer ones like `https://my-api.cloud-provider.com/`.
+    transformUrl: (url, { server: boolean }) => url
+    // Using `http.transformUrl(url)` configuration parameter
+    // one can transform shortcut URLs like `api://items/123`
+    // into longer ones like `https://my-api.cloud-provider.com/items/123`.
 
     // (optional)
     //
@@ -354,11 +351,11 @@ const { status, content, contentType } = renderError(error)
     //
     // * `request` is a `superagent` `request` that can be modified
     //   (for example, to set an HTTP header: `request.set(headerName, headerValue)`).
-    // * `requestedURL` is the URL argument of the `http` utility call.
-    // * `url` is the `requestedURL` transformed by `http.transformURL()`
-    //   (if no `http.transformURL()` is configured then `url` is the same as the `requestedURL`).
+    // * `originalUrl` is the URL argument of the `http` utility call.
+    // * `url` is the `originalUrl` transformed by `http.transformUrl()`
+    //   (if no `http.transformUrl()` is configured then `url` is the same as the `originalUrl`).
     //
-    onRequest: (request, { url, requestedURL, getState }) => {}
+    onRequest: (request, { url, originalUrl, getState }) => {}
 
     // (optional)
     onError: (error, { url, path, redirect, dispatch, getState }) => console.error(error)

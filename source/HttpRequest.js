@@ -56,16 +56,14 @@ export default class HttpRequest {
 	}
 
 	// Sets `Authorization: Bearer ${token}` in HTTP request header
-	addAuthenticationToken(authTokenHeader, authentication, getAuthToken, getCookie, url, path) {
+	addAuthenticationToken(authTokenHeader, authentication, getAuthToken, getCookie, url, originalUrl) {
 		let token
 		if (typeof authentication === 'string') {
 			token = authentication
 		} else if (getAuthToken) {
 			token = getAuthToken(getCookie, {
 				url,
-				// `path` is deprecated, use `requestedURL` instead.
-				path,
-				requestedURL: path
+				originalUrl
 			})
 		}
 		if (token && authentication !== false) {

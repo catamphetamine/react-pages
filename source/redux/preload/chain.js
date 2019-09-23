@@ -13,7 +13,7 @@ export default function generatePreloadChain
 	getState,
 	dispatch,
 	location,
-	parameters,
+	params,
 	getCookie,
 	preloading
 )
@@ -26,9 +26,7 @@ export default function generatePreloadChain
 			dispatch,
 			getState,
 			location,
-			// `parameters` property name is deprecated, use `params` instead.
-			parameters,
-			params: parameters,
+			params,
 			server,
 			// `getCookie` `load` parameter has been requested:
 			// https://github.com/catamphetamine/react-website/issues/71
