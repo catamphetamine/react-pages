@@ -1,6 +1,6 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import { useSelector } from 'react-redux'
+import { connect } from 'react-redux'
 import classNames from 'classnames'
 
 import LoadingIndicator from './LoadingIndicator'
@@ -40,15 +40,8 @@ Loading.defaultProps = {
 	fadeOutDuration: 160
 }
 
-export default function Loading_(props) {
-	const initial = useSelector(({ preload }) => preload.initial)
-	const pending = useSelector(({ preload }) => preload.pending)
-	const immediate = useSelector(({ preload }) => preload.immediate)
-	return (
-		<Loading
-			{...props}
-			initial={initial}
-			pending={pending}
-			immediate={immediate}/>
-	)
-}
+export default connect(({ preload }) => ({
+	initial: preload.initial,
+	pending: preload.pending,
+	immediate: preload.immediate
+}))(Loading)
