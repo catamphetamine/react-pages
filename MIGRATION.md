@@ -27,6 +27,8 @@ http: {
 
 * Removed `Promise` cancellation and the `cancelPrevious: true` Redux action parameter.
 
+### To do
+
 Check that sending forms with files (single, multiple) via `http` works.
 
 Check that the refactored http.request() populateErrorData() works (emulate an error on server side).

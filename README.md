@@ -18,7 +18,7 @@ A complete solution for building a React/Redux application
 
 # `react-pages` vs `react-website`
 
-Previously this library has been known as [`react-website`](https://github.com/catamphetamine/react-website/tree/3.x) but then I found a better (in my opinion) name for it and it's now called `react-pages`. For migrating from `react-website` to `react-pages` see the [migration guide](https://github.com/catamphetamine/react-pages/MIGRATION.md).
+Previously this library has been known as [`react-website`](https://github.com/catamphetamine/react-website/tree/3.x) but then I found a better (in my opinion) name for it and it's now called `react-pages`. For migrating from `react-website` to `react-pages` see the [migration guide](https://github.com/catamphetamine/react-pages/blob/master/MIGRATION.md).
 
 # Introduction
 
