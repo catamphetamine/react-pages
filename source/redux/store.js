@@ -84,7 +84,7 @@ export default function _createStore(settings, data, createHistoryProtocol, http
 			reduxEventNaming,
 			server,
 			http.onError,
-			http.errorState
+			http.getErrorData
 		)
 	)
 

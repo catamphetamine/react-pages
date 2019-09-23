@@ -372,7 +372,7 @@ const { status, content, contentType } = renderError(error)
     // `redirect()` redirects to a URL.
 
     // (optional)
-    errorState: (error) => ({ ... })
+    getErrorData: (error) => ({ ... })
     //
     // Parses a `superagent` `Error` instance
     // into a plain JSON object for storing it in Redux state.
@@ -383,7 +383,7 @@ const { status, content, contentType } = renderError(error)
     // the `error` instance has `.data` JSON object property
     // which carries the `application/json` HTTP response payload.
     //
-    // By default `errorState` takes the `application/json` HTTP response payload
+    // By default `getErrorData` takes the `application/json` HTTP response payload
     // and complements it with HTTP response `status` and `Error` `message`.
 
     // (optional)

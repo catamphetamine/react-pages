@@ -10,7 +10,6 @@
 * Update `react` and `react-dom` to `>= 16.8`.
 * `@meta()`, `@preload()`, `@onPageLoaded()` decorators are now considered deprecated because they [can't be used on functional components](https://github.com/tc39/proposal-decorators). Instead, there're now `meta`, `load` and `onLoaded` static properties: `meta` can be an object or a function returning an object; `load` can be a function, an object of shape `{ load(), client, blocking, blockingSibling }`, or an array of those; `onLoaded` can be a function. The legacy `@meta()`, `@preload()` and `@onPageLoaded()` decorators still work, but also have been rewritten as functions setting static properties of a component rather than creating new "wrapper" React components (there shouldn't be any breaking changes).
 * When using "code splitting" feature, `preload`, `preloadClient` and `preloadClientAfter` properties could previously be set on routes. Those properties have been removed in favor of a single `load` property now.
-* Renamed `showPreloadInitially` setting to `showLoadingInitially`.
 * Page components no longer receive `params` property in `found@0.4.x` (in case anyone used that property, but I guess no one did).
 * For those who used `withRouter()` decorator previously now there's a better alternative — `useRouter()` hook: `const { match, router } = useRouter()`. This library no longer re-exports `found`'s `withRouter` decorator though `found` still does export it.
 * Sending `GET` or `multipart/form-data` requests using `http` utility [no longer](https://github.com/catamphetamine/react-website/issues/74) adds `Content-Type` header. This shouldn't be an issue for most users. For cases when reverting to the old behavior is needed, the `Content-Type` header can be set [manually](https://github.com/catamphetamine/react-website/issues/74#issuecomment-496443987) via `http.onRequest(request)` hook:
@@ -24,13 +23,6 @@ http: {
   }
 }
 ```
-
-* Renamed `requestedURL` parameter of `authentication.accessToken()` function to `originalUrl`.
-
-* Renamed `requestedURL` parameter of `http.onRequest()` function to `originalUrl`.
-
-* Renamed `http.transformURL()` configuration parameter to `http.transformUrl()`.
-
 * `http.transformUrl()` function's second argument changed from `server` to `{ server }`.
 
 * Removed `parameters` property of `@preload()`/`load()` page preloading function, use `params` property name instead.
@@ -39,25 +31,22 @@ http: {
 
 * Removed `Promise` cancellation and the `cancelPrevious: true` Redux action parameter.
 
-### To do
-
-Check that sending forms with files (single, multiple) via `http` works.
-
-Check that the refactored http.request() populateErrorData() works (emulate an error on server side).
-
-Maybe check setting server-side cookies.
-
-Create `react-pages-basic-example` analogous to `react-website-basic-example`.
-
-Update the "code splitting" example for `react-pages` and check that it works:
-https://github.com/catamphetamine/webpack-react-redux-server-side-render-example/pull/40
-
 ### Renames
 
 * Due to the library being renamed from `react-website` to `react-pages` all corresponding global `window` variables have also been renamed from `window._react_website_...` to `window._react_pages_...`. This change shouldn't affect anyone because those global variables aren't documented anywhere and aren't part of the public API.
 * For those who used the `<Loading/>` component its CSS class names have been renamed from `.react-website__loading__...` to `.react-pages__loading__...`.
 * For those who used `static-site-generator` the `/react-website-base` URL has been renamed to `/react-pages-base`.
 * All `@@react-website/...` Redux actions have been renamed to `@@react-pages/...`. Those actions are "preload started", "preload finished" and "preload failed" and they're exported as `PRELOAD_STARTED`, `PRELOAD_FINISHED` and `PRELOAD_FAILED` respectively, so this change shouldn't break anyone's code unless not using those exports for the Redux action names. There're also some "private" ones like `@@react-website/RESOLVE_MATCH` that got renamed but I guess no one would ever have a reason to use those.
+
+* Renamed `showPreloadInitially` setting to `showLoadingInitially`.
+
+* Renamed `http.errorState()` setting to `http.getErrorData()`.
+
+* Renamed `http.transformURL()` setting to `http.transformUrl()`.
+
+* Renamed `requestedURL` parameter of `authentication.accessToken()` function to `originalUrl`.
+
+* Renamed `requestedURL` parameter of `http.onRequest()` function to `originalUrl`.
 
 ### Removed deprecations
 
@@ -77,3 +66,16 @@ https://github.com/catamphetamine/webpack-react-redux-server-side-render-example
 * Updated `string-to-stream` server-side library from `1.x` to `2.x`. No breaking changes.
 * Updated `cookie` server-side library from `0.3.x` to `0.4.x`. No breaking changes.
 * Updated `fs-extra` server-side library from `2.x` to `8.x`. No breaking changes.
+
+### To do
+
+Check that sending forms with files (single, multiple) via `http` works.
+
+Check that the refactored http.request() populateErrorData() works (emulate an error on server side).
+
+Maybe check setting server-side cookies.
+
+Create `react-pages-basic-example` analogous to `react-website-basic-example`.
+
+Update the "code splitting" example for `react-pages` and check that it works:
+https://github.com/catamphetamine/webpack-react-redux-server-side-render-example/pull/40
