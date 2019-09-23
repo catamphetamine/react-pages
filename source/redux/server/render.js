@@ -41,7 +41,7 @@ export default async function renderOnServer({
 	const { routes, elements } = renderArgs
 
 	// Get `<meta/>` for the route.
-	let meta = codeSplit ? getCodeSplitMeta(routes, store.getState()) : getComponentsMeta(elements.map(_ => _.type), store.getState())
+	let meta = codeSplit ? getCodeSplitMeta(routes, store.getState()) : getComponentsMeta(elements.filter(_ => _).map(_ => _.type), store.getState())
 	meta = mergeMeta(meta)
 	meta = { ...defaultMeta, ...meta }
 
