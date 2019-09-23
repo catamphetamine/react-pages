@@ -27,10 +27,8 @@ Previously this library has been known as [`react-website`](https://github.com/c
 First, install Redux:
 
 ```bash
-$ npm install redux react-redux@5 --save
+$ npm install redux react-redux --save
 ```
-
-> Note: `react-redux@6` is incompatible with `found@0.3` and won't work [#69](https://github.com/catamphetamine/react-website/issues/69)
 
 Then, install `react-pages`:
 
