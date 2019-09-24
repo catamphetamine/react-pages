@@ -38,7 +38,7 @@ The file structure can be:
 
 * `./src/pages/Page.js` for the React page component.
 
-* `./src/pages/Page.data.js` for `load`.
+* `./src/pages/Page.load.js` for `load`.
 
 * `./src/pages/Page.meta.js` for `meta`.
 
@@ -64,14 +64,14 @@ export default class Page extends React.Component {
 }
 ```
 
-#### `./src/pages/Page.data.js`
+#### `./src/pages/Page.load.js`
 
 ```js
 import { fetchPageData } from '../redux/page'
 
 export default async ({ dispatch, getState, params, ... }) => {
 	await dispatch(fetchPageData(params.id))
-})
+}
 ```
 
 #### `./src/pages/Page.meta.js`
@@ -110,4 +110,4 @@ Since `load` property is not used on route components for code splitting there a
 
 Each of the loading functions can also have a static `options` property where available options are same as for `load` property normally set on route components: `{ client, blocking, blockingSibling }`.
 
-See the [example project](https://github.com/catamphetamine/webpack-react-redux-server-side-render-example/pull/40) showcasing "code splitting".
+See the [example project](https://github.com/catamphetamine/webpack-react-redux-server-side-render-example/pull/43) showcasing "code splitting".

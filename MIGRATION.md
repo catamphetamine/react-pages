@@ -66,16 +66,3 @@ http: {
 * Updated `string-to-stream` server-side library from `1.x` to `2.x`. No breaking changes.
 * Updated `cookie` server-side library from `0.3.x` to `0.4.x`. No breaking changes.
 * Updated `fs-extra` server-side library from `2.x` to `8.x`. No breaking changes.
-
-### To do
-
-Check that sending forms with files (single, multiple) via `http` works.
-
-Check that the refactored http.request() populateErrorData() works (emulate an error on server side).
-
-Maybe check setting server-side cookies.
-
-Create `react-pages-basic-example` analogous to `react-website-basic-example`.
-
-Update the "code splitting" example for `react-pages` and check that it works:
-https://github.com/catamphetamine/webpack-react-redux-server-side-render-example/pull/40

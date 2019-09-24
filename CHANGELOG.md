@@ -12,6 +12,8 @@ It would just return the base HTML structure without any route-specific stuff.
 
 <!-- Maybe replace ActivityIndicator with something else (not requiring ems for width, using percentages instead). -->
 
+<!-- Maybe make `showLoadingInitially: true` a default setting. -->
+
 0.2.3 / 23.09.2019
 ==================
 
