@@ -14,6 +14,13 @@ It would just return the base HTML structure without any route-specific stuff.
 
 <!-- Maybe make `showLoadingInitially: true` a default setting. -->
 
+0.2.7 / 27.09.2019
+==================
+
+* Fixed `base.html` (`static-site-generator`).
+
+* The `path` argument of server-side settings `assets(path)`, `html.head(path)`, `html.bodyStart(path)`, `html.bodyEnd(path)` now has the ending slash character (`"/"`) trimmed.
+
 0.2.3 / 23.09.2019
 ==================
 

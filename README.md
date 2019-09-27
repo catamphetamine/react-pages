@@ -1139,7 +1139,12 @@ async function run() {
     host: configuration.host,
     port: configuration.port,
     pages: await generatePageList(),
-    outputPath: generatedSitePath
+    outputPath: generatedSitePath,
+    //
+    // Set this flag to `true` to re-run all `load`s on page load.
+    // For example, if the data used on the page can be updated
+    // in-between the static site deployments.
+    // reloadData: true
   })
 
   // Copy assets (built by Webpack).

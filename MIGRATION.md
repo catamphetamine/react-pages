@@ -31,6 +31,8 @@ http: {
 
 * Removed `Promise` cancellation and the `cancelPrevious: true` Redux action parameter.
 
+* The `path` argument of server-side settings `assets(path)`, `html.head(path)`, `html.bodyStart(path)`, `html.bodyEnd(path)` now has the ending slash character (`"/"`) trimmed.
+
 ### Renames
 
 * Due to the library being renamed from `react-website` to `react-pages` all corresponding global `window` variables have also been renamed from `window._react_website_...` to `window._react_pages_...`. This change shouldn't affect anyone because those global variables aren't documented anywhere and aren't part of the public API.

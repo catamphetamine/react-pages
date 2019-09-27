@@ -12,8 +12,8 @@ export function renderBeforeContent({
 {
 	return TEMPLATE_BEFORE_CONTENT.render
 	({
-		icon : assets.icon,
-		style_urls : assets.entries.map(entry => assets.styles && assets.styles[entry]).filter(url => url),
+		icon: assets.icon,
+		stylesheetUrls: assets.entries.map(entry => assets.styles && assets.styles[entry]).filter(url => url),
 		locale,
 		meta,
 		head,
@@ -23,6 +23,7 @@ export function renderBeforeContent({
 
 export function renderAfterContent({
 	assets,
+	serverSideRender,
 	contentNotRendered,
 	locales,
 	javascript,
@@ -31,7 +32,8 @@ export function renderAfterContent({
 {
 	return TEMPLATE_AFTER_CONTENT.render
 	({
-		javascript_urls : assets.entries.map(entry => assets.javascript && assets.javascript[entry]).filter(url => url),
+		javascriptUrls: assets.entries.map(entry => assets.javascript && assets.javascript[entry]).filter(url => url),
+		serverSideRender,
 		contentNotRendered,
 		locales,
 		javascript,
@@ -63,7 +65,7 @@ const TEMPLATE_BEFORE_CONTENT = nunjucks.compile
 				 with webpack extract text plugin)
 				Mount CSS stylesheets for all entry points (e.g. "main")
 			#}
-			{% for style_url in style_urls %}
+			{% for style_url in stylesheetUrls %}
 				<link
 					href="{{ style_url | safe }}"
 					rel="stylesheet"
@@ -91,41 +93,41 @@ const TEMPLATE_BEFORE_CONTENT = nunjucks.compile
 const TEMPLATE_AFTER_CONTENT = nunjucks.compile
 (`</div>
 
-			{#
-				Server-Side Rendering "renderContent" flag.
-				It is used to determine whether to call
-				"ReactDOM.hydrate()" or "ReactDOM.render()".
-			#}
-			<script>
-				{# If renaming this variable don't reset it in "./redux/client/client.js" #}
-				window._server_side_render = true
-				{% if contentNotRendered %}
-					{# If renaming this variable don't reset it in "./redux/client/client.js" #}
-					window._empty_server_side_render = true
-				{% endif %}
-			</script>
-
-			{# User's preferred locales (based on the "Accept-Locale" HTTP request header). #}
-			{% if locales %}
+			{% if serverSideRender %}
+				{#
+					Server-Side Rendering "renderContent" flag.
+					It is used to determine whether to call
+					"ReactDOM.hydrate()" or "ReactDOM.render()".
+				#}
 				<script>
 					{# If renaming this variable don't reset it in "./redux/client/client.js" #}
-					window._react_pages_locales = {{ safeJsonStringify(locales) | safe }}
+					window._server_side_render = true
+					{% if contentNotRendered %}
+						{# If renaming this variable don't reset it in "./redux/client/client.js" #}
+						window._empty_server_side_render = true
+					{% endif %}
 				</script>
-			{% endif %}
 
-			{# Custom javascript. Must be XSS-safe. #}
-			{# e.g. Redux stuff goes here (Redux state, Date parser) #}
-			{% if javascript %}
-				{{ javascript | safe }}
-			{% endif %}
+				{# User's preferred locales (based on the "Accept-Locale" HTTP request header). #}
+				{% if locales %}
+					<script>
+						{# If renaming this variable don't reset it in "./redux/client/client.js" #}
+						window._react_pages_locales = {{ safeJsonStringify(locales) | safe }}
+					</script>
+				{% endif %}
 
-			{# javascripts #}
+				{# Custom javascript. Must be XSS-safe. #}
+				{# e.g. Redux stuff goes here (Redux state, Date parser) #}
+				{% if javascript %}
+					{{ javascript | safe }}
+				{% endif %}
+			{% endif %}
 
 			{#
 				Include all required "entry" points javascript
 				(e.g. "common", "main")
 			#}
-			{% for javascript_url in javascript_urls %}
+			{% for javascript_url in javascriptUrls %}
 				<script src="{{ javascript_url | safe }}" charset="UTF-8"></script>
 			{% endfor %}
 

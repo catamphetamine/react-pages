@@ -33,6 +33,16 @@ export default async function(settings, {
 		codeSplit
 	} = settings
 
+	const location = parseLocation(url)
+	const path = location.pathname.replace(/\/$/, '')
+
+	// A special `base.html` page for static sites.
+	// (e.g. the ones hosted on Amazon S3)
+	let serverSideRender = true
+	if (path === '/react-pages-base') {
+		serverSideRender = false
+	}
+
 	// If Redux is being used, then render for Redux.
 	// Else render for pure React.
 	const render = reduxRender
@@ -50,9 +60,6 @@ export default async function(settings, {
 		url,
 		getInitialState
 	})
-
-	const location = parseLocation(url)
-	const path = location.pathname
 
 	function generateOuterHtml(meta) {
 		// `html` modifiers
@@ -90,6 +97,7 @@ export default async function(settings, {
 			assets,
 			locales,
 			bodyEnd,
+			serverSideRender,
 			contentNotRendered: renderContent === false
 		})
 
@@ -98,8 +106,7 @@ export default async function(settings, {
 
 	// A special `base.html` page for static sites.
 	// (e.g. the ones hosted on Amazon S3)
-	if (path.replace(/\/$/, '') === '/react-pages-base') {
-		renderContent = false
+	if (!serverSideRender) {
 		// Get `<meta/>` for the route.
 		const [ beforeContent, afterContent ] = generateOuterHtml({
 			...defaultMeta,
