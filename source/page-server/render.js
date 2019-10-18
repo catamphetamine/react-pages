@@ -175,7 +175,8 @@ export default async function(settings, { initialize, localize, assets, applicat
 			})
 		}
 
-		if (path.replace(/\/$/, '') === '/react-website-base')
+		if (path.replace(/\/$/, '') === '/react-website-base' ||
+			path.replace(/\/$/, '') === '/react-pages-base')
 		{
 			return {
 				status: 200,
