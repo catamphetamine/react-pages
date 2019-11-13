@@ -58,7 +58,7 @@ http: {
 * `redux.resetError()` method has been removed.
 * `authentication.accessToken()` method's `path` parameter has been removed (use `url` parameter name instead).
 * `reduxModule()` exported function has been removed, use `new ReduxModule()` notation instead.
-* `redux.simpleAction()`'s `action()` argument has been removed. It has been used to convert several arguments into a Redux action object. Instead, pass the Redux action object directly to the Redux function when `dispatch()`ing it.
+* `redux.simpleAction()`'s `action()` argument has been removed. Instead, Redux action object is accessible directly in the `reducer` function as a second argument: `(state, actionArgument) => newState`. In other words: `redux.simpleAction()` now can only take either `(eventName, reducer)` arguments or `(reducer)` argument.
 
 ### Non-breaking dependency updates
 

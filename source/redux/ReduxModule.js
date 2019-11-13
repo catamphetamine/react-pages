@@ -66,22 +66,15 @@ export default class ReduxModule {
 			event = generateReduxEventName(counter.next())
 		}
 		options = options || {}
-		if (typeof action !== 'function') {
-			throw new Error('[react-pages] One must pass an `action()` argument (the second one) to Redux module action creator: `reduxModule(event, action, result, options = {})`.')
-		}
 		return createAction(event, action, result, options, this)
 	}
 
-	simpleAction(event, action, result, options) {
+	simpleAction(event, result) {
 		if (event && typeof event !== 'string') {
-			options = result
-			result = action
-			action = event
+			result = event
 			event = undefined
 		}
-		options = options || {}
-		options.sync = true
-		return this.action(event, action, result, options)
+		return this.action(event, undefined, result, { sync: true })
 	}
 
 	createReducer(initialState = {}) {
@@ -162,9 +155,9 @@ function createAction(event, action, result, options, redux) {
 		// Reducer
 		redux.on(eventName(namespace, event), get_action_value_reducer(result))
 		// Redux "action creator"
-		return (...parameters) => ({
-			type : eventName(namespace, event),
-			[RESULT_ACTION_PROPERTY] : action.apply(this, parameters)
+		return (argument) => ({
+			type: eventName(namespace, event),
+			[RESULT_ACTION_PROPERTY]: argument
 		})
 	}
 

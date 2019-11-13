@@ -14,6 +14,11 @@ It would just return the base HTML structure without any route-specific stuff.
 
 <!-- Maybe make `showLoadingInitially: true` a default setting. -->
 
+0.3.0 / 13.11.2019
+==================
+
+* `redux.simpleAction()`'s `action()` argument has been removed. Instead, Redux action object is accessible directly in the reducer function as a second argument: `redux.simpleAction((state, actionArgument) => newState)`. In other words: `redux.simpleAction()` now can only take either `(eventName, reducer)` arguments or `(reducer)` argument.
+
 0.2.7 / 27.09.2019
 ==================
 
