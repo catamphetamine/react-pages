@@ -123,14 +123,15 @@ export default class HttpRequest {
 			},
 			(error) => {
 				// Infer additional `error` properties from the HTTP response.
-				this.populateErrorData(error)
+				if (error.response) {
+					this.populateErrorDataFromResponse(error, error.response)
+				}
 				throw error
 			}
 		)
 	}
 
-	populateErrorData(error) {
-		const response = error.response
+	populateErrorDataFromResponse(error, response) {
 		const responseData = this.getResponseData(response)
 
 		// Set `error.status` to HTTP response status code
