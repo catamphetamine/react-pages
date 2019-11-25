@@ -187,3 +187,7 @@ export function markImmediateNavigationAsInstantBack(instantBack) {
 		setTimeout(() => window._react_pages_instant_back_navigation = false, 0)
 	}
 }
+
+export function canGoBackInstantly() {
+	return instantBackChain.length > 0
+}

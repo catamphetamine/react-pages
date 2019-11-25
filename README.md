@@ -444,6 +444,8 @@ There's also `instantBack: true` option available for `goto(location, options)` 
 
 One can also use the exported `wasInstantNavigation()` function (on client side) to find out if the current page was navigated to "instantly". This can be used, for example, to restore a "state" of a widget on instant "Back" navigation so that it renders immediately with the previously cached "results" or something.
 
+There's also an `canGoBackInstantly()` function (on client side) that tells if the currently page can be navigated "Back" from instantly. This function can be used to render a custom "Go Back" button on a page only when an instant "Back" transition could be performed.
+
 There's also an `isInstantBackAbleNavigation()` function (on client side) which tells if the currently ongoing navigation process is performed with `instantBack` option (for example, if `<Link instantBack/>` is clicked or `goto(location, { instantBack: true })` is called). It can be used in `componentWillUnmount()` to save the current page state for later restoring it if the user navigates "Back" instantly.
 </details>
 
@@ -782,9 +784,24 @@ BlogPostPage.load = async ({ dispatch, params }) => {
 ####
 
 <details>
-<summary>Redux module can also handle the conventional "synchronous" actions via <code>export const action = redux.simpleAction((state, actionArgument) => newState)</code></summary>
+<summary>Redux module can also handle the conventional "synchronous" actions via <code>export const action = redux.simpleAction()</code></summary>
 
 ####
+
+A simple Redux action that simply updates Redux state.
+
+```js
+action = redux.simpleAction((state, actionArgument) => newState)
+```
+
+A simple Redux action that performs some simple actions and then updates Redux state.
+
+```js
+action = redux.simpleAction(
+  (actionArgument)
+  (state, actionArgument) => newState
+)
+```
 
 ```js
 import { ReduxModule } from 'react-pages'

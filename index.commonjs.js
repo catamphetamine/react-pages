@@ -26,6 +26,7 @@ exports.getState             = require('./commonjs/redux/client/client').getStat
 exports.getHttpClient        = require('./commonjs/redux/client/client').getHttpClient
 exports.wasInstantNavigation = require('./commonjs/redux/client/instantBack').wasInstantNavigation
 exports.isInstantBackAbleNavigation = require('./commonjs/redux/client/instantBack').isInstantBackAbleNavigation
+exports.canGoBackInstantly = require('./commonjs/redux/client/instantBack').canGoBackInstantly
 
 exports.getPreferredLocales   = require('./commonjs/client/locale').getPreferredLocales
 exports.getPreferredLocale    = require('./commonjs/client/locale').getPreferredLocale
