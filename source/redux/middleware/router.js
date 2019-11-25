@@ -161,6 +161,10 @@ export default function routerMiddleware(
 						}
 					}
 
+					// `routeIndices` might be `undefined` after a `<Redirect/>`
+					// is made and a user clicks the "Back" button in a web browser.
+					// https://github.com/4Catalyzer/found/issues/632
+
 					// `previousLocation` is only used for "instant back" navigation.
 					// Therefore it can be skipped in case of anchor link navigation.
 					previousLocation = location
@@ -194,7 +198,11 @@ export default function routerMiddleware(
 					)
 
 					if (onNavigate) {
-						onNavigate(getLocationUrl(location), location, { dispatch, getState })
+						onNavigate(getLocationUrl(location), location, {
+							dispatch,
+							getState,
+							routeMatch: event.payload
+						})
 					}
 
 					// Reset the flag for `isInstantBackAbleNavigation()`.
