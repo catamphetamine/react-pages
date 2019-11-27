@@ -204,7 +204,10 @@ export default function routerMiddleware(
 						onNavigate(getLocationUrl(location), location, {
 							dispatch,
 							getState,
-							routeMatch: event.payload
+							route: {
+								location: event.payload.location,
+								params: event.payload.params
+							}
 						})
 					}
 
