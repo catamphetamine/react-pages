@@ -164,6 +164,9 @@ export default function routerMiddleware(
 					// `routeIndices` might be `undefined` after a `<Redirect/>`
 					// is made and a user clicks the "Back" button in a web browser.
 					// https://github.com/4Catalyzer/found/issues/632
+					if (!routeIndices) {
+						throw new Error(`"${event.type}" Redux action misses "routeIndices" property. This usually means that the target URL path "${location.pathname}" didn't match any route. ${location.pathname[0] !== '/' ? 'The target URL path is missing a leading slash: correct your routes configuration to include a leading slash for "' + location.pathname + '" path. ' : ''}See the issue for more info: https://github.com/4Catalyzer/found/issues/632`)
+					}
 
 					// `previousLocation` is only used for "instant back" navigation.
 					// Therefore it can be skipped in case of anchor link navigation.
