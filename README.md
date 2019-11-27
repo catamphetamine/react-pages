@@ -1380,6 +1380,50 @@ To set default `<meta/>` (for example, `og:site_name`, `og:description`, `og:loc
 }
 ```
 
+### Google Analytics
+
+To report website navigation to Google Analytics supply `onNavigate()` function option to client-side `render()` function call:
+
+<details>
+<summary>See code example</summary>
+
+```js
+import { render } from 'react-pages'
+
+await render(settings, {
+  onNavigate(url, location, { dispatch, getState }) {
+    if (process.env.NODE_ENV === 'production') {
+      // Set up Google Analytics via `gtag`.
+      gtag('config', configuration.googleAnalytics.id, {
+        // Anonymize IP for all Google Analytics events.
+        // https://developers.google.com/analytics/devguides/collection/gtagjs/ip-anonymization
+        // This makes Google Analytics compliant with GDPR:
+        // https://www.jeffalytics.com/gdpr-ip-addresses-google-analytics/
+        'anonymize_ip': true,
+        // Google Analytics can get users' "Demographics" (age, sex)
+        // from "3rd party" data sources if "Advertising Reporting Features"
+        // are enabled in Google Analytics admin panel.
+        // Such data could be considered "Personal Identifiable Information"
+        // which falls under the terms of GDPR.
+        // There's also "Remarketing" feature that could also
+        // fall under the terms of GDPR.
+        'allow_display_features': false,
+        // Specifies what percentage of users should be tracked.
+        // This defaults to 100 (no users are sampled out) but
+        // large sites may need to use a lower sample rate
+        // to stay within Google Analytics processing limits.
+        // 'sample_rate': 1,
+        // Report "page view" event to Google Analytics.
+        // https://stackoverflow.com/questions/37655898/tracking-google-analytics-page-views-in-angular2
+        // https://developers.google.com/analytics/devguides/collection/gtagjs/single-page-applications
+        'page_path': location.pathname
+      })
+    }
+  }
+})
+```
+</details>
+
 ### Get current location
 
 Inside a `load` function: use the `location` parameter.
