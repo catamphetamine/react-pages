@@ -42,6 +42,7 @@ export default function _createStore(settings, data, createHistoryProtocol, http
 		server,
 		devtools,
 		stats,
+		onBeforeNavigate,
 		onNavigate,
 		getCookie
 	} = options
@@ -92,6 +93,7 @@ export default function _createStore(settings, data, createHistoryProtocol, http
 		middleware.push(routerMiddleware(
 			routes,
 			codeSplit,
+			onBeforeNavigate,
 			onNavigate,
 			stats,
 			meta

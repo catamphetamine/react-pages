@@ -619,7 +619,8 @@ const { status, content, contentType } = renderError(error)
   ...
 
   // (optional)
-  // Is fired when a user performs navigation (and also on initial page load).
+  // Is fired after a user performs navigation (and also on initial page load).
+  // Only on client side.
   // This exists mainly for Google Analytics.
   // `url` is a string (`path` + "search" (?...) + "hash" (#...)).
   // "search" query parameters can be stripped in Google Analytics itself.
@@ -628,7 +629,12 @@ const { status, content, contentType } = renderError(error)
   // http://www.lunametrics.com/blog/2015/04/17/strip-query-parameters-google-analytics/
   // The "hash" part should also be stripped manually inside `onNavigate` function
   // because someone somewhere someday might make use of those "hashes".
-  onNavigate: (url, location, { dispatch, getState, route }) => {}
+  onNavigate: (url, location, { dispatch, getState }) => {}
+
+  // (optional)
+  // Same as `onNavigate()` but fires when a user performs navigation (not after it).
+  // Only on client side.
+  onBeforeNavigate: ({ dispatch, getState, location, params }) => {}
 
   // (optional)
   // Is called as soon as Redux store is created.

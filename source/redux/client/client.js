@@ -38,6 +38,7 @@ export default function setUpAndRender(settings, options = {}) {
 	const {
 		devtools,
 		stats,
+		onBeforeNavigate,
 		onNavigate,
 		onStoreCreated
 	} = options
@@ -79,6 +80,7 @@ export default function setUpAndRender(settings, options = {}) {
 		httpClient, {
 			devtools,
 			stats,
+			onBeforeNavigate,
 			onNavigate,
 			getCookie
 		}

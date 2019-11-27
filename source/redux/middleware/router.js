@@ -22,6 +22,7 @@ import { isServerSidePreloaded } from '../../client/flags'
 export default function routerMiddleware(
 	routes,
 	codeSplit,
+	onBeforeNavigate,
 	onNavigate,
 	reportStats,
 	defaultMeta
@@ -50,7 +51,7 @@ export default function routerMiddleware(
 					// Skip `load` and other stuff for anchor link navigation.
 					if (previousLocation && shouldSkipPreloadForNavigation(previousLocation, location)) {
 						// I guess this workaround won't work with `codeSplit: true`
-						// because it doesn't use the global `getData` loader.
+						// because `codeSplit` doesn't use the global `getData` loader.
 						if (!codeSplit) {
 							break
 						}
@@ -125,6 +126,15 @@ export default function routerMiddleware(
 					// 	// Show page loading indicator.
 					// 	dispatch({ type: PRELOAD_STARTED })
 					// }
+
+					if (onBeforeNavigate) {
+						onBeforeNavigate({
+							dispatch,
+							getState,
+							location: event.payload.location,
+							params: event.payload.params
+						})
+					}
 
 					// Show page loading indicator.
 					if (!isServerSidePreloaded() && !window._react_pages_router_rendered) {
@@ -203,11 +213,7 @@ export default function routerMiddleware(
 					if (onNavigate) {
 						onNavigate(getLocationUrl(location), location, {
 							dispatch,
-							getState,
-							route: {
-								location: event.payload.location,
-								params: event.payload.params
-							}
+							getState
 						})
 					}
 

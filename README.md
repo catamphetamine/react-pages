@@ -1387,10 +1387,13 @@ To report website navigation to Google Analytics supply `onNavigate()` function 
 <details>
 <summary>See code example</summary>
 
+####
+
 ```js
 import { render } from 'react-pages'
 
 await render(settings, {
+  // Runs on the initial page load, and then on each navigation.
   onNavigate(url, location, { dispatch, getState }) {
     if (process.env.NODE_ENV === 'production') {
       // Set up Google Analytics via `gtag`.
