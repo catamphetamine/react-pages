@@ -14,6 +14,8 @@ It would just return the base HTML structure without any route-specific stuff.
 
 <!-- Maybe make `showLoadingInitially: true` a default setting. -->
 
+<!-- Maybe replace `getRoutesByPath()` with `matcher.getRoutes(match)` provided by `found` out-of-the-box: https://github.com/4Catalyzer/found/pull/634#issuecomment-558895066 -->
+
 0.3.0 / 13.11.2019
 ==================
 
