@@ -442,6 +442,8 @@ SearchResultsPage.load = async () => await fetchSomeData()
 
 There's also `instantBack: true` option available for `goto(location, options)` which has the same behavior.
 
+`instantBack` is ignored when navigating to the same route: for example, if there's an `<Article/>` page component having a `<Link instantBack/>` to another `<Article/>` then `instantBack` is ignored — this feature was originally added for Redux because it made sense that way (in Redux there's only one slot for data of a route that gets rewritten every time the route is navigated to). For other data fetching frameworks like Relay I guess it would make sense to turn that off. Create an issue if that's the case.
+
 One can also use the exported `wasInstantNavigation()` function (on client side) to find out if the current page was navigated to "instantly". This can be used, for example, to restore a "state" of a widget on instant "Back" navigation so that it renders immediately with the previously cached "results" or something.
 
 There's also an `canGoBackInstantly()` function (on client side) that tells if the currently page can be navigated "Back" from instantly. This function can be used to render a custom "Go Back" button on a page only when an instant "Back" transition could be performed.
