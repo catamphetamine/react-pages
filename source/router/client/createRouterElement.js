@@ -1,14 +1,12 @@
 import React from 'react'
 
-import BrowserProtocol from 'farce/lib/BrowserProtocol'
-
-import createConnectedRouter from 'found/lib/createConnectedRouter'
-import resolver from 'found/lib/resolver'
+import createConnectedRouter from 'found/createConnectedRouter'
+import resolver from 'found/resolver'
 import { ScrollManager } from 'found-scroll'
 
-import render from './render'
+import render from '../render'
 
-export function createRouterElement(renderArgs, { dispatch, getState }) {
+export default function createRouterElement(renderArgs, { dispatch, getState }) {
 	const ConnectedRouter = createConnectedRouter({
 		render: (renderArgs) => {
 			// Force re-mount the last route component on location path change.
@@ -33,8 +31,4 @@ export function createRouterElement(renderArgs, { dispatch, getState }) {
 			resolver={resolver}
 			initialRenderArgs={renderArgs}/>
 	)
-}
-
-export function createHistoryProtocol() {
-	return new BrowserProtocol()
 }

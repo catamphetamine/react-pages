@@ -18,7 +18,7 @@ A complete solution for building a React/Redux application
 
 ### `react-pages` vs `react-website`
 
-Previously this library has been known as [`react-website`](https://github.com/catamphetamine/react-website/tree/3.x) but then I found a better (in my opinion) name for it and it's now called `react-pages`. For migrating from `react-website` to `react-pages` see the [migration guide](https://github.com/catamphetamine/react-pages/blob/master/MIGRATION.md).
+Previously this library has been known as [`react-website`](https://github.com/catamphetamine/react-website/tree/3.x) but then I found a better (in my opinion) name for it and it's now called `react-pages`. For migrating from `react-website` to `react-pages` see the [migration guide](https://gitlab.com/catamphetamine/react-pages/blob/master/MIGRATION.md).
 
 # Introduction
 
@@ -135,7 +135,7 @@ Then call `render()` in the main client-side javascript file.
 #### ./src/index.js
 
 ```javascript
-import { render } from 'react-pages'
+import { render } from 'react-pages/client'
 import settings from './react-pages'
 
 // Render the page in web browser
@@ -223,7 +223,7 @@ webpack-dev-server --hot --config webpack.config.js
 
 See the [Webpack example project](https://github.com/catamphetamine/react-pages-webpack-example).
 
-If you're using [Parcel](https://parceljs.org/) then it's much simpler than Webpack: see the [basic example project](https://github.com/catamphetamine/react-pages-basic-example) for the setup required in order to generate and serve `index.html` and `bundle.js` files over HTTP on `localhost:1234`.
+If you're using [Parcel](https://parceljs.org/) then it's much simpler than Webpack: see the [basic example project](https://gitlab.com/catamphetamine/react-pages-basic-example) for the setup required in order to generate and serve `index.html` and `bundle.js` files over HTTP on `localhost:1234`.
 
 So now the website should be fully working.
 
@@ -267,7 +267,7 @@ const server = webpageServer(settings, {
   // as <script src="..."/> and <link rel="style" href="..."/>.
   // (this is for the main application JS and CSS bundles only,
   //  for injecting 3rd party JS and CSS use `html` settings instead:
-  //  https://github.com/catamphetamine/react-pages/blob/master/README-ADVANCED.md#all-webpage-rendering-server-options)
+  //  https://gitlab.com/catamphetamine/react-pages/blob/master/README-ADVANCED.md#all-webpage-rendering-server-options)
   assets() {
     return {
       // Assuming that it's being tested on a local computer first
@@ -303,9 +303,9 @@ Now [disable javascript in Chrome DevTools](http://stackoverflow.com/questions/1
 
 This concludes the introductory part of the README and the rest is the description of the various tools and techniques which come prepackaged with this library.
 
-A working example illustrating Server-Side Rendering and all other things can be found here: [webpack-react-redux-isomorphic-render-example](https://github.com/catamphetamine/webpack-react-redux-isomorphic-render-example).
+A working example illustrating Server-Side Rendering and all other things can be found here: [webpack-react-redux-isomorphic-render-example](https://gitlab.com/catamphetamine/webpack-react-redux-isomorphic-render-example).
 
-A much simpler and smaller example (using Parcel instead of Webpack) can be found here: [react-pages-basic-example](https://github.com/catamphetamine/react-pages-basic-example).
+A much simpler and smaller example (using Parcel instead of Webpack) can be found here: [react-pages-basic-example](https://gitlab.com/catamphetamine/react-pages-basic-example).
 
 # Documentation
 
@@ -352,19 +352,23 @@ Page.load = async (utility) => {
   const {
     // Can `dispatch()` Redux actions.
     dispatch,
+
     // Returns Redux state.
     getState,
+
     // Current page location (object).
     location,
+
     // Route URL parameters.
-    // For example, for route "/users/:id"
-    // and URL "/users/barackobama"
+    // For example, for route "/users/:id" and URL "/users/barackobama",
     // `params` will be `{ id: "barackobama" }`.
     params,
+
     // Is this server-side rendering?
     server,
+
     // (utility)
-    // Returns cookie value by name.
+    // Returns a cookie value by name.
     getCookie
   } = utility
 
@@ -446,7 +450,9 @@ There's also `instantBack: true` option available for `goto(location, options)` 
 
 One can also use the exported `wasInstantNavigation()` function (on client side) to find out if the current page was navigated to "instantly". This can be used, for example, to restore a "state" of a widget on instant "Back" navigation so that it renders immediately with the previously cached "results" or something.
 
-There's also an `canGoBackInstantly()` function (on client side) that tells if the currently page can be navigated "Back" from instantly. This function can be used to render a custom "Go Back" button on a page only when an instant "Back" transition could be performed.
+There's also a `canGoBackInstantly()` function (on client side) that tells if the currently page can be navigated "Back" from instantly. This function can be used to render a custom "Go Back" button on a page only when an instant "Back" transition could be performed.
+
+There's also a `canGoForwardInstantly()` function (analogous to `canGoBackInstantly()`).
 
 There's also an `isInstantBackAbleNavigation()` function (on client side) which tells if the currently ongoing navigation process is performed with `instantBack` option (for example, if `<Link instantBack/>` is clicked or `goto(location, { instantBack: true })` is called). It can be used in `componentWillUnmount()` to save the current page state for later restoring it if the user navigates "Back" instantly.
 </details>
@@ -725,6 +731,7 @@ export const getComments = redux.action(
 // and the second one is the event name
 // and the listener will be called in case of
 // a "success" event of a `redux.action()`.
+// (not to be confused with `redux.syncAction()`).
 // If only one string argument is passed
 // then it is a raw Redux `action.type`.
 redux.on('BLOG_POST', 'CUSTOM_EVENT', (state, action) => ({
@@ -794,15 +801,6 @@ A simple Redux action that simply updates Redux state.
 
 ```js
 action = redux.simpleAction((state, actionArgument) => newState)
-```
-
-A simple Redux action that performs some simple actions and then updates Redux state.
-
-```js
-action = redux.simpleAction(
-  (actionArgument)
-  (state, actionArgument) => newState
-)
 ```
 
 ```js
@@ -925,7 +923,7 @@ In order for `http` utility to send an authentication token as part of an HTTP r
 
 #####
 
-The `accessToken` is initially obtained when a user signs in: the web browser sends HTTP POST request to `/sign-in` API endpoint with `{ email, password }` parameters and gets `{ userInfo, accessToken }` as a response, which is then stored in `localStorage` (or in Redux `state`, or in a `cookie`) and all subsequent HTTP requests use that `accessToken` to call the API endpoints. The `accessToken` itself is usually a [JSON Web Token](https://jwt.io/introduction/) signed on the server side and holding the list of the user's priviliges ("roles"). Hence authentication and authorization are completely covered. [Refresh tokens](https://auth0.com/blog/refresh-tokens-what-are-they-and-when-to-use-them/) are also [supported](https://github.com/catamphetamine/react-pages/blob/master/README-ADVANCED.md#all-react-pagesjs-settings).
+The `accessToken` is initially obtained when a user signs in: the web browser sends HTTP POST request to `/sign-in` API endpoint with `{ email, password }` parameters and gets `{ userInfo, accessToken }` as a response, which is then stored in `localStorage` (or in Redux `state`, or in a `cookie`) and all subsequent HTTP requests use that `accessToken` to call the API endpoints. The `accessToken` itself is usually a [JSON Web Token](https://jwt.io/introduction/) signed on the server side and holding the list of the user's priviliges ("roles"). Hence authentication and authorization are completely covered. [Refresh tokens](https://auth0.com/blog/refresh-tokens-what-are-they-and-when-to-use-them/) are also [supported](https://gitlab.com/catamphetamine/react-pages/blob/master/README-ADVANCED.md#all-react-pagesjs-settings).
 
 This kind of an authentication and authorization scheme is self-sufficient and doesn't require "restricting" any routes: if a route's `load` uses `http` utility for querying an API endpoint then this API endpoint must check if the user is signed in and if the user has the necessary priviliges. If yes then the route is displayed. If not then the user is redirected to either a "Sign In Required" page or "Access Denied" page.
 
@@ -1065,19 +1063,11 @@ File upload progress can be metered by passing `progress` option as part of the 
 <summary>See example</summary>
 
 ```js
-// React component
-class ItemPage extends React.Component {
-  render() {
-    return (
-      <div>
-        ...
-        <input type="file" onChange={this.onFileSelected}/>
-      </div>
-    )
-  }
+// React component.
+function ItemPage() {
+  const dispatch = useDispatch()
 
-  // Make sure to `.bind()` this handler
-  onFileSelected(event) {
+  const onFileSelected = (event) => {
     const file = event.target.files[0]
 
     // Could also pass just `event.target.files` as `file`
@@ -1088,6 +1078,13 @@ class ItemPage extends React.Component {
     // even with the same file.
     event.target.value = null
   }
+
+  return (
+    <div>
+      ...
+      <input type="file" onChange={onFileSelected}/>
+    </div>
+  )
 }
 
 // Redux action creator
@@ -1235,6 +1232,35 @@ async function generatePageList() {
 ```
 
 The `snapshot()` function snapshots the list of `pages` to `.html` files and then the `upload()` function uploads them to the cloud (in this case to Amazon S3). The `snapshot()` function also snapshots a special `base.html` page which is an empty page that should be used as the "fallback", i.e. the cloud should respond with `base.html` file contents when the file for the requested URL is not found: in this case `base.html` will see the current URL and perform all the routing neccessary on the client side to show the correct page. If the `snapshot()` function isn't passed the list of `pages` to snapshot (e.g. if `pages` argument is `null` or `undefined`) then it will only snapshot `base.html`. The static website will work with just `base.html`, the only point of snapshotting other pages is for Google indexing.
+
+If the website is hosted on Amazon S3 then the IAM policy should allow:
+
+```js
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": [
+                "s3:ListBucket"
+            ],
+            "Resource": [
+                "arn:aws:s3:::<bucket-name>"
+            ]
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "s3:PutObject",
+                "s3:DeleteObject"
+            ],
+            "Resource": [
+                "arn:aws:s3:::<bucket-name>/*"
+            ]
+        }
+    ]
+}
+```
 </details>
 
 ####
@@ -1284,7 +1310,7 @@ export default [{
 }]
 ```
 
-### Setting <title/> and <meta/> tags
+### Setting `<title/>` and `<meta/>` tags
 
 Set `meta: (state) => object` static function on a page component to add `<title/>` and `<meta/>` tags to the page:
 
@@ -1392,7 +1418,7 @@ To report website navigation to Google Analytics supply `onNavigate()` function 
 ####
 
 ```js
-import { render } from 'react-pages'
+import { render } from 'react-pages/client'
 
 await render(settings, {
   // Runs on the initial page load, and then on each navigation.
@@ -1436,10 +1462,8 @@ Inside a `load` function: use the `location` parameter.
 Anywhere in a React component: use the `found` property in Redux state.
 
 ```js
-@connect(({ found }) => ({
-  location: found.resolvedMatch.location,
-  params: found.resolvedMatch.params
-}))
+const location = useSelector(state => state.found.resolvedMatch.location)
+const params = useSelector(state => state.found.resolvedMatch.params)
 ```
 
 ### Changing current location
@@ -1448,17 +1472,16 @@ Dispatch `goto`/`redirect` Redux action to change current location (both on clie
 
 ```javascript
 import { goto, redirect } from 'react-pages'
-import { connect } from 'react-redux'
+import { useDispatch } from 'react-redux'
 
-// Usage example
-// (`goto` navigates to a URL while adding a new entry in browsing history,
-//  `redirect` does the same replacing the current entry in browsing history)
-@connect(state = {}, { goto, redirect })
-class Page extends Component {
-  handleClick(event) {
-    const { goto, redirect } = this.props
-    goto('/items/1?color=red')
-    // redirect('/somewhere')
+// Usage example.
+// * `goto` navigates to a URL while adding a new entry in browsing history.
+// * `redirect` does the same replacing the current entry in browsing history.
+function Page() {
+  const dispatch = useDispatch()
+  const onClick = (event) => {
+    dispatch(goto('/items/1?color=red'))
+    // dispatch(redirect('/somewhere'))
   }
 }
 ```
@@ -1470,23 +1493,20 @@ Advanced: `goto()` can also take `{ instantBack: true }` option.
 If the current location needs to be changed while still staying at the same page (e.g. a checkbox has been ticked and the corresponding URL query parameter must be added), then use `dispatch(pushLocation(location))` or `dispatch(replaceLocation(location))` Redux actions.
 
 ```javascript
+import { useDispatch } from 'react-redux'
 import { pushLocation, replaceLocation } from 'react-pages'
 
-@connect(() => ({
-  ...
-}), {
-  pushLocation
-})
-class Page extends Component {
-  onSearch(query) {
-    const { pushLocation } = this.props
-
-    pushLocation({
-      pathname: '/'
-      query: {
-        query
-      }
-    })
+function Page() {
+  const dispatch = useDispatch()
+  const onSearch = (query) => {
+    dispatch(
+      pushLocation({
+        pathname: '/'
+        query: {
+          query
+        }
+      })
+    )
   }
 }
 ```
@@ -1494,25 +1514,20 @@ class Page extends Component {
 To go "Back"
 
 ```javascript
+import { useDispatch } from 'react-redux'
 import { goBack } from 'react-pages'
 
-@connect(() => ({
-  ...
-}), {
-  goBack
-})
-class Page extends Component {
-  render() {
-    const { goBack } = this.props
-
-    return (
-      <button onClick={goBack}>
-        Back
-      </button>
-    )
-  }
+function Page() {
+  const dispatch = useDispatch()
+  return (
+    <button onClick={() => dispatch(goBack())}>
+      Back
+    </button>
+  )
 }
 ```
+
+Can also go "Forward" via `goForward()` in the same fashion.
 
 If someone prefers interacting with [`found`](https://github.com/4Catalyzer/found) `router` directly instead then it is available on all pages as a `router` property, or via [`useRouter`](https://github.com/4Catalyzer/found#programmatic-navigation) hook.
 
@@ -1605,7 +1620,7 @@ HMR setup for Redux reducers is as simple as adding `store.hotReload()` (as show
 #### application.js
 
 ```js
-import { render } from 'react-pages'
+import { render } from 'react-pages/client'
 import settings from './react-pages'
 
 render(settings).then(({ store, rerender }) => {
@@ -1668,7 +1683,7 @@ Then start [`webpack-dev-server`](https://github.com/webpack/webpack-dev-server)
 `websocket()` helper sets up a WebSocket connection.
 
 ```js
-import { render } from 'react-pages'
+import { render } from 'react-pages/client'
 import websocket from 'react-pages/websocket'
 
 render(settings).then(({ store }) => {
@@ -1844,19 +1859,53 @@ function reducer(state, action) {
 
 ## Server-Side Rendering and bundlers
 
-If the application is being built with a bundler (most likely Webpack) and Server-Side Rendering is enabled then make sure to build the server-side code with the bundler too so that `require()` calls for assets (images, styles, fonts, etc) inside React components don't break (see [universal-webpack](https://github.com/catamphetamine/universal-webpack), for example).
+If the application is being built with a bundler (most likely Webpack) and Server-Side Rendering is enabled then make sure to build the server-side code with the bundler too so that `require()` calls for assets (images, styles, fonts, etc) inside React components don't break (see [universal-webpack](https://gitlab.com/catamphetamine/universal-webpack), for example).
 
 ## Code splitting
 
-Code splitting is supported. See [README-CODE-SPLITTING](https://github.com/catamphetamine/react-pages/blob/master/README-CODE-SPLITTING.md)
+Code splitting is supported. See [README-CODE-SPLITTING](https://gitlab.com/catamphetamine/react-pages/blob/master/README-CODE-SPLITTING.md)
 
 ## `Accept-Language` and `User-Agent` HTTP headers
 
 When server-side rendering is enabled `Accept-Language` and `User-Agent` HTTP headers are accessible inside `getInitialState({ cookies, headers, locales })` function which can be passed as an option to `webpageServer(settings, options)`. `locales` are parsed from the `Accept-Language` HTTP header.
 
+## Known Issues
+
+### Same Route Navigation
+
+Suppose there's a "forum" web application having `<Thread/>` pages with URLs like `/thread/:id`, and one thread could link to another thread. When a user navigates to a thread and clicks a link to another thread there, a navigation transition will start: the "current" thread page will still be rendered while the "new" thread page is loading. The [issue](https://github.com/4Catalyzer/found/issues/639#issuecomment-567084189) is that both these URLs use the same Redux state subtree, so, after the "new" thread data has been loaded, but before the "new" thread page is rendered, the "current" thread page is gonna re-render with the updated Redux state subtree.
+
+If a thread page doesn't use `useState()`, then it wouldn't be an issue. But if it does, it could result in weird bugs. For example, if a `<Thread/>` page had a `fromIndex` state variable that would control the first shown comment index, then, when the "current" page is re-rendered with the updated Redux state subtree for the "new" thread, the `fromIndex` might exceed the "new" thread's comments count resulting in an "out of bounds" exception and the page breaking.
+
+To prevent such bugs, for all routes that could link to the same route, their page components should be rendered in a wrapper with a `key` corresponding to all URL parameters:
+
+```js
+function Thread() {
+  const [fromIndex, setFromIndex] = useState(0)
+  return ...
+}
+
+Thread.meta = ...
+Thread.load = async ({ dispatch, params }) => {
+  await dispatch(loadThreadData(params.id))
+}
+
+// This is a workaround for cases when navigating from one thread
+// to another thread in order to prevent bugs when the "new" thread data
+// has already been loaded and updated in Redux state but the "old" thread
+// page is still being rendered.
+// https://github.com/4Catalyzer/found/issues/639#issuecomment-567084189
+export default function Thread_() {
+  const thread = useSelector(state => state.thread.thread)
+  return <Thread key={thread.id}/>
+}
+Thread_.meta = Thread.meta
+Thread_.load = Thread.load
+```
+
 ## Advanced
 
-At some point in time this README became huge so I extracted some less relevant parts of it into [README-ADVANCED](https://github.com/catamphetamine/react-pages/blob/master/README-ADVANCED.md) (including the list of all possible settings and options). If you're a first timer then just skip that one - you don't need it for sure.
+At some point in time this README became huge so I extracted some less relevant parts of it into [README-ADVANCED](https://gitlab.com/catamphetamine/react-pages/blob/master/README-ADVANCED.md) (including the list of all possible settings and options). If you're a first timer then just skip that one - you don't need it for sure.
 
 ## License
 

@@ -281,7 +281,7 @@ const { status, content, contentType } = renderError(error)
 
   // Use this flag to enable "code splitting" mode.
   // See `README-CODE-SPLITTING` for more info.
-  // https://github.com/catamphetamine/react-pages/blob/master/README-CODE-SPLITTING.md
+  // https://gitlab.com/catamphetamine/react-pages/blob/master/README-CODE-SPLITTING.md
   codeSplit: true/false
 
   // When using `load`s in a client-side-only set up

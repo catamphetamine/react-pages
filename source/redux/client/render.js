@@ -2,7 +2,7 @@ import React from 'react'
 
 import { getLocationUrl } from '../../location'
 import { matchRoutes } from '../../router'
-import { createRouterElement } from '../../router/client'
+import createRouterElement from '../../router/client/createRouterElement'
 import { isServerSidePreloaded } from '../../client/flags'
 
 // Renders the current page React element inside the `to` DOM element.

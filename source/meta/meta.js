@@ -20,20 +20,6 @@ const DEFAULT_META = {
 const META_METHOD_NAME = 'meta'
 
 /**
- * (This decorator is deprecated, set static `meta` property on a page component instead)
- * `@meta()` decorator used for adding `<title/>` and <meta/>` tags to a React page.
- * @param  {function} getMeta - A function of `state` returning this page's meta object.
- * @example
- * @meta(({ state }) => ({ title: `${state.user.name}'s profile` }))
- */
-export default function meta(getMeta) {
-	return function(Component) {
-		Component[META_METHOD_NAME] = getMeta
-		return Component
-	}
-}
-
-/**
  * Gathers `<title/>` and `<meta/>` tags (inside `<head/>`)
  * defined for this route (`components` array).
  * @param {object[]} meta — An array of meta objects.
@@ -71,8 +57,16 @@ export function getComponentsMeta(components, state) {
 		.filter(_ => _)
 		.map(_ => _[META_METHOD_NAME])
 		.filter(_ => _)
-		// Convert objects to functions
-		.map(_ => typeof _ === 'object' ? () => _ : _)
+		// Validate that each `meta` is a function.
+		// This is just because projects using `react-pages@4.x` could use object `meta`s.
+		.map((meta) => {
+			if (typeof meta !== 'function') {
+				throw new Error(`A page component's ".meta" must be a function. Received: ${typeof meta}. Meta: ${JSON.stringify(meta)}`)
+			}
+			return meta
+		})
+		// // Convert objects to functions.
+		// .map(_ => typeof _ === 'object' ? () => _ : _)
 		.map(_ => dropUndefinedProperties(_(state)))
 }
 
@@ -277,7 +271,7 @@ function normalizeMeta(meta) {
 	return convertMeta(normalizeMetaKeys(meta))
 }
 
-function dropUndefinedProperties(object) {
+export function dropUndefinedProperties(object) {
 	const keys = Object.keys(object)
 	for (const key of keys) {
 		if (object[key] === undefined) {

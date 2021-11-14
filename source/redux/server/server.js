@@ -1,10 +1,8 @@
-import Terser from 'terser'
-
 import { ISO_date_regexp } from '../../parseDates'
 import { safeJsonStringify } from '../../server/html'
 import createStore from '../store'
 import createHttpClient from '../HttpClient'
-import { createHistoryProtocol } from '../../router/server'
+import createHistoryProtocol from '../../router/server/createHistoryProtocol'
 
 export async function initialize(settings, {
 	proxy,
@@ -68,7 +66,7 @@ function generateJavascript(store, settings) {
 // Use as the second, 'reviver' argument to `JSON.parse(json, JSON.dateParser)`.
 // http://stackoverflow.com/questions/14488745/javascript-json-date-deserialization/23691273#23691273
 // `JSON.parse(json, JSON.dateParser)` is about 2.5 times slower than `JSON.parse(json)` in Chrome.
-const DEFINE_JSON_DATE_PARSER = Terser.minify(`
+const DEFINE_JSON_DATE_PARSER = `
 if (!JSON.dateParser) {
 	JSON.dateParser = function(key, value) {
 		if (typeof value === 'string' && /^${ISO_date_regexp}$/.test(value)) {
@@ -76,7 +74,11 @@ if (!JSON.dateParser) {
 		}
 		return value
 	}
-}`).code
+}`
+
+// Since version 6.x, `terser` no longer provides a synchronous `minify()` function.
+// import Terser from 'terser'
+// DEFINE_JSON_DATE_PARSER = Terser.minify(DEFINE_JSON_DATE_PARSER).code
 
 // Just to be extra safe from XSS attacks
 if (DEFINE_JSON_DATE_PARSER.indexOf('<') !== -1) {

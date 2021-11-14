@@ -100,10 +100,10 @@ const TEMPLATE_AFTER_CONTENT = nunjucks.compile
 					"ReactDOM.hydrate()" or "ReactDOM.render()".
 				#}
 				<script>
-					{# If renaming this variable don't reset it in "./redux/client/client.js" #}
+					{# If renaming this variable don't reset it in "./redux/client/setUpAndRender.js" #}
 					window._server_side_render = true
 					{% if contentNotRendered %}
-						{# If renaming this variable don't reset it in "./redux/client/client.js" #}
+						{# If renaming this variable don't reset it in "./redux/client/setUpAndRender.js" #}
 						window._empty_server_side_render = true
 					{% endif %}
 				</script>
@@ -111,7 +111,7 @@ const TEMPLATE_AFTER_CONTENT = nunjucks.compile
 				{# User's preferred locales (based on the "Accept-Locale" HTTP request header). #}
 				{% if locales %}
 					<script>
-						{# If renaming this variable don't reset it in "./redux/client/client.js" #}
+						{# If renaming this variable don't reset it in "./redux/client/setUpAndRender.js" #}
 						window._react_pages_locales = {{ safeJsonStringify(locales) | safe }}
 					</script>
 				{% endif %}

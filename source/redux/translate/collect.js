@@ -1,4 +1,4 @@
-import { TRANSLATE_LOCALES_PROPERTY } from '../translate/decorator'
+const TRANSLATE_LOCALES_PROPERTY  = '__translation__'
 
 export default function collectTranslations(components, routes, routeIndices, codeSplit, locale, dispatch) {
 	// Set the `_key` for each route.

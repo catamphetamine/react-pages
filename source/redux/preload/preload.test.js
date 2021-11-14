@@ -1,14 +1,9 @@
 import
 {
+	PRELOAD_METHOD_NAME,
 	collectPreloadersFromComponents,
 }
 from './preload'
-
-import
-{
-	PRELOAD_METHOD_NAME
-}
-from './decorator'
 
 describe(`load`, function()
 {

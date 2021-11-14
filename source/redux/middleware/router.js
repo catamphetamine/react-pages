@@ -1,7 +1,6 @@
 import { UPDATE_MATCH, RESOLVE_MATCH, _RESOLVE_MATCH, getRoutesByPath, getRoutePath } from '../../router'
-import { getComponentsMeta, mergeMeta, updateMeta, getCodeSplitMeta } from '../../meta/meta'
+import { getComponentsMeta, mergeMeta, updateMeta, getCodeSplitMeta, dropUndefinedProperties } from '../../meta/meta'
 import { getLocationUrl, shouldSkipPreloadForNavigation } from '../../location'
-import { ON_PAGE_LOADED_METHOD_NAME } from '../client/onPageLoaded'
 
 import {
 	PRELOAD_STARTED,
@@ -13,10 +12,13 @@ import {
 	isInstantTransition,
 	setInstantNavigationFlag,
 	addInstantBack,
-	resetInstantBack
-} from '../client/instantBack'
+	updateInstantNavigationChainIndex,
+	resetInstantNavigationChain
+} from '../client/instantNavigation'
 
 import { isServerSidePreloaded } from '../../client/flags'
+
+const ON_PAGE_LOADED_METHOD_NAME = 'onLoaded'
 
 // Any events listened to here are being dispatched on client side.
 export default function routerMiddleware(
@@ -30,6 +32,8 @@ export default function routerMiddleware(
 	let startedAt
 	let previousLocation
 	let previousRouteIndices
+
+	defaultMeta = dropUndefinedProperties(defaultMeta)
 
 	return ({ dispatch, getState }) =>
 	{
@@ -91,14 +95,16 @@ export default function routerMiddleware(
 							routeIndices,
 							previousRouteIndices
 						)
-					} else if (!_isInstantTransition) {
+					} else if (_isInstantTransition) {
+						updateInstantNavigationChainIndex(location)
+					} else {
 						// If current transition is not "instant back" and not "instant"
 						// then reset the whole "instant back" chain.
 						// Only a consequitive "instant back" navigation chain
 						// preserves the ability to instantly navigate "Back".
 						// Once a regular navigation takes place
 						// all previous "instant back" possibilities are discarded.
-						resetInstantBack()
+						resetInstantNavigationChain()
 					}
 
 					// Set the flag for `isInstantBackAbleNavigation()`.

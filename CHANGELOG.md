@@ -16,6 +16,41 @@ It would just return the base HTML structure without any route-specific stuff.
 
 <!-- Maybe replace `getRoutesByPath()` with `matcher.getRoutes(match)` provided by `found` out-of-the-box: https://github.com/4Catalyzer/found/pull/634#issuecomment-558895066 -->
 
+0.5.0 / 14.11.2021
+==================
+
+* Updated dependencies.
+
+* (breaking change) Bumped peer dependencies:
+
+  * Bumped `react` peer dependency to `17.x`. No particular reason.
+  * Also, update your application's `react-redux` package version, otherwise it might throw a weird error: `"... Either wrap the root component in a <Provider> ..."`.
+
+* (breaking change) Removed exported "decorators":
+  * `preload` — Set `.load` on page component function instead.
+  * `onPageLoaded` — Set `.onLoaded` on page component function instead.
+  * `meta` — Set `.meta` property on page component function instead.
+  * `translate` — Not used.
+
+* (breaking change) Page component's `meta` can now only be a function. Previously it could be an object and would automatically get converted to a function under the hood.
+
+0.4.2 / 12.01.2021
+==================
+
+* Refactored "instant back" stuff. Added `canGoForwardInstantly()` function (analogous to `canGoBackInstantly()`).
+
+0.4.1 / 07.01.2021
+==================
+
+* (misc) Added `goForward()` exported function (analogous to `goBack()`).
+
+0.4.0 / 19.12.2020
+==================
+
+* Updated dependencies (`found` and miscellaneous).
+
+* (breaking change) Had to move the "client" render function to its own subpackage: `react-pages/client`: `import { render } from 'react-pages'` -> `import { render } from 'react-pages/client'`.
+
 0.3.0 / 13.11.2019
 ==================
 

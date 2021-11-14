@@ -1,7 +1,6 @@
 import React from 'react'
-import ReactDOM from 'react-dom/server'
 import createStringStream from 'string-to-stream'
-import combineStreams from 'multistream'
+import MultiStream from 'multistream'
 
 import { renderBeforeContent, renderAfterContent } from './html'
 import normalizeSettings from '../redux/normalize'
@@ -9,7 +8,8 @@ import timer from '../timer'
 import { getLocationUrl, parseLocation } from '../location'
 import reduxRender from '../redux/server/render'
 import { initialize as reduxInitialize } from '../redux/server/server'
-import { generateMetaTagsMarkup, mergeMeta, convertOpenGraphLocaleToLanguageTag } from '../meta/meta'
+import { generateMetaTagsMarkup, mergeMeta, convertOpenGraphLocaleToLanguageTag, dropUndefinedProperties } from '../meta/meta'
+import { createRenderingStream } from './reactRender'
 
 export default async function(settings, {
 	assets,
@@ -27,11 +27,13 @@ export default async function(settings, {
 	const {
 		routes,
 		container,
-		meta: defaultMeta,
+		meta: _defaultMeta,
 		authentication,
 		onError,
 		codeSplit
 	} = settings
+
+	const defaultMeta = dropUndefinedProperties(_defaultMeta)
 
 	const location = parseLocation(url)
 	const path = location.pathname.replace(/\/$/, '')
@@ -156,13 +158,13 @@ export default async function(settings, {
 		// inserting this stream in the middle of `streams` array.
 		// `array.splice(index, 0, element)` inserts `element` at `index`.
 		const pageElement = React.createElement(container, containerProps, content)
-		streams.splice(streams.length / 2, 0, ReactDOM.renderToNodeStream(pageElement))
+		streams.splice(streams.length / 2, 0, createRenderingStream(pageElement))
 	}
 
 	return {
 		route,
 		status,
-		content: combineStreams(streams),
+		content: new MultiStream(streams),
 		time,
 		cookies: newCookies
 	}

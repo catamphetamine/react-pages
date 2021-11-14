@@ -3,7 +3,7 @@ import React from 'react'
 import timer from '../../timer'
 import { mergeMeta, getComponentsMeta, getCodeSplitMeta } from '../../meta/meta'
 import { matchRoutes, RedirectException } from '../../router'
-import { createRouterElement } from '../../router/server'
+import createRouterElement from '../../router/server/createRouterElement'
 
 // Returns a Promise resolving to { status, content, redirect }.
 //

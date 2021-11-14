@@ -1,0 +1,7 @@
+{
+  "private": true,
+  "name": "react-pages/client",
+  "main": "index.commonjs.js",
+  "module": "index.js",
+  "sideEffects": false
+}

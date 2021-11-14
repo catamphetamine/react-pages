@@ -53,14 +53,12 @@ The file structure can be:
 ```js
 import React from 'react'
 
-export default class Page extends React.Component {
-	render() {
-		return (
-			<section>
-				...
-			</section>
-		)
-	}
+export default function Page() {
+	return (
+		<section>
+			...
+		</section>
+	)
 }
 ```
 

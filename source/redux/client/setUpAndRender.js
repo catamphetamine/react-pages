@@ -2,11 +2,12 @@ import clientSideRender from '../../client/render'
 import { isServerSidePreloaded } from '../../client/flags'
 import { getCookie } from '../../client/cookies'
 import render from './render'
+import getState from './getState'
 import createHttpClient from '../HttpClient'
 import normalizeSettings from '../normalize'
 import createStore from '../store'
-import { resetInstantBack } from './instantBack'
-import { createHistoryProtocol } from '../../router/client'
+import { resetInstantNavigationChain } from './instantNavigation'
+import createHistoryProtocol from '../../router/client/createHistoryProtocol'
 import { redirect, _RESOLVE_MATCH, pushLocation, RedirectException } from '../../router'
 import { showInitialPreload, hideInitialPreload } from './initialPreload'
 
@@ -55,7 +56,7 @@ export default function setUpAndRender(settings, options = {}) {
 	// since Redux state is cleared.
 	// "instant back" chain is stored in `window.sessionStorage`
 	// and therefore it survives page reload.
-	resetInstantBack()
+	resetInstantNavigationChain()
 
 	// `showLoadingInitially` is handled in a special way
 	// in case of client-side-only rendering.
@@ -178,23 +179,4 @@ export default function setUpAndRender(settings, options = {}) {
 		}
 		throw error
 	})
-}
-
-// Gets Redux store state before "rehydration".
-// In case someone needs to somehow modify
-// Redux state before client-side render.
-// (because the variable could be potentially renamed in future)
-export function getState(erase) {
-	const state = window._redux_state
-	if (erase) {
-		delete window._redux_state
-	}
-	return state
-}
-
-// Returns `http` utility on client side.
-// Can be used in WebSocket message handlers,
-// since they only run on the client side.
-export function getHttpClient() {
-	return window._react_pages_http_client
 }

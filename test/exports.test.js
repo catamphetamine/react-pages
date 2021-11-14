@@ -2,19 +2,13 @@ import React from 'react'
 
 import
 {
-	meta,
-	render,
 	getState,
 	getHttpClient,
-	preload,
-	translate,
-	onPageLoaded,
 	goto,
 	redirect,
 	PRELOAD_STARTED,
 	PRELOAD_FINISHED,
 	PRELOAD_FAILED,
-	// PRELOAD_METHOD_NAME,
 	ReduxModule,
 	underscoredToCamelCase,
 	eventName,
@@ -26,6 +20,7 @@ import
 	replaceLocation,
 	pushLocation,
 	goBack,
+	goForward,
 	indicateLoading,
 	Loading,
 	Route,
@@ -38,16 +33,11 @@ describe(`exports`, function()
 {
 	it(`should export ES6`, () =>
 	{
-		meta.should.be.a('function')
 		indicateLoading.should.be.a('function')
 		Loading.WrappedComponent.should.be.a('function')
 
-		render.should.be.a('function')
 		getState.should.be.a('function')
 		getHttpClient.should.be.a('function')
-		preload.should.be.a('function')
-		translate.should.be.a('function')
-		onPageLoaded.should.be.a('function')
 
 		goto.should.be.a('function')
 		redirect.should.be.a('function')
@@ -55,8 +45,6 @@ describe(`exports`, function()
 		PRELOAD_STARTED.should.be.a('string')
 		PRELOAD_FINISHED.should.be.a('string')
 		PRELOAD_FAILED.should.be.a('string')
-
-		// PRELOAD_METHOD_NAME.should.be.a('string')
 
 		underscoredToCamelCase.should.be.a('function')
 		eventName.should.be.a('function')
@@ -74,24 +62,20 @@ describe(`exports`, function()
 		replaceLocation.should.be.a('function')
 		pushLocation.should.be.a('function')
 		goBack.should.be.a('function')
+		goForward.should.be.a('function')
 	})
 
 	it(`should export ES5`, () =>
 	{
 		const _ = require('../index.commonjs')
 
-		_.meta.should.be.a('function')
 		_.indicateLoading.should.be.a('function')
 		_.Loading.WrappedComponent.should.be.a('function')
 
 		// Combined Redux exports
 
-		_.render.should.be.a('function')
 		_.getState.should.be.a('function')
 		_.getHttpClient.should.be.a('function')
-		_.preload.should.be.a('function')
-		_.translate.should.be.a('function')
-		_.onPageLoaded.should.be.a('function')
 
 		_.goto.should.be.a('function')
 		_.redirect.should.be.a('function')
@@ -99,8 +83,6 @@ describe(`exports`, function()
 		_.PRELOAD_STARTED.should.be.a('string')
 		_.PRELOAD_FINISHED.should.be.a('string')
 		_.PRELOAD_FAILED.should.be.a('string')
-
-		// _.PRELOAD_METHOD_NAME.should.be.a('string')
 
 		_.ReduxModule.should.be.a('function')
 
@@ -120,6 +102,7 @@ describe(`exports`, function()
 		_.replaceLocation.should.be.a('function')
 		_.pushLocation.should.be.a('function')
 		_.goBack.should.be.a('function')
+		_.goForward.should.be.a('function')
 	})
 
 	it(`should export rendering service`, () =>

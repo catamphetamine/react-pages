@@ -1,4 +1,5 @@
-let instantBackChain = []
+let instantNavigationChain = []
+let instantNavigationChainIndex = -1
 
 /**
  * Is called when a `<Link/>` with `instantBack` property set is clicked.
@@ -26,7 +27,7 @@ export function addInstantBack(
 	previousLocationRouteComponents
 )
 {
-	let chain = instantBackChain
+	let chain = instantNavigationChain
 
 	// If there is already an "instant" transition in the chain
 	// then insert this transition into the chain
@@ -50,7 +51,7 @@ export function addInstantBack(
 			// console.error('[react-pages] Error: previous location not found in an already existing instant back navigation chain', getLocationKey(previousLocation), chain)
 			// Anomaly detected.
 			// Reset the chain.
-			// return resetInstantBack()
+			// return resetInstantNavigationChain()
 
 			// Basic recovery for cases where `history.replaceState()`
 			// or `replaceHistory()` were called.
@@ -82,7 +83,8 @@ export function addInstantBack(
 	})
 
 	// Save the chain.
-	instantBackChain = chain
+	instantNavigationChain = chain
+	instantNavigationChainIndex = chain.length - 1
 }
 
 /**
@@ -95,44 +97,57 @@ export function addInstantBack(
  */
 export function isInstantTransition(fromLocation, toLocation)
 {
-	return indexOfByKey(instantBackChain, getLocationKey(fromLocation)) >= 0 &&
-		indexOfByKey(instantBackChain, getLocationKey(toLocation)) >= 0
+	return indexOfByKey(instantNavigationChain, getLocationKey(fromLocation)) >= 0 &&
+		indexOfByKey(instantNavigationChain, getLocationKey(toLocation)) >= 0
 }
 
 /**
  * Clears any "instant back" history.
  */
-export const resetInstantBack = () => instantBackChain = []
+export function resetInstantNavigationChain() {
+	instantNavigationChain = []
+	instantNavigationChainIndex = -1
+}
+
+/**
+ * Updates instant navigation chain's current route index.
+ */
+export function updateInstantNavigationChainIndex(location) {
+	let i = 0
+	while (i < instantNavigationChain.length) {
+		if (instantNavigationChain[i].key === getLocationKey(location)) {
+			instantNavigationChainIndex = i
+			return
+		}
+		i++
+	}
+	// Shouldn't happen.
+	console.error('[react-pages] Location not found in instant navigation chain', location)
+	instantNavigationChainIndex = -1
+}
 
 /**
  * Each history `location` has a randomly generated `key`.
  */
 const getLocationKey = location => location.key
 
-function indexOfByKey(chain, key)
-{
+function indexOfByKey(chain, key) {
 	let i = 0
-	while (i < chain.length)
-	{
+	while (i < chain.length) {
 		if (chain[i].key === key) {
 			return i
 		}
 		i++
 	}
-
 	return -1
 }
 
-function findSameRoutesLocationIndex(chain, routes)
-{
+function findSameRoutesLocationIndex(chain, routes) {
 	let i = 0
-	while (i < chain.length)
-	{
-		if (chain[i].routes.length === routes.length)
-		{
+	while (i < chain.length) {
+		if (chain[i].routes.length === routes.length) {
 			let j = 0
-			while (j < routes.length)
-			{
+			while (j < routes.length) {
 				if (chain[i].routes[j] !== routes[j]) {
 					break
 				}
@@ -144,7 +159,6 @@ function findSameRoutesLocationIndex(chain, routes)
 		}
 		i++
 	}
-
 	return -1
 }
 
@@ -189,5 +203,9 @@ export function markImmediateNavigationAsInstantBack(instantBack) {
 }
 
 export function canGoBackInstantly() {
-	return instantBackChain.length > 0
+	return instantNavigationChainIndex > 0
+}
+
+export function canGoForwardInstantly() {
+	return instantNavigationChainIndex < instantNavigationChain.length - 1
 }

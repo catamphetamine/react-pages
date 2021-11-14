@@ -1,7 +1,3 @@
-// Helpers
-
-exports.meta = require('./commonjs/meta/meta').default
-
 // Redux
 
 var PreloadActions = require('./commonjs/redux/preload/actions')
@@ -10,23 +6,17 @@ exports.PRELOAD_STARTED  = PreloadActions.PRELOAD_STARTED
 exports.PRELOAD_FINISHED = PreloadActions.PRELOAD_FINISHED
 exports.PRELOAD_FAILED   = PreloadActions.PRELOAD_FAILED
 
-var preloadDecorator = require('./commonjs/redux/preload/decorator')
-
-// exports.PRELOAD_METHOD_NAME  = preloadDecorator.PRELOAD_METHOD_NAME
-
-exports.preload = preloadDecorator.default
 exports.indicateLoading = PreloadActions.indicateLoading
-exports.translate = require('./commonjs/redux/translate/decorator').default
-exports.onPageLoaded = require('./commonjs/redux/client/onPageLoaded').default
 
 exports.Loading = require('./commonjs/components/Loading').default
 
-exports.render               = require('./commonjs/redux/client/client').default
-exports.getState             = require('./commonjs/redux/client/client').getState
-exports.getHttpClient        = require('./commonjs/redux/client/client').getHttpClient
-exports.wasInstantNavigation = require('./commonjs/redux/client/instantBack').wasInstantNavigation
-exports.isInstantBackAbleNavigation = require('./commonjs/redux/client/instantBack').isInstantBackAbleNavigation
-exports.canGoBackInstantly = require('./commonjs/redux/client/instantBack').canGoBackInstantly
+exports.getState             = require('./commonjs/redux/client/getState').default
+exports.getHttpClient        = require('./commonjs/redux/client/getHttpClient').default
+
+exports.wasInstantNavigation = require('./commonjs/redux/client/instantNavigation').wasInstantNavigation
+exports.isInstantBackAbleNavigation = require('./commonjs/redux/client/instantNavigation').isInstantBackAbleNavigation
+exports.canGoBackInstantly = require('./commonjs/redux/client/instantNavigation').canGoBackInstantly
+exports.canGoForwardInstantly = require('./commonjs/redux/client/instantNavigation').canGoForwardInstantly
 
 exports.getPreferredLocales   = require('./commonjs/client/locale').getPreferredLocales
 exports.getPreferredLocale    = require('./commonjs/client/locale').getPreferredLocale
@@ -49,3 +39,4 @@ exports.redirect = require('./commonjs/router').redirect
 exports.pushLocation = require('./commonjs/router').pushLocation
 exports.replaceLocation = require('./commonjs/router').replaceLocation
 exports.goBack = require('./commonjs/router').goBack
+exports.goForward = require('./commonjs/router').goForward

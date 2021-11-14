@@ -8,7 +8,7 @@ import {
 	RedirectException
 } from '../../router'
 
-import { isInstantTransition } from '../client/instantBack'
+import { isInstantTransition } from '../client/instantNavigation'
 
 import generatePreloadChain from './chain'
 
@@ -16,7 +16,7 @@ import { PRELOAD_FAILED } from './actions'
 
 import collectTranslations from '../translate/collect'
 
-import { PRELOAD_METHOD_NAME } from './decorator'
+export const PRELOAD_METHOD_NAME = 'load'
 
 export default function _preload(
 	location,

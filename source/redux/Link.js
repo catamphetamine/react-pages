@@ -1,8 +1,8 @@
 import React, { useCallback } from 'react'
 import PropTypes from 'prop-types'
-import Link from 'found/lib/Link'
+import Link from 'found/Link'
 
-import { markImmediateNavigationAsInstantBack } from './client/instantBack'
+import { markImmediateNavigationAsInstantBack } from './client/instantNavigation'
 
 export default function HyperLink({ instantBack, onClick, ...rest }) {
 	const onClickHandler = useCallback((event) => {

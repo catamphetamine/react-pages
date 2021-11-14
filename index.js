@@ -1,16 +1,3 @@
-// Helpers
-
-export { default as meta } from './modules/meta/meta'
-
-// Redux
-
-export
-{
-	default as preload,
-	// PRELOAD_METHOD_NAME
-}
-from './modules/redux/preload/decorator'
-
 export
 {
 	PRELOAD_STARTED,
@@ -22,29 +9,12 @@ from './modules/redux/preload/actions'
 
 export
 {
-	default as onPageLoaded
-}
-from './modules/redux/client/onPageLoaded'
-
-export
-{
-	default as translate
-}
-from './modules/redux/translate/decorator'
-
-export
-{
 	default as Loading
 }
 from './modules/components/Loading'
 
-export
-{
-	default as render,
-	getState,
-	getHttpClient
-}
-from './modules/redux/client/client'
+export { default as getState } from './modules/redux/client/getState'
+export { default as getHttpClient } from './modules/redux/client/getHttpClient'
 
 export
 {
@@ -63,9 +33,10 @@ export
 {
 	wasInstantNavigation,
 	isInstantBackAbleNavigation,
-	canGoBackInstantly
+	canGoBackInstantly,
+	canGoForwardInstantly
 }
-from './modules/redux/client/instantBack'
+from './modules/redux/client/instantNavigation'
 
 export
 {
@@ -101,6 +72,7 @@ export
 	redirect,
 	pushLocation,
 	replaceLocation,
-	goBack
+	goBack,
+	goForward
 }
 from './modules/router'

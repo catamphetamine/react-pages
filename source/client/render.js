@@ -1,6 +1,8 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
 
+import reactRender, { canHydrate, hydrate } from './reactRender'
+
 import { isServerSidePreloaded, isServerSideRendered } from './flags'
 
 // Performs client-side React application rendering.
@@ -53,11 +55,11 @@ export default function render({ render, renderParameters = {}, container }) {
 // Renders React element to a DOM node
 function renderReactElementTree(element, to) {
 	// If using React >= 16 and the content is Server-Side Rendered.
-	if (isServerSidePreloaded() && isServerSideRendered() && ReactDOM.hydrate) {
-		// New API introduced in React 16
+	if (isServerSidePreloaded() && isServerSideRendered() && canHydrate()) {
+		// An API introduced in React 16
 		// for "hydrating" Server-Side Rendered markup.
 		// https://reactjs.org/docs/react-dom.html#hydrate
-		return ReactDOM.hydrate(element, to)
+		return hydrate(element, to)
 	}
 	// Clears `element` to prevent React warning:
 	// "Calling ReactDOM.render() to hydrate server-rendered markup
@@ -68,7 +70,7 @@ function renderReactElementTree(element, to) {
 			to.removeChild(to.firstChild)
 		}
 	}
-	return ReactDOM.render(element, to)
+	return reactRender(element, to)
 }
 
 // Retrieves a variable from `window` erasing it.

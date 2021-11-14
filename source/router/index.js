@@ -1,24 +1,24 @@
-export { default as foundReducer } from 'found/lib/foundReducer'
-export { default as Route } from 'found/lib/Route'
-export { default as Redirect } from 'found/lib/Redirect'
-export { default as useRouter } from 'found/lib/useRouter'
-export { default as RedirectException } from 'found/lib/RedirectException'
+export { default as foundReducer } from 'found/foundReducer'
+export { default as Route } from 'found/Route'
+export { default as Redirect } from 'found/Redirect'
+export { default as useRouter } from 'found/useRouter'
+export { default as RedirectException } from 'found/RedirectException'
 
-import createMatchEnhancer from 'found/lib/createMatchEnhancer'
-import Matcher from 'found/lib/Matcher'
-import makeRouteConfig from 'found/lib/makeRouteConfig'
-import getStoreRenderArgs from 'found/lib/getStoreRenderArgs'
-import HttpError from 'found/lib/HttpError'
-import resolver from 'found/lib/resolver'
-import FoundActionTypes from 'found/lib/ActionTypes'
+import createMatchEnhancer from 'found/createMatchEnhancer'
+import Matcher from 'found/Matcher'
+import makeRouteConfig from 'found/makeRouteConfig'
+import getStoreRenderArgs from 'found/getStoreRenderArgs'
+import HttpError from 'found/HttpError'
+import resolver from 'found/resolver'
+import FoundActionTypes from 'found/ActionTypes'
 
-import Actions from 'farce/lib/Actions'
-import ActionTypes from 'farce/lib/ActionTypes'
-import createHistoryEnhancer from 'farce/lib/createHistoryEnhancer'
-import createBasenameMiddleware from 'farce/lib/createBasenameMiddleware'
-import queryMiddleware from 'farce/lib/queryMiddleware'
+import Actions from 'farce/Actions'
+import ActionTypes from 'farce/ActionTypes'
+import createHistoryEnhancer from 'farce/createHistoryEnhancer'
+import createBasenameMiddleware from 'farce/createBasenameMiddleware'
+import queryMiddleware from 'farce/queryMiddleware'
 
-import { markImmediateNavigationAsInstantBack } from '../redux/client/instantBack'
+import { markImmediateNavigationAsInstantBack } from '../redux/client/instantNavigation'
 
 export function createRouterStoreEnhancers(routes, createHistoryProtocol, options = {}) {
 	const middlewares = [
@@ -75,16 +75,44 @@ export function getMatchedRoutesIndices(state) {
 	return state.found.match.routeIndices
 }
 
+// A URL can consist of several "routes": a parent route + possible sub-routes.
+// "Matched route params" are just this particular route's params for a given URL.
+// All routes' params are the combined params for all matched routes for a given URL.
+//
+// Example:
+//
+// const routes = [{
+//   path: ':foo',
+//   children: [{
+//     path: ':bar'
+//   }]
+// }]
+//
+// const location = {
+//   pathname: '/a/b'
+// }
+//
+// const routeParams = [
+// 	{ foo: 'a' },
+// 	{ bar: 'b' }
+// ]
+//
+// const params = {
+//   foo: 'a',
+//   bar: 'b'
+// }
+//
 export function getMatchedRoutesParams(state) {
 	return state.found.match.routeParams
 }
 
-export function getCurrentlyMatchedLocation(state) {
-	return state.found.match.location
+export function getRouteParams(state) {
+	const routeIndices = getMatchedRoutesIndices(state)
+	return state.found.match.params
 }
 
-export function getRouteParams(state) {
-	return state.found.match.params
+export function getCurrentlyMatchedLocation(state) {
+	return state.found.match.location
 }
 
 export function getPreviouslyMatchedLocation(state) {
@@ -128,6 +156,10 @@ export const GOTO_ACTION_TYPE = ActionTypes.PUSH
 
 export function goBack() {
 	return Actions.go(-1)
+}
+
+export function goForward() {
+	return Actions.go(1)
 }
 
 export function pushLocation(location, options) {

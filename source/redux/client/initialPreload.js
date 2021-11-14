@@ -2,6 +2,7 @@ import React from 'react'
 import ReactDOM from 'react-dom'
 
 import { Loading } from '../../components/Loading'
+import reactRender from '../../client/reactRender'
 
 // In cases when the initial page immediately redirects
 // to another page (for example, to a "not found" page),
@@ -37,7 +38,8 @@ export function showInitialPreload() {
 			refs[index] = ref
 		}
 	}
-	ReactDOM.render(<LoadingContainer ref={setRef}/>, node)
+	// `ReactDOM.createRoot` is available since React 18.
+	reactRender(<LoadingContainer ref={setRef}/>, node)
 }
 
 export function hideInitialPreload() {
