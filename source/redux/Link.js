@@ -4,7 +4,7 @@ import Link from 'found/Link'
 
 import { markImmediateNavigationAsInstantBack } from './client/instantNavigation'
 
-export default function HyperLink({ instantBack, onClick, ...rest }) {
+let HyperLink = function({ instantBack, onClick, ...rest }, ref) {
 	const onClickHandler = useCallback((event) => {
 		if (onClick) {
 			onClick(event)
@@ -15,11 +15,15 @@ export default function HyperLink({ instantBack, onClick, ...rest }) {
 		markImmediateNavigationAsInstantBack(instantBack)
 	}, [instantBack, onClick])
 	return (
-		<Link {...rest} onClick={onClickHandler}/>
+		<Link ref={ref} {...rest} onClick={onClickHandler}/>
 	)
 }
+
+HyperLink = React.forwardRef(HyperLink)
 
 HyperLink.propTypes = {
 	instantBack: PropTypes.bool,
 	onClick: PropTypes.func
 }
+
+export default HyperLink
