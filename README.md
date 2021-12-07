@@ -726,14 +726,11 @@ export const getComments = redux.action(
 
 // A developer can listen to any Redux event via
 // `redux.on('EVENT_NAME', (state, action) => state)`.
-// If two string arguments are passed
-// then the first one is namespace
-// and the second one is the event name
-// and the listener will be called in case of
-// a "success" event of a `redux.action()`.
-// (not to be confused with `redux.syncAction()`).
-// If only one string argument is passed
-// then it is a raw Redux `action.type`.
+//
+// In this case, it listens to a "success" event of a `redux.action()`.
+// There's a section in this document describing this feature in more detail:
+// "Redux module can also listen for events from other redux modules via <code>redux.on()</code>"
+//
 redux.on('BLOG_POST', 'CUSTOM_EVENT', (state, action) => ({
   ...state,
   reduxStateProperty: action.value
@@ -858,13 +855,19 @@ dispatch(notify('Test'))
 ```js
 // A developer can listen to any Redux event via
 // `redux.on('EVENT_NAME', (state, action) => state)`.
-// If two string arguments are passed
-// then the first one is namespace
-// and the second one is the event name
-// and the listener will be called in case of
-// a "success" event of a `redux.action()`.
-// If only one string argument is passed
-// then it is a raw Redux `action.type`.
+//
+// If one string argument is passed then it will listen for
+// an exact Redux `action.type`.
+//
+// If two string arguments are passed then the first argument should be
+// a `ReduxModule` namespace (the argument to `ReduxModule()` function)
+// and the second argument should be a name of an asynchronous `redux.action()`.
+// In that case, it will listen only for a "success" event of that `redux.action()`.
+//
+// To listen for a non-"success" event of a `redux.action()`,
+// specify the full Redux event name.
+// Example for a "pending" event: 'BLOG_POST: CUSTOM_EVENT_PENDING'.
+//
 redux.on('BLOG_POST', 'CUSTOM_EVENT', (state, action) => ({
   ...state,
   reduxStateProperty: action.value
@@ -934,7 +937,7 @@ A real-world (advanced) example for handling "Unauthenticated"/"Unauthorized" er
 ```js
 {
   ...,
-  onError(error, { path, url, redirect, getState, server }) {
+  onError(error, { path, url, redirect, dispatch, getState, server }) {
     // Not authenticated
     if (error.status === 401) {
       return handleUnauthenticatedError(error, url, redirect);
@@ -1406,6 +1409,18 @@ To set default `<meta/>` (for example, `og:site_name`, `og:description`, `og:loc
     locale: 'en_US'
   }
 }
+```
+
+To update `meta` in real time, use the exported `updateMeta()` function. For example, to update the page's title with the count of unread notifications count:
+
+```js
+import { updateMeta } from 'react-pages'
+
+updateMeta({
+  title: unreadMessagesCount === 0
+    ? 'Messages'
+    : `(${unreadMessagesCount}) Messages`
+})
 ```
 
 ### Google Analytics

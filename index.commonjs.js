@@ -10,8 +10,10 @@ exports.indicateLoading = PreloadActions.indicateLoading
 
 exports.Loading = require('./commonjs/components/Loading').default
 
-exports.getState             = require('./commonjs/redux/client/getState').default
-exports.getHttpClient        = require('./commonjs/redux/client/getHttpClient').default
+exports.updateMeta = require('./commonjs/meta/meta').patchMeta
+
+exports.getState = require('./commonjs/redux/client/getState').default
+exports.getHttpClient = require('./commonjs/redux/client/getHttpClient').default
 
 exports.wasInstantNavigation = require('./commonjs/redux/client/instantNavigation').wasInstantNavigation
 exports.isInstantBackAbleNavigation = require('./commonjs/redux/client/instantNavigation').isInstantBackAbleNavigation

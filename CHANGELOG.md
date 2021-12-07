@@ -16,6 +16,18 @@ It would just return the base HTML structure without any route-specific stuff.
 
 <!-- Maybe replace `getRoutesByPath()` with `matcher.getRoutes(match)` provided by `found` out-of-the-box: https://github.com/4Catalyzer/found/pull/634#issuecomment-558895066 -->
 
+0.5.4 / 03.12.2021
+==================
+
+* Added `dispatch` parameter on `onError()` handler in settings.
+
+0.5.3 / 30.11.2021
+==================
+
+* Fixed `<Link ref/>`.
+
+* Added an exported `updateMeta(metaProperties)` function that could be used to update some `meta` properties in real time.
+
 0.5.0 / 14.11.2021
 ==================
 

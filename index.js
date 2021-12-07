@@ -13,6 +13,8 @@ export
 }
 from './modules/components/Loading'
 
+export { patchMeta as updateMeta } from './modules/meta/meta'
+
 export { default as getState } from './modules/redux/client/getState'
 export { default as getHttpClient } from './modules/redux/client/getHttpClient'
 

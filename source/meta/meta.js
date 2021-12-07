@@ -67,7 +67,8 @@ export function getComponentsMeta(components, state) {
 		})
 		// // Convert objects to functions.
 		// .map(_ => typeof _ === 'object' ? () => _ : _)
-		.map(_ => dropUndefinedProperties(_(state)))
+		.map(_ => _(state))
+		.map(dropUndefinedProperties)
 }
 
 /**
@@ -87,9 +88,44 @@ export function getCodeSplitMeta(routes, state) {
 }
 
 /**
+ * (advanced) (hacking around)
+ * This client-side-only function is expored from this library
+ * as an `updateMeta()` function. It could be used to "patch"
+ * the latest applied `meta` for whatever reason.
+ *
+ * For example, one project required this type of function when
+ * migrating `load()` methods from always being handled by this library
+ * to being sometimes handled in a React's `useEffect()` hook
+ * as a possible "user experience" enhancement.
+ *
+ * Another use case would be somehow changing the page's `title`
+ * after some additional user-specific data has been loaded in a
+ * React's `useEffect()` hook.
+ *
+ * Or, for example, when `<title/>` gets updated with the count of
+ * unread notifications.
+ */
+export function patchMeta(metaProperties) {
+	updateMeta({
+		...window._react_pages_meta,
+		...metaProperties
+	})
+}
+
+/**
  * Updates `<title/>` and `<meta/>` tags (inside `<head/>`).
  */
 export function updateMeta(meta, document = browserDocument) {
+	// Keep a reference to the latest applied `meta`
+	// in order for the `patchMeta()` public exported function to work.
+	// The public exported `patchMeta()` function is not the same as
+	// this `updateMeta()` function.
+	//
+	// Tests don't have a `window` global variable.
+	if (typeof window !== 'undefined') {
+		window._react_pages_meta = meta
+	}
+
 	const { title, charset } = meta
 	meta = normalizeMeta(meta)
 

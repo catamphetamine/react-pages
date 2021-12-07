@@ -69,6 +69,7 @@ export default function createGetDataForPreload(codeSplit, server, onError, getL
 							redirect(to) {
 								throw new RedirectException(to)
 							},
+							dispatch,
 							getState,
 							server
 						})
