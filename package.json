@@ -1,6 +1,6 @@
 {
   "name": "react-pages",
-  "version": "0.5.4",
+  "version": "0.5.5",
   "description": "A complete solution for building a React/Redux application: routing, page loading, (optional) server-side rendering, asynchronous HTTP requests, document metadata, internationalization, etc.",
   "main": "index.commonjs.js",
   "module": "index.js",

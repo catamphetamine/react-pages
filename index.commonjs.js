@@ -42,3 +42,5 @@ exports.pushLocation = require('./commonjs/router').pushLocation
 exports.replaceLocation = require('./commonjs/router').replaceLocation
 exports.goBack = require('./commonjs/router').goBack
 exports.goForward = require('./commonjs/router').goForward
+
+exports.useLocation = require('./modules/router/useLocation').default

@@ -2,12 +2,16 @@ import React from 'react'
 
 import { RouterProvider } from 'found/server'
 
+import LocationProvider from '../LocationProvider'
+
 import render from '../render'
 
 export default function createRouterElement(renderArgs) {
 	return (
-		<RouterProvider renderArgs={renderArgs}>
-			{render(renderArgs)}
-		</RouterProvider>
+		<LocationProvider location={renderArgs.location}>
+			<RouterProvider renderArgs={renderArgs}>
+				{render(renderArgs)}
+			</RouterProvider>
+		</LocationProvider>
 	)
 }

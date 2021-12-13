@@ -4,6 +4,8 @@ import createConnectedRouter from 'found/createConnectedRouter'
 import resolver from 'found/resolver'
 import { ScrollManager } from 'found-scroll'
 
+import LocationProvider from '../LocationProvider'
+
 import render from '../render'
 
 export default function createRouterElement(renderArgs, { dispatch, getState }) {
@@ -16,9 +18,11 @@ export default function createRouterElement(renderArgs, { dispatch, getState }) 
 				elements[elements.length - 1] = React.cloneElement(elements[elements.length - 1], { key: renderArgs.location.pathname })
 			}
 			return (
-				<ScrollManager renderArgs={renderArgs}>
-					{render(renderArgs)}
-				</ScrollManager>
+				<LocationProvider location={renderArgs.location}>
+					<ScrollManager renderArgs={renderArgs}>
+						{render(renderArgs)}
+					</ScrollManager>
+				</LocationProvider>
 			)
 		}
 	})

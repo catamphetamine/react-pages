@@ -78,3 +78,5 @@ export
 	goForward
 }
 from './modules/router'
+
+export { default as useLocation } from './modules/router/useLocation'

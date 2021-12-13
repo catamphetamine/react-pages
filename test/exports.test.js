@@ -25,7 +25,8 @@ import
 	Loading,
 	Route,
 	Redirect,
-	useRouter
+	useRouter,
+	useLocation
 }
 from '../index'
 
@@ -63,6 +64,8 @@ describe(`exports`, function()
 		pushLocation.should.be.a('function')
 		goBack.should.be.a('function')
 		goForward.should.be.a('function')
+
+		useLocation.should.be.a('function')
 	})
 
 	it(`should export ES5`, () =>
@@ -103,6 +106,8 @@ describe(`exports`, function()
 		_.pushLocation.should.be.a('function')
 		_.goBack.should.be.a('function')
 		_.goForward.should.be.a('function')
+
+		_.useLocation.should.be.a('function')
 	})
 
 	it(`should export rendering service`, () =>

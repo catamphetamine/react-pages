@@ -45,9 +45,7 @@ export default function render({ render, renderParameters = {}, container }) {
 	return renderPage().then((result) => ({
 		// Redux `store`, for example.
 		...result,
-		// Client side code can then rerender the page any time
-		// by calling this `render()` function
-		// (makes hot reload work in development mode).
+		// Deprecated. Don't use.
 		rerender: renderPage
 	}))
 }

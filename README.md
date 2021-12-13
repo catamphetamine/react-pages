@@ -1474,11 +1474,12 @@ await render(settings, {
 
 Inside a `load` function: use the `location` parameter.
 
-Anywhere in a React component: use the `found` property in Redux state.
+Anywhere in a React component: use `useLocation()` hook.
 
 ```js
-const location = useSelector(state => state.found.resolvedMatch.location)
-const params = useSelector(state => state.found.resolvedMatch.params)
+import { useLocation } from 'react-pages'
+
+const location = useLocation()
 ```
 
 ### Changing current location
@@ -1638,11 +1639,10 @@ HMR setup for Redux reducers is as simple as adding `store.hotReload()` (as show
 import { render } from 'react-pages/client'
 import settings from './react-pages'
 
-render(settings).then(({ store, rerender }) => {
+render(settings).then(({ store }) => {
   if (module.hot) {
     module.hot.accept('./react-pages', () => {
-      rerender()
-      // Update reducer
+      // Update Redux "reducer".
       store.hotReload(settings.reducers)
     })
   }
