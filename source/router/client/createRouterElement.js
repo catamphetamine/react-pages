@@ -17,8 +17,17 @@ export default function createRouterElement(renderArgs, { dispatch, getState }) 
 			if (elements && window.reactPagesRemountOnNavigate !== false) {
 				elements[elements.length - 1] = React.cloneElement(elements[elements.length - 1], { key: renderArgs.location.pathname })
 			}
+			// When a user navigates to a page, this `render()` function is called:
+			// * If there's any `load()` data loader:
+			//   * The first call is gonna be with `elements: undefined` and the new `location`,
+			//     before the page starts loading the initial data.
+			//     `<LocationProvider/>` ignores this `render()` call.
+			//   * The second call is gonna be with `elements: React.Element[]` and the new `location`,
+			//     after the page has loaded the initial data.
+			// * Otherwise, if there's no data to load:
+			//   * The page just renders with `elements: React.Element[]` and the new `location`.
 			return (
-				<LocationProvider location={renderArgs.location}>
+				<LocationProvider location={elements && renderArgs.location}>
 					<ScrollManager renderArgs={renderArgs}>
 						{render(renderArgs)}
 					</ScrollManager>

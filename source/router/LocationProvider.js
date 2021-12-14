@@ -1,11 +1,17 @@
-import React from 'react'
+import React, { useRef } from 'react'
 import PropTypes from 'prop-types'
 
 export const LocationContext = React.createContext()
 
 export default function LocationProvider({ location, children }) {
+	const currentLocation = useRef(location)
+	if (location) {
+		if (location !== currentLocation.current) {
+			currentLocation.current = location
+		}
+	}
 	return (
-		<LocationContext.Provider value={location}>
+		<LocationContext.Provider value={currentLocation.current}>
 			{children}
 		</LocationContext.Provider>
 	)
