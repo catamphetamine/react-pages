@@ -1,24 +1,30 @@
-export { default as foundReducer } from 'found/foundReducer'
-export { default as Route } from 'found/Route'
-export { default as Redirect } from 'found/Redirect'
-export { default as useRouter } from 'found/useRouter'
-export { default as RedirectException } from 'found/RedirectException'
+export {
+	foundReducer,
+	Route,
+	Redirect,
+	useRouter,
+	RedirectException
+} from '@catamphetamine/found'
 
-import createMatchEnhancer from 'found/createMatchEnhancer'
-import Matcher from 'found/Matcher'
-import makeRouteConfig from 'found/makeRouteConfig'
-import getStoreRenderArgs from 'found/getStoreRenderArgs'
-import HttpError from 'found/HttpError'
-import resolver from 'found/resolver'
-import FoundActionTypes from 'found/ActionTypes'
+import {
+	createMatchEnhancer,
+	Matcher,
+	makeRouteConfig,
+	getStoreRenderArgs,
+	HttpError,
+	resolver,
+	ActionTypes as FoundActionTypes
+} from '@catamphetamine/found'
 
-import Actions from 'farce/Actions'
-import ActionTypes from 'farce/ActionTypes'
-import createHistoryEnhancer from 'farce/createHistoryEnhancer'
-import createBasenameMiddleware from 'farce/createBasenameMiddleware'
-import queryMiddleware from 'farce/queryMiddleware'
+import {
+	Actions,
+	ActionTypes,
+	createHistoryEnhancer,
+	createBasenameMiddleware,
+	queryMiddleware
+} from 'farce'
 
-import { markImmediateNavigationAsInstantBack } from '../redux/client/instantNavigation'
+import { markImmediateNavigationAsInstantBack } from '../redux/client/instantNavigation.js'
 
 export function createRouterStoreEnhancers(routes, createHistoryProtocol, options = {}) {
 	const middlewares = [
@@ -156,6 +162,10 @@ export const GOTO_ACTION_TYPE = ActionTypes.PUSH
 
 export function goBack() {
 	return Actions.go(-1)
+}
+
+export function goBackTwoPages() {
+	return Actions.go(-2)
 }
 
 export function goForward() {

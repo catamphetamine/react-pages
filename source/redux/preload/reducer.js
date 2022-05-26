@@ -2,7 +2,7 @@ import {
 	PRELOAD_STARTED,
 	PRELOAD_FINISHED,
 	PRELOAD_FAILED
-} from './actions'
+} from './actions.js'
 
 // `load` reducer
 export default function createPreloadReducer(showInitially = false)

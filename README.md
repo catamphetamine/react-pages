@@ -16,9 +16,11 @@ A complete solution for building a React/Redux application
 * HTTP Cookies
 * etc
 
+<!--
 ### `react-pages` vs `react-website`
 
 Previously this library has been known as [`react-website`](https://github.com/catamphetamine/react-website/tree/3.x) but then I found a better (in my opinion) name for it and it's now called `react-pages`. For migrating from `react-website` to `react-pages` see the [migration guide](https://gitlab.com/catamphetamine/react-pages/blob/master/MIGRATION.md).
+-->
 
 # Introduction
 
@@ -27,10 +29,18 @@ Previously this library has been known as [`react-website`](https://github.com/c
 First, install Redux:
 
 ```bash
+$ yarn add redux react-redux
+```
+
+```bash
 $ npm install redux react-redux --save
 ```
 
 Then, install `react-pages`:
+
+```bash
+$ yarn add react-pages
+```
 
 ```bash
 $ npm install react-pages --save
@@ -41,11 +51,11 @@ Start by creating `react-pages` configuration file.
 #### ./src/react-pages.js
 
 ```javascript
-import routes from './routes'
+import routes from './routes.js'
 
-// Redux reducers, which will be combined into
+// Redux reducers that will be combined into
 // a single Redux reducer via `combineReducers()`.
-import * as reducers from './redux/index'
+import * as reducers from './redux/index.js'
 
 export default {
   routes,
@@ -61,9 +71,9 @@ The routes:
 import React from 'react'
 import { Route } from 'react-pages'
 
-import App from '../pages/App'
-import Home from '../pages/Home'
-import About from '../pages/About'
+import App from '../pages/App.js'
+import Home from '../pages/Home.js'
+import About from '../pages/About.js'
 
 export default (
   <Route path="/" component={ App }>
@@ -125,8 +135,8 @@ The reducers:
 ```js
 // For those who're unfamiliar with Redux,
 // a reducer is a function `(state, action) => state`.
-export { default as reducer1 } from './reducer1'
-export { default as reducer2 } from './reducer2'
+export { default as reducer1 } from './reducer1.js'
+export { default as reducer2 } from './reducer2.js'
 ...
 ```
 
@@ -136,7 +146,7 @@ Then call `render()` in the main client-side javascript file.
 
 ```javascript
 import { render } from 'react-pages/client'
-import settings from './react-pages'
+import settings from './react-pages.js'
 
 // Render the page in web browser
 render(settings)
@@ -229,6 +239,77 @@ So now the website should be fully working.
 
 The website (`index.html`, `bundle.js`, CSS stylesheets and images, etc) can now be deployed as-is in a cloud (e.g. on Amazon S3) and served statically for a very low price. The API can be hosted "serverlessly" in a cloud (e.g. Amazon Lambda) which is also considered cheap. No running Node.js server is required. Yes, it's not a Server-Side Rendered approach because a user is given a blank page first, then `bundle.js` script is loaded by the web browser, then `bundle.js` script is executed fetching some data from the API via an HTTP request, and only when that HTTP request comes back — only then the page is rendered (in the browser). Google won't index such websites, but if searchability is not a requirement (at all or yet) then that would be the way to go (e.g. startup "MVP"s or "internal applications"). Server-Side Rendering can be easily added to such setup should the need arise.
 
+<details>
+<summary>Creating and using Redux <code>store</code> independently of the rendering framework.</summary>
+
+By default, the client-side `render()` function creates a Redux `store` under the hood. Some developers might prefer, for whatever reasons, to first create that `store` and then pass that `store` as a parameter to the aforementioned `render()` function. For example, I could imagine some application migrating from `react-pages` rendering framework to something like Next.js. But Next.js doesn't provide any Redux framework, it's just a React rendering framework. So a developer might want to keep using the Redux framework provided by `react-pages` (for example, `ReduxModule` and its `http` utility) while moving the rendering part to something like Next.js. To support such scenario, this library exports a `createStore()` function that returns a Redux `store` that could either be passed to the `render()` function or be used independently if a developer just wants the Redux part of this framework.
+
+#####
+
+```js
+import { render, createStore } from 'react-pages/client'
+
+import routes from './routes.js'
+
+// Redux reducers that will be combined into
+// a single Redux reducer via `combineReducers()`.
+import * as reducers from './redux/index.js'
+
+// Create a Redux `store`.
+const store = createStore({
+  // Page routes.
+  routes,
+
+  // A combined Redux reducer.
+  reducers,
+
+  // (optional)
+  // Http Client options.
+  http: {
+    // (optional)
+    // HTTP authentication settings.
+    authentication: {
+      // Returns an "access token": it will be used in
+      // "Authorization: Bearer" HTTP header when making HTTP requests.
+      accessToken(options) {}
+    },
+
+    // (optional)
+    // Catches HTTP errors.
+    onError(error, options) {},
+
+    // (optional)
+    // Transforms an HTTP error to a Redux state `error` property.
+    getErrorData(error) {},
+
+    // (optional)
+    // Transforms HTTP request URLs.
+    // For example, could transform relative URLs to absolute URLs.
+    transformUrl(url) {}
+  },
+
+  // (optional)
+  // Catches errors thrown from page `load()` functions.
+  onError(error, options) {},
+
+  // (optional)
+  // The "base" website `<meta/>` tags.
+  // All pages' `<meta/>` tags are applied on top of these `<meta/>` tags.
+  meta
+})
+
+// Start the rendering framework.
+render({
+  store,
+
+  // (optional)
+  // Website `<Container/>` component.
+  // Must wrap `children` in a `react-redux` `<Provider/>`.
+  container: Container
+})
+```
+</details>
+
 ## Server Side Rendering
 
 <!--
@@ -311,29 +392,18 @@ A much simpler and smaller example (using Parcel instead of Webpack) can be foun
 
 ## Loading pages
 
-To "load" a page before it's rendered set a static `load` property on the page component.
+To "load" a page before it's rendered (both on server side and on client side), define a static `load` property function on the page component.
 
 ```javascript
 import React from 'react'
-import { useSelector, useDispatch } from 'react-redux'
+import { useSelector } from 'react-redux'
 
-// Redux "asynchronous action",
-// explained later in this document.
-function fetchUsers() {
-  return {
-    promise: ({ http }) => http.get('/api/users'),
-    events: ['FETCH_USERS_PENDING', 'FETCH_USERS_SUCCESS', 'FETCH_USERS_FAILURE']
-  }
-}
-
-function UsersPage({ users }) {
+function UsersPage() {
   const users = useSelector(state => state.usersPage.users)
-  const dispatch = useDispatch()
   return (
-    <div>
-      <ul> { users.map(user => <li> { user.name } </li>) } </ul>
-      <button onClick={ () => dispatch(fetchUsers) }> Refresh </button>
-    </div>
+    <ul>
+      {users.map(user => <li key={user.id}>{user.name}</li>)}
+    </ul>
   )
 }
 
@@ -343,9 +413,7 @@ UsersPage.load = async ({ dispatch }) => {
 }
 ```
 
-In this example the static `load` property is used to "load" a page before it is displayed, i.e. before the page is rendered (both on server side and on client side).
-
-The static `load` property is usually an `async`/`await` function that takes an object as an argument:
+The `load` function receives a parameters object as its argument:
 
 ```javascript
 Page.load = async (utility) => {
@@ -364,6 +432,12 @@ Page.load = async (utility) => {
     // `params` will be `{ id: "barackobama" }`.
     params,
 
+    // Navigation history.
+    // Each entry is an object having properties:
+    // * `route: string` — Example: "/user/:userId/post/:postId".
+    // * `action: string` — One of: "start", "push", "redirect", "back", "forward".
+    history,
+
     // Is this server-side rendering?
     server,
 
@@ -374,6 +448,32 @@ Page.load = async (utility) => {
 
   // Send HTTP request and wait for response.
   await dispatch(fetchPageData(params.id))
+}
+```
+
+In the example above, it loads the initial page data in Redux state.
+
+An alternative approach to loading page data would be mimicking Next.js's `getServerSideProps()` approach: instead of putting the initial page data in Redux state, it would simply return the initial page data from the data loading function, and that data would then be accessible in the page component through its `props`.
+
+In that case, the only differences from Next.js would be:
+
+* Next.js requires the returned object to have shape `{ props }` while this library's `load()` function can return the `props` directly.
+* Next.js supports returning `{ redirect: toUrl }` object while this library's `load()` function receives a `redirect(toUrl)` function for such purposes.
+
+```js
+import React from 'react'
+
+function UsersPage({ users }) {
+  return (
+    <ul>
+      {users.map(user => <li key={user.id}>{user.name}</li>)}
+    </ul>
+  )
+}
+
+UsersPage.load = async () => {
+  const users = await fetch('/api/users')
+  return { users }
 }
 ```
 
@@ -1531,7 +1631,7 @@ To go "Back"
 
 ```javascript
 import { useDispatch } from 'react-redux'
-import { goBack } from 'react-pages'
+import { goBack, goBackTwoPages } from 'react-pages'
 
 function Page() {
   const dispatch = useDispatch()
@@ -1654,17 +1754,14 @@ render(settings).then(({ store }) => {
 ```js
 import React from 'react'
 import { Provider } from 'react-redux'
-import { hot } from 'react-hot-loader'
 
-function Container({ store, children }) {
+export function Container({ store, children }) {
   return (
     <Provider store={store}>
       {children}
     </Provider>
   )
 }
-
-export default hot(module)(Container)
 ```
 
 #### .babelrc
@@ -1677,8 +1774,8 @@ export default hot(module)(Container)
   ],
 
   "plugins": [
-    // `react-hot-loader` Babel plugin
-    "react-hot-loader/babel"
+    // React "Fast Refresh".
+    "react-refresh/babel"
   ]
 }
 ```
@@ -1686,12 +1783,16 @@ export default hot(module)(Container)
 #### ./src/index.js
 
 ```js
-// An ES6 polyfill is required for `react-hot-loader`.
+// An ES6 polyfill for older browsers.
 require('babel-polyfill')
 ...
 ```
 
-Then start [`webpack-dev-server`](https://github.com/webpack/webpack-dev-server) or [`webpack-serve`](https://github.com/webpack-contrib/webpack-serve) with `--hot` option.
+Then start [`webpack-dev-server`](https://github.com/webpack/webpack-dev-server).
+
+```
+webpack serve --hot --module-strict-export-presence --stats-errors --stats-error-details true --config path-to-webpack.config.js"
+```
 
 ## WebSocket
 

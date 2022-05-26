@@ -1,9 +1,8 @@
 import React, { useCallback } from 'react'
 import PropTypes from 'prop-types'
-// import Link_ from 'found/Link'
-import { withRouter } from 'found';
+import { withRouter } from '@catamphetamine/found';
 
-import { markImmediateNavigationAsInstantBack } from './client/instantNavigation'
+import { markImmediateNavigationAsInstantBack } from './client/instantNavigation.js'
 
 // `found`'s `src/BaseLink.js` doesn't have a `.focus()` method
 // and doesn't forward `ref` which prevents it from being
@@ -94,14 +93,12 @@ function BaseLink({
     }
   }
 
-  return (
-    <Component
-    	ref={ref}
-      {...props}
-      href={href}
-      onClick={onClick_}
-    />
-  )
+  return React.createElement(Component, {
+    ref,
+    ...props,
+    href,
+    onClick: onClick_
+  })
 }
 
 BaseLink = React.forwardRef(BaseLink)
@@ -146,8 +143,13 @@ let Link = function({
 		onClick
 	])
 
-	return (
-		<Link_ ref={ref} {...rest} onClick={onClickHandler}/>
+	return React.createElement(
+    Link_,
+    {
+      ref,
+      ...rest,
+      onClick: onClickHandler
+    }
 	)
 }
 

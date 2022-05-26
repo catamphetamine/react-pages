@@ -1,9 +1,10 @@
 import React from 'react'
 
-import timer from '../../timer'
-import { mergeMeta, getComponentsMeta, getCodeSplitMeta } from '../../meta/meta'
-import { matchRoutes, RedirectException } from '../../router'
-import createRouterElement from '../../router/server/createRouterElement'
+import timer from '../../timer.js'
+import { mergeMeta, getComponentsMeta, getCodeSplitMeta } from '../../meta/meta.js'
+import { matchRoutes, RedirectException } from '../../router/index.js'
+import getRoutePath from '../../router/getRoutePath.js'
+import createRouterElement from '../../router/server/createRouterElement.js'
 
 // Returns a Promise resolving to { status, content, redirect }.
 //
@@ -48,7 +49,7 @@ export default async function renderOnServer({
 	// Return HTTP status code and the rendered page
 	return {
 		// Concatenated route `path` string.
-		// E.g. "/user/:user_id/post/:post_id"
+		// E.g. "/user/:userId/post/:postId"
 		route   : getRoutePath(routes),
 		status  : getHttpResponseStatusCodeForTheRoute(routes),
 		content : createRouterElement(renderArgs),
@@ -63,19 +64,4 @@ export default async function renderOnServer({
 function getHttpResponseStatusCodeForTheRoute(matchedRoutes)
 {
 	return matchedRoutes.reduce((previous, current) => (current && current.status) || (previous && current.status), null)
-}
-
-// Returns a complete `path` for matched route chain.
-// E.g. returns "/user/:user_id/post/:post_id"
-// for matched URL "/user/1/post/123?key=value".
-function getRoutePath(routes)
-{
-	return routes
-		// Select routes having `path` React property set.
-		.filter(route => route.path)
-		// Trim leading and trailing slashes (`/`)
-		// from each route `path` React property.
-		.map(route => route.path.replace(/^\//, '').replace(/\/$/, ''))
-		// Join route `path`s with slashes (`/`).
-		.join('/') || '/'
 }

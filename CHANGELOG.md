@@ -16,6 +16,92 @@ It would just return the base HTML structure without any route-specific stuff.
 
 <!-- Maybe replace `getRoutesByPath()` with `matcher.getRoutes(match)` provided by `found` out-of-the-box: https://github.com/4Catalyzer/found/pull/634#issuecomment-558895066 -->
 
+<!-- Maybe rename `onNavigate()` to `onPageView()`. -->
+
+0.6.3 / 26.04.2022
+==================
+
+* Moved to a fork of `found`, initially because `found` [doesn't support React 18](https://github.com/4Catalyzer/found/issues/965), and after that because specifying `redux` and `react-redux` in `peerDependencies` is better than specifying those in `dependencies`.
+
+* Moved `authentication` settings property to `http.authentication`. The old property still works but is considered deprecated.
+
+* Added `createStore(settings, options)` function that returns a Redux `store` and is exported from `/client` subpackage. The default `render()` function exported from the same subpackage now accepts a `store` option. This way, a developer could first create a `store` and then pass it to the `render()` function: this way, the application rendering could be migrated to some other framework like Next.js while still leaving all Redux-related code (actions, reducers) as is, and it's supposed to work that way because Redux store operates independently from the rendering framework.
+
+```js
+import { render, createStore } from 'react-pages/client'
+
+import routes from './routes.js'
+
+// Redux reducers that will be combined into
+// a single Redux reducer via `combineReducers()`.
+import * as reducers from './redux/index.js'
+
+const store = createStore({
+	// Page routes.
+	routes,
+
+	// A combined Redux reducer.
+	reducers,
+
+	// (optional)
+	// Http Client options.
+	http: {
+		// (optional)
+		// HTTP authentication settings.
+		authentication: {
+			// Returns an "access token": it will be used in
+			// "Authorization: Bearer" HTTP header when making HTTP requests.
+			accessToken(options) {}
+		},
+
+		// (optional)
+		// Catches HTTP errors.
+		onError(error, options) {},
+
+		// (optional)
+		// Transforms an HTTP error to a Redux state `error` property.
+		getErrorData(error) {},
+
+		// (optional)
+		// Transforms HTTP request URLs.
+		// For example, could transform relative URLs to absolute URLs.
+		transformUrl(url) {}
+	},
+
+	// (optional)
+	// Catches errors thrown from page `load()` functions.
+	onError(error, options) {},
+
+	// (optional)
+	// The "base" website `<meta/>` tags.
+	// All pages' `<meta/>` tags are applied on top of these `<meta/>` tags.
+	meta
+})
+
+// Start the rendering framework.
+render({
+	store,
+
+	// (optional)
+	// Website `<Container/>` component.
+	// Must wrap `children` in a `react-redux` `<Provider/>`.
+	container: Container
+})
+```
+
+0.6.0 / 23.04.2022
+==================
+
+* Only provides ["ES Modules"](https://nodejs.org/api/esm.html) exports now (no "CommonJS" exports).
+
+* Requires React `18`.
+
+* Updated `react-redux` from `7` to `8`.
+
+* Updated `superagent` from `6` to `7`.
+
+* An experimental migration to [`found@1.1.1`](https://github.com/4Catalyzer/found/issues/964).
+
 0.5.5 / 07.12.2021
 ==================
 

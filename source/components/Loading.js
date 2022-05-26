@@ -3,8 +3,8 @@ import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
 import classNames from 'classnames'
 
-import LoadingIndicator from './LoadingIndicator'
-import FadeInOut from './FadeInOut'
+import LoadingIndicator from './LoadingIndicator.js'
+import FadeInOut from './FadeInOut.js'
 
 export function Loading({
 	initial,
@@ -13,17 +13,25 @@ export function Loading({
 	indicator: Indicator,
 	fadeOutDuration
 }) {
-	return (
-		<div
-			className={classNames('rrui__fixed-full-width', 'react-pages__loading', {
+	React.createElement(
+		'div',
+		{
+			className: classNames('rrui__fixed-full-width', 'react-pages__loading', {
 				'react-pages__loading--initial': initial,
 				'react-pages__loading--shown': pending,
 				'react-pages__loading--immediate': immediate
-			})}>
-			<FadeInOut show={pending} fadeOutDuration={fadeOutDuration}>
-				<Indicator className="react-pages__loading-spinner"/>
-			</FadeInOut>
-		</div>
+			})
+		},
+		React.createElement(
+			FadeInOut,
+			{
+				show: pending,
+				fadeOutDuration
+			},
+			React.createElement(Indicator, {
+				className: 'react-pages__loading-spinner'
+			})
+		)
 	)
 }
 

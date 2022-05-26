@@ -6,11 +6,8 @@ import { useSelector } from 'react-redux'
 function RemountOnNavigate(props) {
 	const loading = useSelector(state => state.preload.pending)
 	const location = useLocation()
-	return (
-		<div
-			{...props}
-			key={`${location.pathname}${location.search}`}>
-			{children}
-		</div>
-	)
+	return React.createElement('div', {
+		...props,
+		key: `${location.pathname}${location.search}`
+	}, children)
 }

@@ -1,9 +1,10 @@
 import
 {
 	filter_preloaders,
-	chain_preloaders
+	chain_preloaders,
+	promisify
 }
-from './chain'
+from './chain.js'
 
 describe(`load`, function()
 {
@@ -465,5 +466,39 @@ describe(`load`, function()
 				]
 			}
 		])
+	})
+
+	it(`should return preloader results`, async () =>
+	{
+		const preload_1 = () => Promise.resolve({ a: 1 })
+		const preload_2 = () => Promise.resolve({ b: 2 })
+		const preload_3 = () => Promise.resolve()
+		const preload_4 = () => Promise.resolve()
+		const preload_5 = () => Promise.resolve({ e: 5 })
+
+		const promise = promisify([
+			{
+				parallel:
+				[
+					preload_1,
+					preload_2
+				]
+			},
+			{
+				parallel:
+				[
+					preload_3,
+					preload_4
+				]
+			},
+			preload_5
+		], { cancelled: false })
+
+		const result = await promise
+		result.should.deep.equal({
+			a: 1,
+			b: 2,
+			e: 5
+		})
 	})
 })

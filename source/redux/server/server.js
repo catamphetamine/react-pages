@@ -1,8 +1,8 @@
-import { ISO_date_regexp } from '../../parseDates'
-import { safeJsonStringify } from '../../server/html'
-import createStore from '../store'
-import createHttpClient from '../HttpClient'
-import createHistoryProtocol from '../../router/server/createHistoryProtocol'
+import { ISO_date_regexp } from '../../parseDates.js'
+import { safeJsonStringify } from '../../server/html.js'
+import createStore from '../store.js'
+import createHttpClient from '../HttpClient.js'
+import createHistoryProtocol from '../../router/server/createHistoryProtocol.js'
 
 export async function initialize(settings, {
 	proxy,

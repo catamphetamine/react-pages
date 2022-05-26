@@ -1,4 +1,4 @@
-import { isObject } from './helpers'
+import { isObject } from './helpers.js'
 
 // ISO 8601 date regular expression
 // Adapted from: http://stackoverflow.com/a/14322189/970769

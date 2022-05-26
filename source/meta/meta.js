@@ -1,7 +1,6 @@
-import flatten from 'lodash/flatten'
-import compact from 'lodash/compact'
+import { flatten, compact } from 'lodash-es'
 
-import BrowserDocument, { getMetaAttributeFor } from './BrowserDocument'
+import BrowserDocument, { getMetaAttributeFor } from './BrowserDocument.js'
 
 const browserDocument = new BrowserDocument()
 

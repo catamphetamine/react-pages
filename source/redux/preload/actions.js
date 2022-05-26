@@ -1,4 +1,4 @@
-import { parseLocation } from '../../location'
+import { parseLocation } from '../../location.js'
 
 export const PRELOAD_STARTED  = '@@react-pages/preload-started'
 export const PRELOAD_FINISHED = '@@react-pages/preload-finished'
@@ -9,6 +9,6 @@ export const PRELOAD_FAILED   = '@@react-pages/preload-failed'
 // and calling `window.location.reload()`.
 export const indicateLoading = () =>
 ({
-	type      : PRELOAD_STARTED,
-	immediate : true
+	type: PRELOAD_STARTED,
+	immediate: true
 })

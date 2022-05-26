@@ -1,17 +1,19 @@
 import React from 'react'
 
-import { RouterProvider } from 'found/server'
+import { RouterProvider } from '@catamphetamine/found/lib/cjs/server.js'
 
-import LocationProvider from '../LocationProvider'
+import LocationProvider from '../LocationProvider.js'
 
-import render from '../render'
+import render from '../render.js'
 
 export default function createRouterElement(renderArgs) {
-	return (
-		<LocationProvider location={renderArgs.location}>
-			<RouterProvider renderArgs={renderArgs}>
-				{render(renderArgs)}
-			</RouterProvider>
-		</LocationProvider>
+	return React.createElement(
+		LocationProvider,
+		{ location: renderArgs.location },
+		React.createElement(
+			RouterProvider,
+			{ renderArgs },
+			render(renderArgs)
+		)
 	)
 }

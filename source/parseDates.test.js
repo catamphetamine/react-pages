@@ -1,4 +1,4 @@
-import parseDates from './parseDates'
+import parseDates from './parseDates.js'
 
 describe('parseDates', function()
 {

@@ -1,4 +1,4 @@
-import RobustWebSocket from '../../client/robust-websocket'
+import RobustWebSocket from '../../client/robust-websocket.js'
 
 // Sets up WebSocket connection.
 export default function websocket({ host, port, secure, store, autoDispatch })

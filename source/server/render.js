@@ -2,14 +2,14 @@ import React from 'react'
 import createStringStream from 'string-to-stream'
 import MultiStream from 'multistream'
 
-import { renderBeforeContent, renderAfterContent } from './html'
-import normalizeSettings from '../redux/normalize'
-import timer from '../timer'
-import { getLocationUrl, parseLocation } from '../location'
-import reduxRender from '../redux/server/render'
-import { initialize as reduxInitialize } from '../redux/server/server'
-import { generateMetaTagsMarkup, mergeMeta, convertOpenGraphLocaleToLanguageTag, dropUndefinedProperties } from '../meta/meta'
-import { createRenderingStream } from './reactRender'
+import { renderBeforeContent, renderAfterContent } from './html.js'
+import normalizeSettings from '../redux/normalize.js'
+import timer from '../timer.js'
+import { getLocationUrl, parseLocation } from '../location.js'
+import reduxRender from '../redux/server/render.js'
+import { initialize as reduxInitialize } from '../redux/server/server.js'
+import { generateMetaTagsMarkup, mergeMeta, convertOpenGraphLocaleToLanguageTag, dropUndefinedProperties } from '../meta/meta.js'
+import { createRenderingStream } from './reactRender.js'
 
 export default async function(settings, {
 	assets,
@@ -28,7 +28,6 @@ export default async function(settings, {
 		routes,
 		container,
 		meta: _defaultMeta,
-		authentication,
 		onError,
 		codeSplit
 	} = settings
@@ -63,38 +62,44 @@ export default async function(settings, {
 		getInitialState
 	})
 
-	function generateOuterHtml(meta) {
+	// Normalize assets type and shape.
+	assets = typeof assets === 'function' ? assets(path, parameters) : assets
+	if (!assets.entries) {
+		// Default `assets.entries` to `["main"]`.
+		if (assets.javascript && assets.javascript.main) {
+			assets.entries = ['main']
+		} else {
+			throw new Error(`"assets.entries[]" configuration parameter is required: it includes all Webpack "entries" for which javascripts and styles must be included on a server-rendered page. If you didn't set up any custom "entries" in Webpack configuration then the default Webpack entry is called "main". You don't seem to have the "main" entry so the server doesn't know which assets to include on the page ("['main']" is the default value for "assets.entries").`)
+		}
+	}
+
+	function generateOuterHtmlBeforeContent(meta) {
 		// `html` modifiers
-		let { head, bodyStart, bodyEnd } = html
+		let { head, bodyStart } = html
 
 		// Normalize `html` parameters
 		head = typeof head === 'function' ? head(path, parameters) : head
 		bodyStart = typeof bodyStart === 'function' ? bodyStart(path, parameters) : bodyStart
-		bodyEnd = typeof bodyEnd === 'function' ? bodyEnd(path, parameters) : bodyEnd
-
-		// Normalize assets
-		assets = typeof assets === 'function' ? assets(path, parameters) : assets
-
-		if (!assets.entries) {
-			// Default `assets.entries` to `["main"]`.
-			if (assets.javascript && assets.javascript.main) {
-				assets.entries = ['main']
-			} else {
-				throw new Error(`"assets.entries[]" configuration parameter is required: it includes all Webpack "entries" for which javascripts and styles must be included on a server-rendered page. If you didn't set up any custom "entries" in Webpack configuration then the default Webpack entry is called "main". You don't seem to have the "main" entry so the server doesn't know which assets to include on the page ("['main']" is the default value for "assets.entries").`)
-			}
-		}
 
 		// Render all HTML that goes before React markup.
-		const beforeContent = renderBeforeContent({
+		return renderBeforeContent({
 			assets,
 			locale: meta.locale && convertOpenGraphLocaleToLanguageTag(meta.locale),
 			meta: generateMetaTagsMarkup(meta).join(''),
 			head,
 			bodyStart
 		})
+	}
+
+	function generateOuterHtmlAfterContent() {
+		// `html` modifiers
+		let { bodyEnd } = html
+
+		// Normalize `html` parameters
+		bodyEnd = typeof bodyEnd === 'function' ? bodyEnd(path, parameters) : bodyEnd
 
 		// Render all HTML that goes after React markup
-		const afterContent = renderAfterContent({
+		return renderAfterContent({
 			javascript: generateJavascript(),
 			assets,
 			locales,
@@ -102,18 +107,17 @@ export default async function(settings, {
 			serverSideRender,
 			contentNotRendered: renderContent === false
 		})
-
-		return [ beforeContent, afterContent ]
 	}
 
 	// A special `base.html` page for static sites.
 	// (e.g. the ones hosted on Amazon S3)
 	if (!serverSideRender) {
 		// Get `<meta/>` for the route.
-		const [ beforeContent, afterContent ] = generateOuterHtml({
+		const beforeContent = generateOuterHtmlBeforeContent({
 			...defaultMeta,
 			...mergeMeta([])
 		})
+		const afterContent = generateOuterHtmlAfterContent()
 		return {
 			route: '/react-pages-base',
 			status: 200,
@@ -122,7 +126,7 @@ export default async function(settings, {
 		}
 	}
 
-	// Render the page.
+	// Render page content to a `React.Element`.
 	const {
 		redirect,
 		route,
@@ -146,11 +150,10 @@ export default async function(settings, {
 		}
 	}
 
-	const [ beforeContent, afterContent ] = generateOuterHtml(meta)
+	const beforeContent = generateOuterHtmlBeforeContent(meta)
 
 	const streams = [
-		createStringStream(beforeContent),
-		createStringStream(afterContent)
+		createStringStream(beforeContent)
 	]
 
 	if (renderContent !== false) {
@@ -158,8 +161,14 @@ export default async function(settings, {
 		// inserting this stream in the middle of `streams` array.
 		// `array.splice(index, 0, element)` inserts `element` at `index`.
 		const pageElement = React.createElement(container, containerProps, content)
-		streams.splice(streams.length / 2, 0, createRenderingStream(pageElement))
+		streams.push(createRenderingStream(pageElement))
 	}
+
+	// Generating `afterContent` should wait for the React 18 rendering process
+	// to finish: that's because there can be "Suspense" calls that might fetch data
+	// and, therefore, modify Redux state.
+	const afterContent = generateOuterHtmlAfterContent()
+	streams.push(createStringStream(afterContent))
 
 	return {
 		route,

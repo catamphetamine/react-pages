@@ -3,7 +3,7 @@ import
 	PRELOAD_METHOD_NAME,
 	collectPreloadersFromComponents,
 }
-from './preload'
+from './preload.js'
 
 describe(`load`, function()
 {

@@ -1,8 +1,8 @@
 import superagent from 'superagent'
 
-import { starts_with } from './helpers'
-import { getCookie as _getCookie } from './client/cookies'
-import HttpRequest, { getCookieKeyAndValue } from './HttpRequest'
+import { starts_with } from './helpers.js'
+import { getCookie as _getCookie } from './client/cookies.js'
+import HttpRequest, { getCookieKeyAndValue } from './HttpRequest.js'
 
 const HTTP_METHODS = [
 	'get',

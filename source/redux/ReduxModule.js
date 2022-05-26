@@ -4,12 +4,12 @@ import {
 	DEFAULT_REDUX_EVENT_NAMING,
 	generateReduxNamespace,
 	generateReduxEventName
-} from './naming'
+} from './naming.js'
 
 import {
 	RESULT_ACTION_PROPERTY,
 	ERROR_ACTION_PROPERTY
-} from './middleware/asynchronous'
+} from './middleware/asynchronous.js'
 
 // Sometimes modules for one project are imported from another project directory.
 // For example, Redux actions from one project may be imported into another project.

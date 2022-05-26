@@ -25,9 +25,3 @@ npm-debug.log
 
 # workspace files are user-specific
 *.sublime-workspace
-
-# NUL
-/NUL
-
-# Sources aren't needed for npm
-/source

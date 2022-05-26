@@ -1,4 +1,4 @@
-import { isServerSidePreloaded } from '../../client/flags'
+import { isServerSidePreloaded } from '../../client/flags.js'
 
 // Returns function returning a Promise
 // which resolves when all the required page `load`s are resolved.
@@ -14,6 +14,7 @@ export default function generatePreloadChain
 	dispatch,
 	location,
 	params,
+	history,
 	getCookie,
 	preloading
 )
@@ -27,6 +28,7 @@ export default function generatePreloadChain
 			getState,
 			location,
 			params,
+			history,
 			server,
 			// `getCookie` `load` parameter has been requested:
 			// https://github.com/catamphetamine/react-website/issues/71
@@ -195,7 +197,7 @@ function is_preloader_blocking(preloader)
 }
 
 // Returns a `Promise` chain.
-function promisify(chain, preloading)
+export function promisify(chain, preloading)
 {
 	if (typeof chain === 'function') {
 		return chain()
@@ -204,16 +206,25 @@ function promisify(chain, preloading)
 	if (typeof chain === 'object' && chain.parallel)
 	{
 		return Promise.all(chain.parallel.map(link => promisify(link, preloading)))
+			.then((results) => {
+				return results.reduce((combined, result) => ({
+					...combined,
+					...result
+				}), {})
+			})
 	}
 
 	return chain.reduce((promise, link) =>
 	{
-		return promise.then(() =>
+		return promise.then((result) =>
 		{
 			if (preloading.cancelled) {
 				return
 			}
-			return promisify(link, preloading)
+			return promisify(link, preloading).then((nextResult) => ({
+				...result,
+				...nextResult
+			}))
 		})
 	},
 	Promise.resolve())

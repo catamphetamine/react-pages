@@ -1,12 +1,12 @@
-import { UPDATE_MATCH, RESOLVE_MATCH, _RESOLVE_MATCH, getRoutesByPath, getRoutePath } from '../../router'
-import { getComponentsMeta, mergeMeta, updateMeta, getCodeSplitMeta, dropUndefinedProperties } from '../../meta/meta'
-import { getLocationUrl, shouldSkipPreloadForNavigation } from '../../location'
+import { UPDATE_MATCH, RESOLVE_MATCH, _RESOLVE_MATCH, getRoutesByPath, getRoutePath } from '../../router/index.js'
+import { getComponentsMeta, mergeMeta, updateMeta, getCodeSplitMeta, dropUndefinedProperties } from '../../meta/meta.js'
+import { getLocationUrl, shouldSkipPreloadForNavigation } from '../../location.js'
 
 import {
 	PRELOAD_STARTED,
 	PRELOAD_FINISHED,
 	PRELOAD_FAILED
-} from '../preload/actions'
+} from '../preload/actions.js'
 
 import {
 	isInstantTransition,
@@ -14,9 +14,9 @@ import {
 	addInstantBack,
 	updateInstantNavigationChainIndex,
 	resetInstantNavigationChain
-} from '../client/instantNavigation'
+} from '../client/instantNavigation.js'
 
-import { isServerSidePreloaded } from '../../client/flags'
+import { isServerSidePreloaded } from '../../client/flags.js'
 
 const ON_PAGE_LOADED_METHOD_NAME = 'onLoaded'
 

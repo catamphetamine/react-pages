@@ -1,8 +1,8 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
 
-import { Loading } from '../../components/Loading'
-import reactRender from '../../client/reactRender'
+import { Loading } from '../../components/Loading.js'
+import reactRender from '../../client/reactRender.js'
 
 // In cases when the initial page immediately redirects
 // to another page (for example, to a "not found" page),
@@ -17,11 +17,13 @@ class LoadingContainer extends React.Component {
 	}
 	render() {
 		const { loading } = this.state
-		return (
-			<Loading
-				initial={loading}
-				immediate={loading}
-				pending={loading}/>
+		return React.createElement(
+			Loading,
+			{
+				initial: loading,
+				immediate: loading,
+				pending: loading
+			}
 		)
 	}
 }
@@ -39,7 +41,7 @@ export function showInitialPreload() {
 		}
 	}
 	// `ReactDOM.createRoot` is available since React 18.
-	reactRender(<LoadingContainer ref={setRef}/>, node)
+	reactRender(React.createElement(LoadingContainer, { ref: setRef }, node))
 }
 
 export function hideInitialPreload() {

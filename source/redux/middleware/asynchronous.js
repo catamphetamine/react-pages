@@ -1,7 +1,7 @@
-import { exists, isObject } from '../../helpers'
-import { getLocationUrl } from '../../location'
-import { goto } from '../../router'
-import { DEFAULT_REDUX_EVENT_NAMING } from '../naming'
+import { exists, isObject } from '../../helpers.js'
+import { getLocationUrl } from '../../location.js'
+import { goto } from '../../router/index.js'
+import { DEFAULT_REDUX_EVENT_NAMING } from '../naming.js'
 
 export const RESULT_ACTION_PROPERTY = 'value'
 export const ERROR_ACTION_PROPERTY = 'error'

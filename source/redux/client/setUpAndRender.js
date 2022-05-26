@@ -1,15 +1,11 @@
-import clientSideRender from '../../client/render'
-import { isServerSidePreloaded } from '../../client/flags'
-import { getCookie } from '../../client/cookies'
-import render from './render'
-import getState from './getState'
-import createHttpClient from '../HttpClient'
-import normalizeSettings from '../normalize'
-import createStore from '../store'
-import { resetInstantNavigationChain } from './instantNavigation'
-import createHistoryProtocol from '../../router/client/createHistoryProtocol'
-import { redirect, _RESOLVE_MATCH, pushLocation, RedirectException } from '../../router'
-import { showInitialPreload, hideInitialPreload } from './initialPreload'
+import clientSideRender from '../../client/render.js'
+import { isServerSidePreloaded } from '../../client/flags.js'
+import render from './render.js'
+import normalizeSettings from '../normalize.js'
+import createStore from './createStore.js'
+import { resetInstantNavigationChain } from './instantNavigation.js'
+import { redirect, _RESOLVE_MATCH, pushLocation, RedirectException } from '../../router/index.js'
+import { showInitialPreload, hideInitialPreload } from './initialPreload.js'
 
 // This function is what's gonna be called from the project's code on the client-side.
 //
@@ -32,25 +28,8 @@ import { showInitialPreload, hideInitialPreload } from './initialPreload'
 // and only then would it render the application.
 // That would be more intuitive and convenient for developers I guess.
 //
-export default function setUpAndRender(settings, options = {}) {
-
+export default function setUpAndRender(settings, options) {
 	settings = normalizeSettings(settings)
-
-	const {
-		devtools,
-		stats,
-		onBeforeNavigate,
-		onNavigate,
-		onStoreCreated
-	} = options
-
-	// Redux store.
-	let store
-
-	// Create HTTP client (Redux action creator `http` utility)
-	const httpClient = createHttpClient(settings, () => store)
-	// E.g. for WebSocket message handlers, since they only run on the client side.
-	window._react_pages_http_client = httpClient
 
 	// Reset "instant back" on page reload
 	// since Redux state is cleared.
@@ -60,7 +39,7 @@ export default function setUpAndRender(settings, options = {}) {
 
 	// `showLoadingInitially` is handled in a special way
 	// in case of client-side-only rendering.
-	const showLoadingInitially = settings.showLoadingInitially
+	const { showLoadingInitially } = settings
 
 	// The first pass of initial client-side render
 	// is to render the markup which matches server-side one.
@@ -70,44 +49,15 @@ export default function setUpAndRender(settings, options = {}) {
 		window._react_pages_skip_preload = true
 	}
 
-	// Create Redux store
-	store = createStore(
-		{
-			...settings,
-			showLoadingInitially: !isServerSidePreloaded() && showLoadingInitially ? false : showLoadingInitially
-		},
-		getState(true),
-		createHistoryProtocol,
-		httpClient, {
-			devtools,
-			stats,
-			onBeforeNavigate,
-			onNavigate,
-			getCookie
-		}
-	)
-
-	// `onStoreCreated(store)` is called here.
-	//
-	// For example, client-side-only applications
-	// may capture this `store` as `window.store`
-	// to call `bindActionCreators()` for all actions (globally).
-	//
-	// onStoreCreated: store => window.store = store
-	//
-	// import { bindActionCreators } from 'redux'
-	// import actionCreators from './actions'
-	// const boundActionCreators = bindActionCreators(actionCreators, window.store.dispatch)
-	// export default boundActionCreators
-	//
-	// Not saying that this is even a "good" practice,
-	// more like "legacy code", but still my employer
-	// happened to have such binding, so I added this feature.
-  // Still this technique cuts down on a lot of redundant "wiring" code.
-  //
-	if (onStoreCreated) {
-		onStoreCreated(store)
+	// Create a Redux `store` if not passed.
+	if (!settings.store) {
+		// Create a Redux store (and, internally, an HTTP client).
+		// Mutate `settings` because they're passed again "recursively"
+		// in a `catch` clause below.
+		settings.store = createStore(settings, options)
 	}
+
+	const { store } = settings
 
 	// Render loading indicator in case of client-side-only rendering
 	// because the main application React tree won't be rendered

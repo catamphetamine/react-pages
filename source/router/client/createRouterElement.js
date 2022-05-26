@@ -1,12 +1,11 @@
 import React from 'react'
 
-import createConnectedRouter from 'found/createConnectedRouter'
-import resolver from 'found/resolver'
-import { ScrollManager } from 'found-scroll'
+import { createConnectedRouter, resolver } from '@catamphetamine/found'
+import { ScrollManager } from '@catamphetamine/found-scroll'
 
-import LocationProvider from '../LocationProvider'
+import LocationProvider from '../LocationProvider.js'
 
-import render from '../render'
+import render from '../render.js'
 
 export default function createRouterElement(renderArgs, { dispatch, getState }) {
 	const ConnectedRouter = createConnectedRouter({
@@ -26,22 +25,26 @@ export default function createRouterElement(renderArgs, { dispatch, getState }) 
 			//     after the page has loaded the initial data.
 			// * Otherwise, if there's no data to load:
 			//   * The page just renders with `elements: React.Element[]` and the new `location`.
-			return (
-				<LocationProvider location={elements && renderArgs.location}>
-					<ScrollManager renderArgs={renderArgs}>
-						{render(renderArgs)}
-					</ScrollManager>
-				</LocationProvider>
+			return React.createElement(
+				LocationProvider,
+				{ location: elements && renderArgs.location },
+				React.createElement(
+					ScrollManager,
+					{ renderArgs },
+					render(renderArgs)
+				)
 			)
 		}
 	})
-	return (
-		<ConnectedRouter
-			matchContext={{
+	return React.createElement(
+		ConnectedRouter,
+		{
+			matchContext: {
 				dispatch,
 				getState
-			}}
-			resolver={resolver}
-			initialRenderArgs={renderArgs}/>
+			},
+			resolver,
+			initialRenderArgs: renderArgs
+		}
 	)
 }

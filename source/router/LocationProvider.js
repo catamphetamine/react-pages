@@ -10,10 +10,10 @@ export default function LocationProvider({ location, children }) {
 			currentLocation.current = location
 		}
 	}
-	return (
-		<LocationContext.Provider value={currentLocation.current}>
-			{children}
-		</LocationContext.Provider>
+	return React.createElement(
+		LocationContext.Provider,
+		{ value: currentLocation.current },
+		children
 	)
 }
 

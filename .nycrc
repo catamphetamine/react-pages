@@ -1,7 +1,4 @@
 {
-  "require": [
-    "@babel/register"
-  ],
   "reporter": [
     "lcov",
     "text-summary"

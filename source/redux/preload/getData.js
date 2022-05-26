@@ -1,4 +1,4 @@
-import { getLocationUrl, shouldSkipPreloadForNavigation } from '../../location'
+import { getLocationUrl, shouldSkipPreloadForNavigation } from '../../location.js'
 
 import {
 	redirect,
@@ -9,9 +9,9 @@ import {
 	getCurrentlyMatchedLocation,
 	getPreviouslyMatchedLocation,
 	RedirectException
-} from '../../router'
+} from '../../router/index.js'
 
-import preload from './preload'
+import preload from './preload.js'
 
 export default function createGetDataForPreload(codeSplit, server, onError, getLocale, getConvertedRoutes, getCookie) {
 	return function({ params, context: { dispatch, getState } }) {
@@ -54,7 +54,7 @@ export default function createGetDataForPreload(codeSplit, server, onError, getL
 			getState
 		)
 		.then(
-			() => {},
+			(result) => result,
 			(error) => {
 				// Possibly handle the error (for example, redirect to an error page).
 				if (!(error instanceof RedirectException)) {

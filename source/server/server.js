@@ -2,10 +2,10 @@ import http from 'http'
 import https from 'https'
 import cookie from 'cookie'
 
-import render from './render'
-import renderError from './renderError'
-import timer from '../timer'
-import { getPreferredLocales } from './locale'
+import render from './render.js'
+import renderError from './renderError.js'
+import timer from '../timer.js'
+import { getPreferredLocales } from './locale.js'
 
 export default function server(settings, options)
 {
@@ -55,7 +55,6 @@ export async function renderPage(url, headers, settings, options)
 		secure,
 		proxy,
 		assets,
-		authentication,
 		renderContent,
 		html,
 		stats,
@@ -74,7 +73,6 @@ export async function renderPage(url, headers, settings, options)
 	} = await render(settings, {
 		proxy,
 		assets,
-		authentication,
 		renderContent,
 		html,
 		url,

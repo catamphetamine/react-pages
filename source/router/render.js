@@ -1,13 +1,9 @@
 import React from 'react'
-import createRender from 'found/createRender'
+import { createRender } from '@catamphetamine/found'
 
-// Seems to be ignored.
-const render = createRender({
-	renderError: ({ error }) => (
-		<div>
-			Error
-		</div>
-	)
+export default createRender({
+	// Seems to be ignored.
+	renderError: ({ error }) => {
+		return React.createElement('div', undefined, 'Error')
+	}
 })
-
-export default render

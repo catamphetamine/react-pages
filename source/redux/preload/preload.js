@@ -1,4 +1,4 @@
-import isEqual from 'lodash/isEqual'
+import { isEqual } from 'lodash-es'
 
 import {
 	redirect,
@@ -6,15 +6,17 @@ import {
 	REDIRECT_ACTION_TYPE,
 	GOTO_ACTION_TYPE,
 	RedirectException
-} from '../../router'
+} from '../../router/index.js'
 
-import { isInstantTransition } from '../client/instantNavigation'
+import getRoutePath from '../../router/getRoutePath.js'
 
-import generatePreloadChain from './chain'
+import { isInstantTransition } from '../client/instantNavigation.js'
 
-import { PRELOAD_FAILED } from './actions'
+import generatePreloadChain from './chain.js'
 
-import collectTranslations from '../translate/collect'
+import { PRELOAD_FAILED } from './actions.js'
+
+import collectTranslations from '../translate/collect.js'
 
 export const PRELOAD_METHOD_NAME = 'load'
 
@@ -29,12 +31,16 @@ export default function _preload(
 	dispatch,
 	getState
 ) {
+	// If it's a "Back"/"Forward" navigation
+	const isBackOrForwardNavigation =
+		location.action === 'POP' &&
+		location.delta !== 0
+		// && !server
+
 	// If it's an instant "Back"/"Forward" navigation
 	// then navigate to the page without loading it.
 	// (has been previously preloaded and is in Redux state)
-	const _isInstantTransition = !server &&
-		location.action === 'POP' &&
-		previousLocation &&
+	const _isInstantTransition = isBackOrForwardNavigation &&
 		isInstantTransition(previousLocation, location)
 
 	// Preload status object.
@@ -69,6 +75,9 @@ export default function _preload(
 	// `dispatch` for client side cancels current `load` on redirect.
 	dispatch = instrumentDispatch(dispatch, server, preloading)
 
+	const history = getHistory({ server })
+		.concat(createHistoryEntry({ routes, location }))
+
 	// Preload all the required data for this route (page)
 	let preload
 	if (!_isInstantTransition) {
@@ -100,6 +109,7 @@ export default function _preload(
 			dispatch,
 			location,
 			params,
+			history,
 			getCookie,
 			preloading
 		)
@@ -152,7 +162,7 @@ export default function _preload(
 
 	return promise.then(
 		// Navigate to the new page
-		() => {
+		(result) => {
 			preloading.pending = false
 			// If this navigation process was cancelled
 			// before `load` finished its work,
@@ -162,6 +172,8 @@ export default function _preload(
 				// indicating that the navigation was cancelled.
 				return false
 			}
+			setHistory(history, { server })
+			return result
 		},
 		(error) => {
 			// If this navigation process was cancelled
@@ -315,4 +327,42 @@ function normalizeLoad(load) {
 		load = [load]
 	}
 	return load
+}
+
+function getHistory({ server }) {
+	if (server) {
+		return []
+	}
+	return window._react_pages_navigation_history || []
+}
+
+function setHistory(history, { server }) {
+	if (server) {
+		window._react_pages_navigation_history = history
+	}
+}
+
+function createHistoryEntry({ routes, location }) {
+	return {
+		// A complete `path` for matched route chain.
+		// E.g. "/user/:userId/post/:postId"
+		// for matched URL "/user/1/post/123?key=value".
+		route: getRoutePath(routes),
+		action: getHistoryAction(location)
+	}
+}
+
+function getHistoryAction(location) {
+	if (location.index === 0) {
+		return 'start'
+	} else if (location.action === 'POP') {
+		return location.delta === -1 ? 'back' : 'forward'
+	} else if (location.method === 'PUSH') {
+		return 'push'
+	} else if (location.method === 'REPLACE') {
+		return 'redirect'
+	} else {
+		console.error('[react-pages] Couldn\'t get a history entry action for location')
+		console.log(location)
+	}
 }

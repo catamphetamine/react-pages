@@ -2,7 +2,7 @@ import path from 'path'
 import fs from 'fs-extra'
 import ProgressBar from 'progress'
 
-import download from './download'
+import download from './download.js'
 
 // Snapshots all pages (URLs).
 export default async function snapshotWebsite(options) {

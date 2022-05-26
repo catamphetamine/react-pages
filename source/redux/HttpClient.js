@@ -1,4 +1,4 @@
-import HttpClient from '../HttpClient'
+import HttpClient from '../HttpClient.js'
 
 export default function createHttpClient(settings, getStore, options = {}) {
 	let onBeforeSend
@@ -27,9 +27,9 @@ export default function createHttpClient(settings, getStore, options = {}) {
 	}
 
 	// Add `store` helper to `authentication.accessToken`
-	if (settings.authentication.accessToken) {
+	if (settings.http.authentication.accessToken) {
 		getAuthToken = (getCookie, helpers) => {
-			return settings.authentication.accessToken({
+			return settings.http.authentication.accessToken({
 				...helpers,
 				getCookie,
 				getState: getStore().getState
@@ -43,7 +43,7 @@ export default function createHttpClient(settings, getStore, options = {}) {
 		getAuthToken,
 		transformUrl: settings.http.transformUrl,
 		parseDates: settings.parseDates,
-		authTokenHeader: settings.authentication.header,
+		authTokenHeader: settings.http.authentication.header,
 		...options
 	})
 }

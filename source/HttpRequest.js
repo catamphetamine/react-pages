@@ -1,5 +1,5 @@
-import parseDates from './parseDates'
-import { isObject } from './helpers'
+import parseDates from './parseDates.js'
+import { isObject } from './helpers.js'
 
 // Performs HTTP requests
 export default class HttpRequest {

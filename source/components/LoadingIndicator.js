@@ -11,15 +11,20 @@ import PropTypes from 'prop-types'
 import classNames from 'classnames'
 
 export default function ActivityIndicator(props) {
-	return (
-		<div
-			{...props}
-			className={classNames('rrui__activity-indicator', props.className)}>
-			<div className="rrui__activity-indicator__arc"/>
-			<div className="rrui__activity-indicator__arc"/>
-			<div className="rrui__activity-indicator__arc"/>
-			<div className="rrui__activity-indicator__arc"/>
-		</div>
+	const arc = React.createElement(
+		'div',
+		{ className: 'rrui__activity-indicator__arc' }
+	)
+	return React.createElement(
+		'div',
+		{
+			...props,
+			className: classNames('rrui__activity-indicator', props.className)
+		},
+		arc,
+		arc,
+		arc,
+		arc
 	)
 }
 

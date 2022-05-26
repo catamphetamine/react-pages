@@ -1,9 +1,9 @@
 import React from 'react'
 
-import { getLocationUrl } from '../../location'
-import { matchRoutes } from '../../router'
-import createRouterElement from '../../router/client/createRouterElement'
-import { isServerSidePreloaded } from '../../client/flags'
+import { getLocationUrl } from '../../location.js'
+import { matchRoutes } from '../../router/index.js'
+import createRouterElement from '../../router/client/createRouterElement.js'
+import { isServerSidePreloaded } from '../../client/flags.js'
 
 // Renders the current page React element inside the `to` DOM element.
 //

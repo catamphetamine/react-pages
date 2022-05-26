@@ -7,9 +7,9 @@ import
 	convertMeta,
 	convertOpenGraphLocaleToLanguageTag
 }
-from './meta'
+from './meta.js'
 
-import TestDocument from './TestDocument'
+import TestDocument from './TestDocument.js'
 
 describe(`meta`, () =>
 {

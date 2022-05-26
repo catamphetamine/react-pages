@@ -20,6 +20,7 @@ import
 	replaceLocation,
 	pushLocation,
 	goBack,
+	goBackTwoPages,
 	goForward,
 	indicateLoading,
 	Loading,
@@ -28,7 +29,12 @@ import
 	useRouter,
 	useLocation
 }
-from '../index'
+from '../index.js'
+
+import server, {
+	render,
+	renderError
+} from '../server.js'
 
 describe(`exports`, function()
 {
@@ -63,59 +69,16 @@ describe(`exports`, function()
 		replaceLocation.should.be.a('function')
 		pushLocation.should.be.a('function')
 		goBack.should.be.a('function')
+		goBackTwoPages.should.be.a('function')
 		goForward.should.be.a('function')
 
 		useLocation.should.be.a('function')
 	})
 
-	it(`should export ES5`, () =>
-	{
-		const _ = require('../index.commonjs')
-
-		_.indicateLoading.should.be.a('function')
-		_.Loading.WrappedComponent.should.be.a('function')
-
-		// Combined Redux exports
-
-		_.getState.should.be.a('function')
-		_.getHttpClient.should.be.a('function')
-
-		_.goto.should.be.a('function')
-		_.redirect.should.be.a('function')
-
-		_.PRELOAD_STARTED.should.be.a('string')
-		_.PRELOAD_FINISHED.should.be.a('string')
-		_.PRELOAD_FAILED.should.be.a('string')
-
-		_.ReduxModule.should.be.a('function')
-
-		_.underscoredToCamelCase.should.be.a('function')
-		_.eventName.should.be.a('function')
-
-		_.Link.render.should.be.a('function')
-		_.Route.should.be.a('function')
-		_.Redirect.should.be.a('function')
-		_.useRouter.should.be.a('function')
-
-		_.getCookie.should.be.a('function')
-		_.getPreferredLocales.should.be.a('function')
-		_.getPreferredLocale.should.be.a('function')
-		_.getLanguageFromLocale.should.be.a('function')
-
-		_.replaceLocation.should.be.a('function')
-		_.pushLocation.should.be.a('function')
-		_.goBack.should.be.a('function')
-		_.goForward.should.be.a('function')
-
-		_.useLocation.should.be.a('function')
-	})
-
 	it(`should export rendering service`, () =>
 	{
-		const server = require('../server')
-
 		server.should.be.a('function')
-		server.render.should.be.a('function')
-		server.renderError.should.be.a('function')
+		render.should.be.a('function')
+		renderError.should.be.a('function')
 	})
 })
