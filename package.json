@@ -18,7 +18,7 @@
       "default": "./static-site-generator.js"
     }
   },
-  "version": "0.6.10",
+  "version": "0.6.11",
   "description": "A simple toolkit for building a React/Redux application: routing, loading page data, fetching data over HTTP, (optional) server-side rendering, etc.",
   "dependencies": {
     "@catamphetamine/found": "^1.1.2",

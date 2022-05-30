@@ -1594,6 +1594,12 @@ import { useRoute } from 'react-pages'
 const route = useRoute()
 ```
 
+A `route` has:
+
+* `path` — Example: `"/users/:id"`
+* `params` — Example: `{ id: "12345" }`
+* `location` — Same as `useLocation()`
+
 ### Changing current location
 
 Dispatch `goto`/`redirect` Redux action to change current location (both on client and server).
