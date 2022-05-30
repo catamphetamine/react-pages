@@ -27,6 +27,7 @@ import
 	Route,
 	Redirect,
 	useRouter,
+	useRoute,
 	useLocation
 }
 from '../index.js'
@@ -59,6 +60,7 @@ describe(`exports`, function()
 		Link.render.should.be.a('function')
 		Route.should.be.a('function')
 		Redirect.should.be.a('function')
+		useRoute.should.be.a('function')
 		useRouter.should.be.a('function')
 
 		getCookie.should.be.a('function')

@@ -5,31 +5,31 @@ export
 	PRELOAD_FAILED,
 	indicateLoading
 }
-from './source/redux/preload/actions.js'
+from './lib/redux/preload/actions.js'
 
 export
 {
 	default as Loading
 }
-from './source/components/Loading.js'
+from './lib/components/Loading.js'
 
-export { patchMeta as updateMeta } from './source/meta/meta.js'
+export { patchMeta as updateMeta } from './lib/meta/meta.js'
 
-export { default as getState } from './source/redux/client/getState.js'
-export { default as getHttpClient } from './source/redux/client/getHttpClient.js'
+export { default as getState } from './lib/redux/client/getState.js'
+export { default as getHttpClient } from './lib/redux/client/getHttpClient.js'
 
 export
 {
 	getPreferredLocale,
 	getPreferredLocales
 }
-from './source/client/locale.js'
+from './lib/client/locale.js'
 
 export
 {
 	getLanguageFromLocale
 }
-from './source/locale.js'
+from './lib/locale.js'
 
 export
 {
@@ -38,32 +38,32 @@ export
 	canGoBackInstantly,
 	canGoForwardInstantly
 }
-from './source/redux/client/instantNavigation.js'
+from './lib/redux/client/instantNavigation.js'
 
 export
 {
 	default as ReduxModule
 }
-from './source/redux/ReduxModule.js'
+from './lib/redux/ReduxModule.js'
 
 export
 {
 	underscoredToCamelCase,
 	eventName
 }
-from './source/redux/naming.js'
+from './lib/redux/naming.js'
 
 export
 {
 	default as Link
 }
-from './source/redux/Link.js'
+from './lib/redux/Link.js'
 
 export
 {
 	getCookie
 }
-from './source/client/cookies.js'
+from './lib/client/cookies.js'
 
 export
 {
@@ -78,6 +78,8 @@ export
 	goBackTwoPages,
 	goForward
 }
-from './source/router/index.js'
+from './lib/router/index.js'
 
-export { default as useLocation } from './source/router/useLocation.js'
+export { default as useLocation } from './lib/router/useLocation.js'
+
+export { default as useRoute } from './lib/router/useRoute.js'

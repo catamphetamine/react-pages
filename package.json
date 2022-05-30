@@ -18,7 +18,7 @@
       "default": "./static-site-generator.js"
     }
   },
-  "version": "0.6.9",
+  "version": "0.6.10",
   "description": "A simple toolkit for building a React/Redux application: routing, loading page data, fetching data over HTTP, (optional) server-side rendering, etc.",
   "dependencies": {
     "@catamphetamine/found": "^1.1.2",
@@ -63,8 +63,8 @@
     }
   },
   "scripts": {
-    "test": "mocha --bail --require ./test/setup.js \"source/**/*.test.js\" \"test/**/*.test.js\"",
-    "test-coverage": "nyc mocha --bail --require ./test/setup.js \"source/**/*.test.js\" \"test/**/*.test.js\"",
+    "test": "mocha --bail --require ./test/setup.js \"lib/**/*.test.js\" \"test/**/*.test.js\"",
+    "test-coverage": "nyc mocha --bail --require ./test/setup.js \"lib/**/*.test.js\" \"test/**/*.test.js\"",
     "coveralls": "nyc report --reporter=text-lcov | coveralls",
     "prepublishOnly": "npm run test"
   },
