@@ -271,15 +271,21 @@ const store = createStore({
     authentication: {
       // Returns an "access token": it will be used in
       // "Authorization: Bearer" HTTP header when making HTTP requests.
-      accessToken(options) {}
+      accessToken(utilities) {}
     },
 
     // (optional)
-    // Catches HTTP errors.
-    onError(error, options) {},
+    // Allows HTTP cross-domain cookies.
+    useCrossDomainCookies({ getDomain, belongsToDomain, url, originalUrl }) {
+      return belongsToDomain('trusted.com')
+    },
 
     // (optional)
-    // Transforms an HTTP error to a Redux state `error` property.
+    // Listens to HTTP errors.
+    onError(error, utilities) {},
+
+    // (optional)
+    // Transforms an HTTP `Error` to a Redux state `error` property.
     getErrorData(error) {},
 
     // (optional)
@@ -290,7 +296,7 @@ const store = createStore({
 
   // (optional)
   // Catches errors thrown from page `load()` functions.
-  onError(error, options) {},
+  onError(error, utilities) {},
 
   // (optional)
   // The "base" website `<meta/>` tags.
@@ -975,18 +981,40 @@ redux.on('BLOG_POST', 'CUSTOM_EVENT', (state, action) => ({
 ```
 </details>
 
+### HTTP cookies
 
-### HTTP authentication
+To enable sending and receiving cookies when making cross-domain HTTP requests, specify `http.useCrossDomainCookies()` function in `react-pages.js` configuration file. If that function returns `true`, then it has the same effect as changing `credentials: "same-origin"` to `credentials: "include"` in a [`fetch()`](https://developer.mozilla.org/ru/docs/Web/API/Fetch_API/Using_Fetch) call.
 
-In order for `http` utility to send an authentication token as part of an HTTP request (the `Authorization: Bearer ${token}` HTTP header) the `authentication.accessToken()` function must be specified in `react-pages.js`.
+When enabling cross-domain cookies on front end, don't forget to make the relevant backend changes:
+
+* Change `Access-Control-Allow-Origin` HTTP header from `*` to an explict comma-separated list of the allowed domain names.
+* Add `Access-Control-Allow-Credentials: true` HTTP header.
 
 ```js
 {
-  authentication: {
-    accessToken({ getState, getCookie }) {
-      return localStorage.getItem('accessToken')
-      return getCookie('accessToken')
-      return getState().authentication.accessToken
+  http: {
+    // Allows sending cookies to and receiving cookies from
+    // "trusted.com" domain or any of its sub-domains.
+    useCrossDomainCookies({ getDomain, belongsToDomain, url, originalUrl }) {
+      return belongsToDomain('trusted.com')
+    }
+  }
+}
+```
+
+### HTTP authentication
+
+In order to send an authentication token in the form of an `Authorization: Bearer ${token}` HTTP header, specify `http.authentication.accessToken()` function in `react-pages.js` configuration file.
+
+```js
+{
+  http: {
+    authentication: {
+      accessToken({ getState, getCookie }) {
+        return localStorage.getItem('accessToken')
+        return getCookie('accessToken')
+        return getState().authentication.accessToken
+      }
     }
   }
 }
@@ -999,19 +1027,21 @@ In order for `http` utility to send an authentication token as part of an HTTP r
 
 ```js
 {
-  authentication: {
-    accessToken({ getState, getCookie, url, originalUrl }) {
-      // It's recommended to check the URL to make sure that the access token
-      // is not leaked to a third party: only send it to your own servers.
-      //
-      // `originalUrl` is the URL argument of the `http` utility call.
-      // `url` is the `originalUrl` transformed by `http.transformUrl()` settings function.
-      // If no `http.transformUrl()` is configured then `url` is the same as the `originalUrl`.
-      //
-      if (url.indexOf('https://my.api.com/') === 0) {
-        return localStorage.getItem('accessToken')
-        return getCookie('accessToken')
-        return getState().authentication.accessToken
+  http: {
+    authentication: {
+      accessToken({ getState, getCookie, url, originalUrl }) {
+        // It's recommended to check the URL to make sure that the access token
+        // is not leaked to a third party: only send it to your own servers.
+        //
+        // `originalUrl` is the URL argument of the `http` utility call.
+        // `url` is the `originalUrl` transformed by `http.transformUrl()` settings function.
+        // If no `http.transformUrl()` is configured then `url` is the same as the `originalUrl`.
+        //
+        if (url.indexOf('https://my.api.com/') === 0) {
+          return localStorage.getItem('accessToken')
+          return getCookie('accessToken')
+          return getState().authentication.accessToken
+        }
       }
     }
   }
@@ -1066,6 +1096,7 @@ A real-world (advanced) example for handling "Unauthenticated"/"Unauthorized" er
       console.error(error.stack);
     }
   },
+
   http: {
     onError(error, { path, url, redirect, dispatch, getState }) {
       // JWT token expired, the user needs to relogin.
@@ -1101,6 +1132,40 @@ function handleUnauthenticatedError(error, url, redirect) {
 }
 ```
 </details>
+
+### HTTP errors
+
+To listen for HTTP request errors, one may specify an `http.onError()` function in `react-pages.js` configuration file.
+
+```js
+{
+  http: {
+    // (optional)
+    // Listens to HTTP errors.
+    // `error` argument an `Error` instance.
+    onError(error, { path, url, redirect, dispatch, getState }) {
+      if (error.status === 401) {
+        redirect('/not-authenticated')
+      } else {
+        // Ignore.
+      }
+    },
+
+    // (optional)
+    // Creates a Redux state `error` property from an HTTP `Error` instance.
+    //
+    // By default, returns whatever JSON data was returned in the HTTP response,
+    // if any, and adds a couple of properties to it:
+    //
+    // * `message: string` — `error.message`.
+    // * `status: number?` — The HTTP response status. May be `undefined` if no response was received.
+    //
+    getErrorData(error) {
+      return { ... }
+    }
+  }
+}
+```
 
 ### HTTP request URLs
 

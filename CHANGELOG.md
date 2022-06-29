@@ -18,6 +18,11 @@ It would just return the base HTML structure without any route-specific stuff.
 
 <!-- Maybe rename `onNavigate()` to `onPageView()`. -->
 
+0.6.13 / 04.06.2022
+==================
+
+* Added `http.useCrossDomainCookies({ getDomain(), belongsToDomain(), url, originalUrl })` setting.
+
 0.6.3 / 26.04.2022
 ==================
 

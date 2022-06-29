@@ -27,9 +27,9 @@ from './lib/client/locale.js'
 
 export
 {
-	getLanguageFromLocale
+	default as getLanguageFromLocale
 }
-from './lib/locale.js'
+from './lib/getLanguageFromLocale.js'
 
 export
 {
