@@ -1010,10 +1010,10 @@ In order to send an authentication token in the form of an `Authorization: Beare
 {
   http: {
     authentication: {
+      // If a token is returned from this function, it gets sent as
+      // `Authorization: Bearer {token}` HTTP header.
       accessToken({ getState, getCookie }) {
         return localStorage.getItem('accessToken')
-        return getCookie('accessToken')
-        return getState().authentication.accessToken
       }
     }
   }
@@ -1029,6 +1029,8 @@ In order to send an authentication token in the form of an `Authorization: Beare
 {
   http: {
     authentication: {
+      // If a token is returned from this function, it gets sent as
+      // `Authorization: Bearer {token}` HTTP header.
       accessToken({ getState, getCookie, url, originalUrl }) {
         // It's recommended to check the URL to make sure that the access token
         // is not leaked to a third party: only send it to your own servers.
@@ -1039,8 +1041,6 @@ In order to send an authentication token in the form of an `Authorization: Beare
         //
         if (url.indexOf('https://my.api.com/') === 0) {
           return localStorage.getItem('accessToken')
-          return getCookie('accessToken')
-          return getState().authentication.accessToken
         }
       }
     }
