@@ -6,19 +6,20 @@
   ],
   "exports": {
     ".": {
-      "default": "./index.js",
+      "import": "./index.js",
       "require": "./index.cjs"
     },
     "./server": {
-      "default": "./server.js",
+      "import": "./server.js",
       "require": "./server.cjs"
     },
     "./client": {
-      "default": "./client.js",
+      "import": "./client.js",
       "require": "./client.cjs"
     },
     "./static-site-generator": {
-      "default": "./static-site-generator.js"
+      "import": "./static-site-generator.js",
+      "require": "./static-site-generator.cjs"
     },
     "./components/Loading.css": {
       "default": "./components/Loading.css"
@@ -27,7 +28,7 @@
       "default": "./components/LoadingIndicator.css"
     }
   },
-  "version": "0.6.23",
+  "version": "0.6.24",
   "description": "A simple toolkit for building a React/Redux application: routing, loading page data, fetching data over HTTP, (optional) server-side rendering, etc.",
   "dependencies": {
     "@catamphetamine/found": "^1.1.2",
