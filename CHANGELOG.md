@@ -18,6 +18,11 @@ It would just return the base HTML structure without any route-specific stuff.
 
 <!-- Maybe rename `onNavigate()` to `onPageView()`. -->
 
+0.6.23 / 09.01.2023
+==================
+
+* Re-added CommonJS exports
+
 0.6.13 / 04.06.2022
 ==================
 

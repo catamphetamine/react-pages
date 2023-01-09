@@ -6,13 +6,16 @@
   ],
   "exports": {
     ".": {
-      "default": "./index.js"
+      "default": "./index.js",
+      "require": "./index.cjs"
     },
     "./server": {
-      "default": "./server.js"
+      "default": "./server.js",
+      "require": "./server.cjs"
     },
     "./client": {
-      "default": "./client.js"
+      "default": "./client.js",
+      "require": "./client.cjs"
     },
     "./static-site-generator": {
       "default": "./static-site-generator.js"
@@ -24,7 +27,7 @@
       "default": "./components/LoadingIndicator.css"
     }
   },
-  "version": "0.6.22",
+  "version": "0.6.23",
   "description": "A simple toolkit for building a React/Redux application: routing, loading page data, fetching data over HTTP, (optional) server-side rendering, etc.",
   "dependencies": {
     "@catamphetamine/found": "^1.1.2",
@@ -33,6 +36,7 @@
     "cookie": "^0.4.1",
     "core-js-pure": "^3.19.1",
     "fs-extra": "^10.0.0",
+    "lodash": "^4.17.21",
     "lodash-es": "^4.17.21",
     "multistream": "^4.1.0",
     "node-fetch": "^3.2.6",
@@ -45,21 +49,26 @@
     "superagent": "^8.0.0"
   },
   "devDependencies": {
+    "@babel/cli": "^7.20.7",
+    "@babel/core": "^7.20.12",
+    "@babel/preset-env": "^7.20.2",
     "chai": "^4.3.4",
     "core-js": "^3.19.1",
     "crlf": "^1.1.1",
     "mocha": "^9.2.2",
+    "npm-run-all": "^4.1.5",
     "nyc": "^15.1.0",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
     "react-redux": "^8.0.1",
-    "redux": "^4.2.0"
+    "redux": "^4.2.0",
+    "rimraf": "^3.0.2"
   },
   "peerDependencies": {
     "react": ">= 18",
     "react-dom": ">= 18",
-    "redux": ">= 4.2.0",
-    "react-redux": ">= 8"
+    "react-redux": ">= 8",
+    "redux": ">= 4.2.0"
   },
   "resolutions": {
     "found/react-redux": ">= 8"
@@ -73,7 +82,11 @@
     "test": "mocha --bail --require ./test/setup.js \"lib/**/*.test.js\" \"test/**/*.test.js\"",
     "test-coverage": "nyc mocha --bail --require ./test/setup.js \"lib/**/*.test.js\" \"test/**/*.test.js\"",
     "coveralls": "nyc report --reporter=text-lcov | coveralls",
-    "prepublishOnly": "npm run test"
+    "build:clean": "rimraf ./commonjs/**/*",
+    "build:commonjs": "npm-run-all build:commonjs:files build:commonjs:package.json",
+    "build:commonjs:files": "babel ./lib --out-dir ./commonjs --source-maps",
+    "build:commonjs:package.json": "node runnable/create-commonjs-package-json.js",
+    "prepublishOnly": "npm run build:commonjs test"
   },
   "repository": {
     "type": "git",
