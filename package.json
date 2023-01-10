@@ -28,7 +28,7 @@
       "default": "./components/LoadingIndicator.css"
     }
   },
-  "version": "0.6.25",
+  "version": "0.6.26",
   "description": "A simple toolkit for building a React/Redux application: routing, loading page data, fetching data over HTTP, (optional) server-side rendering, etc.",
   "dependencies": {
     "@catamphetamine/found": "^1.1.2",
@@ -83,6 +83,7 @@
     "test": "mocha --bail --require ./test/setup.js \"lib/**/*.test.js\" \"test/**/*.test.js\"",
     "test-coverage": "nyc mocha --bail --require ./test/setup.js \"lib/**/*.test.js\" \"test/**/*.test.js\"",
     "coveralls": "nyc report --reporter=text-lcov | coveralls",
+    "build": "npm run build:commonjs",
     "build:clean": "rimraf ./commonjs/**/*",
     "build:commonjs": "npm-run-all build:commonjs:files build:commonjs:package.json",
     "build:commonjs:files": "babel ./lib --out-dir ./commonjs --source-maps",
