@@ -29,8 +29,9 @@ import
 	Loading,
 	Route,
 	Redirect,
-	useRouter,
 	useRoute,
+	useRouter,
+	useNavigationEffect,
 	useLocation
 }
 from '../index.js'
@@ -65,6 +66,7 @@ describe(`exports`, function()
 		Redirect.should.be.a('function')
 		useRoute.should.be.a('function')
 		useRouter.should.be.a('function')
+		useNavigationEffect.should.be.a('function')
 
 		getCookie.should.be.a('function')
 		getPreferredLocales.should.be.a('function')
@@ -103,6 +105,7 @@ describe(`exports`, function()
 		Library.Redirect.should.be.a('function')
 		Library.useRoute.should.be.a('function')
 		Library.useRouter.should.be.a('function')
+		Library.useNavigationEffect.should.be.a('function')
 
 		Library.getCookie.should.be.a('function')
 		Library.getPreferredLocales.should.be.a('function')
