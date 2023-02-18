@@ -560,13 +560,13 @@ There's also a `canGoBackInstantly()` function (on client side) that tells if th
 
 There's also a `canGoForwardInstantly()` function (analogous to `canGoBackInstantly()`).
 
-There's also an `isInstantBackAbleNavigation()` function (on client side) which tells if the currently ongoing navigation process is performed with `instantBack` option (for example, if `<Link instantBack/>` is clicked or `goto(location, { instantBack: true })` is called). It can be used in a `useNavigationEffect()` hook to save the current page state for later restoring it if the user navigates "Back" instantly.
+There's also an `isInstantBackAbleNavigation()` function (on client side) which tells if the currently ongoing navigation process is performed with `instantBack` option (for example, if `<Link instantBack/>` is clicked or `goto(location, { instantBack: true })` is called). It can be used in a `useNavigationStartEffect()` hook to save the current page state for later restoring it if the user navigates "Back" instantly.
 
 ```js
-import { useNavigationEffect, isInstantBackAbleNavigation } from 'react-pages'
+import { useNavigationStartEffect, isInstantBackAbleNavigation } from 'react-pages'
 
 function Page() {
-  useNavigationEffect(() => {
+  useNavigationStartEffect(() => {
     if (isInstantBackAbleNavigation()) {
       // Save the current page state.
     }

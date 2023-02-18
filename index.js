@@ -80,7 +80,8 @@ export
 }
 from './lib/router/index.js'
 
-export { default as useNavigationEffect } from './lib/router/useNavigationEffect.js'
+export { default as useNavigationStartEffect } from './lib/router/useNavigationStartEffect.js'
+export { default as useNavigationEndEffect } from './lib/router/useNavigationEndEffect.js'
 export { default as useLocation } from './lib/router/useLocation.js'
 
 export { default as useRoute } from './lib/router/useRoute.js'

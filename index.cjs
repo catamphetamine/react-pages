@@ -40,6 +40,7 @@ exports.goBackTwoPages = require('./commonjs/router/index.js').goBackTwoPages;
 exports.goForward = require('./commonjs/router/index.js').goForward;
 
 exports.useLocation = require('./commonjs/router/useLocation.js').default;
-exports.useNavigationEffect = require('./commonjs/router/useNavigationEffect.js').default;
+exports.useNavigationStartEffect = require('./commonjs/router/useNavigationStartEffect.js').default;
+exports.useNavigationEndEffect = require('./commonjs/router/useNavigationEndEffect.js').default;
 
 exports.useRoute = require('./commonjs/router/useRoute.js').default;
