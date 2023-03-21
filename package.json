@@ -28,11 +28,11 @@
       "default": "./components/LoadingIndicator.css"
     }
   },
-  "version": "0.6.30",
+  "version": "0.6.31",
   "description": "A simple toolkit for building a React/Redux application: routing, loading page data, fetching data over HTTP, (optional) server-side rendering, etc.",
   "dependencies": {
-    "@catamphetamine/found": "^1.1.2",
-    "@catamphetamine/found-scroll": "^1.1.0",
+    "@catamphetamine/found": "^1.2.2",
+    "@catamphetamine/found-scroll": "^1.1.1",
     "classnames": "^2.3.1",
     "cookie": "^0.4.1",
     "core-js-pure": "^3.19.1",
