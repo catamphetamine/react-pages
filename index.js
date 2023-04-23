@@ -3,7 +3,8 @@ export
 	PRELOAD_STARTED,
 	PRELOAD_FINISHED,
 	PRELOAD_FAILED,
-	indicateLoading
+	indicateLoading,
+	showLoadingPage
 }
 from './lib/redux/preload/actions.js'
 

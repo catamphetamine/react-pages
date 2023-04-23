@@ -18,6 +18,17 @@ It would just return the base HTML structure without any route-specific stuff.
 
 <!-- Maybe rename `onNavigate()` to `onPageView()`. -->
 
+0.6.36 / 23.04.2023
+==================
+
+* Refactored `showLoadingInitially` configuration parameter. It no longer exists. Instead, there're 3 new parameters:
+
+  * `InitialLoadComponent` — A React component that shows an initial page loading indicator.
+
+  * `initialLoadShowDelay: number` — When supplying `InitialLoadComponent`, one should also specify the delay before showing the `InitialLoadComponent`. For example, such delay could be used to only show `InitialLoadComponent` for initial loads that aren't fast enough. For "no delay", the value should be `0`.
+
+  * `initialLoadHideAnimationDuration: number` — When supplying `InitialLoadComponent`, one should also specify the duration of the hide animation of `InitialLoadComponent`, if it has a hide animation. If there's no hide animation, the value should be `0`.
+
 0.6.23 / 09.01.2023
 ==================
 

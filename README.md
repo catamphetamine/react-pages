@@ -484,7 +484,69 @@ UsersPage.load = async () => {
 ```
 
 <details>
+<summary>Advanced topic: client-side page <code>load</code> indication (during navigation).</summary>
+
+#####
+
+While the application is performing a `load` as a result of navigating to another page, a developer might prefer to show some kind of a loading indicator. Such loading indicator could be implemented as a React component that listens to Redux state variable `state.preload.pending: boolean`.
+
+```js
+import { useSelector } from 'react-redux'
+import LoadingIndicator from './LoadingIndicator.js'
+
+export default function PageLoading() {
+  const isLoading = useSelector(state => state.preload.pending)
+  return (
+    <LoadingIndicator show={isLoading}/>
+  )
+}
+```
+
+```js
+export default function App({ children }) {
+  return (
+    <div>
+      <PageLoading/>
+      {children}
+    </div>
+  )
+}
+```
+</details>
+
+#####
+
+<details>
+<summary>Advanced topic: client-side page <code>load</code> indication (initial).</summary>
+
+#####
+
+Initial client-side (non-server-side) `load` is different from client-side `load` during navigation: during the initial client-side `load`, the `<App/>` element is not rendered yet. Therefore, while the application is performing an initial client-side `load`, a blank screen is shown.
+
+There're two possible workarounds for that:
+
+* Perform the initial load on server side (not on client side).
+* Show some kind of a loading indicator instead of a blank screen during the initial load.
+
+To show a loading indicator instead of a blank screen during the initial load, one could specify some additional `react-pages` configuration parameters:
+
+* `InitialLoadComponent` — A React component that shows an initial page loading indicator. Receives properties:
+  * `initial: true` — This is just a flag that is always `true`.
+  * `show: boolean` — Is `true` when the component should be shown. Is `false` when the component should no longer be shown.
+    * When `false` is passed, the component could either hide itself immediately or show some kind of a hiding animation (for example, fade out). The duration of such hiding animation should be passed as `initialLoadHideAnimationDuration: number` parameter (see below) so that the library knows when can it unmount the `InitialLoadComponent`.
+  * `hideAnimationDuration: number` — This is just a copy of `initialLoadHideAnimationDuration: number` parameter (see below) for convenience.
+
+* `initialLoadShowDelay: number` — When supplying `InitialLoadComponent`, one should also specify the delay before showing the `InitialLoadComponent`. For example, such delay could be used to only show `InitialLoadComponent` for initial loads that aren't fast enough. For "no delay", the value should be `0`.
+
+* `initialLoadHideAnimationDuration: number` — When supplying `InitialLoadComponent`, one should also specify the duration of the hide animation of `InitialLoadComponent`, if it has a hide animation. If there's no hide animation, the value should be `0`.
+</details>
+
+#####
+
+<details>
 <summary>Advanced topic: The static <code>load</code> property can also be an object having the <code>load()</code> function itself along with some options. It can also be an array of several <code>load</code>s.</summary>
+
+#####
 
 ```js
 // A single `load` example with options.
@@ -517,6 +579,8 @@ The available `options` are:
 
 * `server` — (defaults to `false`) If `true` then the `load` will be executed only on server side. If `false` then this `load` will be executed normally: if part of initial page "load" then on server side and if part of subsequent "load" (e.g. navigation) then on client side.
 </details>
+
+#####
 
 On client side, in order for `load` to work all links **must** be created as the `<Link/>` component imported from `react-pages` package. Upon a click on a `<Link/>` first it waits for the next page to load, and then, when the next page is fully loaded, the navigation itself takes place.
 

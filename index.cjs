@@ -2,6 +2,7 @@ exports.PRELOAD_STARTED = require('./commonjs/redux/preload/actions.js').PRELOAD
 exports.PRELOAD_FINISHED = require('./commonjs/redux/preload/actions.js').PRELOAD_FINISHED;
 exports.PRELOAD_FAILED = require('./commonjs/redux/preload/actions.js').PRELOAD_FAILED;
 exports.indicateLoading = require('./commonjs/redux/preload/actions.js').indicateLoading;
+exports.showLoadingPage = require('./commonjs/redux/preload/actions.js').showLoadingPage;
 
 exports.Loading = require('./commonjs/components/Loading.js').default;
 

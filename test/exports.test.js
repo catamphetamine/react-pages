@@ -26,6 +26,7 @@ import
 	goBackTwoPages,
 	goForward,
 	indicateLoading,
+	showLoadingPage,
 	Loading,
 	Route,
 	Redirect,
@@ -47,6 +48,7 @@ describe(`exports`, function()
 	it(`should export ES6`, () =>
 	{
 		indicateLoading.should.be.a('function')
+		showLoadingPage.should.be.a('function')
 		Loading.WrappedComponent.should.be.a('function')
 
 		getState.should.be.a('function')
@@ -87,6 +89,7 @@ describe(`exports`, function()
 	it(`should export CommonJS`, () =>
 	{
 		Library.indicateLoading.should.be.a('function')
+		Library.showLoadingPage.should.be.a('function')
 		Library.Loading.WrappedComponent.should.be.a('function')
 
 		Library.getState.should.be.a('function')

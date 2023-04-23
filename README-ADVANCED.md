@@ -284,21 +284,37 @@ const { status, content, contentType } = renderError(error)
   // https://gitlab.com/catamphetamine/react-pages/blob/master/README-CODE-SPLITTING.md
   codeSplit: true/false
 
-  // When using `load`s in a client-side-only set up
-  // `showLoadingInitially: true` will show a spinner on initial page load.
-  // Also, when using `codeSplit` with `getComponent`
+  // When using `load`s in a client-side-only set up,
+  // `react-pages` can show a "loading" screen on initial page load.
+  //
+  // Also, when using `codeSplit` with `getComponent`,
   // route components are loaded after the initial page render.
-  // To hide webpage content until all route components
-  // are resolved one may set `showLoadingInitially` to `true`.
-  // When setting `showLoadingInitially` to `true` also import the styles:
-  // import 'react-pages/components/Loading.css'
-  // import 'react-pages/components/LoadingIndicator.css'
-  showLoadingInitially: true/false
+  // To hide webpage content until all route components are resolved,
+  // one may show a "loading" screen.
+  //
+  // To activate "show initial load" feature, supply an `InitialLoadComponent`.
+  //
+  // Properties:
+  // * initial: true
+  // * show: boolean
+  // * hideAnimationDuration: number
+  //
+  InitialLoadComponent
+
+  // When supplying `InitialLoadComponent`, one should also specify `initialLoadShowDelay`:
+  // the delay before showing the `InitialLoadComponent`.
+  // This delay could be used to only show `InitialLoadComponent` for initial loads
+  // that aren't fast enough.
+  initialLoadShowDelay: 0
+
+  // When supplying `InitialLoadComponent`, one should also specify `initialLoadHideAnimationDuration`:
+  // the duration of the hide animation of `InitialLoadComponent`, if it has a hide animation.
+  initialLoadHideAnimationDuration: 160
 
   // When using `react-hot-loader` one can pass `hot` as a configuration parameter
   // instead of passing a custom `container` component just for enabling `react-hot-loader`.
   // import { hot } from 'react-hot-loader'
-  hot: hot,
+  hot: hot
 
   // (optional)
   // Default `<meta/>` (applies to all pages).
