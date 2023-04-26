@@ -232,8 +232,11 @@ import settings from './react-pages'
 // content - rendered HTML document (a Node.js "Readable Stream").
 //
 const { redirect, cookies, status, content } = await render(
-  request.url,
-  request.headers,
+  {
+    url: request.url,
+    origin: `${request.protocol}://${request.host}`,
+    headers: request.headers
+  },
   settings,
   serverSideConfiguration
 )
