@@ -1,8 +1,8 @@
-exports.PRELOAD_STARTED = require('./commonjs/redux/preload/actions.js').PRELOAD_STARTED;
-exports.PRELOAD_FINISHED = require('./commonjs/redux/preload/actions.js').PRELOAD_FINISHED;
-exports.PRELOAD_FAILED = require('./commonjs/redux/preload/actions.js').PRELOAD_FAILED;
-exports.indicateLoading = require('./commonjs/redux/preload/actions.js').indicateLoading;
-exports.showLoadingPage = require('./commonjs/redux/preload/actions.js').showLoadingPage;
+exports.PRELOAD_STARTED = require('./commonjs/redux/load/actions.js').PRELOAD_STARTED;
+exports.PRELOAD_FINISHED = require('./commonjs/redux/load/actions.js').PRELOAD_FINISHED;
+exports.PRELOAD_FAILED = require('./commonjs/redux/load/actions.js').PRELOAD_FAILED;
+exports.indicateLoading = require('./commonjs/redux/load/actions.js').indicateLoading;
+exports.showLoadingPage = require('./commonjs/redux/load/actions.js').showLoadingPage;
 
 exports.Loading = require('./commonjs/components/Loading.js').default;
 

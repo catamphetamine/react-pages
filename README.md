@@ -449,7 +449,13 @@ Page.load = async (utility) => {
 
     // (utility)
     // Returns a cookie value by name.
-    getCookie
+    getCookie,
+
+    // (optional)
+    // If `getContext()` function was specified in `load` object in `react-pages.js`
+    // settings file — `{ ..., load: { getContext: ... } }` — then that `getContext()` function
+    // is gonna be available as a `getContext()` parameter in all `.load()` functions.
+    getContext
   } = utility
 
   // Send HTTP request and wait for response.

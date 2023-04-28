@@ -6,7 +6,7 @@ export
 	indicateLoading,
 	showLoadingPage
 }
-from './lib/redux/preload/actions.js'
+from './lib/redux/load/actions.js'
 
 export
 {

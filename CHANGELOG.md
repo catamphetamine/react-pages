@@ -18,6 +18,11 @@ It would just return the base HTML structure without any route-specific stuff.
 
 <!-- Maybe rename `onNavigate()` to `onPageView()`. -->
 
+0.6.53 / 28.04.2023
+==================
+
+* Added a new parameter in `.load()` functions: If `getContext()` function was specified in `load` object in `react-pages.js` settings file — `{ ..., load: { getContext: ... } }` — then that `getContext()` function is gonna be available as a `getContext()` parameter in all `.load()` functions.
+
 0.6.36 / 23.04.2023
 ==================
 
