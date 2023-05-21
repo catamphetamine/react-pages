@@ -25,9 +25,9 @@ function Page() {
   )
 }
 
-Page.onLoaded = ({ dispatch, getState, location }) => {
+Page.onLoaded = ({ dispatch, useSelector, location }) => {
   if (isAnIdURL(location.pathname)) {
-    dispatch(replaceLocation(replaceIdWithAnAlias(location, getState().userProfilePage.userProfile)))
+    dispatch(replaceLocation(replaceIdWithAnAlias(location, useSelector(state => state.userProfilePage.userProfile))))
   }
 }
 ```
@@ -346,7 +346,7 @@ const { status, content, contentType } = renderError(error)
   // `path` is `url` without `?...` parameters.
   // `redirect()` redirects to a URL.
   //
-  onError: (error, { path, url, redirect, getState, server }) => redirect(`/error?url=${encodeURIComponent(url)}&error=${error.status}`)
+  onError: (error, { path, url, redirect, useSelector, server }) => redirect(`/error?url=${encodeURIComponent(url)}&error=${error.status}`)
 
   // (not used)
   // Gets current user's locale.
@@ -374,10 +374,10 @@ const { status, content, contentType } = renderError(error)
     // * `url` is the `originalUrl` transformed by `http.transformUrl()`
     //   (if no `http.transformUrl()` is configured then `url` is the same as the `originalUrl`).
     //
-    onRequest: (request, { url, originalUrl, getState }) => {}
+    onRequest: (request, { url, originalUrl, useSelector }) => {}
 
     // (optional)
-    onError: (error, { url, path, redirect, dispatch, getState }) => console.error(error)
+    onError: (error, { url, path, redirect, dispatch, useSelector }) => console.error(error)
     //
     // Is called when `http` calls either fail or return an error.
     // Is not called for errors happening during the initial page render
@@ -449,7 +449,7 @@ const { status, content, contentType } = renderError(error)
   authentication:
   {
     // (optional)
-    accessToken: ({ getState, path, url, getCookie }) => String
+    accessToken: ({ useSelector, path, url, getCookie }) => String
     //
     // If specified, this "access token" will always be set
     // automatically in the "Authorization" HTTP header
@@ -648,12 +648,12 @@ const { status, content, contentType } = renderError(error)
   // http://www.lunametrics.com/blog/2015/04/17/strip-query-parameters-google-analytics/
   // The "hash" part should also be stripped manually inside `onNavigate` function
   // because someone somewhere someday might make use of those "hashes".
-  onNavigate: (url, location, { dispatch, getState }) => {}
+  onNavigate: ({ url, location, route, dispatch, useSelector }) => {}
 
   // (optional)
   // Same as `onNavigate()` but fires when a user performs navigation (not after it).
   // Only on client side.
-  onBeforeNavigate: ({ dispatch, getState, location, params }) => {}
+  onBeforeNavigate: ({ dispatch, useSelector, location, route, params }) => {}
 
   // (optional)
   // Is called as soon as Redux store is created.

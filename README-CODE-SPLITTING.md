@@ -27,7 +27,7 @@ Then, in routes, replace some or all `Component={...}` with `getComponent={() =>
 	path: '/',
 	getComponent: () => import('./Application.js').then(_ => _.default),
 	meta: state => ({ title: '...' }),
-	load: async ({ dispatch, getState, params, ... }) => ...,
+	load: async ({ dispatch, useSelector, params, ... }) => ...,
 	...
 }
 ```
@@ -67,7 +67,7 @@ export default function Page() {
 ```js
 import { fetchPageData } from '../redux/page'
 
-export default async ({ dispatch, getState, params, ... }) => {
+export default async ({ dispatch, useSelector, params, ... }) => {
 	await dispatch(fetchPageData(params.id))
 }
 ```

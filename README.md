@@ -480,8 +480,8 @@ Page.load = async (utility) => {
     // Can `dispatch()` Redux actions.
     dispatch,
 
-    // Returns Redux state.
-    getState,
+    // Can be used to get a slice of Redux state.
+    useSelector,
 
     // Current page location (object).
     location,
@@ -861,7 +861,7 @@ The possible `options` (the third argument of all `http` methods) are
 
 ###
 
-For that use the `http.onRequest(request, { url, originalUrl, getState })` setting in `./react-pages.js` where:
+For that use the `http.onRequest(request, { url, originalUrl, useSelector })` setting in `./react-pages.js` where:
 
 * `request` is a [`superagent`](https://visionmedia.github.io/superagent/) `request` that can be modified. For example, to set an HTTP header: `request.set(headerName, headerValue)`.
 * `originalUrl` is the URL argument of the `http` utility call.
@@ -1212,7 +1212,7 @@ In order to send an authentication token in the form of an `Authorization: Beare
     authentication: {
       // If a token is returned from this function, it gets sent as
       // `Authorization: Bearer {token}` HTTP header.
-      accessToken({ getState, getCookie }) {
+      accessToken({ useSelector, getCookie }) {
         return localStorage.getItem('accessToken')
       }
     }
@@ -1231,7 +1231,7 @@ In order to send an authentication token in the form of an `Authorization: Beare
     authentication: {
       // If a token is returned from this function, it gets sent as
       // `Authorization: Bearer {token}` HTTP header.
-      accessToken({ getState, getCookie, url, originalUrl }) {
+      accessToken({ useSelector, getCookie, url, originalUrl }) {
         // It's recommended to check the URL to make sure that the access token
         // is not leaked to a third party: only send it to your own servers.
         //
@@ -1267,7 +1267,7 @@ A real-world (advanced) example for handling "Unauthenticated"/"Unauthorized" er
 ```js
 {
   ...,
-  onError(error, { path, url, redirect, dispatch, getState, server }) {
+  onError(error, { path, url, redirect, dispatch, useSelector, server }) {
     // Not authenticated
     if (error.status === 401) {
       return handleUnauthenticatedError(error, url, redirect);
@@ -1298,7 +1298,7 @@ A real-world (advanced) example for handling "Unauthenticated"/"Unauthorized" er
   },
 
   http: {
-    onError(error, { path, url, redirect, dispatch, getState }) {
+    onError(error, { path, url, redirect, dispatch, useSelector }) {
       // JWT token expired, the user needs to relogin.
       if (error.status === 401) {
         return handleUnauthenticatedError(error, url, redirect);
@@ -1345,7 +1345,7 @@ To listen for common `http` errors, one may specify an `http.onError()` function
     // (optional)
     // Listens to HTTP errors.
     // `error` argument an `Error` instance.
-    onError(error, { path, url, redirect, dispatch, getState }) {
+    onError(error, { path, url, redirect, dispatch, useSelector }) {
       if (error.status === 401) {
         redirect('/not-authenticated')
       } else {
@@ -1828,7 +1828,7 @@ import { render } from 'react-pages/client'
 
 await render(settings, {
   // Runs on the initial page load, and then on each navigation.
-  onNavigate(url, location, { dispatch, getState }) {
+  onNavigate({ url, location, route, dispatch, useSelector }) {
     if (process.env.NODE_ENV === 'production') {
       // Set up Google Analytics via `gtag`.
       gtag('config', configuration.googleAnalytics.id, {

@@ -61,6 +61,18 @@ It would just return the base HTML structure without any route-specific stuff.
 
 * The `store` is no longer returned from the client-side `render()` function due to not being used.
 
+* Removed `getState` parameter from some functions. Use `useSelector` parameter instead.
+  * `Component.load()`
+  * `Component.onLoaded()`
+  * `settings.onError()`
+  * `settings.http.onError()`
+  * `settings.http.onRequest()`
+  * `settings.http.authentication.accessToken()`
+  * `clientSideRenderOptions.onNavigate()`
+  * `clientSideRenderOptions.onBeforeNavigate()`
+
+* Changed the arguments of `onNavigate()` function. Previously, it receives 3 arguments: `url`, `location` and `rest`. Now it's a single object: `{ url, location, params, ...rest }`.
+
 <!--
 Next.js `redirect` object scheme:
 
