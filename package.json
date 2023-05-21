@@ -28,7 +28,7 @@
       "default": "./components/LoadingIndicator.css"
     }
   },
-  "version": "0.6.53",
+  "version": "0.7.0",
   "description": "A simple toolkit for building a React/Redux application: routing, loading page data, fetching data over HTTP, (optional) server-side rendering, etc.",
   "dependencies": {
     "@catamphetamine/farce": "^0.4.18",
@@ -41,7 +41,6 @@
     "fs-extra": "^10.0.0",
     "invariant": "^2.2.4",
     "lodash": "^4.17.21",
-    "lodash-es": "^4.17.21",
     "multistream": "^4.1.0",
     "node-fetch": "^3.2.6",
     "nunjucks": "^3.2.3",

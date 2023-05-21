@@ -44,7 +44,7 @@ So, the pages are cached for guests. How do they get rerendered when the data is
 
 Since in React the composing approach doesn't currently work, this approach won't be taken. A somewhat similar approach would be comparing the whole dataset fetched from Memcache with the dataset for the cached rendered page: if these two datasets are the same, then the page is fetched from the cache; otherwise, the page is rerendered with the new dataset and put into the cache.
 
-Tracking a dataset could be a non-trivial and fragile task in an abstract paradigm but since Redux is used, and since it's React with its "functional" stateless approach, the "state" of the page actually is the page, so the dataset is basically the Redux state, and if the Redux state after page preloading is equal to the Redux state of the cached page, then the page is fetched from the cache; otherwise, the page is rerendered with the new dataset and put into the cache.
+Tracking a dataset could be a non-trivial and fragile task in an abstract paradigm but since Redux is used, and since it's React with its "functional" stateless approach, the "state" of the page actually is the page, so the dataset is basically the Redux state, and if the Redux state after page loading is equal to the Redux state of the cached page, then the page is fetched from the cache; otherwise, the page is rerendered with the new dataset and put into the cache.
 
 ## Cache key
 

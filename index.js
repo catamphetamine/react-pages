@@ -1,76 +1,45 @@
-export
-{
-	PRELOAD_STARTED,
-	PRELOAD_FINISHED,
-	PRELOAD_FAILED,
-	indicateLoading,
-	showLoadingPage
-}
-from './lib/redux/load/actions.js'
-
-export
-{
-	default as Loading
-}
-from './lib/components/Loading.js'
-
-export { patchMeta as updateMeta } from './lib/meta/meta.js'
+// export { default as updateMeta } from './lib/meta/patchMeta.js'
 
 export { default as getState } from './lib/redux/client/getState.js'
 export { default as getHttpClient } from './lib/redux/client/getHttpClient.js'
 
-export
-{
+export {
 	getPreferredLocale,
 	getPreferredLocales
-}
-from './lib/client/locale.js'
+} from './lib/client/locale.js'
 
-export
-{
+export {
 	default as getLanguageFromLocale
-}
-from './lib/getLanguageFromLocale.js'
+} from './lib/getLanguageFromLocale.js'
 
-export
-{
+export {
 	wasInstantNavigation,
 	isInstantBackAbleNavigation,
 	canGoBackInstantly,
 	canGoForwardInstantly
-}
-from './lib/redux/client/instantNavigation.js'
+} from './lib/redux/client/instantNavigation.js'
 
-export
-{
+export {
 	default as ReduxModule
-}
-from './lib/redux/ReduxModule.js'
+} from './lib/redux/ReduxModule.js'
 
-export
-{
+export {
 	underscoredToCamelCase,
 	eventName
-}
-from './lib/redux/naming.js'
+} from './lib/redux/naming.js'
 
-export
-{
+export {
 	default as Link
-}
-from './lib/redux/Link.js'
+} from './lib/redux/Link.js'
 
-export
-{
+export {
 	getCookie
-}
-from './lib/client/cookies.js'
+} from './lib/client/cookies.js'
 
-export
-{
-  Redirect,
-  Route,
-  useRouter,
+export {
+	Redirect,
+	Route,
+	useRouter,
 	goto,
 	redirect,
 	pushLocation,
@@ -78,11 +47,12 @@ export
 	goBack,
 	goBackTwoPages,
 	goForward
-}
-from './lib/router/index.js'
+} from './lib/router/index.js'
 
 export { default as useNavigationStartEffect } from './lib/router/useNavigationStartEffect.js'
 export { default as useNavigationEndEffect } from './lib/router/useNavigationEndEffect.js'
 export { default as useLocation } from './lib/router/useLocation.js'
-
+export { default as useLoading } from './lib/router/useLoading.js'
 export { default as useRoute } from './lib/router/useRoute.js'
+
+export { updateReducers } from './lib/redux/hotReload.js'

@@ -6,14 +6,14 @@
 A complete solution for building a React/Redux application
 
 * Routing
-* Page loading
-* (optional) Code splitting
-* (optional) Server-side rendering
-* Asynchronous HTTP requests
-* Easy and simplified Redux (no boilerplate code)
-* Document metadata (`<title/>`, `<meta/>`, social network sharing)
-* Webpack "hot reload"
-* HTTP Cookies
+* [Loading pages](#loading-pages)
+* (optional) [Code splitting](#code-splitting)
+* (optional) [Server-side rendering](#adding-server-side-rendering)
+* [Fetching data](#fetching-data)
+* [Easier Redux](#redux-module)
+* [Document metadata](#setting-title-and-meta-tags) (`<title/>`, `<meta/>`, social network sharing)
+* [Webpack "hot reload"](#webpack-hmr)
+* [HTTP Cookies](#http-cookies)
 * etc
 
 <!--
@@ -26,11 +26,13 @@ Previously this library has been known as [`react-website`](https://github.com/c
 
 ## Getting started
 
-First, install Redux:
+### First, install Redux.
 
 ```bash
 $ yarn add redux react-redux
 ```
+
+or:
 
 ```bash
 $ npm install redux react-redux --save
@@ -42,28 +44,27 @@ Then, install `react-pages`:
 $ yarn add react-pages
 ```
 
+or:
+
 ```bash
 $ npm install react-pages --save
 ```
 
-Start by creating `react-pages` configuration file.
+### Then, create a `react-pages` configuration file.
+
+The configuration file:
 
 #### ./src/react-pages.js
 
 ```javascript
 import routes from './routes.js'
 
-// Redux reducers that will be combined into
-// a single Redux reducer via `combineReducers()`.
-import * as reducers from './redux/index.js'
-
 export default {
-  routes,
-  reducers
+  routes
 }
 ```
 
-The routes:
+The `routes`:
 
 #### ./src/routes.js
 
@@ -72,27 +73,21 @@ import React from 'react'
 import { Route } from 'react-pages'
 
 import App from '../pages/App.js'
-import Home from '../pages/Home.js'
-import About from '../pages/About.js'
+import Item from '../pages/Item.js'
+import Items from '../pages/Items.js'
 
-export default (
-  <Route path="/" component={ App }>
-    <Route component={ Home }/>
-    <Route path="about" component={ About }/>
-  </Route>
-)
-```
-
-<!--
 export default [{
-  path: '/',
   Component: App,
+  path: '/',
   children: [
-    { Component: Home },
-    { path: 'about', Component: About }
+    { Component: App },
+    { Component: Items, path: 'items' },
+    { Component: Item, path: 'items/:id' }
   ]
 }]
--->
+```
+
+The page components:
 
 #### ./src/pages/App.js
 
@@ -101,46 +96,37 @@ import React from 'react'
 import { Link } from 'react-pages'
 
 export default ({ children }) => (
-  <div>
-    <h1> Web Application </h1>
-    <ul>
-      <li> <Link exact to="/"> Home </Link> </li>
-      <li> <Link to="/about"> About </Link> </li>
-    </ul>
-    { children }
-  </div>
+  <section>
+    <header>
+      Web Application
+    </header>
+    {children}
+    <footer>
+      Copyright
+    </footer>
+  </section>
 )
 ```
 
-#### ./src/pages/Home.js
+#### ./src/pages/Items.js
 
 ```js
 import React from 'react'
 
-export default () => <div> This is a home page </div>
+export default () => <div> This is the list of items </div>
 ```
 
-#### ./src/pages/About.js
+#### ./src/pages/Item.js
 
 ```js
 import React from 'react'
 
-export default () => <div> Made using `react-pages` </div>
+export default ({ params }) => <div> Item #{params.id} </div>
 ```
 
-The reducers:
+### Finally, call `render()` in the main client-side javascript file of the app.
 
-#### ./src/redux/index.js
-
-```js
-// For those who're unfamiliar with Redux,
-// a reducer is a function `(state, action) => state`.
-export { default as reducer1 } from './reducer1.js'
-export { default as reducer2 } from './reducer2.js'
-...
-```
-
-Then call `render()` in the main client-side javascript file.
+The main client-side javascript file of the app:
 
 #### ./src/index.js
 
@@ -148,11 +134,11 @@ Then call `render()` in the main client-side javascript file.
 import { render } from 'react-pages/client'
 import settings from './react-pages.js'
 
-// Render the page in web browser
+// Render the page in a web browser.
 render(settings)
 ```
 
-And the `index.html` would look like this:
+The `index.html` file of the app usually looks like this:
 
 ```html
 <html>
@@ -171,7 +157,9 @@ And the `index.html` would look like this:
 
 Where `bundle.js` is the `./src/index.js` file built with Webpack (or you could use any other javascript bundler).
 
-Now, `index.html` and `bundle.js` files must be served over HTTP(S).
+### And make sure that the output files are accessible from a web browser.
+
+The `index.html` and `bundle.js` files must be served over HTTP(S).
 
 If you're using Webpack then add [`HtmlWebpackPlugin`](https://webpack.js.org/plugins/html-webpack-plugin/) to generate `index.html`, and run [`webpack-dev-server`](https://webpack.js.org/configuration/dev-server/) with [`historyApiFallback`](https://webpack.js.org/configuration/dev-server/#devserver-historyapifallback) to serve the generated `index.html` and `bundle.js` files over HTTP on `localhost:8080`.
 
@@ -231,16 +219,154 @@ webpack-dev-server --hot --config webpack.config.js
 
 ####
 
-See the [Webpack example project](https://github.com/catamphetamine/react-pages-webpack-example).
+Or see the [Webpack example project](https://gitlab.com/catamphetamine/webpack-react-redux-isomorphic-render-example).
 
-If you're using [Parcel](https://parceljs.org/) then it's much simpler than Webpack: see the [basic example project](https://gitlab.com/catamphetamine/react-pages-basic-example) for the setup required in order to generate and serve `index.html` and `bundle.js` files over HTTP on `localhost:1234`.
+If you're using [Parcel](https://parceljs.org/) instead of Webpack then see the [basic example project](https://gitlab.com/catamphetamine/react-pages-basic-example) for the setup required in order to generate and serve `index.html` and `bundle.js` files over HTTP on `localhost:1234`.
+
+### Done
 
 So now the website should be fully working.
 
-The website (`index.html`, `bundle.js`, CSS stylesheets and images, etc) can now be deployed as-is in a cloud (e.g. on Amazon S3) and served statically for a very low price. The API can be hosted "serverlessly" in a cloud (e.g. Amazon Lambda) which is also considered cheap. No running Node.js server is required. Yes, it's not a Server-Side Rendered approach because a user is given a blank page first, then `bundle.js` script is loaded by the web browser, then `bundle.js` script is executed fetching some data from the API via an HTTP request, and only when that HTTP request comes back — only then the page is rendered (in the browser). Google won't index such websites, but if searchability is not a requirement (at all or yet) then that would be the way to go (e.g. startup "MVP"s or "internal applications"). Server-Side Rendering can be easily added to such setup should the need arise.
+The website (`index.html`, `bundle.js`, CSS stylesheets and images, etc) can now be deployed as-is in a cloud (e.g. on Amazon S3) and served statically for a very low price. The API can be hosted "serverlessly" in a cloud (e.g. Amazon Lambda) which is also considered cheap. No running Node.js server is required.
+
+Yes, it's not a Server-Side Rendered approach because a user is given a blank page first, then `bundle.js` script is loaded by the web browser, then `bundle.js` script is executed fetching some data from the API via an HTTP request, and only when that HTTP request comes back — only then the page is rendered (in the browser). Google won't index such websites, but if searchability is not a requirement (at all or yet) then that would be the way to go (e.g. startup "MVP"s or "internal applications"). Server-Side Rendering can be easily added to such setup should the need arise.
 
 <details>
-<summary>Creating and using Redux <code>store</code> independently of the rendering framework.</summary>
+<summary>Adding Server Side Rendering</summary>
+
+#####
+
+<!--
+### Search engines
+
+Search engine crawlers like Google bot won't wait for a page to make its asynchronous HTTP calls to an API server for data: they would simply abort all **asynchronous** javascript and index the page as is. Don't mistake it for web crawlers not being able to execute javascript — they're [perfectly fine](http://andrewhfarmer.com/react-seo/) with doing that ([watch out though](https://blog.codaxy.com/debugging-googlebot-crawl-errors-for-javascript-applications-5d9134c06ee7) for using the latest javascript language features and always use polyfills for the older browsers since web crawlers may be using those under the hood).
+
+So the only thing preventing a dynamic website from being indexed by a crawler is asynchronous HTTP queries for data, not javascript itself. This therefore brings two solutions: one is to perform everything (routing, data fetching, rendering) on the server side and the other is to perform routing and data fetching on the server side leaving rendering to the client's web browser. Both these approaches work with web crawlers. And this is what this library provides.
+
+While the first approach is more elegant and pure, while also delivering the fastest "time to first byte", currently it is a CPU intensive task to render a complex React page (takes about 30 milliseconds of blocking CPU single core time for complex pages having more than 1000 components, as of 2017). Therefore one may prefer the second approach: performing routing and page loading on the server side while leaving page rendering to the client. This means that the user won't see any content until the javascript bundle is downloaded (which takes some time, especially with large applications not using "code splitting"), but it also means that the server's CPU is freed from rendering React. This mode is activated by passing `renderContent: false` flag to the rendering server.
+
+### Page loading time
+
+Another argument in favour of Server-Side Rendering is that even if a website doesn't need search engine indexing it could still benefit from saving that additional asynchronous HTTP roundtrip from the web browser to the API server for fetching the page's data. And no matter how fast the API server is, [latency is unbeatable](https://www.igvita.com/2012/07/19/latency-the-new-web-performance-bottleneck/) being about 100ms. So, by performing routing and page loading on the server side one can speed up website loading by about 100ms.
+
+### Adding server-side rendering
+
+Not everyone needs server-side rendering for their apps. E.g. if search engine indexing is not a priority, or if a website is a "static" one, like a "promosite" or a "personal portfolio" (just build it with a bundler and host it as a bunch of files in a cloud).
+-->
+
+Adding server-side rendering to the setup is quite simple, although I'd consider it an "advanced" topic.
+
+While client-side rendering could be done entirely in a web browser, server-side rendering would require running a Node.js process somewhere in a cloud which slightly increases the complexity of the whole setup.
+
+So in case of server-side rendering, `index.html` file is being generated on-the-fly by a page rendering server (a Node.js process) for each incoming HTTP request, so the `index.html` file that was used previously for client-side rendering may be deleted now as it's of no longer use.
+
+A Node.js script for running a "rendering server" process would look like this:
+
+#### ./rendering-server.js
+
+```javascript
+import webpageServer from 'react-pages/server'
+import settings from './react-pages'
+
+// Create webpage rendering server
+const server = webpageServer(settings, {
+  // Pass `secure: true` flag to listen on `https://` rather than `http://`.
+  // secure: true,
+
+  // These are the URLs of the "static" javascript and CSS files
+  // which are injected into the resulting HTML webpage in the form of
+  // <script src="..."/> and <link rel="style" href="..."/> tags.
+  //
+  // The javascript file should be the javascript "bundle" of the website
+  // and the CSS file should be the CSS "bundle" of the website.
+  //
+  // P.S.: To inject other types of javascript or CSS files
+  // (for example, files of 3rd-party libraries),
+  // use a separate configuration parameter called `html`:
+  // https://gitlab.com/catamphetamine/react-pages/blob/master/README-ADVANCED.md#all-webpage-rendering-server-options)
+  //
+  assets() {
+    return {
+      // This should be the URL for the application's javascript bundle.
+      // In this case, the configuration assumes that the website is being run
+      // on `localhost` domain with "static file hosting" enabled for its files.
+      javascript: 'http://localhost:8080/bundle.js',
+
+      // (optional)
+      // This should be the URL for the application's CSS bundle.
+      style: 'http://localhost:8080/bundle.css'
+    }
+  }
+})
+
+// Start webpage rendering server on port 3000.
+// Syntax: `server.listen(port, [host], [callback])`.
+server.listen(3000, function(error) {
+  if (error) {
+    throw error
+  }
+  console.log(`Webpage rendering server is listening at http://localhost:3000`)
+})
+```
+
+Run the rendering server:
+
+```
+$ npm install npx --global
+$ npm install babel-cli
+$ npx babel-node rendering-server.js
+```
+
+Now [disable javascript in Chrome DevTools](http://stackoverflow.com/questions/13405383/how-to-disable-javascript-in-chrome-developer-tools), go to `localhost:3000` and the server should respond with a fully server-side-rendered page.
+</details>
+
+### Conclusion
+
+This concludes the introductory part of the README and the rest is the description of the various tools and techniques which come prepackaged with this library.
+
+A working example illustrating Server-Side Rendering and all other things can be found here: [webpack-react-redux-isomorphic-render-example](https://gitlab.com/catamphetamine/webpack-react-redux-isomorphic-render-example).
+
+Another minimalistic example using Parcel instead of Webpack can be found here: [react-pages-basic-example](https://gitlab.com/catamphetamine/react-pages-basic-example).
+
+# Documentation
+
+## Redux
+
+If you plan on using Redux in your application, provide a `reducers` object in the `react-pages` configuration file.
+
+#### ./src/react-pages.js
+
+```javascript
+import routes from './routes.js'
+
+// The `reducers` parameter should be an object:
+// a map of Redux reducers that will be combined into a single Redux reducer
+// via the standard `combineReducers()` Redux function.
+import * as reducers from './redux/index.js'
+
+export default {
+  routes,
+  reducers
+}
+```
+
+The reducers map:
+
+#### ./src/redux/index.js
+
+```js
+// For those who're unfamiliar with Redux,
+// a "reducer" is a function `(state, action) => state`.
+export { default as reducer1 } from './reducer1.js'
+export { default as reducer2 } from './reducer2.js'
+...
+```
+
+<!--
+<details>
+<summary>Unlikely scenario: Passing a custom Redux <code>store</code></summary>
+
+#####
 
 By default, the client-side `render()` function creates a Redux `store` under the hood. Some developers might prefer, for whatever reasons, to first create that `store` and then pass that `store` as a parameter to the aforementioned `render()` function. For example, I could imagine some application migrating from `react-pages` rendering framework to something like Next.js. But Next.js doesn't provide any Redux framework, it's just a React rendering framework. So a developer might want to keep using the Redux framework provided by `react-pages` (for example, `ReduxModule` and its `http` utility) while moving the rendering part to something like Next.js. To support such scenario, this library exports a `createStore()` function that returns a Redux `store` that could either be passed to the `render()` function or be used independently if a developer just wants the Redux part of this framework.
 
@@ -296,16 +422,12 @@ const store = createStore({
 
   // (optional)
   // Catches errors thrown from page `load()` functions.
-  onError(error, utilities) {},
-
-  // (optional)
-  // The "base" website `<meta/>` tags.
-  // All pages' `<meta/>` tags are applied on top of these `<meta/>` tags.
-  meta
+  onError(error, utilities) {}
 })
 
 // Start the rendering framework.
 render({
+  // Redux `store`.
   store,
 
   // (optional)
@@ -315,91 +437,13 @@ render({
 })
 ```
 </details>
-
-## Server Side Rendering
-
-<!--
-### Search engines
-
-Search engine crawlers like Google bot won't wait for a page to make its asynchronous HTTP calls to an API server for data: they would simply abort all **asynchronous** javascript and index the page as is. Don't mistake it for web crawlers not being able to execute javascript — they're [perfectly fine](http://andrewhfarmer.com/react-seo/) with doing that ([watch out though](https://blog.codaxy.com/debugging-googlebot-crawl-errors-for-javascript-applications-5d9134c06ee7) for using the latest javascript language features and always use polyfills for the older browsers since web crawlers may be using those under the hood).
-
-So the only thing preventing a dynamic website from being indexed by a crawler is asynchronous HTTP queries for data, not javascript itself. This therefore brings two solutions: one is to perform everything (routing, data fetching, rendering) on the server side and the other is to perform routing and data fetching on the server side leaving rendering to the client's web browser. Both these approaches work with web crawlers. And this is what this library provides.
-
-While the first approach is more elegant and pure, while also delivering the fastest "time to first byte", currently it is a CPU intensive task to render a complex React page (takes about 30 milliseconds of blocking CPU single core time for complex pages having more than 1000 components, as of 2017). Therefore one may prefer the second approach: performing routing and page loading on the server side while leaving page rendering to the client. This means that the user won't see any content until the javascript bundle is downloaded (which takes some time, especially with large applications not using "code splitting"), but it also means that the server's CPU is freed from rendering React. This mode is activated by passing `renderContent: false` flag to the rendering server.
-
-### Page loading time
-
-Another argument in favour of Server-Side Rendering is that even if a website doesn't need search engine indexing it could still benefit from saving that additional asynchronous HTTP roundtrip from the web browser to the API server for fetching the page's data. And no matter how fast the API server is, [latency is unbeatable](https://www.igvita.com/2012/07/19/latency-the-new-web-performance-bottleneck/) being about 100ms. So, by performing routing and page loading on the server side one can speed up website loading by about 100ms.
-
-### Adding server-side rendering
-
-Not everyone needs server-side rendering for their apps. E.g. if search engine indexing is not a priority, or if a website is a "static" one, like a "promosite" or a "personal portfolio" (just build it with a bundler and host it as a bunch of files in a cloud).
 -->
-Adding server-side rendering to the setup is quite simple though requiring a Node.js process running which increases hosting costs and maintenance complexity.
-
-In case of server-side rendering `index.html` is being generated on-the-fly by page rendering server for each incoming HTTP request, so the `index.html` file may be deleted as it's of no use now.
-
-#### ./rendering-server.js
-
-```javascript
-import webpageServer from 'react-pages/server'
-import settings from './react-pages'
-
-// Create webpage rendering server
-const server = webpageServer(settings, {
-  // Pass `secure: true` for HTTPS.
-  //
-  // These are the URLs of the "static" javascript and CSS files
-  // which are injected in the resulting Html webpage
-  // as <script src="..."/> and <link rel="style" href="..."/>.
-  // (this is for the main application JS and CSS bundles only,
-  //  for injecting 3rd party JS and CSS use `html` settings instead:
-  //  https://gitlab.com/catamphetamine/react-pages/blob/master/README-ADVANCED.md#all-webpage-rendering-server-options)
-  assets() {
-    return {
-      // Assuming that it's being tested on a local computer first
-      // therefore using "localhost" URLs.
-      javascript: 'http://localhost:8080/bundle.js',
-      // (optional) If using a separate CSS bundle:
-      style: 'http://localhost:8080/bundle.css'
-    }
-  }
-})
-
-// Start webpage rendering server on port 3000
-// (`server.listen(port, [host], [callback])`)
-server.listen(3000, function(error) {
-  if (error) {
-    throw error
-  }
-  console.log(`Webpage rendering server is listening at http://localhost:3000`)
-})
-```
-
-Run the rendering server:
-
-```
-$ npm install npx --global
-$ npm install babel-cli
-$ npx babel-node rendering-server.js
-```
-
-Now [disable javascript in Chrome DevTools](http://stackoverflow.com/questions/13405383/how-to-disable-javascript-in-chrome-developer-tools), go to `localhost:3000` and the server should respond with a fully server-side-rendered page.
-
-## Conclusion
-
-This concludes the introductory part of the README and the rest is the description of the various tools and techniques which come prepackaged with this library.
-
-A working example illustrating Server-Side Rendering and all other things can be found here: [webpack-react-redux-isomorphic-render-example](https://gitlab.com/catamphetamine/webpack-react-redux-isomorphic-render-example).
-
-A much simpler and smaller example (using Parcel instead of Webpack) can be found here: [react-pages-basic-example](https://gitlab.com/catamphetamine/react-pages-basic-example).
-
-# Documentation
 
 ## Loading pages
 
 To "load" a page before it's rendered (both on server side and on client side), define a static `load` property function on the page component.
 
+<!--
 ```javascript
 import React from 'react'
 import { useSelector } from 'react-redux'
@@ -418,10 +462,19 @@ UsersPage.load = async ({ dispatch }) => {
   await dispatch(fetchUsers())
 }
 ```
+-->
 
-The `load` function receives a parameters object as its argument:
+The `load` function receives a "utility" object as its only argument:
 
 ```javascript
+function Page({ data }) {
+  return (
+    <div>
+      {data}
+    </div>
+  )
+}
+
 Page.load = async (utility) => {
   const {
     // Can `dispatch()` Redux actions.
@@ -449,59 +502,98 @@ Page.load = async (utility) => {
 
     // (utility)
     // Returns a cookie value by name.
-    getCookie,
-
-    // (optional)
-    // If `getContext()` function was specified in `load` object in `react-pages.js`
-    // settings file — `{ ..., load: { getContext: ... } }` — then that `getContext()` function
-    // is gonna be available as a `getContext()` parameter in all `.load()` functions.
-    getContext
+    getCookie
   } = utility
 
   // Send HTTP request and wait for response.
-  await dispatch(fetchPageData(params.id))
+  // For example, it could just be using the standard `fetch()` function.
+  const data = await fetch(`https://data-source.com/data/${params.id}`)
+
+  // Optionally return an object containing page component `props`.
+  // If returned, these props will be available in the page component,
+  // same way it works in Next.js in its `getServerSideProps()` function.
+  return {
+    // `data` prop will be available in the page component.
+    props: {
+      data
+    }
+  }
 }
 ```
 
-In the example above, it loads the initial page data in Redux state.
+<!--
+// Send HTTP request and wait for response.
+const data = await dispatch(fetchPageData(params.id))
 
-An alternative approach to loading page data would be mimicking Next.js's `getServerSideProps()` approach: instead of putting the initial page data in Redux state, it would simply return the initial page data from the data loading function, and that data would then be accessible in the page component through its `props`.
+// Optionally return an object with `props` property.
+// If returned, the `props` will be available in the page component.
+return {
+  props: {
+    data: data
+  }
+}
+-->
 
-In that case, the only differences from Next.js would be:
+The `load` property function could additionally be defined on the application's root React component. In that case, the application would first execute the `load` function of the application's root React component, and then, after it finishes, it would proceed to executing the page component's `load` function. This behavior allows the root React component's `load` function to perform the "initialization" of the application: for example, it could authenticate the user.
 
-* Next.js requires the returned object to have shape `{ props }` while this library's `load()` function can return the `props` directly.
-* Next.js supports returning `{ redirect: toUrl }` object while this library's `load()` function receives a `redirect(toUrl)` function for such purposes.
+<details>
+<summary>Redirecting from <code>load</code> function</summary>
+
+#####
+
+To redirect from a `load` function, return an object with `redirect` property, similar to how it works in Next.js in its `getServerSideProps()` function.
 
 ```js
-import React from 'react'
-
-function UsersPage({ users }) {
-  return (
-    <ul>
-      {users.map(user => <li key={user.id}>{user.name}</li>)}
-    </ul>
-  )
-}
-
-UsersPage.load = async () => {
-  const users = await fetch('/api/users')
-  return { users }
+UserPage.load = async ({ params }) => {
+  const user = await fetch(`/api/users/${params.id}`)
+  if (user.wasDeleted) {
+    return {
+      redirect: {
+        url: '/not-found'
+      }
+    }
+  }
+  return {
+    props: {
+      user
+    }
+  }
 }
 ```
+</details>
+
+#####
+
+<details>
+<summary>Permanent redirects in routes configuration</summary>
+
+#####
+
+To [permanently](https://www.domain.com/blog/what-is-a-redirect/) redirect from one URL to another URL, specify a `permanentRedirectTo` parameter on the "from" route.
+
+```js
+{
+  path: '/old-path/:id',
+  permanentRedirectTo: '/new-path/:id'
+}
+```
+</details>
+
+#####
 
 <details>
 <summary>Advanced topic: client-side page <code>load</code> indication (during navigation).</summary>
 
 #####
 
-While the application is performing a `load` as a result of navigating to another page, a developer might prefer to show some kind of a loading indicator. Such loading indicator could be implemented as a React component that listens to Redux state variable `state.preload.pending: boolean`.
+While the application is performing a `load` as a result of navigating to another page, a developer might prefer to show some kind of a loading indicator. Such loading indicator could be implemented as a React component that listens to the `boolean` value returned from `useLoading()` hook.
 
 ```js
-import { useSelector } from 'react-redux'
+import { useLoading } from 'react-pages'
 import LoadingIndicator from './LoadingIndicator.js'
 
 export default function PageLoading() {
-  const isLoading = useSelector(state => state.preload.pending)
+  const isLoading = useLoading()
   return (
     <LoadingIndicator show={isLoading}/>
   )
@@ -549,6 +641,7 @@ To show a loading indicator instead of a blank screen during the initial load, o
 
 #####
 
+<!--
 <details>
 <summary>Advanced topic: The static <code>load</code> property can also be an object having the <code>load()</code> function itself along with some options. It can also be an array of several <code>load</code>s.</summary>
 
@@ -587,11 +680,12 @@ The available `options` are:
 </details>
 
 #####
+-->
 
-On client side, in order for `load` to work all links **must** be created as the `<Link/>` component imported from `react-pages` package. Upon a click on a `<Link/>` first it waits for the next page to load, and then, when the next page is fully loaded, the navigation itself takes place.
+On client side, in order for `load` to work, all links **must** be created using the `<Link/>` component imported from `react-pages` package. Upon a click on a `<Link/>`, first it waits for the next page to load, and then, when the next page is fully loaded, the navigation itself takes place.
 
 <details>
-<summary><code>load</code> also works for Back/Forward navigation. To disable page <code>load</code> on Back navigation pass <code>instantBack</code> property to a <code>&lt;Link/&gt;</code>.</summary>
+<summary><code>load</code> also works for Back/Forward navigation. To disable page <code>load</code> on Back navigation, pass <code>instantBack</code> property to a <code>&lt;Link/&gt;</code>.</summary>
 
 ####
 
@@ -645,6 +739,7 @@ function Page() {
 ```
 </details>
 
+<!--
 ## `load` indicator
 
 Sometimes loading a page can take some time so one may want to (and actually should) add some kind of a "spinner" to inform the user that the application isn't frozen and that the navigation process needs some more time to finish. This can be achieved by adding the built-in `<Loading/>` component on a page:
@@ -666,6 +761,21 @@ export default function Application() {
 ```
 
 The `<Loading/>` component takes an optional `indicator` property which can be a React component accepting a `className` property and which is a white circular spinner by default.
+-->
+
+## Fetching Data
+
+Fetching data in an application could be done using several approaches:
+
+* Using `fetch()` for making HTTP requests and then storing the result in React Component state using `useState()` hook setter.
+* Using `fetch()` for making HTTP requests and then storing the result in Redux state by `dispatch()`-ing a "setter" action.
+* Using "asynchronous actions" framework provided by this library, which is described in detail in the next section of this document. This is the most sophisticated variant of the three and it comes with many useful features such as:
+  * Handling cookies
+  * CORS utilities
+  * Authentication utilities
+  * File upload progress support
+  * Automatic date parsing in JSON responses
+  * Persisting the result in Redux state
 
 ## Asynchronous actions
 
@@ -701,7 +811,15 @@ Page.load = async ({ dispatch }) => {
 
 ### HTTP utility
 
-Because in almost all cases dispatching an "asynchronous action" means "making an HTTP request", the `promise` function described above always takes an `{ http }` argument: `promise: ({ http }) => ...`.
+<!--
+There could be different approaches to how one fetches the data via HTTP.
+
+The simplest approach would be just using the standard `fetch()` function to both load page data and submit forms. And in most cases that would be the most convenient one.
+
+However, historically, this library came with a somehow more sophisticated way of making HTTP calls: it heavily used Redux for its operation and used the dispatching of "asynchronous" Redux actions to make HTTP requests. That was in the early days, before React "hooks" and such, and it was called the `http` utility.
+-->
+
+Because in almost all cases dispatching an "asynchronous action" in practice means "making an HTTP request", the `promise` function used in `asynchronousAction()`s always receives an `{ http }` argument: `promise: ({ http }) => ...`.
 
 The `http` utility has the following methods:
 
@@ -934,7 +1052,7 @@ export default redux.reducer()
 #### redux/index.js
 
 ```js
-// The "main" reducer composed of various reducers.
+// The "main" reducer is composed of various reducers.
 export { default as blogPost } from './blogPost'
 ...
 ```
@@ -1217,7 +1335,9 @@ function handleUnauthenticatedError(error, url, redirect) {
 
 ### HTTP errors
 
-To listen for HTTP request errors, one may specify an `http.onError()` function in `react-pages.js` configuration file.
+This library doesn't force one to dispatch "asynchronous" Redux actions using the `http` utility in order to fetch data over HTTP. For example, one could use the standard `fetch()` function instead. But if one chooses to use the `http` utility, default error handlers for it could be set up.
+
+To listen for common `http` errors, one may specify an `http.onError()` function in `react-pages.js` configuration file.
 
 ```js
 {
@@ -1562,7 +1682,7 @@ export default [{
 
 ### Setting `<title/>` and `<meta/>` tags
 
-Set `meta: (state) => object` static function on a page component to add `<title/>` and `<meta/>` tags to the page:
+To add `<title/>` and `<meta/>` tags to a page, define `meta: (...) => object` static function on a page component:
 
 ```js
 function Page() {
@@ -1573,92 +1693,115 @@ function Page() {
   )
 }
 
-Page.meta = (state) => ({
-  // `<meta property="og:site_name" .../>`
-  siteName: 'International Bodybuilders Club',
+Page.load = async ({ params }) => {
+  return {
+    props: {
+      bodyBuilder: await getBodyBuilderInfo(params.id)
+    }
+  }
+}
 
-  // Webpage `<title/>` will be replaced with this one
-  // and also `<meta property="og:title" .../>` will be added.
-  title: `${state.user.name}`,
+Page.meta = ({ props, useSelector }) => {
+  const notificationsCount = useSelector(state => state.user.notificationsCount)
 
-  // `<meta property="og:description" .../>`
-  description: 'Muscles',
+  const { bodyBuilder } = props
 
-  // `<meta property="og:image" .../>`
-  // https://iamturns.com/open-graph-image-size/
-  image: 'https://cdn.google.com/logo.png',
+  return {
+    // `<meta property="og:site_name" .../>`
+    siteName: 'International Bodybuilders Club',
 
-  // Objects are expanded.
-  //
-  // `<meta property="og:image" content="https://cdn.google.com/logo.png"/>`
-  // `<meta property="og:image:width" content="100"/>`
-  // `<meta property="og:image:height" content="100"/>`
-  // `<meta property="og:image:type" content="image/png"/>`
-  //
-  image: {
-    _: 'https://cdn.google.com/logo.png',
-    width: 100,
-    height: 100,
-    type: 'image/png'
-  },
+    // Webpage `<title/>` will be replaced with this one
+    // and also `<meta property="og:title" .../>` will be added.
+    title: `(${notificationsCount}) ${bodyBuilder.name}`,
 
-  // Arrays are expanded (including arrays of objects).
-  image: [{...}, {...}, ...],
+    // `<meta property="og:description" .../>`
+    description: 'Muscles',
 
-  // `<meta property="og:audio" .../>`
-  audio: '...',
+    // `<meta property="og:image" .../>`
+    // https://iamturns.com/open-graph-image-size/
+    image: 'https://cdn.google.com/logo.png',
 
-  // `<meta property="og:video" .../>`
-  video: '...',
+    // Objects are expanded.
+    //
+    // `<meta property="og:image" content="https://cdn.google.com/logo.png"/>`
+    // `<meta property="og:image:width" content="100"/>`
+    // `<meta property="og:image:height" content="100"/>`
+    // `<meta property="og:image:type" content="image/png"/>`
+    //
+    image: {
+      _: 'https://cdn.google.com/logo.png',
+      width: 100,
+      height: 100,
+      type: 'image/png'
+    },
 
-  // `<meta property="og:locale" content="ru_RU"/>`
-  locale: state.user.locale,
+    // Arrays are expanded (including arrays of objects).
+    image: [{...}, {...}, ...],
 
-  // `<meta property="og:locale:alternate" content="en_US"/>`
-  // `<meta property="og:locale:alternate" content="fr_FR"/>`
-  locales: ['ru_RU', 'en_US', 'fr_FR'],
+    // `<meta property="og:audio" .../>`
+    audio: '...',
 
-  // `<meta property="og:url" .../>`
-  url: 'https://google.com/',
+    // `<meta property="og:video" .../>`
+    video: '...',
 
-  // `<meta property="og:type" .../>`
-  type: 'profile',
+    // `<meta property="og:locale" content="ru_RU"/>`
+    locale: state.user.locale,
 
-  // `<meta charset="utf-8"/>` tag is added automatically.
-  // The default "utf-8" encoding can be changed
-  // by passing custom `charset` parameter.
-  charset: 'utf-16',
+    // `<meta property="og:locale:alternate" content="en_US"/>`
+    // `<meta property="og:locale:alternate" content="fr_FR"/>`
+    locales: ['ru_RU', 'en_US', 'fr_FR'],
 
-  // `<meta name="viewport" content="width=device-width, initial-scale=1.0"/>`
-  // tag is added automatically
-  // (prevents downscaling on mobile devices).
-  // This default behaviour can be changed
-  // by passing custom `viewport` parameter.
-  viewport: '...',
+    // `<meta property="og:url" .../>`
+    url: 'https://google.com/',
 
-  // All other properties will be transformed directly to
-  // either `<meta property="{property_name}" content="{property_value}/>`
-  // or `<meta name="{property_name}" content="{property_value}/>`
+    // `<meta property="og:type" .../>`
+    type: 'profile',
+
+    // `<meta charset="utf-8"/>` tag is added automatically.
+    // The default "utf-8" encoding can be changed
+    // by passing custom `charset` parameter.
+    charset: 'utf-16',
+
+    // `<meta name="viewport" content="width=device-width, initial-scale=1.0"/>`
+    // tag is added automatically
+    // (prevents downscaling on mobile devices).
+    // This default behaviour can be changed
+    // by passing custom `viewport` parameter.
+    viewport: '...',
+
+    // All other properties will be transformed directly to
+    // either `<meta property="{property_name}" content="{property_value}/>`
+    // or `<meta name="{property_name}" content="{property_value}/>`
+  }
 })
 ```
 
-Setting `meta` property on a page component discards all other `<meta/>` set by any other means, e.g. if there are any `<meta/>` tags in `index.html` template then all of them will be dicarded if setting `meta` property so don't mix `meta` property with `<meta/>` tags in `index.html`.
+If the root route component also has a `meta` function, the result of the page component's `meta` function will be merged on top of the result of the root route component's `meta` function.
 
-To set default `<meta/>` (for example, `og:site_name`, `og:description`, `og:locale`) define `meta` property in `react-pages.js` settings file:
+The `meta` will be applied on the web page and will overwrite any existing `<meta/>` tags. For example, if there were any `<meta/>` tags written by hand in `index.html` template then all of them will be dicarded when this library applies its own `meta`, so any "base" `<meta/>` tags should be moved from the `index.html` file to the root route component's `meta` function:
 
 ```js
-{
-  routes: ...,
-  reducers: ...,
-  meta: {
-    siteName: 'WebSite',
+function App({ children }) {
+  return (
+    <div>
+      {children}
+    </div>
+  )
+}
+
+App.meta = ({ useSelector }) => {
+  return {
+    siteName: 'WebApp',
     description: 'A generic web application',
     locale: 'en_US'
   }
 }
 ```
 
-To update `meta` in real time, use the exported `updateMeta()` function. For example, to update the page's title with the count of unread notifications count:
+The `meta` function behaves like a React "hook": `<meta/>` tags will be updated if the values returned from `useSelector()` function calls do change.
+
+<!--
+To update `meta` in real time, one could use the exported `updateMeta()` function. It would replace all existing `<meta/>` tags on the page. For example, to update the page's title with the count of unread notifications count:
 
 ```js
 import { updateMeta } from 'react-pages'
@@ -1669,6 +1812,7 @@ updateMeta({
     : `(${unreadMessagesCount}) Messages`
 })
 ```
+-->
 
 ### Google Analytics
 
@@ -1892,41 +2036,16 @@ telegraf -config telegraf.conf
 ```
 </details>
 
-## Webpack HMR
+## Hot Reload
 
-Webpack's [Hot Module Replacement](https://webpack.github.io/docs/hot-module-replacement.html) (aka Hot Reload) works for React components and Redux reducers and Redux action creators (it just doesn't work for page `load`s).
+### React Hot Reload via Webpack HMR
 
-HMR setup for Redux reducers is as simple as adding `store.hotReload()` (as shown below). For enabling [HMR on React Components](https://webpack.js.org/guides/hmr-react/) (and Redux action creators) use [react-hot-loader](https://github.com/gaearon/react-hot-loader):
+Webpack's [Hot Module Replacement](https://webpack.github.io/docs/hot-module-replacement.html) (aka Hot Reload) provides the ability to "hot reload" React components.
 
-#### application.js
+To enable hot reload for React components, one could use a combination of [`react-refresh/babel`](https://www.npmjs.com/package/react-refresh) Babel plugn and [`react-refresh-webpack-plugin`](https://www.npmjs.com/package/@pmmmwh/react-refresh-webpack-plugin) Webpack plugin.
 
-```js
-import { render } from 'react-pages/client'
-import settings from './react-pages'
-
-render(settings).then(({ store }) => {
-  if (module.hot) {
-    module.hot.accept('./react-pages', () => {
-      // Update Redux "reducer".
-      store.hotReload(settings.reducers)
-    })
-  }
-})
 ```
-
-#### Container.js
-
-```js
-import React from 'react'
-import { Provider } from 'react-redux'
-
-export function Container({ store, children }) {
-  return (
-    <Provider store={store}>
-      {children}
-    </Provider>
-  )
-}
+npm install @pmmmwh/react-refresh-webpack-plugin react-refresh --save-dev
 ```
 
 #### .babelrc
@@ -1935,7 +2054,7 @@ export function Container({ store, children }) {
 {
   "presets": [
     "react",
-    ["env", { modules: false }],
+    ["env", { modules: false }]
   ],
 
   "plugins": [
@@ -1945,18 +2064,77 @@ export function Container({ store, children }) {
 }
 ```
 
-#### ./src/index.js
+#### webpack.config.js
 
 ```js
-// An ES6 polyfill for older browsers.
-require('babel-polyfill')
-...
+import ReactRefreshWebpackPlugin from '@pmmmwh/react-refresh-webpack-plugin'
+
+export default {
+  mode: 'development',
+  ...,
+  plugins: [
+    new ReactRefreshWebpackPlugin(),
+    ...
+  ]
+}
 ```
 
 Then start [`webpack-dev-server`](https://github.com/webpack/webpack-dev-server).
 
 ```
 webpack serve --hot --module-strict-export-presence --stats-errors --stats-error-details true --config path-to-webpack.config.js"
+```
+
+P.S.: Hot reload won't work for page component's `load`/`meta` functions, so when a `load`/`meta` function code is updated, the page has to be refreshed in order to observe the changes.
+
+### Redux Hot Reload via Webpack HMR
+
+Webpack's [Hot Module Replacement](https://webpack.github.io/docs/hot-module-replacement.html) (aka Hot Reload) provides the ability to "hot reload" Redux reducers and Redux action creators.
+
+<!-- Redux action creators will be updated automatically as part of the "hot reload" process for the React components that import those action creators. -->
+
+Enabling "hot reload" for Redux reducers and Redux action creators is slightly more complex and requires some additional "hacky" code. The following line:
+
+```js
+import * as reducers from './redux/reducers.js'
+```
+
+Should be replaced with:
+
+```js
+import * as reducers from './redux/reducers.with-hot-reload.js'
+```
+
+And a new file called `reducers.with-hot-reload.js` should be created:
+
+```js
+import { updateReducers } from 'react-pages'
+
+import * as reducers from './reducers.js'
+
+export * from './reducers.js'
+
+if (import.meta.webpackHot) {
+  import.meta.webpackHot.accept(['./reducers.js'], () => {
+    updateReducers(reducers)
+  })
+}
+```
+
+And then add some additional code in the file that calls the client-side `render()` function:
+
+```js
+import { render } from 'react-pages/client'
+
+import settings from './react-pages.js'
+
+export default async function() {
+  const { enableHotReload } = await render(settings)
+
+  if (import.meta.webpackHot) {
+    enableHotReload()
+  }
+}
 ```
 
 ## WebSocket

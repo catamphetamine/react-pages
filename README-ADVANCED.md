@@ -12,7 +12,7 @@ So, **javascript is required** on the client side in order for this CSRF attacks
 
 ## `onLoaded`
 
-When using `load` static property on a page component with `{ client: true }` option it's sometimes required to perform some actions (e.g. adjust the current URL) after those `load`ers finish (and after the browser navigates to the preloaded page). While with regular `load`ers it could be done using `componentDidMount()` such an approach wouldn't work for `{ client: true }` `load`ers because they're executed after `componentDidMount()`. The solution is `onLoaded` static property which is called after all `load`ers finish on client side. `onLoaded` static property won't work when `codeSplit: true` setting is configured. <!-- (could be implemented as some `onPageLoaded` route attribute) -->
+When using `load` static property on a page component with `{ client: true }` option it's sometimes required to perform some actions (e.g. adjust the current URL) after those `load`ers finish (and after the browser navigates to the loaded page). While with regular `load`ers it could be done using `componentDidMount()` such an approach wouldn't work for `{ client: true }` `load`ers because they're executed after `componentDidMount()`. The solution is `onLoaded` static property which is called after all `load`ers finish on client side. `onLoaded` static property won't work when `codeSplit: true` setting is configured. <!-- (could be implemented as some `onPageLoaded` route attribute) -->
 
 ```js
 import { replaceLocation } from 'react-pages'
@@ -261,6 +261,7 @@ const { status, content, contentType } = renderError(error)
   // Routes element.
   routes: require('./src/routes')
 
+  // (optional)
   // Redux reducers (an object)
   reducers: require('./src/redux/index')
 
@@ -347,10 +348,9 @@ const { status, content, contentType } = renderError(error)
   //
   onError: (error, { path, url, redirect, getState, server }) => redirect(`/error?url=${encodeURIComponent(url)}&error=${error.status}`)
 
-  // (optional)
+  // (not used)
   // Gets current user's locale.
-  // Is used in `@translate()` decorator.
-  getLocale: (state) => state.user.profile && state.user.profile.locale || getCookie('locale') || getPreferredLocale() || 'en'
+  // getLocale: (state) => state.user.profile && state.user.profile.locale || getCookie('locale') || getPreferredLocale() || 'en'
 
   // (optional)
   // `http` utility settings

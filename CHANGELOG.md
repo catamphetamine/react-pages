@@ -18,6 +18,66 @@ It would just return the base HTML structure without any route-specific stuff.
 
 <!-- Maybe rename `onNavigate()` to `onPageView()`. -->
 
+0.7.0 / 22.05.2023
+==================
+
+* `.load()` or `.meta()` functions can now be present only on the `Component` of either a "root" or a "leaf" route, i.e. only on the root `Component` or a page's `Component`.
+
+* Removed the `meta` property from `react-page.js` settings file. Instead, set `.meta()` function on the "root" route's `Component`.
+
+* The `.load()` function can now return an object of shape `{ props }` or an object of shape `{ redirect }`, similar to `Next.js`'s [`getServerSideProps()`](https://nextjs.org/docs/pages/api-reference/functions/get-server-side-props).
+
+* The `.load()` function no longer receives `redirect` parameter. Instead, return an object of shape `{ redirect: { url: '/some/url' } }`.
+
+* The `.meta()` function's arguments have changed: previously it was `(state)`, now it's `({ props, useSelector })` where `props` are the `{ props }` returned from the `.load()` function and `useSelector()` behaves analogous to the `useSelector` hook imported from `react-redux`.
+
+* The `updateMeta()` function is no longer exported. Instead, the meta is supposed to refresh itself when the values returned from `useSelector()` change, so it behaves like a React "hook".
+
+* Removed `load.getContext()` parameter from `react-pages.js` settings file.
+
+* Renamed Redux state object key from `preload` to something else. Developers shouldn't access it normally.
+
+* Renamed Redux state key from `preload.pending` to something else. Developers shouldn't access it normally. Use the new `useLoading()` hook instead to get the value of used-to-be `state.preload.pending`.
+
+* Removed Redux state `preload.immediate` property due to not being used.
+
+<!-- * Added optional `default: true` property on routes in routes configuration. It can only be used along with `status: 4xx / 5xx` property. When `default: true` is set for such route, it's gonna be a default page to redirect to in case of the corresponding HTTP errors arising when executing `load()` functions when loading pages. -->
+
+<!-- * Removed `errorPages` configuration parameter in `react-pages.js`. Instead, set the `default: true` flag on a route, as described above. -->
+
+* Added a new property `permanentRedirectTo` on route objects.
+
+* Removed the default `<Loading/>` component and the CSS files associated with it.
+
+* Removed deprecated "translation" stuff.
+
+* Removed exports related to `load()` functions: `indicateLoading()`, `showLoadingPage()`, `LOAD_STARTED`, `LOAD_FINISHED`, `LOAD_FAILED`.
+
+* Removed deprecated `rerender` function that was previously returned from `setUpAndRender()` on the client side.
+
+* Removed `store` parameter from `react-pages.js` configuration file.
+
+* The `reducers` parameter in `react-pages.js` configuration file is now optional.
+
+* The `store` is no longer returned from the client-side `render()` function due to not being used.
+
+<!--
+Next.js `redirect` object scheme:
+
+// https://github.com/vercel/next.js/blob/main/packages/next/types/index.d.ts
+export type Redirect =
+  | {
+      statusCode: 301 | 302 | 303 | 307 | 308
+      destination: string
+      basePath?: false
+    }
+  | {
+      permanent: boolean
+      destination: string
+      basePath?: false
+    }
+-->
+
 0.6.53 / 28.04.2023
 ==================
 
@@ -66,7 +126,8 @@ const store = createStore({
 	// Page routes.
 	routes,
 
-	// A combined Redux reducer.
+	// (optional)
+	// `export`ed Redux reducers.
 	reducers,
 
 	// (optional)

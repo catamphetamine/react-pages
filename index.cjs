@@ -1,12 +1,4 @@
-exports.PRELOAD_STARTED = require('./commonjs/redux/load/actions.js').PRELOAD_STARTED;
-exports.PRELOAD_FINISHED = require('./commonjs/redux/load/actions.js').PRELOAD_FINISHED;
-exports.PRELOAD_FAILED = require('./commonjs/redux/load/actions.js').PRELOAD_FAILED;
-exports.indicateLoading = require('./commonjs/redux/load/actions.js').indicateLoading;
-exports.showLoadingPage = require('./commonjs/redux/load/actions.js').showLoadingPage;
-
-exports.Loading = require('./commonjs/components/Loading.js').default;
-
-exports.updateMeta = require('./commonjs/meta/meta.js').patchMeta;
+// exports.updateMeta = require('./commonjs/meta/patchMeta.js').default;
 
 exports.getState = require('./commonjs/redux/client/getState.js').default;
 exports.getHttpClient = require('./commonjs/redux/client/getHttpClient.js').default;
@@ -40,8 +32,10 @@ exports.goBack = require('./commonjs/router/index.js').goBack;
 exports.goBackTwoPages = require('./commonjs/router/index.js').goBackTwoPages;
 exports.goForward = require('./commonjs/router/index.js').goForward;
 
+exports.useLoading = require('./commonjs/router/useLoading.js').default;
 exports.useLocation = require('./commonjs/router/useLocation.js').default;
 exports.useNavigationStartEffect = require('./commonjs/router/useNavigationStartEffect.js').default;
 exports.useNavigationEndEffect = require('./commonjs/router/useNavigationEndEffect.js').default;
-
 exports.useRoute = require('./commonjs/router/useRoute.js').default;
+
+exports.updateReducers = require('./commonjs/redux/hotReload.js').updateReducers;

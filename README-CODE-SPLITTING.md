@@ -15,7 +15,7 @@ First, set "code splitting" mode to "ON".
 ```js
 export default {
   routes,
-  reducers,
+  reducers, // (optional)
   codeSplit: true
 }
 ```
@@ -75,7 +75,7 @@ export default async ({ dispatch, getState, params, ... }) => {
 #### `./src/pages/Page.meta.js`
 
 ```js
-export default (state) => ({
+export default ({ props, useSelector }) => ({
 	title: '...'
 })
 ```

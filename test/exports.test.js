@@ -1,17 +1,11 @@
-import React from 'react'
-
 import Library from '../index.cjs'
 import Server from '../server.cjs'
 
-import
-{
+import {
 	getState,
 	getHttpClient,
 	goto,
 	redirect,
-	PRELOAD_STARTED,
-	PRELOAD_FINISHED,
-	PRELOAD_FAILED,
 	ReduxModule,
 	underscoredToCamelCase,
 	eventName,
@@ -25,41 +19,30 @@ import
 	goBack,
 	goBackTwoPages,
 	goForward,
-	indicateLoading,
-	showLoadingPage,
-	Loading,
 	Route,
 	Redirect,
 	useRoute,
 	useRouter,
 	useNavigationStartEffect,
 	useNavigationEndEffect,
-	useLocation
-}
-from '../index.js'
+	useLocation,
+	useLoading,
+	updateReducers
+	// updateMeta
+} from '../index.js'
 
 import server, {
 	render,
 	renderError
 } from '../server.js'
 
-describe(`exports`, function()
-{
-	it(`should export ES6`, () =>
-	{
-		indicateLoading.should.be.a('function')
-		showLoadingPage.should.be.a('function')
-		Loading.WrappedComponent.should.be.a('function')
-
+describe(`exports`, function() {
+	it(`should export ES6`, () => {
 		getState.should.be.a('function')
 		getHttpClient.should.be.a('function')
 
 		goto.should.be.a('function')
 		redirect.should.be.a('function')
-
-		PRELOAD_STARTED.should.be.a('string')
-		PRELOAD_FINISHED.should.be.a('string')
-		PRELOAD_FAILED.should.be.a('string')
 
 		underscoredToCamelCase.should.be.a('function')
 		eventName.should.be.a('function')
@@ -84,23 +67,17 @@ describe(`exports`, function()
 		goForward.should.be.a('function')
 
 		useLocation.should.be.a('function')
+		useLoading.should.be.a('function')
+		updateReducers.should.be.a('function')
+		// updateMeta.should.be.a('function')
 	})
 
-	it(`should export CommonJS`, () =>
-	{
-		Library.indicateLoading.should.be.a('function')
-		Library.showLoadingPage.should.be.a('function')
-		Library.Loading.WrappedComponent.should.be.a('function')
-
+	it(`should export CommonJS`, () => {
 		Library.getState.should.be.a('function')
 		Library.getHttpClient.should.be.a('function')
 
 		Library.goto.should.be.a('function')
 		Library.redirect.should.be.a('function')
-
-		Library.PRELOAD_STARTED.should.be.a('string')
-		Library.PRELOAD_FINISHED.should.be.a('string')
-		Library.PRELOAD_FAILED.should.be.a('string')
 
 		Library.underscoredToCamelCase.should.be.a('function')
 		Library.eventName.should.be.a('function')
@@ -125,17 +102,18 @@ describe(`exports`, function()
 		Library.goForward.should.be.a('function')
 
 		Library.useLocation.should.be.a('function')
+		Library.useLoading.should.be.a('function')
+		Library.updateReducers.should.be.a('function')
+		// Library.updateMeta.should.be.a('function')
 	})
 
-	it(`should export rendering service`, () =>
-	{
+	it(`should export rendering service`, () => {
 		server.should.be.a('function')
 		render.should.be.a('function')
 		renderError.should.be.a('function')
 	})
 
-	it(`should export rendering service (CommonJS)`, () =>
-	{
+	it(`should export rendering service (CommonJS)`, () => {
 		Server.should.be.a('function')
 		Server.default.should.be.a('function')
 		Server.render.should.be.a('function')
