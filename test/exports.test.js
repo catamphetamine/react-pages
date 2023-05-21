@@ -19,7 +19,6 @@ import {
 	goBack,
 	goBackTwoPages,
 	goForward,
-	Route,
 	Redirect,
 	useRoute,
 	useRouter,
@@ -48,7 +47,6 @@ describe(`exports`, function() {
 		eventName.should.be.a('function')
 
 		Link.render.should.be.a('function')
-		Route.should.be.a('function')
 		Redirect.should.be.a('function')
 		useRoute.should.be.a('function')
 		useRouter.should.be.a('function')
@@ -83,7 +81,6 @@ describe(`exports`, function() {
 		Library.eventName.should.be.a('function')
 
 		Library.Link.render.should.be.a('function')
-		Library.Route.should.be.a('function')
 		Library.Redirect.should.be.a('function')
 		Library.useRoute.should.be.a('function')
 		Library.useRouter.should.be.a('function')

@@ -22,7 +22,6 @@ exports.Link = require('./commonjs/redux/Link.js').default;
 exports.getCookie = require('./commonjs/client/cookies.js').getCookie;
 
 exports.Redirect = require('./commonjs/router/index.js').Redirect;
-exports.Route = require('./commonjs/router/index.js').Route;
 exports.useRouter = require('./commonjs/router/index.js').useRouter;
 exports.goto = require('./commonjs/router/index.js').goto;
 exports.redirect = require('./commonjs/router/index.js').redirect;

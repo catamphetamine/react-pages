@@ -38,7 +38,6 @@ export {
 
 export {
 	Redirect,
-	Route,
 	useRouter,
 	goto,
 	redirect,
