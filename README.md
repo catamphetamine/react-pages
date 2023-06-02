@@ -330,6 +330,24 @@ Another minimalistic example using Parcel instead of Webpack can be found here: 
 
 # Documentation
 
+## Root component
+
+The `react-pages` configuration file supports a `rootComponent` parameter. It should be the root component of the application. It receives properties: `children` and `store` (Redux store).
+
+The default (and minimal) `rootComponent` is simply a Redux `Provider` wrapped around the `children`. The Redux `Provider` enables Redux, because this library uses Redux internally.
+
+```js
+import { Provider as ReduxProvider } from 'react-redux'
+
+export default function DefaultRootComponent({ store, children }) {
+  return (
+    <ReduxProvider store={store}>
+      {children}
+    </ReduxProvider>
+  )
+}
+```
+
 ## Redux
 
 If you plan on using Redux in your application, provide a `reducers` object in the `react-pages` configuration file.
