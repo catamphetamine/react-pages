@@ -73,6 +73,20 @@ It would just return the base HTML structure without any route-specific stuff.
 
 * Changed the arguments of `onNavigate()` function. Previously, it receives 3 arguments: `url`, `location` and `rest`. Now it's a single object: `{ url, location, params, ...rest }`.
 
+* Renamed the `path` parameter of `onError` parameter of `react-pages.js` settings file to `location.pathname`.
+
+* Renamed the `path` parameter of `http.onError` parameter of `react-pages.js` settings file to `location.pathname`.
+
+* Renamed the `path` parameter of `onError` parameter of `react-pages.js` settings file to `location.pathname`.
+
+* Renamed the `container` parameter of `react-pages.js` settings file to `rootComponent`.
+
+* Renamed the `onError` parameter of `react-pages.js` settings file to `onLoadError`.
+
+* The `http.onError` function of `react-pages.js` settings file can now return `true` to prevent the error from being logged to the console as an "Unhandled rejection".
+
+* The `http.onError` function of `react-pages.js` settings file now skips the errors originating from `load()` functions of page components.
+
 <!--
 Next.js `redirect` object scheme:
 

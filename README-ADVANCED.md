@@ -281,7 +281,7 @@ const { status, content, contentType } = renderError(error)
   //   </Provider>
   // )
   //
-  container: require('./src/Container')
+  rootComponent: require('./src/Container')
 
   // Use this flag to enable "code splitting" mode.
   // See `README-CODE-SPLITTING` for more info.
@@ -316,7 +316,7 @@ const { status, content, contentType } = renderError(error)
   initialLoadHideAnimationDuration: 160
 
   // When using `react-hot-loader` one can pass `hot` as a configuration parameter
-  // instead of passing a custom `container` component just for enabling `react-hot-loader`.
+  // instead of passing a custom `rootComponent` component just for enabling `react-hot-loader`.
   // import { hot } from 'react-hot-loader'
   hot: hot
 
@@ -346,7 +346,9 @@ const { status, content, contentType } = renderError(error)
   // `path` is `url` without `?...` parameters.
   // `redirect()` redirects to a URL.
   //
-  onError: (error, { path, url, redirect, useSelector, server }) => redirect(`/error?url=${encodeURIComponent(url)}&error=${error.status}`)
+  onLoadError: (error, { path, url, redirect, useSelector, server }) => {
+    redirect(`/error?url=${encodeURIComponent(url)}&error=${error.status}`)
+  }
 
   // (not used)
   // Gets current user's locale.
@@ -377,7 +379,15 @@ const { status, content, contentType } = renderError(error)
     onRequest: (request, { url, originalUrl, useSelector }) => {}
 
     // (optional)
-    onError: (error, { url, path, redirect, dispatch, useSelector }) => console.error(error)
+    // Catches all HTTP errors that weren't thrown from `load()` functions.
+    onError: (error, { location, url, redirect, dispatch, useSelector }) => {
+      if (isSomeParticularError(error)) {
+        redirect('/some-particular-error')
+        // `return true` indicates that the error has been handled by the developer
+        // and it shouldn't be re-thrown as an "Unhandled rejection".
+        return true
+      }
+    }
     //
     // Is called when `http` calls either fail or return an error.
     // Is not called for errors happening during the initial page render

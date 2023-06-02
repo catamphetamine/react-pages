@@ -20,15 +20,9 @@
     "./static-site-generator": {
       "import": "./static-site-generator.js",
       "require": "./static-site-generator.cjs"
-    },
-    "./components/Loading.css": {
-      "default": "./components/Loading.css"
-    },
-    "./components/LoadingIndicator.css": {
-      "default": "./components/LoadingIndicator.css"
     }
   },
-  "version": "0.7.1",
+  "version": "0.7.2",
   "description": "A simple toolkit for building a React/Redux application: routing, loading page data, fetching data over HTTP, (optional) server-side rendering, etc.",
   "dependencies": {
     "@catamphetamine/farce": "^0.4.18",

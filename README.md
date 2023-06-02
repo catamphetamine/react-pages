@@ -407,7 +407,7 @@ const store = createStore({
     },
 
     // (optional)
-    // Listens to HTTP errors.
+    // Catches all HTTP errors that weren't thrown from `load()` functions.
     onError(error, utilities) {},
 
     // (optional)
@@ -421,8 +421,8 @@ const store = createStore({
   },
 
   // (optional)
-  // Catches errors thrown from page `load()` functions.
-  onError(error, utilities) {}
+  // Catches all errors thrown from page `load()` functions.
+  onLoadError(error, utilities) {}
 })
 
 // Start the rendering framework.
@@ -433,7 +433,7 @@ render({
   // (optional)
   // Website `<Container/>` component.
   // Must wrap `children` in a `react-redux` `<Provider/>`.
-  container: Container
+  rootComponent: Container
 })
 ```
 </details>
@@ -535,6 +535,24 @@ return {
 -->
 
 The `load` property function could additionally be defined on the application's root React component. In that case, the application would first execute the `load` function of the application's root React component, and then, after it finishes, it would proceed to executing the page component's `load` function. This behavior allows the root React component's `load` function to perform the "initialization" of the application: for example, it could authenticate the user.
+
+<details>
+<summary>Catching errors in <code>load</code> function</summary>
+
+#####
+
+To catch all errors originating in `load()` functions, specify an `onLoadError()` parameter in `react-pages.js` settings file.
+
+```js
+{
+  onLoadError: (error, { location, url, redirect, useSelector, server }) => {
+    redirect(`/error?url=${encodeURIComponent(url)}&error=${error.status}`)
+  }
+}
+```
+</details>
+
+#####
 
 <details>
 <summary>Redirecting from <code>load</code> function</summary>
@@ -1267,7 +1285,8 @@ A real-world (advanced) example for handling "Unauthenticated"/"Unauthorized" er
 ```js
 {
   ...,
-  onError(error, { path, url, redirect, dispatch, useSelector, server }) {
+  // Catches errors thrown from page `load()` functions.
+  onLoadError(error, { location, url, redirect, dispatch, useSelector, server }) {
     // Not authenticated
     if (error.status === 401) {
       return handleUnauthenticatedError(error, url, redirect);
@@ -1284,7 +1303,7 @@ A real-world (advanced) example for handling "Unauthenticated"/"Unauthorized" er
     if (process.env.NODE_ENV === 'production') {
       // Prevents infinite redirect to the error page
       // in case of overall page rendering bugs, etc.
-      if (path !== '/error') {
+      if (location.pathname !== '/error') {
         // Redirect to a generic error page
         return redirect(`/error?url=${encodeURIComponent(url)}`);
       }
@@ -1298,10 +1317,14 @@ A real-world (advanced) example for handling "Unauthenticated"/"Unauthorized" er
   },
 
   http: {
-    onError(error, { path, url, redirect, dispatch, useSelector }) {
+    // Catches all HTTP errors that weren't thrown from `load()` functions.
+    onError(error, { location, url, redirect, dispatch, useSelector }) {
       // JWT token expired, the user needs to relogin.
       if (error.status === 401) {
-        return handleUnauthenticatedError(error, url, redirect);
+        handleUnauthenticatedError(error, url, redirect);
+        // `return true` indicates that the error has been handled by the developer
+        // and it shouldn't be re-thrown as an "Unhandled rejection".
+        return true
       }
     },
     ...
@@ -1337,23 +1360,30 @@ function handleUnauthenticatedError(error, url, redirect) {
 
 This library doesn't force one to dispatch "asynchronous" Redux actions using the `http` utility in order to fetch data over HTTP. For example, one could use the standard `fetch()` function instead. But if one chooses to use the `http` utility, default error handlers for it could be set up.
 
-To listen for common `http` errors, one may specify an `http.onError()` function in `react-pages.js` configuration file.
+To listen for `http` errors, one may specify two functions in `react-pages.js` configuration file:
+
+* `onLoadError()` — Catches all errors thrown from page `load()` functions.
+* `http.onError()` — Catches all HTTP errors that weren't thrown from `load()` functions. Should return `true` if the error has been handled successfully and shouldn't be printed to the console.
 
 ```js
 {
   http: {
     // (optional)
-    // Listens to HTTP errors.
-    // `error` argument an `Error` instance.
-    onError(error, { path, url, redirect, dispatch, useSelector }) {
+    // Catches all HTTP errors that weren't thrown from `load()` functions.
+    onError(error, { location, url, redirect, dispatch, useSelector }) {
       if (error.status === 401) {
         redirect('/not-authenticated')
+        // `return true` indicates that the error has been handled by the developer
+        // and it shouldn't be re-thrown as an "Unhandled rejection".
+        return true
       } else {
-        // Ignore.
+        // Ignore the error.
       }
     },
 
     // (optional)
+    // (advanced)
+    //
     // Creates a Redux state `error` property from an HTTP `Error` instance.
     //
     // By default, returns whatever JSON data was returned in the HTTP response,
