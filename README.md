@@ -1824,6 +1824,11 @@ Page.meta = ({ props, useSelector }) => {
 })
 ```
 
+The parameters of a `meta` function are:
+
+* `props` — Any `props` returned from the `load()` function.
+* `useSelector` — A hook that could be used to access Redux state.
+
 If the root route component also has a `meta` function, the result of the page component's `meta` function will be merged on top of the result of the root route component's `meta` function.
 
 The `meta` will be applied on the web page and will overwrite any existing `<meta/>` tags. For example, if there were any `<meta/>` tags written by hand in `index.html` template then all of them will be dicarded when this library applies its own `meta`, so any "base" `<meta/>` tags should be moved from the `index.html` file to the root route component's `meta` function:
@@ -1847,6 +1852,32 @@ App.meta = ({ useSelector }) => {
 ```
 
 The `meta` function behaves like a React "hook": `<meta/>` tags will be updated if the values returned from `useSelector()` function calls do change.
+
+<!-- There might also be "hacky" edge-cases when the application chooses to patch the `meta()` function of a component in real time for whatever reason. In those cases, a manual re-calculation and re-applying of the `meta()` is required after the patching. To do that, use the `refreshMeta()` function that is returned from the exported `useRefreshMeta()` hook. -->
+
+In some advanced cases, the `meta()` function might need to access some state that is local to the page component and is not stored in global Redux state. That could be done by setting `metaComponentProperty` property of a page component to `true` and then rendering the `<Meta/>` component manually inside the page component, where any properties passed to the `<Meta/>` component will be available in the `props` of the `meta()` function.
+
+```js
+function Page({ Meta }) {
+  const [number, setNumber] = useState(0)
+  return (
+    <>
+      <Meta number={number}/>
+      <button onClick={() => setNumber(number + 1)}>
+        Increment
+      </button>
+    </>
+  )
+}
+
+Page.metaComponentProperty = true
+
+Page.meta = ({ props }) => {
+  return {
+    title: String(props.number)
+  }
+}
+```
 
 <!--
 To update `meta` in real time, one could use the exported `updateMeta()` function. It would replace all existing `<meta/>` tags on the page. For example, to update the page's title with the count of unread notifications count:

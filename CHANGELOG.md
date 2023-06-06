@@ -33,6 +33,10 @@ It would just return the base HTML structure without any route-specific stuff.
 
 * The `updateMeta()` function is no longer exported. Instead, the meta is supposed to refresh itself when the values returned from `useSelector()` change, so it behaves like a React "hook".
 
+  * In cases when the `meta()` function has to access some state that is local to the page component and is not stored in Redux state, a developer could pass such state to the `meta()` function by setting `metaComponentProperty` property of a page component to `true` and then rendering the `<Meta/>` component manually inside the page component. See the readme for more details.
+
+  <!-- * There might also be "hacky" edge-cases when the application chooses to patch the `meta()` function of a component in real time for whatever reason. In those cases, a manual re-calculation and re-applying of the `meta()` is required after the patching. To do that, use the `refreshMeta()` function that is returned from the exported `useRefreshMeta()` hook. -->
+
 * Removed `load.getContext()` parameter from `react-pages.js` settings file.
 
 * Renamed Redux state object key from `preload` to something else. Developers shouldn't access it normally.
@@ -57,6 +61,8 @@ It would just return the base HTML structure without any route-specific stuff.
 
 * Removed `store` parameter from `react-pages.js` configuration file.
 
+* Added `onStoreCreated` option that can be passed to `setUpAndRender()` as part of the second `options` argument. One could use this function to get the `store` as soon as it's created.
+
 * The `reducers` parameter in `react-pages.js` configuration file is now optional.
 
 * The `store` is no longer returned from the client-side `render()` function due to not being used.
@@ -76,8 +82,6 @@ It would just return the base HTML structure without any route-specific stuff.
 * Renamed the `path` parameter of `onError` parameter of `react-pages.js` settings file to `location.pathname`.
 
 * Renamed the `path` parameter of `http.onError` parameter of `react-pages.js` settings file to `location.pathname`.
-
-* Renamed the `path` parameter of `onError` parameter of `react-pages.js` settings file to `location.pathname`.
 
 * Renamed the `container` parameter of `react-pages.js` settings file to `rootComponent`.
 
