@@ -357,9 +357,9 @@ If you plan on using Redux in your application, provide a `reducers` object in t
 ```javascript
 import routes from './routes.js'
 
-// The `reducers` parameter should be an object:
-// a map of Redux reducers that will be combined into a single Redux reducer
-// via the standard `combineReducers()` Redux function.
+// The `reducers` parameter should be an object containing
+// Redux reducers that will be combined into a single Redux reducer
+// using the standard `combineReducers()` function of Redux.
 import * as reducers from './redux/index.js'
 
 export default {
@@ -368,16 +368,38 @@ export default {
 }
 ```
 
-The reducers map:
+Where the `reducers` object should be:
 
 #### ./src/redux/index.js
 
 ```js
-// For those who're unfamiliar with Redux,
+// For those who're unfamiliar with Redux concepts,
 // a "reducer" is a function `(state, action) => state`.
-export { default as reducer1 } from './reducer1.js'
-export { default as reducer2 } from './reducer2.js'
+//
+// The main (or "root") "reducer" usually consists of "sub-reducers",
+// in which case it's an object rather than a function,
+// and each property of such object is a "sub-reducer" function.
+//
+// There's no official name for "sub-reducer".
+// For example, Redux Toolkit [calls](https://redux.js.org/usage/structuring-reducers/splitting-reducer-logic) them "slices".
+//
+export { default as subReducer1 } from './subReducer1.js'
+export { default as subReducer2 } from './subReducer2.js'
 ...
+```
+
+It also supports passing in custom Redux "middleware", if required. To do that, specify a `reduxMiddleware` parameter in the `react-pages` configuration file.
+
+```js
+export default {
+  ...,
+
+  // `reduxMiddleware` should be a function returning an array of custom Redux middlewares.
+  reduxMiddleware: () => [
+    middleware1,
+    middleware2
+  ]
+}
 ```
 
 <!--
