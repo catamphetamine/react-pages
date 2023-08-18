@@ -22,11 +22,12 @@
       "require": "./static-site-generator.cjs"
     }
   },
-  "version": "0.7.6",
+  "version": "0.7.7",
   "description": "A simple toolkit for building a React/Redux application: routing, loading page data, fetching data over HTTP, (optional) server-side rendering, etc.",
   "dependencies": {
     "@catamphetamine/farce": "^0.4.18",
     "@catamphetamine/found": "^1.3.11",
+    "@redux-devtools/extension": "^3.2.5",
     "classnames": "^2.3.1",
     "cookie": "^0.4.1",
     "core-js-pure": "^3.19.1",
@@ -42,7 +43,6 @@
     "print-error": "^0.1.17",
     "progress": "^2.0.3",
     "prop-types": "^15.7.2",
-    "redux-devtools-extension": "^2.13.9",
     "string-to-stream": "^3.0.1",
     "superagent": "^8.0.0"
   },

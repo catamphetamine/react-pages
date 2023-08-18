@@ -394,8 +394,8 @@ It also supports passing in custom Redux "middleware", if required. To do that, 
 export default {
   ...,
 
-  // `reduxMiddleware` should be a function returning an array of custom Redux middlewares.
-  reduxMiddleware: () => [
+  // `reduxMiddleware` should be an array of custom Redux middlewares.
+  reduxMiddleware: [
     middleware1,
     middleware2
   ]

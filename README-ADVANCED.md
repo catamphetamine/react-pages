@@ -326,11 +326,11 @@ const { status, content, contentType } = renderError(error)
 
   // (optional)
   // User can add custom Redux middleware
-  reduxMiddleware: () => [...]
+  reduxMiddleware: [...]
 
   // (optional)
   // User can add custom Redux store enhancers
-  reduxStoreEnhancers: () => [...]
+  reduxStoreEnhancers: [...]
 
   // (optional)
   // Is called for errors happening during the initial page render
@@ -704,11 +704,11 @@ const { status, content, contentType } = renderError(error)
     // By default, "logOnlyInProduction" compose function is used
     // which is the best practice according to the web browser extension author:
     // https://medium.com/@zalmoxis/using-redux-devtools-in-production-4c5b56c5600f
-    compose: require('remote-redux-devtools/composeWithDevTools')
+    compose: import { composeWithDevToolsDevelopmentOnly } from '@redux-devtools/extension',
 
     // (optional)
     // Web browser extension options (when no custom `compose` is supplied).
-    // https://github.com/zalmoxisus/redux-devtools-extension/blob/master/docs/API/Arguments.md
+    // https://github.com/reduxjs/redux-devtools/tree/main
     options: { ... }
   }
 }
