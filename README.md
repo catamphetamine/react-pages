@@ -1994,7 +1994,7 @@ A `route` has:
 
 ### Changing current location
 
-Dispatch `goto`/`redirect` Redux action to change current location (both on client and server).
+To navigate to a different URL, one could `dispatch()` a `goto(location)` action or a `redirect(location)` action. It works both on client and server.
 
 ```javascript
 import { goto, redirect } from 'react-pages'
@@ -2016,7 +2016,9 @@ function Page() {
 Advanced: `goto()` can also take `{ instantBack: true }` option.
 -->
 
-If the current location needs to be changed while still staying at the same page (e.g. a checkbox has been ticked and the corresponding URL query parameter must be added), then use `dispatch(pushLocation(location))` or `dispatch(replaceLocation(location))` Redux actions.
+One could also pass a `load: false` option to `goto(location, options)` or `redirect(location, options)` to skip the `.load()` function of the target page.
+
+If the current location URL needs to be updated while still staying at the same page (i.e. no navigation should take place), then instead of `dispatch()`ing a `goto(location)` action or a `redirect(location)` action, one should `dispatch()` a `pushLocation(location)` action or a `replaceLocation(location)` action respectively.
 
 ```javascript
 import { useDispatch } from 'react-redux'
@@ -2037,11 +2039,11 @@ function Page() {
 }
 ```
 
-To go "Back"
+To go "Back" or "Forward", one could `dispatch()` a `goBack()` action or a `goForward()` action.
 
 ```javascript
 import { useDispatch } from 'react-redux'
-import { goBack, goBackTwoPages } from 'react-pages'
+import { goBack, goBackTwoPages, goForward } from 'react-pages'
 
 function Page() {
   const dispatch = useDispatch()
@@ -2053,9 +2055,7 @@ function Page() {
 }
 ```
 
-Can also go "Forward" via `goForward()` in the same fashion.
-
-If someone prefers interacting with [`found`](https://github.com/4Catalyzer/found) `router` directly instead then it is available on all pages as a `router` property, or via [`useRouter`](https://github.com/4Catalyzer/found#programmatic-navigation) hook.
+If someone prefers interacting with [`found`](https://github.com/4Catalyzer/found) `router` directly then it could be accessed at any page: either as a `router` property of a page component or via [`useRouter`](https://github.com/4Catalyzer/found#programmatic-navigation) hook.
 
 ```js
 import React from 'react'
