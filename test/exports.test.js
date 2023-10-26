@@ -24,6 +24,7 @@ import {
 	useRouter,
 	useNavigationStartEffect,
 	useNavigationEndEffect,
+	useSelectorForLocation,
 	useLocation,
 	useLoading,
 	updateReducers
@@ -64,6 +65,7 @@ describe(`exports`, function() {
 		goBackTwoPages.should.be.a('function')
 		goForward.should.be.a('function')
 
+		useSelectorForLocation.should.be.a('function')
 		useLocation.should.be.a('function')
 		useLoading.should.be.a('function')
 		updateReducers.should.be.a('function')
@@ -98,6 +100,7 @@ describe(`exports`, function() {
 		Library.goBackTwoPages.should.be.a('function')
 		Library.goForward.should.be.a('function')
 
+		Library.useSelectorForLocation.should.be.a('function')
 		Library.useLocation.should.be.a('function')
 		Library.useLoading.should.be.a('function')
 		Library.updateReducers.should.be.a('function')

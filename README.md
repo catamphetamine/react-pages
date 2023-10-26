@@ -1974,6 +1974,35 @@ import { useLocation } from 'react-pages'
 const location = useLocation()
 ```
 
+### Get Redux state for current location
+
+One edge case is when an application is architectured in such a way that:
+
+* A certain page `Component` handles a certain route.
+  * For example, an `Item` page component handles `/items/:id` URLs.
+* For that route, it is possible to navigate to the same route but with different route parameters.
+  * For example, a user could navigate from `/items/1` to `/items/2` via a "Related items" links section.
+* The page `Component` has a `.load()` function that puts data in Redux state.
+  * For example, the `Item` page component first `fetch()`es item data and then puts it in Redux state via `dispatch(setItem(itemData))`.
+* The page `Component` uses the loaded data from the Redux state.
+  * For example, the `Item` page component gets the item data via `useSelector()` and renders it on the page.
+
+In the above example, when a user navigates from item `A` to item `B`, there's a short timeframe of inconsistency:
+
+* Item `A` page renders item `A` data from Redux state.
+* User clicks the link to item `B`.
+* Item `B` data is fetched and put into Redux state.
+* Item `A` page is still rendered. `useSelector()` on it gets refreshed with the new data from Redux state and now returns item `B` data while still being on item `A` page.
+* The navigation finishes and item `B` page is rendered. `useSelector()` on it returns item `B` data.
+
+To work around that, one could use `useSelectorForLocation` hook instead of `useSelector`.
+
+```js
+import { useSelectorForLocation } from 'react-pages'
+
+const propertyValue = useSelectorForLocation(state => state.reducerName.propertyName)
+```
+
 ### Get current route
 
 Inside a `load` function: you already know what route it is.

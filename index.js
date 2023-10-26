@@ -50,6 +50,7 @@ export {
 
 export { default as useNavigationStartEffect } from './lib/router/useNavigationStartEffect.js'
 export { default as useNavigationEndEffect } from './lib/router/useNavigationEndEffect.js'
+export { default as useSelectorForLocation } from './lib/redux/useSelectorForLocation.js'
 export { default as useLocation } from './lib/router/useLocation.js'
 export { default as useLoading } from './lib/router/useLoading.js'
 export { default as useRoute } from './lib/router/useRoute.js'

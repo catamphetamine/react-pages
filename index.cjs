@@ -33,6 +33,7 @@ exports.goForward = require('./commonjs/router/index.js').goForward;
 
 exports.useLoading = require('./commonjs/router/useLoading.js').default;
 exports.useLocation = require('./commonjs/router/useLocation.js').default;
+exports.useSelectorForLocation = require('./commonjs/redux/useSelectorForLocation.js').default;
 exports.useNavigationStartEffect = require('./commonjs/router/useNavigationStartEffect.js').default;
 exports.useNavigationEndEffect = require('./commonjs/router/useNavigationEndEffect.js').default;
 exports.useRoute = require('./commonjs/router/useRoute.js').default;
