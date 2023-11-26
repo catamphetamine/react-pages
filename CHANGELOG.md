@@ -18,6 +18,16 @@ It would just return the base HTML structure without any route-specific stuff.
 
 <!-- Maybe rename `onNavigate()` to `onPageView()`. -->
 
+0.7.12 / 26.11.2023
+==================
+
+* Replaced `dispatch(goto())` with `useNavigate()()`.
+* Replaced `dispatch(redirect())` with `useRedirect()()`.
+* Replaced `dispatch(pushLocation())` with `useLocationHistory().push()`.
+* Replaced `dispatch(replaceLocation())` with `useLocationHistory().replace()`.
+* Replaced `dispatch(goBack())` with `useGoBack()()`.
+* Replaced `dispatch(goForward())` with `useGoForward()()`.
+
 0.7.0 / 22.05.2023
 ==================
 

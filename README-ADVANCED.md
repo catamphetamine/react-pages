@@ -359,6 +359,21 @@ const { status, content, contentType } = renderError(error)
   http:
   {
     // (optional)
+    // When set to `true`, it will automatically find and convert all ISO date strings
+    // to `Date` objects in HTTP responses of `application/json` type.
+    //
+    // This is more of a legacy feature that was historically "on" by default.
+    // Looking at this feature now, I wouldn't advise enabling it because it could potentially
+    // lead to a bug when it accidentally mistakes a string for a date.
+    // For example, some user could write a comment with the comment content being an ISO date string.
+    // If, when fetching that comment from the server, the application automatically finds and converts
+    // the comment text from a string to a `Date` instance, it will likely lead to a bug
+    // when the application attempts to access any string-specific methods of such `Date` instance,
+    // resulting in a possible crash of the application.
+    //
+    findAndConvertIsoDateStringsToDateInstances: true
+
+    // (optional)
     transformUrl: (url, { server: boolean }) => url
     // Using `http.transformUrl(url)` configuration parameter
     // one can transform shortcut URLs like `api://items/123`
@@ -487,16 +502,17 @@ const { status, content, contentType } = renderError(error)
   }
 
   // (optional)
-  // Prepend "base path" to all URLs.
-  // Can be used, for example, for hosting a website on GitHub pages.
+  //
+  // If some "base path" should be prepended to all URLs,
+  // set it as a `basename` parameter.
+  //
+  // It can be used, for example, for hosting a website on GitHub pages
+  // where each website has a prefix.
+  // For example, for website `username.github.io/repo`, the `basename` would be `/repo`.
+  //
+  // A `basename` should not include a trailing slash.
+  //
   basename: '/path'
-
-  // (optional)
-  // Controls automatic `Date` parsing
-  // when using `http` utility, and when
-  // restoring Redux state on the client-side.
-  // (is `true` by default)
-  parseDates: `true` / `false`
 
   // (optional)
   // When supplying `event` instead of `events`
@@ -658,12 +674,12 @@ const { status, content, contentType } = renderError(error)
   // http://www.lunametrics.com/blog/2015/04/17/strip-query-parameters-google-analytics/
   // The "hash" part should also be stripped manually inside `onNavigate` function
   // because someone somewhere someday might make use of those "hashes".
-  onNavigate: ({ url, location, route, dispatch, useSelector }) => {}
+  onNavigate: ({ url, location, params, dispatch, useSelector }) => {}
 
   // (optional)
   // Same as `onNavigate()` but fires when a user performs navigation (not after it).
   // Only on client side.
-  onBeforeNavigate: ({ dispatch, useSelector, location, route, params }) => {}
+  onBeforeNavigate: ({ location, params, dispatch, useSelector }) => {}
 
   // (optional)
   // Is called as soon as Redux store is created.

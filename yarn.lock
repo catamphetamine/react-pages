@@ -919,10 +919,10 @@
     "@babel/helper-validator-identifier" "^7.19.1"
     "to-fast-properties" "^2.0.0"
 
-"@catamphetamine/farce@^0.4.18":
-  "integrity" "sha512-SBXfsNcYREzSLlEU/gmOKJX1S/NF1GgK4vDw2eHvW//fyHLog+tXds+n29reGZwH1NwPS2NLe2hEqruFIzn44Q=="
-  "resolved" "https://registry.npmjs.org/@catamphetamine/farce/-/farce-0.4.18.tgz"
-  "version" "0.4.18"
+"@catamphetamine/farce@^0.4.18", "@catamphetamine/farce@^0.4.19":
+  "integrity" "sha512-b/tCXwDk1THo7/T9oNHyUFBVdSi/MD+0KS/5rcCtF1+exgtwD9uSkLdh3yBO6JJvaoR/REbXXKiONo3+D3KVww=="
+  "resolved" "https://registry.npmjs.org/@catamphetamine/farce/-/farce-0.4.19.tgz"
+  "version" "0.4.19"
   dependencies:
     "query-string" "^5.1.1"
 

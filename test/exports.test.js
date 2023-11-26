@@ -2,7 +2,6 @@ import Library from '../index.cjs'
 import Server from '../server.cjs'
 
 import {
-	getState,
 	getHttpClient,
 	goto,
 	redirect,
@@ -24,8 +23,14 @@ import {
 	useRouter,
 	useNavigationStartEffect,
 	useNavigationEndEffect,
+	useNavigationLocation,
 	useSelectorForLocation,
 	useLocation,
+	useLocationHistory,
+	useGoBack,
+	useGoForward,
+	useNavigate,
+	useRedirect,
 	useLoading,
 	updateReducers
 	// updateMeta
@@ -38,7 +43,6 @@ import server, {
 
 describe(`exports`, function() {
 	it(`should export ES6`, () => {
-		getState.should.be.a('function')
 		getHttpClient.should.be.a('function')
 
 		goto.should.be.a('function')
@@ -65,15 +69,20 @@ describe(`exports`, function() {
 		goBackTwoPages.should.be.a('function')
 		goForward.should.be.a('function')
 
+		useNavigationLocation.should.be.a('function')
 		useSelectorForLocation.should.be.a('function')
 		useLocation.should.be.a('function')
+		useLocationHistory.should.be.a('function')
+		useGoBack.should.be.a('function')
+		useGoForward.should.be.a('function')
+		useNavigate.should.be.a('function')
+		useRedirect.should.be.a('function')
 		useLoading.should.be.a('function')
 		updateReducers.should.be.a('function')
 		// updateMeta.should.be.a('function')
 	})
 
 	it(`should export CommonJS`, () => {
-		Library.getState.should.be.a('function')
 		Library.getHttpClient.should.be.a('function')
 
 		Library.goto.should.be.a('function')
@@ -100,8 +109,14 @@ describe(`exports`, function() {
 		Library.goBackTwoPages.should.be.a('function')
 		Library.goForward.should.be.a('function')
 
+		Library.useNavigationLocation.should.be.a('function')
 		Library.useSelectorForLocation.should.be.a('function')
 		Library.useLocation.should.be.a('function')
+		Library.useLocationHistory.should.be.a('function')
+		Library.useGoBack.should.be.a('function')
+		Library.useGoForward.should.be.a('function')
+		Library.useNavigate.should.be.a('function')
+		Library.useRedirect.should.be.a('function')
 		Library.useLoading.should.be.a('function')
 		Library.updateReducers.should.be.a('function')
 		// Library.updateMeta.should.be.a('function')

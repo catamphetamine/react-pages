@@ -332,7 +332,7 @@ Another minimalistic example using Parcel instead of Webpack can be found here: 
 
 ## Root component
 
-The `react-pages` configuration file supports a `rootComponent` parameter. It should be the root component of the application. It receives properties: `children` and `store` (Redux store).
+`react-pages` configuration file supports a `rootComponent` parameter. It should be the root component of the application. It receives properties: `children` and `store` (Redux store).
 
 The default (and minimal) `rootComponent` is simply a Redux `Provider` wrapped around the `children`. The Redux `Provider` enables Redux, because this library uses Redux internally.
 
@@ -388,7 +388,9 @@ export { default as subReducer2 } from './subReducer2.js'
 ...
 ```
 
-It also supports passing in custom Redux "middleware", if required. To do that, specify a `reduxMiddleware` parameter in the `react-pages` configuration file.
+### Middleware
+
+To add custom Redux "middleware", specify a `reduxMiddleware` parameter in the `react-pages` configuration file.
 
 ```js
 export default {
@@ -401,6 +403,12 @@ export default {
   ]
 }
 ```
+
+<!--
+### On Store Created (client-side)
+
+On client side, to access Redux `store` right after it has been created, pass `onStoreCreated(store)` function option to the client-side `render()` function.
+-->
 
 <!--
 <details>
@@ -522,6 +530,33 @@ Page.load = async (utility) => {
 
     // Can be used to get a slice of Redux state.
     useSelector,
+
+    // (optional)
+    //
+    // "Load Context" could hold any custom developer-defined variables
+    // that could then be accessed inside `.load()` functions.
+    //
+    // To define a "load context":
+    //
+    // * Pass `getLoadContext()` function as an option to the client-side `render()` function.
+    //   The options are the second argument of that function.
+    //   The result of the function will be passed to each `load()` function as `context` parameter.
+    //   The result of the function will be reused within the scope of a given web browser tab,
+    //   i.e. `getLoadContext()` function will only be called once for a given web browser tab.
+    //
+    // * (if also using server-side rendering)
+    //   Pass `getLoadContext()` function as an option to the server-side `webpageServer()` function.
+    //   The options are the second argument of that function.
+    //   The result of the function will be passed to each `load()` function as `context` parameter.
+    //   The result of the function will be reused within the scope of a given HTTP request,
+    //   i.e. `getLoadContext()` function will only be called once for a given HTTP request.
+    //
+    // `getLoadContext()` function recevies an argument object: `{ dispatch }`.
+    // `getLoadContext()` function should return a "load context" object.
+    //
+    // Miscellaneous: `context` parameter will also be passed to `onNavigate()`/`onBeforeNavigate()` functions.
+    //
+    context,
 
     // Current page location (object).
     location,
@@ -772,7 +807,7 @@ function SearchResultsPage() {
 SearchResultsPage.load = async () => await fetchSomeData()
 ```
 
-There's also `instantBack: true` option available for `goto(location, options)` which has the same behavior.
+There's also `instantBack: true` option that could be passed to `navigate(location, options)` function which is returned from `useNavigate()` hook. The behavior of the option is the same.
 
 `instantBack` is ignored when navigating to the same route: for example, if there's an `<Article/>` page component having a `<Link instantBack/>` to another `<Article/>` then `instantBack` is ignored — this feature was originally added for Redux because it made sense that way (in Redux there's only one slot for data of a route that gets rewritten every time the route is navigated to). For other data fetching frameworks like Relay I guess it would make sense to turn that off. Create an issue if that's the case.
 
@@ -782,7 +817,7 @@ There's also a `canGoBackInstantly()` function (on client side) that tells if th
 
 There's also a `canGoForwardInstantly()` function (analogous to `canGoBackInstantly()`).
 
-There's also an `isInstantBackAbleNavigation()` function (on client side) which tells if the currently ongoing navigation process is performed with `instantBack` option (for example, if `<Link instantBack/>` is clicked or `goto(location, { instantBack: true })` is called). It can be used in a `useNavigationStartEffect()` hook to save the current page state for later restoring it if the user navigates "Back" instantly.
+There's also an `isInstantBackAbleNavigation()` function (on client side) which tells if the currently ongoing navigation process is performed with `instantBack` option: for example, if `<Link instantBack/>` is clicked, or when `navigate(location, { instantBack: true })` returned from `useNavigate()` hook is called. It can be used in a `useNavigationStartEffect()` hook to save the current page state for later restoring it if the user navigates "Back" instantly.
 
 ```js
 import { useNavigationStartEffect, isInstantBackAbleNavigation } from 'react-pages'
@@ -832,7 +867,6 @@ Fetching data in an application could be done using several approaches:
   * CORS utilities
   * Authentication utilities
   * File upload progress support
-  * Automatic date parsing in JSON responses
   * Persisting the result in Redux state
 
 ## Asynchronous actions
@@ -1543,7 +1577,23 @@ function uploadItemPhoto(itemId, file) {
 
 ### JSON Date parsing
 
-By default, when using `http` utility all JSON responses get parsed for javascript `Date`s which are then automatically converted from `String`s to `Date`s. This is convenient, and also safe because such date `String`s have to be in a very specific ISO format in order to get parsed (`year-month-dayThours:minutes:seconds[timezone]`, e.g. `2017-12-22T23:03:48.912Z`), but if someone still prefers to disable this feature and have their stringified dates untouched then there's the `parseDates: false` flag in the configuration to opt-out of this feature.
+By default, when using `http` utility all JSON responses get parsed for javascript `Date`s which are then automatically converted from `String`s to `Date`s.
+
+This has been a very convenient feature that is also safe in almost all cases because such date `String`s have to be in a very specific ISO format in order to get parsed (`year-month-dayThours:minutes:seconds[timezone]`, e.g. `2017-12-22T23:03:48.912Z`).
+
+Looking at this feature now, I wouldn't advise enabling it because it could potentially lead to a bug when it accidentally mistakes a string for a date. For example, some user could write a comment with the comment content being an ISO date string. If, when fetching that comment from the server, the application automatically finds and converts the comment text from a string to a `Date` instance, it will likely lead to a bug when the application attempts to access any string-specific methods of such `Date` instance, resulting in a possible crash of the application.
+
+Therefore, currenly I'd advise setting `http.findAndConvertIsoDateStringsToDateInstances` flag to `false` in `react-pages.js` settings file to opt out of this feature.
+
+```js
+{
+  ...
+  http: {
+    ...
+    findAndConvertIsoDateStringsToDateInstances: false
+  }
+}
+```
 
 ## Snapshotting
 
@@ -1915,9 +1965,9 @@ updateMeta({
 ```
 -->
 
-### Google Analytics
+### Navigation Listener
 
-To report website navigation to Google Analytics supply `onNavigate()` function option to client-side `render()` function call:
+If the application would like to listen to navigation changes — for example, to report the current location to Google Analytics — it might supply `onNavigate()` function option to the client-side `render()` function:
 
 <details>
 <summary>See code example</summary>
@@ -1929,7 +1979,21 @@ import { render } from 'react-pages/client'
 
 await render(settings, {
   // Runs on the initial page load, and then on each navigation.
-  onNavigate({ url, location, route, dispatch, useSelector }) {
+  onNavigate({
+    // Stringified `location` object.
+    url,
+    // `location` object.
+    location,
+    // URL pathname parameters.
+    params,
+    // (optional) If `getLoadContext()` function is defined,
+    // this will be the result of calling that function.
+    context,
+    // Redux `dispatch()` function.
+    dispatch,
+    // Mimicks Redux `useSelector()` hook.
+    useSelector
+  }) {
     if (process.env.NODE_ENV === 'production') {
       // Set up Google Analytics via `gtag`.
       gtag('config', configuration.googleAnalytics.id, {
@@ -1961,6 +2025,10 @@ await render(settings, {
 })
 ```
 </details>
+
+`onNavigate()` function option only gets called after the navigation has finished.
+
+If navigation start events are of interest, one may supply `onBeforeNavigate()` function option, which is basically the same as `onNavigate()` but runs before the navigation has started. Another minor difference is that it doesn't receive the `url` parameter due to it not being used.
 
 ### Get current location
 
@@ -2003,6 +2071,15 @@ import { useSelectorForLocation } from 'react-pages'
 const propertyValue = useSelectorForLocation(state => state.reducerName.propertyName)
 ```
 
+### Get last location in the navigation chain
+
+`useNavigationLocation` hook returns "navigation location" — the last location (so far) in the navigation chain:
+
+* When a user starts navigating to a page, the "navigation location" set to that new page's location.
+* If there's an error during said navigation, the "navigation location" is reset back to the current page's location.
+
+`useSelectorForLocation` hook uses `useNavigationLocation` under the hood.
+
 ### Get current route
 
 Inside a `load` function: you already know what route it is.
@@ -2023,68 +2100,77 @@ A `route` has:
 
 ### Changing current location
 
-To navigate to a different URL, one could `dispatch()` a `goto(location)` action or a `redirect(location)` action. It works both on client and server.
+To navigate to a different URL, use `useNavigation()` hook.
 
 ```javascript
-import { goto, redirect } from 'react-pages'
-import { useDispatch } from 'react-redux'
+import { useNavigate, useRedirect } from 'react-pages'
 
 // Usage example.
-// * `goto` navigates to a URL while adding a new entry in browsing history.
+// * `navigate` navigates to a URL while adding a new entry in browsing history.
 // * `redirect` does the same replacing the current entry in browsing history.
 function Page() {
-  const dispatch = useDispatch()
+  const navigate = useNavigate()
+  // const redirect = useRedirect()
   const onClick = (event) => {
-    dispatch(goto('/items/1?color=red'))
-    // dispatch(redirect('/somewhere'))
+    navigate('/items/1?color=red')
+    // redirect('/somewhere')
   }
 }
 ```
 
 <!--
-Advanced: `goto()` can also take `{ instantBack: true }` option.
+Advanced: `navigate()` also accepts `{ instantBack: true }` option.
 -->
 
-One could also pass a `load: false` option to `goto(location, options)` or `redirect(location, options)` to skip the `.load()` function of the target page.
+One could also pass a `load: false` option to `navigate(location, options)` or `redirect(location, options)` to skip the `.load()` function of the target page.
 
-If the current location URL needs to be updated while still staying at the same page (i.e. no navigation should take place), then instead of `dispatch()`ing a `goto(location)` action or a `redirect(location)` action, one should `dispatch()` a `pushLocation(location)` action or a `replaceLocation(location)` action respectively.
+If the current location URL needs to be updated while still staying at the same page (i.e. no navigation should take place), then instead of `redirect(location, options)` one should call `locationHistory.replace(location)`.
 
 ```javascript
-import { useDispatch } from 'react-redux'
-import { pushLocation, replaceLocation } from 'react-pages'
+import { useLocationHistory } from 'react-pages'
 
 function Page() {
-  const dispatch = useDispatch()
-  const onSearch = (query) => {
+  const locationHistory = useLocationHistory()
+
+  // * `locationHistory.push(location)`
+  // * `locationHistory.replace(location)`
+  // * `locationHistory.go(-1)`
+
+  const onSearch = (searchQuery) => {
     dispatch(
-      pushLocation({
+      locationHistory.replace({
         pathname: '/'
         query: {
-          query
+          searchQuery
         }
       })
     )
   }
+  return (
+    <input onChange={onSearch}/>
+  )
 }
 ```
 
-To go "Back" or "Forward", one could `dispatch()` a `goBack()` action or a `goForward()` action.
+To go "Back" or "Forward", one could use `useGoBack()` or `useGoForward()` hooks.
 
 ```javascript
-import { useDispatch } from 'react-redux'
-import { goBack, goBackTwoPages, goForward } from 'react-pages'
+import { useLocationHistory } from 'react-pages'
 
 function Page() {
-  const dispatch = useDispatch()
+  const goBack = useGoBack()
+  const goForward = useGoForward()
   return (
-    <button onClick={() => dispatch(goBack())}>
+    <button onClick={() => goBack()}>
       Back
     </button>
   )
 }
 ```
 
-If someone prefers interacting with [`found`](https://github.com/4Catalyzer/found) `router` directly then it could be accessed at any page: either as a `router` property of a page component or via [`useRouter`](https://github.com/4Catalyzer/found#programmatic-navigation) hook.
+Both `goBack()` and `goForward()` functions accept an optional `delta` numeric argument that tells how far should it "go" in terms of the number of entries in the history. The default `delta` is `1`.
+
+If someone prefers to interact with [`found`](https://github.com/4Catalyzer/found) `router` directly then it could be accessed at any page: either as a `router` property of a page component or via [`useRouter`](https://github.com/4Catalyzer/found#programmatic-navigation) hook.
 
 ```js
 import React from 'react'
@@ -2454,9 +2540,16 @@ If the application is being built with a bundler (most likely Webpack) and Serve
 
 Code splitting is supported. See [README-CODE-SPLITTING](https://gitlab.com/catamphetamine/react-pages/blob/master/README-CODE-SPLITTING.md)
 
-## `Accept-Language` and `User-Agent` HTTP headers
+## Get cookies and HTTP headers on server side
 
-When server-side rendering is enabled `Accept-Language` and `User-Agent` HTTP headers are accessible inside `getInitialState({ cookies, headers, locales })` function which can be passed as an option to `webpageServer(settings, options)`. `locales` are parsed from the `Accept-Language` HTTP header.
+When server-side rendering is enabled, one can pass a `getInitialState()` function as an option to the server-side rendering function.
+
+That function should return an object — the initial Redux state — based on its parameters:
+* `cookies` — Cookies JSON object.
+* `headers` — HTTP request headers JSON object.
+* `locales` — A list of locales parsed from `Accept-Language` HTTP header and ordered by most-preferred ones first.
+
+For example, the application could set `defaultLocale` initial state property based on the `Accept-Language` HTTP header value, or it could set `device` initial state property based on the `User-Agent` HTTP header value.
 
 ## Known Issues
 
