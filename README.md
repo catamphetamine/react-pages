@@ -69,9 +69,6 @@ The `routes`:
 #### ./src/routes.js
 
 ```js
-import React from 'react'
-import { Route } from 'react-pages'
-
 import App from '../pages/App.js'
 import Item from '../pages/Item.js'
 import Items from '../pages/Items.js'
