@@ -1,3 +1,6 @@
+import type { Match, LocationDescriptor } from '@catamphetamine/found';
+// import type { Match, LocationDescriptor } from 'found';
+
 import type {
 	Location,
 	HttpClient
@@ -55,12 +58,16 @@ export class ReduxModule<State = any, Action extends ReduxAction<string> = Unkno
 
 export function underscoredToCamelCase(string: string): string;
 
-export const Link: (props: object) => JSX.Element;
+export const Link: React.FC;
 
 export function getCookie(name: string): string | undefined;
 
 // `<Redirect/>` route.
-export const Redirect: (props: object) => JSX.Element;
+export interface Redirect {
+	path?: string;
+	to: string | ((match: Match) => LocationDescriptor);
+	status?: number;
+}
 
 // Returns a `found` router object.
 export function useRouter(): object;

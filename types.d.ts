@@ -1,4 +1,4 @@
-import type { Route } from '@catamphetamine/found';
+// import type { Route } from '@catamphetamine/found';
 // import type { Route } from 'found';
 
 import type {
@@ -27,7 +27,33 @@ interface HttpClient {
 // `superagent` request.
 type HttpRequest_ = object;
 
-interface SettingsBase<State, Action extends ReduxAction<string>> {
+interface RouteWithOrWithoutCodeSplit<State, Action extends ReduxAction<string>, Context> {
+	path?: string;
+
+	Component?: React.FC;
+	getComponent?: () => Promise<React.FC>;
+
+	meta?: (state: State) => object;
+
+	load?: (parameters: {
+		dispatch: Dispatch<Action>,
+		useSelector: TypedUseSelectorHook<State>,
+		params: object,
+		location: Location,
+		context?: Context,
+		history: {
+			route: string,
+			action: string
+		}[],
+		server: boolean,
+		getCookie: (name: string) => string | undefined
+	}) => Promise<void>;
+
+	children?: RouteWithOrWithoutCodeSplit<State, Action, Context>[];
+}
+
+export interface Settings<State, Action extends ReduxAction<string>, Context> {
+	routes: RouteWithOrWithoutCodeSplit<State, Action, Context>[];
 	reducers?: Record<string, Reducer>;
 	reduxMiddleware?: Middleware[];
 	reduxStoreEnhancers?: StoreEnhancer[];
@@ -72,20 +98,9 @@ interface SettingsBase<State, Action extends ReduxAction<string>> {
 
 	// Deprecated?
 	getLocale?: (state: State) => string;
-}
 
-interface SettingsNoCodeSplit<State, Action extends ReduxAction<string>> extends SettingsBase<State, Action> {
-	routes: Route[];
+	codeSplit?: true;
 }
-
-interface SettingsCodeSplit<State, Action extends ReduxAction<string>, Context> extends SettingsBase<State, Action> {
-	routes: RouteCodeSplitting<State, Action, Context>[];
-	codeSplit: true;
-}
-
-export type Settings<State, Action extends ReduxAction<string>, Context> =
-	SettingsNoCodeSplit<State, Action> |
-	SettingsCodeSplit<State, Action, Context>;
 
 // import { LocationDescriptor } from '@catamphetamine/farce';
 // import { LocationDescriptor } from 'farce';
@@ -97,30 +112,4 @@ export interface Location {
 	pathname: string;
 	search?: string;
 	hash?: string;
-}
-
-// interface Route {
-// 	path: string;
-// 	Component: () => JSX.Element;
-// }
-
-interface RouteCodeSplitting<State, Action extends ReduxAction<string>, Context> {
-	path: string;
-	getComponent: () => Promise<() => JSX.Element>;
-
-	meta: (state: State) => object;
-
-	load: (parameters: {
-		dispatch: Dispatch<Action>,
-		useSelector: TypedUseSelectorHook<State>,
-		params: object,
-		location: Location,
-		context?: Context,
-		history: {
-			route: string,
-			action: string
-		}[],
-		server: boolean,
-		getCookie: (name: string) => string | undefined
-	}) => Promise<void>;
 }
