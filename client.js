@@ -11,4 +11,6 @@
 // So, the client-side rendering function was moved to a separate `/client` subpackage.
 //
 export { default as render } from './lib/redux/client/setUpAndRender.js'
-export { default as createStore } from './lib/redux/client/createStore.js'
+
+// Looks like the `createStore()` function export is deprecated due to being unused.
+// export { default as createStore } from './lib/redux/client/createStore.js'
