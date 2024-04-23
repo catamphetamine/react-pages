@@ -2119,7 +2119,9 @@ function Page() {
 Advanced: `navigate()` also accepts `{ instantBack: true }` option.
 -->
 
-One could also pass a `load: false` option to `navigate(location, options)` or `redirect(location, options)` to skip the `.load()` function of the target page.
+* One could also pass a `load: false` parameter in `options` when calling `navigate(location, options)` or `redirect(location, options)` to skip the `.load()` function of the target page.
+
+* One could also pass a `navigation` parameter in `options` when calling `navigate(location, options)` or `redirect(location, options)` to pass an additional parameter called `navigationContext` to the `.load()` function of the target page.
 
 If the current location URL needs to be updated while still staying at the same page (i.e. no navigation should take place), then instead of `redirect(location, options)` one should call `locationHistory.replace(location)`.
 

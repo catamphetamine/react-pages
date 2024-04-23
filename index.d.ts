@@ -21,6 +21,7 @@ export interface LocationHistory {
 export interface NavigateOptions {
 	load?: boolean;
 	instantBack?: boolean;
+	context?: any;
 }
 
 export interface RedirectOptions {
