@@ -8,6 +8,7 @@ import type {
 
 import type {
 	Action as ReduxAction,
+	ActionCreator,
 	Reducer,
 	UnknownAction
 } from 'redux';
@@ -50,10 +51,10 @@ export class ReduxModule<State = any, Action extends ReduxAction<string> = Unkno
 	replace(event: string, handler: Reducer): void;
 	// Adds an event handler with a custom one.
 	on(namespace: string, event: string, handler: Reducer): void;
-	action(event: string, action: ReduxModuleAsyncAction, result: ReduxModuleActionResultApplier): object;
-	action(action: ReduxModuleAsyncAction, result: ReduxModuleActionResultApplier): object;
-	simpleAction(event: string, result: ReduxModuleActionResultApplier): object;
-	simpleAction(result: ReduxModuleActionResultApplier): object;
+	action(event: string, action: ReduxModuleAsyncAction, result: ReduxModuleActionResultApplier): ActionCreator<Action>;
+	action(action: ReduxModuleAsyncAction, result: ReduxModuleActionResultApplier): ActionCreator<Action>;
+	simpleAction(event: string, result: ReduxModuleActionResultApplier): ActionCreator<Action>;
+	simpleAction(result: ReduxModuleActionResultApplier): ActionCreator<Action>;
 	reducer(initialState?: object): Reducer<State, Action>;
 }
 
