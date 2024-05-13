@@ -674,7 +674,7 @@ const { status, content, contentType } = renderError(error)
   // http://www.lunametrics.com/blog/2015/04/17/strip-query-parameters-google-analytics/
   // The "hash" part should also be stripped manually inside `onNavigate` function
   // because someone somewhere someday might make use of those "hashes".
-  onNavigate: ({ url, location, params, dispatch, useSelector }) => {}
+  onPageRendered: ({ location, params, dispatch, useSelector }) => {}
 
   // (optional)
   // Same as `onNavigate()` but fires when a user performs navigation (not after it).

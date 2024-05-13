@@ -551,9 +551,15 @@ Page.load = async (utility) => {
     // `getLoadContext()` function recevies an argument object: `{ dispatch }`.
     // `getLoadContext()` function should return a "load context" object.
     //
-    // Miscellaneous: `context` parameter will also be passed to `onNavigate()`/`onBeforeNavigate()` functions.
+    // Miscellaneous: `context` parameter will also be passed to `onPageRendered()`/`onBeforeNavigate()` functions.
     //
     context,
+
+    // (optional)
+    // A `context` parameter could be passed to the functions
+    // returned from `useNavigation()` hooks. When passed, that parameter
+    // will be available inside the `.load()` function of the page as `navigationContext` parameter.
+    navigationContext,
 
     // Current page location (object).
     location,
@@ -814,19 +820,19 @@ There's also a `canGoBackInstantly()` function (on client side) that tells if th
 
 There's also a `canGoForwardInstantly()` function (analogous to `canGoBackInstantly()`).
 
+<!--
 There's also an `isInstantBackAbleNavigation()` function (on client side) which tells if the currently ongoing navigation process is performed with `instantBack` option: for example, if `<Link instantBack/>` is clicked, or when `navigate(location, { instantBack: true })` returned from `useNavigate()` hook is called. It can be used in a `useNavigationStartEffect()` hook to save the current page state for later restoring it if the user navigates "Back" instantly.
 
 ```js
-import { useNavigationStartEffect, isInstantBackAbleNavigation } from 'react-pages'
+import { useBeforeNavigateToAnotherPage } from 'react-pages'
 
 function Page() {
-  useNavigationStartEffect(() => {
-    if (isInstantBackAbleNavigation()) {
-      // Save the current page state.
-    }
+  useBeforeNavigateToAnotherPage(({ instantBack }) => {
+    // Save the current page state.
   })
 }
 ```
+-->
 </details>
 
 <!--
@@ -1818,7 +1824,7 @@ Page.load = async ({ params }) => {
   }
 }
 
-Page.meta = ({ props, useSelector }) => {
+Page.meta = ({ props, useSelector, usePageStateSelector }) => {
   const notificationsCount = useSelector(state => state.user.notificationsCount)
 
   const { bodyBuilder } = props
@@ -1897,6 +1903,7 @@ The parameters of a `meta` function are:
 
 * `props` — Any `props` returned from the `load()` function.
 * `useSelector` — A hook that could be used to access Redux state.
+* `usePageSelector` — A hook that could be used to access "page-specific" Redux state.
 
 If the root route component also has a `meta` function, the result of the page component's `meta` function will be merged on top of the result of the root route component's `meta` function.
 
@@ -1964,7 +1971,7 @@ updateMeta({
 
 ### Navigation Listener
 
-If the application would like to listen to navigation changes — for example, to report the current location to Google Analytics — it might supply `onNavigate()` function option to the client-side `render()` function:
+If the application would like to listen to navigation changes — for example, to report the current location to Google Analytics — it might supply `onPageRendered()` function option to the client-side `render()` function:
 
 <details>
 <summary>See code example</summary>
@@ -1975,10 +1982,8 @@ If the application would like to listen to navigation changes — for example, t
 import { render } from 'react-pages/client'
 
 await render(settings, {
-  // Runs on the initial page load, and then on each navigation.
-  onNavigate({
-    // Stringified `location` object.
-    url,
+  // Runs on the initial page load, and then after each navigation to some page.
+  onPageRendered({
     // `location` object.
     location,
     // URL pathname parameters.
@@ -2023,9 +2028,9 @@ await render(settings, {
 ```
 </details>
 
-`onNavigate()` function option only gets called after the navigation has finished.
+`onPageRendered()` function option only gets called after the navigation has finished. It also gets called at the initial page load when the user opens the website.
 
-If navigation start events are of interest, one may supply `onBeforeNavigate()` function option, which is basically the same as `onNavigate()` but runs before the navigation has started. Another minor difference is that it doesn't receive the `url` parameter due to it not being used.
+If navigation start events are of interest, one may supply `onBeforeNavigate()` function option, which is basically the same as `onPageRendered()` but runs before the navigation has started.
 
 ### Get current location
 
@@ -2060,13 +2065,61 @@ In the above example, when a user navigates from item `A` to item `B`, there's a
 * Item `A` page is still rendered. `useSelector()` on it gets refreshed with the new data from Redux state and now returns item `B` data while still being on item `A` page.
 * The navigation finishes and item `B` page is rendered. `useSelector()` on it returns item `B` data.
 
-To work around that, one could use `useSelectorForLocation` hook instead of `useSelector`.
+In the steps above, there's a short window of data inconsistency at the step before the last one: the page component experiences a data update from item `A` to item `B`.
+
+If the page component doesn't account for a possibility of such change, it may lead to tricky bugs. For example, each item could have a list of reviews and the page component can be showing one review at a time. To do that, the page component introduces its own local state — a `shownReviewIndex` state variable — and then shows the review via `<Review review={item.reviews[shownReviewIndex]}/>`. In such case, when a user navigates from item `A` that has some reviews to item `B` that has no reviews, the `review` property value is gonna be `undefined` which would break the `<Review/>` component which would crash the whole page and display a blank screen to the user.
+
+To work around such issues, any potentially unexpected updates to Redux state should be minimized inside page components. To do that, this package provides a parameter in the settings called `pageStateReducerNames: string[]` and a set of two hooks that're meant to replace the standard `useSelector()` hook for use in page components.
+
+The standard route configuration usually has a "root" route and all other routes that branch out from it:
 
 ```js
-import { useSelectorForLocation } from 'react-pages'
-
-const propertyValue = useSelectorForLocation(state => state.reducerName.propertyName)
+export default [{
+  path: "/",
+  Component: App,
+  children: [
+    { path: 'not-found', Component: NotFound, status: 404 },
+    { path: 'error', Component: Error, status: 500 },
+    ...
+  ]
+}]
 ```
+
+The `pageStateReducerNames` parameter is specified in the settings and it should be a list of all Redux state keys that get modified from inside page `.load()` functions:
+
+```js
+export default {
+  routes,
+  reducers,
+  pageStateReducerNames: ['orderPage']
+}
+```
+
+Those state keys become inaccessible via the standard `useSelector()` hook and should be accessed via either `usePageStateSelector()` hook or `usePageStateSelectorOutsideOfPage()` hook, depending on where in the route component chain the hook is being called.
+
+Using the hook somewhere inside a page component (or in its children):
+
+```js
+import { usePageStateSelector } from 'react-pages'
+
+export default function Page() {
+  // const order = useSelector(state => state.orderPage.order)
+  const order = usePageStateSelector('orderPage', state => state.orderPage.order)
+  ...
+}
+```
+
+Using the hook somewhere outside a page component:
+
+```js
+export default function Page() {
+  // const order = useSelector(state => state.orderPage.order)
+  const order = usePageStateSelectorOutsideOfPage('orderPage', state => state.orderPage.order)
+  ...
+}
+```
+
+To access "page state" properties in page `.meta()` functions, there's a parameter called `usePageStateSelector` that work analogous to the `usePageStateSelector()` exported hook.
 
 ### Get last location in the navigation chain
 
@@ -2075,7 +2128,7 @@ const propertyValue = useSelectorForLocation(state => state.reducerName.property
 * When a user starts navigating to a page, the "navigation location" set to that new page's location.
 * If there's an error during said navigation, the "navigation location" is reset back to the current page's location.
 
-`useSelectorForLocation` hook uses `useNavigationLocation` under the hood.
+<!-- `useSelectorForLocation` hook uses `useNavigationLocation` under the hood. -->
 
 ### Get current route
 
@@ -2180,6 +2233,74 @@ export default function Component() {
   ...
 }
 ```
+
+### Get notified when navigation starts or ends
+
+```js
+import {
+  // These hooks can only be used in "leaf" route components.
+  useBeforeNavigateToAnotherPage,
+  useBeforeRenderAnotherPage,
+  useAfterRenderedThisPage,
+
+  // These hooks can only be used in a "root" route component.
+  useBeforeRenderNewPage,
+  useAfterRenderedNewPage
+} from 'react-pages'
+
+function Page() {
+  useBeforeNavigateToAnotherPage(({ location, route, params, instantBack, navigationContext }) => {
+    // Navigation to another page is about to start.
+    // It will start `.load()`ing another page.
+    // This is an appropriate time to snapshot the current page state.
+  })
+
+  useBeforeRenderAnotherPage(({ location, route, params, instantBack, navigationContext }) => {
+    // Navigation to another page is about to conclude.
+    // That other page has already been `.load()`ed and is about to be rendered.
+    // The current page is about to be unmounted.
+  })
+
+  useAfterRenderedThisPage(({ location, route, params, instantBack, navigationContext }) => {
+    // This page is currently rendered on screen.
+    // Is triggered at the initial render of the app and then after each navigation.
+  })
+
+  return (
+    <section>
+      <h1>
+        Page Title
+      </h1>
+    </section>
+  )
+}
+
+function Root({ children }) {
+  useBeforeRenderNewPage(({ location, route, params, instantBack, navigationContext }) => {
+    // Will render a new page on screen.
+  })
+
+  useAfterRenderedNewPage(({ location, route, params, instantBack, navigationContext }) => {
+    // Has rendered a new page on screen.
+    // The initial render of the app also counts as "after rendered new page".
+  })
+
+  return (
+    <main>
+      {children}
+    </main>
+  )
+}
+```
+
+<!--
+  import { useAfterNavigatedToAnotherPage } from 'react-pages'
+
+  useAfterNavigatedToAnotherPage(({ location, route, params, instantBack, navigationContext }) => {
+    // Navigation to another page has finished.
+    // The new page has been rendered on screen.
+  })
+-->
 
 ## Monitoring
 

@@ -21,10 +21,16 @@ import {
 	Redirect,
 	useRoute,
 	useRouter,
-	useNavigationStartEffect,
-	useNavigationEndEffect,
+	useBeforeNavigateToAnotherPage,
+	useBeforeRenderAnotherPage,
+	// useAfterNavigatedToAnotherPage,
+	useAfterRenderedThisPage,
+	useBeforeRenderNewPage,
+	useAfterRenderedNewPage,
 	useNavigationLocation,
-	useSelectorForLocation,
+	// useSelectorForLocation,
+	usePageStateSelector,
+	usePageStateSelectorOutsideOfPage,
 	useLocation,
 	useLocationHistory,
 	useGoBack,
@@ -55,8 +61,12 @@ describe(`exports`, function() {
 		Redirect.should.be.a('function')
 		useRoute.should.be.a('function')
 		useRouter.should.be.a('function')
-		useNavigationStartEffect.should.be.a('function')
-		useNavigationEndEffect.should.be.a('function')
+		useBeforeRenderAnotherPage.should.be.a('function')
+		useBeforeNavigateToAnotherPage.should.be.a('function')
+		// useAfterNavigatedToAnotherPage.should.be.a('function')
+		useAfterRenderedThisPage.should.be.a('function')
+		useBeforeRenderNewPage.should.be.a('function')
+		useAfterRenderedNewPage.should.be.a('function')
 
 		getCookie.should.be.a('function')
 		getPreferredLocales.should.be.a('function')
@@ -70,7 +80,9 @@ describe(`exports`, function() {
 		goForward.should.be.a('function')
 
 		useNavigationLocation.should.be.a('function')
-		useSelectorForLocation.should.be.a('function')
+		// useSelectorForLocation.should.be.a('function')
+		usePageStateSelector.should.be.a('function')
+		usePageStateSelectorOutsideOfPage.should.be.a('function')
 		useLocation.should.be.a('function')
 		useLocationHistory.should.be.a('function')
 		useGoBack.should.be.a('function')
@@ -95,8 +107,12 @@ describe(`exports`, function() {
 		Library.Redirect.should.be.a('function')
 		Library.useRoute.should.be.a('function')
 		Library.useRouter.should.be.a('function')
-		Library.useNavigationStartEffect.should.be.a('function')
-		Library.useNavigationEndEffect.should.be.a('function')
+		Library.useBeforeRenderAnotherPage.should.be.a('function')
+		Library.useBeforeNavigateToAnotherPage.should.be.a('function')
+		// Library.useAfterNavigatedToAnotherPage.should.be.a('function')
+		Library.useAfterRenderedThisPage.should.be.a('function')
+		Library.useBeforeRenderNewPage.should.be.a('function')
+		Library.useAfterRenderedNewPage.should.be.a('function')
 
 		Library.getCookie.should.be.a('function')
 		Library.getPreferredLocales.should.be.a('function')
@@ -110,7 +126,9 @@ describe(`exports`, function() {
 		Library.goForward.should.be.a('function')
 
 		Library.useNavigationLocation.should.be.a('function')
-		Library.useSelectorForLocation.should.be.a('function')
+		// Library.useSelectorForLocation.should.be.a('function')
+		Library.usePageStateSelector.should.be.a('function')
+		Library.usePageStateSelectorOutsideOfPage.should.be.a('function')
 		Library.useLocation.should.be.a('function')
 		Library.useLocationHistory.should.be.a('function')
 		Library.useGoBack.should.be.a('function')

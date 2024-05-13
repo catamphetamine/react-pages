@@ -18,6 +18,27 @@ It would just return the base HTML structure without any route-specific stuff.
 
 <!-- Maybe rename `onNavigate()` to `onPageView()`. -->
 
+0.8.0 / 09.05.2024
+==================
+
+* Renamed `onNavigate` client-side render option to `onPageRendered`. Removed `url` parameter from it.
+* Removed hooks:
+  * `useNavigationStartEffect()`
+  * `useNavigationEndEffect()`
+  * `useSelectorForLocation()`
+* Added hooks:
+  * `usePageStateSelector()`
+  * `usePageStateSelectorOutsideOfPage()`
+* Added hooks:
+  * `useBeforeNavigateToAnotherPage()`
+  * `useBeforeRenderAnotherPage()`
+  <!-- * `useAfterNavigatedToAnotherPage()` -->
+  * `useAfterRenderedThisPage()`
+  * `useBeforeRenderNewPage()`
+  * `useAfterRenderedNewPage()`
+* Removed function: `isInstantBackAbleNavigation()`. Use the new `useBeforeNavigateToAnotherPage({ instantBack })` or `useBeforeRenderAnotherPage({ instantBack })` hooks instead.
+* Any actions `dispatch()`ed from `.load()` functions can now only modify the parts of the Redux state that've been explicitly marked as `pageStateReducerNames` in the settings file (`react-pages.js`).
+
 0.7.12 / 26.11.2023
 ==================
 

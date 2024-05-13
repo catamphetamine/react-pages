@@ -24,13 +24,11 @@ type UseSelector = <State>(selector: (state: State) => any) => any;
 
 interface ClientRenderOptions<State, Action extends ReduxAction<string>, Context> {
   // Gets called on the initial page load, and then on each navigation.
-  onNavigate?(parameters: {
-  	// Strigified `location`.
-    url: string,
+  onPageRendered?(parameters: {
     // URL `location`.
     location: Location,
     // URL pathname parameters.
-    params: object,
+    params: Record<string, string>,
     // (optional) If `getLoadContext()` function is defined,
     // this will be the result of calling that function.
     context?: Context,
@@ -46,7 +44,7 @@ interface ClientRenderOptions<State, Action extends ReduxAction<string>, Context
     // URL `location`.
 		location: Location,
     // URL pathname parameters.
-		params: object,
+		params: Record<string, string>,
     // (optional) If `getLoadContext()` function is defined,
     // this will be the result of calling that function.
 		context?: Context,

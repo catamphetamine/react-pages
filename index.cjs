@@ -8,7 +8,6 @@ exports.getPreferredLocales = require('./commonjs/client/locale.js').getPreferre
 exports.getLanguageFromLocale = require('./commonjs/getLanguageFromLocale.js').default;
 
 exports.wasInstantNavigation = require('./commonjs/redux/client/instantNavigation.js').wasInstantNavigation;
-exports.isInstantBackAbleNavigation = require('./commonjs/redux/client/instantNavigation.js').isInstantBackAbleNavigation;
 exports.canGoBackInstantly = require('./commonjs/redux/client/instantNavigation.js').canGoBackInstantly;
 exports.canGoForwardInstantly = require('./commonjs/redux/client/instantNavigation.js').canGoForwardInstantly;
 
@@ -38,9 +37,15 @@ exports.useGoBack = require('./commonjs/router/useGoBack.js').default;
 exports.useGoForward = require('./commonjs/router/useGoForward.js').default;
 exports.useNavigate = require('./commonjs/router/useNavigate.js').default;
 exports.useRedirect = require('./commonjs/router/useRedirect.js').default;
-exports.useSelectorForLocation = require('./commonjs/redux/useSelectorForLocation.js').default;
-exports.useNavigationStartEffect = require('./commonjs/router/useNavigationStartEffect.js').default;
-exports.useNavigationEndEffect = require('./commonjs/router/useNavigationEndEffect.js').default;
+// exports.useSelectorForLocation = require('./commonjs/redux/useSelectorForLocation.js').default;
+exports.usePageStateSelector = require('./commonjs/redux/usePageStateSelector.js').default;
+exports.usePageStateSelectorOutsideOfPage = require('./commonjs/redux/usePageStateSelectorOutsideOfPage.js').default;
+exports.useBeforeNavigateToAnotherPage = require('./commonjs/router/useBeforeNavigateToAnotherPage.js').default;
+exports.useBeforeRenderAnotherPage = require('./commonjs/router/useBeforeRenderAnotherPage.js').default;
+// exports.useAfterNavigatedToAnotherPage = require('./commonjs/router/useAfterNavigatedToAnotherPage.js').default;
+exports.useAfterRenderedThisPage = require('./commonjs/router/useAfterRenderedThisPage.js').default;
+exports.useBeforeRenderNewPage = require('./commonjs/router/useBeforeRenderNewPage.js').default;
+exports.useAfterRenderedNewPage = require('./commonjs/router/useAfterRenderedNewPage.js').default;
 exports.useNavigationLocation = require('./commonjs/redux/navigation/useNavigationLocation.js').default;
 exports.useRoute = require('./commonjs/router/useRoute.js').default;
 

@@ -1,5 +1,4 @@
 import type {
-	// Location,
 	Settings
 } from './types.d.js'
 

@@ -1,4 +1,4 @@
-// `lib/router/client/createRouterElement.js`
+// `lib/router/client/Router.js`
 //   `import` `found-scroll`
 //     `import` `scroll-behavior`
 //       `import` `page-lifecycle/dist/lifecycle.es5.js` (regardless of CommonJS or ESM)
