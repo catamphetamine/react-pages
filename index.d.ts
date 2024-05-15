@@ -140,7 +140,7 @@ export interface NavigationHistory {
 	action: 'start' | 'push' | 'redirect' | 'back' | 'forward';
 }
 
-export type PageLoadFunction<State = any, LoadContext = any, NavigationContext = any> = (parameters: {
+export type PageLoadFunction<Props = Record<string, any>, State = any, LoadContext = any, NavigationContext = any> = (parameters: {
   dispatch: Dispatch,
   useSelector: TypedUseSelectorHook<State>,
   context?: LoadContext,
@@ -151,7 +151,7 @@ export type PageLoadFunction<State = any, LoadContext = any, NavigationContext =
   server: boolean;
   getCookie: (name: string) => string | null;
 }) => Promise<{
-	props?: Record<string, any>,
+	props?: Props,
 	redirect?: {
 		url: string
 	}
@@ -172,7 +172,7 @@ type PageMetaValue = string | number | boolean;
 // Arrays of objects are expanded: `[{ a: { b: 'c' } }, { a: { b: 'd' } }]` becomes `<meta property="a:b" content="c"/>` and `<meta property="a:b" content="d"/>`.
 type PageMetaObject = Record<string, PageMetaValue>;
 
-export type PageMetaFunction<State = any, PageStateReducerName = string, Props = Record<string, any>> = (parameters: {
+export type PageMetaFunction<Props = Record<string, any>, State = any, PageStateReducerName = string> = (parameters: {
 	props: Props,
 	useSelector: TypedUseSelectorHook<State>,
 	usePageStateSelector: (reducerName: PageStateReducerName, selector: (state: State) => unknown) => any
