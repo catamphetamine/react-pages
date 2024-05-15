@@ -2276,13 +2276,17 @@ function Page() {
 }
 
 function Root({ children }) {
-  useBeforeRenderNewPage(({ location, route, params, instantBack, navigationContext }) => {
+  useBeforeRenderNewPage((newPage, prevPage?) => {
     // Will render a new page on screen.
+    //
+    // const { location, route, params, instantBack, navigationContext } = newPage
   })
 
-  useAfterRenderedNewPage(({ location, route, params, instantBack, navigationContext }) => {
+  useAfterRenderedNewPage((newPage, prevPage?) => {
     // Has rendered a new page on screen.
     // The initial render of the app also counts as "after rendered new page".
+    //
+    // const { location, route, params, instantBack, navigationContext } = newPage
   })
 
   return (

@@ -110,12 +110,20 @@ export function goBack(): object;
 export function goBackTwoPages(): object;
 export function goForward(): object;
 
-export function useBeforeNavigateToAnotherPage<NavigationContext = any>(callback: (parameters: { location: Location, route: string, params: Record<string, string>, instantBack: boolean, navigationContext?: NavigationContext }) => void): void;
-export function useBeforeRenderAnotherPage<NavigationContext = any>(callback: (parameters: { location: Location, route: string, params: Record<string, string>, instantBack: boolean, navigationContext?: NavigationContext }) => void): void;
-// export function useAfterNavigatedToAnotherPage<NavigationContext = any>(callback: (parameters: { location: Location, route: string, params: Record<string, string>, instantBack: boolean, navigationContext?: NavigationContext }) => void): void;
-export function useAfterRenderedThisPage<NavigationContext = any>(callback: (parameters: { location: Location, route: string, params: Record<string, string>, instantBack: boolean, navigationContext?: NavigationContext }) => void): void;
-export function useBeforeRenderNewPage<NavigationContext = any>(callback: (parameters: { location: Location, route: string, params: Record<string, string>, instantBack: boolean, navigationContext?: NavigationContext }) => void): void;
-export function useAfterRenderedNewPage<NavigationContext = any>(callback: (parameters: { location: Location, route: string, params: Record<string, string>, instantBack: boolean, navigationContext?: NavigationContext }) => void): void;
+export interface NavigationPage<NavigationContext> {
+	location: Location;
+	route: string;
+	params: Record<string, string>;
+	instantBack: boolean;
+	navigationContext?: NavigationContext;
+}
+
+export function useBeforeNavigateToAnotherPage<NavigationContext = any>(callback: (newPage: NavigationPage<NavigationContext>) => void): void;
+export function useBeforeRenderAnotherPage<NavigationContext = any>(callback: (newPage: NavigationPage<NavigationContext>) => void): void;
+// export function useAfterNavigatedToAnotherPage<NavigationContext = any>(callback: (newPage: NavigationPage<NavigationContext>) => void): void;
+export function useAfterRenderedThisPage<NavigationContext = any>(callback: (newPage: NavigationPage<NavigationContext>) => void): void;
+export function useBeforeRenderNewPage<NavigationContext = any>(callback: (newPage: NavigationPage<NavigationContext>, prevPage?: NavigationPage<NavigationContext>) => void): void;
+export function useAfterRenderedNewPage<NavigationContext = any>(callback: (newPage: NavigationPage<NavigationContext>, prevPage?: NavigationPage<NavigationContext>) => void): void;
 export function useNavigationLocation(): LocationBasic;
 // export function useSelectorForLocation(selector: (state: any) => unknown): any;
 export function usePageStateSelector<State = any, PageStateReducerName = string, Selector extends (state: State) => unknown = (state: State) => unknown>(reducerName: PageStateReducerName, selector: Selector): ReturnType<Selector>;
