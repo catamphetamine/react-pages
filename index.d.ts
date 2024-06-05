@@ -83,8 +83,9 @@ export class ReduxModule<State = any, Action extends ReduxAction<string> = Unkno
 
 export function underscoredToCamelCase(string: string): string;
 
-interface LinkProps extends React.AnchorHTMLAttributes<HTMLAnchorElement> {
+interface LinkProps<NavigationContext = any> extends React.AnchorHTMLAttributes<HTMLAnchorElement> {
 	to: string | LocationInput;
+	navigationContext?: NavigationContext;
 }
 
 export const Link: React.ForwardRefExoticComponent<LinkProps & React.RefAttributes<HTMLAnchorElement>>;
@@ -101,7 +102,19 @@ export interface Redirect {
 // Returns a `found` router object.
 export function useRouter(): object;
 
-// Deprecated Redux action creator functions.
+// These are "older" ways of `dispatch()`-ing Redux actions to perform a navigation action.
+// In React components code, consider using the corresponding hooks instead.
+//
+// These Redux action creators are still not removed though:
+//
+// * Older projects might still be using them. By not removing those actions,
+//   the migration path is easier for those "legacy" projects.
+//
+// * In some edge cases, it may be required to perform a navigation action from somewhere
+//   outside of any React component: for example, from a Redux "middleware".
+//   For example, one could be using `import { isRejectedWithValue } from '@reduxjs/toolkit'`
+//   in order to detect errors and then redirect to the `/error` page if there was an error.
+//
 export function goto(location: LocationInput, options?: NavigateOptions): object;
 export function redirect(location: LocationInput, options?: RedirectOptions): object;
 export function pushLocation(location: LocationInput, options?: NavigateOptions): object;

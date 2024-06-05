@@ -25,6 +25,8 @@ type UseSelector = <State>(selector: (state: State) => any) => any;
 interface ClientRenderOptions<State, Action extends ReduxAction<string>, Context> {
   // Gets called on the initial page load, and then on each navigation.
   onPageRendered?(parameters: {
+    // Relative URL.
+    url: string,
     // URL `location`.
     location: Location,
     // URL pathname parameters.

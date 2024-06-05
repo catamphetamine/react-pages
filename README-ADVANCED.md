@@ -395,7 +395,7 @@ const { status, content, contentType } = renderError(error)
 
     // (optional)
     // Catches all HTTP errors that weren't thrown from `load()` functions.
-    onError: (error, { location, url, redirect, dispatch, useSelector }) => {
+    onError: (error, { url, location, redirect, dispatch, useSelector }) => {
       if (isSomeParticularError(error)) {
         redirect('/some-particular-error')
         // `return true` indicates that the error has been handled by the developer
@@ -674,12 +674,12 @@ const { status, content, contentType } = renderError(error)
   // http://www.lunametrics.com/blog/2015/04/17/strip-query-parameters-google-analytics/
   // The "hash" part should also be stripped manually inside `onNavigate` function
   // because someone somewhere someday might make use of those "hashes".
-  onPageRendered: ({ location, params, dispatch, useSelector }) => {}
+  onPageRendered: ({ url, location, params, dispatch, useSelector }) => {}
 
   // (optional)
   // Same as `onNavigate()` but fires when a user performs navigation (not after it).
   // Only on client side.
-  onBeforeNavigate: ({ location, params, dispatch, useSelector }) => {}
+  onBeforeNavigate: ({ url, location, params, dispatch, useSelector }) => {}
 
   // (optional)
   // Is called as soon as Redux store is created.

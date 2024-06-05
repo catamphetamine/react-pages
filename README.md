@@ -623,7 +623,7 @@ To catch all errors originating in `load()` functions, specify an `onLoadError()
 
 ```js
 {
-  onLoadError: (error, { location, url, redirect, useSelector, server }) => {
+  onLoadError: (error, { url, location, redirect, useSelector, server }) => {
     redirect(`/error?url=${encodeURIComponent(url)}&error=${error.status}`)
   }
 }
@@ -1363,7 +1363,7 @@ A real-world (advanced) example for handling "Unauthenticated"/"Unauthorized" er
 {
   ...,
   // Catches errors thrown from page `load()` functions.
-  onLoadError(error, { location, url, redirect, dispatch, useSelector, server }) {
+  onLoadError(error, { url, location, redirect, dispatch, useSelector, server }) {
     // Not authenticated
     if (error.status === 401) {
       return handleUnauthenticatedError(error, url, redirect);
@@ -1395,7 +1395,7 @@ A real-world (advanced) example for handling "Unauthenticated"/"Unauthorized" er
 
   http: {
     // Catches all HTTP errors that weren't thrown from `load()` functions.
-    onError(error, { location, url, redirect, dispatch, useSelector }) {
+    onError(error, { url, location, redirect, dispatch, useSelector }) {
       // JWT token expired, the user needs to relogin.
       if (error.status === 401) {
         handleUnauthenticatedError(error, url, redirect);
@@ -1447,7 +1447,7 @@ To listen for `http` errors, one may specify two functions in `react-pages.js` c
   http: {
     // (optional)
     // Catches all HTTP errors that weren't thrown from `load()` functions.
-    onError(error, { location, url, redirect, dispatch, useSelector }) {
+    onError(error, { url, location, redirect, dispatch, useSelector }) {
       if (error.status === 401) {
         redirect('/not-authenticated')
         // `return true` indicates that the error has been handled by the developer
@@ -1984,6 +1984,8 @@ import { render } from 'react-pages/client'
 await render(settings, {
   // Runs on the initial page load, and then after each navigation to some page.
   onPageRendered({
+    // Relative URL.
+    url,
     // `location` object.
     location,
     // URL pathname parameters.
@@ -2150,7 +2152,7 @@ A `route` has:
 
 ### Changing current location
 
-To navigate to a different URL, use `useNavigation()` hook.
+To navigate to a different URL inside a React component, use `useNavigation()` hook.
 
 ```javascript
 import { useNavigate, useRedirect } from 'react-pages'
@@ -2233,6 +2235,18 @@ export default function Component() {
   ...
 }
 ```
+
+### Changing current location (outside of React component code)
+
+In places where React hooks can't be used, there're `dispatch()`-able action creator alternatives to each navigation type. Those action creators are exported from this package: `import { goto } from "react-pages"`.
+
+* `dispatch(goto())` → `useNavigate()()`
+* `dispatch(redirect())` → `useRedirect()()`
+* `dispatch(pushLocation())` → `useLocationHistory().push()`
+* `dispatch(replaceLocation())` → `useLocationHistory().replace()`
+* `dispatch(goBack())` → `useGoBack()()`
+* `dispatch(goBackTwoPages())` → `2x` `useGoBack()()`
+* `dispatch(goForward())` → `useGoForward()()`
 
 ### Get notified when navigation starts or ends
 

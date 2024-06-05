@@ -21,7 +21,7 @@ It would just return the base HTML structure without any route-specific stuff.
 0.8.0 / 09.05.2024
 ==================
 
-* Renamed `onNavigate` client-side render option to `onPageRendered`. Removed `url` parameter from it.
+* Renamed `onNavigate` client-side render option to `onPageRendered`.
 * Removed hooks:
   * `useNavigationStartEffect()`
   * `useNavigationEndEffect()`
@@ -37,17 +37,19 @@ It would just return the base HTML structure without any route-specific stuff.
   * `useBeforeRenderNewPage()`
   * `useAfterRenderedNewPage()`
 * Removed function: `isInstantBackAbleNavigation()`. Use the new `useBeforeNavigateToAnotherPage({ instantBack })` or `useBeforeRenderAnotherPage({ instantBack })` hooks instead.
-* Any actions `dispatch()`ed from `.load()` functions can now only modify the parts of the Redux state that've been explicitly marked as `pageStateReducerNames` in the settings file (`react-pages.js`).
+<!-- * Any actions `dispatch()`ed from `.load()` functions can now only modify the parts of the Redux state that've been explicitly marked as `pageStateReducerNames` in the settings file (`react-pages.js`). -->
 
 0.7.12 / 26.11.2023
 ==================
 
-* Replaced `dispatch(goto())` with `useNavigate()()`.
-* Replaced `dispatch(redirect())` with `useRedirect()()`.
-* Replaced `dispatch(pushLocation())` with `useLocationHistory().push()`.
-* Replaced `dispatch(replaceLocation())` with `useLocationHistory().replace()`.
-* Replaced `dispatch(goBack())` with `useGoBack()()`.
-* Replaced `dispatch(goForward())` with `useGoForward()()`.
+Added React hook alternatives to `dispatch()`-able navigation actions. The rationale is that in React components code writing `const goto = useNavigate()` and then `goto('/page')` a little bit cleaner than writing `const dispatch = useDispatch()` and then `dispatch(goto('/page'))`.
+
+* `dispatch(goto())` → `useNavigate()()`
+* `dispatch(redirect())` → `useRedirect()()`
+* `dispatch(pushLocation())` → `useLocationHistory().push()`
+* `dispatch(replaceLocation())` → `useLocationHistory().replace()`
+* `dispatch(goBack())` → `useGoBack()()`
+* `dispatch(goForward())` → `useGoForward()()`
 
 0.7.0 / 22.05.2023
 ==================
