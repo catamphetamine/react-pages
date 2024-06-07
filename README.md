@@ -2130,8 +2130,6 @@ To access "page state" properties in page `.meta()` functions, there's a paramet
 * When a user starts navigating to a page, the "navigation location" set to that new page's location.
 * If there's an error during said navigation, the "navigation location" is reset back to the current page's location.
 
-<!-- `useSelectorForLocation` hook uses `useNavigationLocation` under the hood. -->
-
 ### Get current route
 
 Inside a `load` function: you already know what route it is.

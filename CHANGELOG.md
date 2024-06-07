@@ -18,6 +18,12 @@ It would just return the base HTML structure without any route-specific stuff.
 
 <!-- Maybe rename `onNavigate()` to `onPageView()`. -->
 
+0.8.6 / 05.06.2024
+==================
+
+* Changed the `location` object that is returned from `useNavigationLocation()` hook.
+  * If anyone used `useNavigationLocation()` to get a `url: string` from it then that URL might've changed if the "get URL" function prepends `location.origin` to it.
+
 0.8.0 / 09.05.2024
 ==================
 

@@ -28,7 +28,6 @@ import {
 	useBeforeRenderNewPage,
 	useAfterRenderedNewPage,
 	useNavigationLocation,
-	// useSelectorForLocation,
 	usePageStateSelector,
 	usePageStateSelectorOutsideOfPage,
 	useLocation,
@@ -80,7 +79,6 @@ describe(`exports`, function() {
 		goForward.should.be.a('function')
 
 		useNavigationLocation.should.be.a('function')
-		// useSelectorForLocation.should.be.a('function')
 		usePageStateSelector.should.be.a('function')
 		usePageStateSelectorOutsideOfPage.should.be.a('function')
 		useLocation.should.be.a('function')
@@ -126,7 +124,6 @@ describe(`exports`, function() {
 		Library.goForward.should.be.a('function')
 
 		Library.useNavigationLocation.should.be.a('function')
-		// Library.useSelectorForLocation.should.be.a('function')
 		Library.usePageStateSelector.should.be.a('function')
 		Library.usePageStateSelectorOutsideOfPage.should.be.a('function')
 		Library.useLocation.should.be.a('function')

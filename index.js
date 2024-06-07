@@ -56,7 +56,6 @@ export { default as useAfterRenderedThisPage } from './lib/router/useAfterRender
 export { default as useBeforeRenderNewPage } from './lib/router/useBeforeRenderNewPage.js'
 export { default as useAfterRenderedNewPage } from './lib/router/useAfterRenderedNewPage.js'
 export { default as useNavigationLocation } from './lib/redux/navigation/useNavigationLocation.js'
-// export { default as useSelectorForLocation } from './lib/redux/useSelectorForLocation.js'
 export { default as usePageStateSelector } from './lib/redux/usePageStateSelector.js'
 export { default as usePageStateSelectorOutsideOfPage } from './lib/redux/usePageStateSelectorOutsideOfPage.js'
 export { default as useLocation } from './lib/router/useLocation.js'

@@ -1,4 +1,4 @@
-import type { Match, LocationDescriptor, RouteObject as Route } from '@catamphetamine/found';
+import type { Match, LocationDescriptor, RouteObject as Route, useRouter as useRouterFromFound } from '@catamphetamine/found';
 // import type { Match, LocationDescriptor } from 'found';
 
 export type { RouteObject as Route } from '@catamphetamine/found';
@@ -18,7 +18,6 @@ import type {
 import type {
 	Location,
 	LocationInput,
-	LocationBasic,
 	HttpClient
 } from './types.d.js';
 
@@ -59,26 +58,27 @@ export function canGoForwardInstantly(): boolean;
 
 type ReduxModuleActionResultApplier<State, Parameters extends any[]> = string | ReduxModuleActionResultApplierFunction<State, Parameters>;
 
-interface ReduxModuleActionResultApplierFunction<State, Parameters extends any[] = any[]> {
-	(state: State, ...args: Parameters): State
-}
+type ReduxModuleActionResultApplierFunction<State, Parameters extends any[] = any[]> = (state: State, ...args: Parameters) => State
 
-interface ReduxModuleAsyncAction<ReturnType, Parameters extends any[] = any[]> {
-	(...args: Parameters): () => Promise<ReturnType>
-}
+type ReduxModuleAsyncAction<ReturnType, Parameters extends any[] = any[]> = (...args: Parameters) => (http: HttpClient) => Promise<ReturnType>
+
+export type Settings = Record<string, any>
 
 export class ReduxModule<State = any, Action extends ReduxAction<string> = UnknownAction> {
-	constructor(namespace?: string, settings?: object);
+	constructor(namespace?: string, settings?: Settings);
 	// Deprecated?
 	// Replaces an event handler with a custom one.
 	replace(event: string, handler: Reducer): void;
 	// Adds an event handler with a custom one.
 	on(namespace: string, event: string, handler: Reducer): void;
+	on(namespaceAndEvent: string, handler: Reducer): void;
 	action<Parameters extends any[], Result>(event: string, action: ReduxModuleAsyncAction<Result, Parameters>, result: ReduxModuleActionResultApplier<State, Array<Result>>): ActionCreator<Action, Parameters>;
+	action<Parameters extends any[], Result>(event: string, action: ReduxModuleAsyncAction<Result, Parameters>): ActionCreator<Action, Parameters>;
 	action<Parameters extends any[], Result>(action: ReduxModuleAsyncAction<Result, Parameters>, result: ReduxModuleActionResultApplier<State, Array<Result>>): ActionCreator<Action, Parameters>;
+	action<Parameters extends any[], Result>(action: ReduxModuleAsyncAction<Result, Parameters>): ActionCreator<Action, Parameters>;
 	simpleAction<Parameters extends any[]>(event: string, result: ReduxModuleActionResultApplier<State, Parameters>): ActionCreator<Action, Parameters>;
 	simpleAction<Parameters extends any[]>(result: ReduxModuleActionResultApplier<State, Parameters>): ActionCreator<Action, Parameters>;
-	reducer(initialState?: object): Reducer<State, Action>;
+	reducer(initialState?: State): Reducer<State, Action>;
 }
 
 export function underscoredToCamelCase(string: string): string;
@@ -100,7 +100,7 @@ export interface Redirect {
 }
 
 // Returns a `found` router object.
-export function useRouter(): object;
+export const useRouter: useRouterFromFound
 
 // These are "older" ways of `dispatch()`-ing Redux actions to perform a navigation action.
 // In React components code, consider using the corresponding hooks instead.
@@ -115,13 +115,13 @@ export function useRouter(): object;
 //   For example, one could be using `import { isRejectedWithValue } from '@reduxjs/toolkit'`
 //   in order to detect errors and then redirect to the `/error` page if there was an error.
 //
-export function goto(location: LocationInput, options?: NavigateOptions): object;
-export function redirect(location: LocationInput, options?: RedirectOptions): object;
-export function pushLocation(location: LocationInput, options?: NavigateOptions): object;
-export function replaceLocation(location: LocationInput, options?: RedirectOptions): object;
-export function goBack(): object;
-export function goBackTwoPages(): object;
-export function goForward(): object;
+export function goto(location: LocationInput, options?: NavigateOptions): UnknownAction;
+export function redirect(location: LocationInput, options?: RedirectOptions): UnknownAction;
+export function pushLocation(location: LocationInput, options?: NavigateOptions): UnknownAction;
+export function replaceLocation(location: LocationInput, options?: RedirectOptions): UnknownAction;
+export function goBack(): UnknownAction;
+export function goBackTwoPages(): UnknownAction;
+export function goForward(): UnknownAction;
 
 export interface NavigationPage<NavigationContext> {
 	location: Location;
@@ -137,8 +137,7 @@ export function useBeforeRenderAnotherPage<NavigationContext = any>(callback: (n
 export function useAfterRenderedThisPage<NavigationContext = any>(callback: (newPage: NavigationPage<NavigationContext>) => void): void;
 export function useBeforeRenderNewPage<NavigationContext = any>(callback: (newPage: NavigationPage<NavigationContext>, prevPage?: NavigationPage<NavigationContext>) => void): void;
 export function useAfterRenderedNewPage<NavigationContext = any>(callback: (newPage: NavigationPage<NavigationContext>, prevPage?: NavigationPage<NavigationContext>) => void): void;
-export function useNavigationLocation(): LocationBasic;
-// export function useSelectorForLocation(selector: (state: any) => unknown): any;
+export function useNavigationLocation(): Location;
 export function usePageStateSelector<State = any, PageStateReducerName = string, Selector extends (state: State) => unknown = (state: State) => unknown>(reducerName: PageStateReducerName, selector: Selector): ReturnType<Selector>;
 export function usePageStateSelectorOutsideOfPage<State = any, PageStateReducerName = string, Selector extends (state: State) => unknown = (state: State) => unknown>(reducerName: PageStateReducerName, selector: Selector): ReturnType<Selector>;
 export function useLocation(): Location;
@@ -150,7 +149,7 @@ export function useRedirect(): (location: LocationInput, options?: RedirectOptio
 export function useLoading(): boolean;
 export function useRoute(): Route;
 
-export function updateReducers(reducers: object): void;
+export function updateReducers<State = any, Action extends ReduxAction<string> = UnknownAction>(reducers: Record<string, Reducer<State, Action>>): void;
 
 // Navigation history.
 // Each entry is an object having properties:

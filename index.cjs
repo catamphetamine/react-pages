@@ -37,7 +37,6 @@ exports.useGoBack = require('./commonjs/router/useGoBack.js').default;
 exports.useGoForward = require('./commonjs/router/useGoForward.js').default;
 exports.useNavigate = require('./commonjs/router/useNavigate.js').default;
 exports.useRedirect = require('./commonjs/router/useRedirect.js').default;
-// exports.useSelectorForLocation = require('./commonjs/redux/useSelectorForLocation.js').default;
 exports.usePageStateSelector = require('./commonjs/redux/usePageStateSelector.js').default;
 exports.usePageStateSelectorOutsideOfPage = require('./commonjs/redux/usePageStateSelectorOutsideOfPage.js').default;
 exports.useBeforeNavigateToAnotherPage = require('./commonjs/router/useBeforeNavigateToAnotherPage.js').default;

@@ -94,4 +94,5 @@ export function render<State = any, Action extends ReduxAction<string> = Unknown
 }>;
 
 // Looks like the `createStore()` function export is deprecated due to being unused.
+// In case of uncommenting this, `object` would have to be replaced with something proper.
 // export function createStore(settings: object, options: object | undefined, { stash }): object;

@@ -108,16 +108,15 @@ export interface Settings<State, Action extends ReduxAction<string>, LoadContext
 // 	origin: string;
 // }
 
-// By defaul, `farce` and `found` use a location object
-// that doesn't have a `query` object and has a `search` string instead.
-// This library adds a `queryMiddleware` under the hood which parses `string` into `query`.
-export interface LocationBasic {
-	// `useNavigationLocation()` returns a `location` without the `origin` field.
-	// origin: string;
-	pathname: string;
-	search?: string;
-	hash?: string;
-}
+// // By defaul, `farce` and `found` use a location object
+// // that doesn't have a `query` object and has a `search` string instead.
+// // This library adds a `queryMiddleware` under the hood which parses `string` into `query`.
+// export interface LocationBasic {
+// 	origin: string;
+// 	pathname: string;
+// 	search?: string;
+// 	hash?: string;
+// }
 
 export interface Location {
 	// * `POP` for the initial location, or for any "back"/"forward"/"goto in history" navigation.
@@ -135,8 +134,12 @@ export interface Location {
 	pathname: string;
 
 	// URL query parameters object.
-	// `query` is parsed by `queryMiddleware` which is added by this library
-	// into the list of middlewares when creating a Redux `store`.
+	//
+	// By default, `farce` and `found` use a location object
+	// that doesn't have a `query` object and has a `search` string instead.
+	// This library adds a `queryMiddleware` under the hood which parses `string` into `query`.
+	// The `queryMiddleware` is added into the list of middlewares when creating a Redux `store`.
+	//
 	query: Record<string, string>;
 
 	// Mimicks the `search` part of the DOM `location`:
