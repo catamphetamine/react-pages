@@ -26,6 +26,5 @@ npm-debug.log
 # workspace files are user-specific
 *.sublime-workspace
 
-# webpack build target folder
-/modules/
-/commonjs/
+# build folders
+/lib/

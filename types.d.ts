@@ -1,200 +1,215 @@
-// import type { Route } from '@catamphetamine/found';
-// import type { Route } from 'found';
+import type * as React from 'react';
 
-import type {
-	Action as ReduxAction,
-	Store,
-	Dispatch,
-	Reducer,
-	Middleware,
-	StoreEnhancer
-} from 'redux';
-
-import type {
-	TypedUseSelectorHook
-} from 'react-redux';
-
-interface HttpClient {
-	head: (...args: any) => Promise<any>;
-	get: (...args: any) => Promise<any>;
-	post: (...args: any) => Promise<any>;
-	patch: (...args: any) => Promise<any>;
-	put: (...args: any) => Promise<any>;
-	delete: (...args: any) => Promise<any>;
-	options: (...args: any) => Promise<any>;
+// A route segment could have a `component` property,
+// in which case the `component` will be rendered
+// and it will wrap any components of any child route segments.
+interface RouteSegmentComponentPropertyShape {
+	component: React.FC;
 }
 
-// `superagent` request.
-type HttpRequest_ = object;
+// A route segment could have a `getComponent()` property,
+// in which case the returned component will be rendered
+// and it will wrap any components of any child route segments.
+interface RouteSegmentGetComponentPropertyShape<
+	LoadContext,
+	NavigationContext,
+	MetaContext extends Record<string, any>,
+	Props extends Record<string, any>,
+	LocationParameters extends Record<string, any> = Record<string, any>,
+	Cookies extends Record<string, any> = Record<string, any>
+> {
+	// This function works same way as `component` property.
+	//
+	// It returns the `component` after a delay.
+	// For example, it could use an "asynchronous" `import()` function
+	// to reduce the main bundle size.
+	//
+	getComponent: () => Promise<React.FC>;
 
-interface RouteWithOrWithoutCodeSplit<State, Action extends ReduxAction<string>, LoadContext> {
+	// This function works same way as `Component.meta` property.
+	//
+	// Because `getComponent()` function returns the component after a delay,
+	// the corresponding `Component.meta` has to be known in advance in order to
+	// return the correct `<head/>` markup immediately.
+	//
+	meta?: PageMetaFunction<Props, MetaContext>;
+
+	// This function works same way as `Component.load` property.
+	//
+	// Because `getComponent()` function returns the component after a delay,
+	// the corresponding `Component.load` has to be known in advance in order to
+	// return the correct `<head/>` markup immediately.
+	//
+	load?: PageLoadFunction<LoadContext, NavigationContext, Props, LocationParameters, Cookies>;
+}
+
+interface LeafRouteSegmentWithoutComponent_ {
+	// A "leaf" route segment has to have a `path` in order to be discernable
+	// from the rest of the "leaf" route segments.
+	path: string;
+
+	// A "leaf" route segment by definition doesn't have any Child route segments.
+	children: undefined;
+}
+
+interface LeafRouteSegmentWithComponent_ extends LeafRouteSegmentWithoutComponent_, RouteSegmentComponentPropertyShape {}
+
+interface LeafRouteSegmentWithGetComponent_<
+	LoadContext,
+	NavigationContext,
+	MetaContext extends Record<string, any>,
+	Props extends Record<string, any>,
+	LocationParameters extends Record<string, any> = Record<string, any>,
+	Cookies extends Record<string, any> = Record<string, any>
+> extends LeafRouteSegmentWithoutComponent_, RouteSegmentGetComponentPropertyShape<
+	LoadContext,
+	NavigationContext,
+	MetaContext,
+	Props,
+	LocationParameters,
+	Cookies
+> {}
+
+type LeafRouteSegment<
+	LoadContext,
+	NavigationContext,
+	MetaContext extends Record<string, any>,
+	Props extends Record<string, any>,
+	LocationParameters extends Record<string, any> = Record<string, any>,
+	Cookies extends Record<string, any> = Record<string, any>
+> =
+	| LeafRouteSegmentWithComponent_
+	| LeafRouteSegmentWithGetComponent_<
+		LoadContext,
+		NavigationContext,
+		MetaContext,
+		Props,
+		LocationParameters,
+		Cookies
+	>
+
+// A non-"leaf" route segment could be one of three types:
+// * With neither `component` nor `getComponent` — Just a "passthrough", typically with an added `path`.
+// * With `component` — Renders a wrapper component.
+// * With `getComponent` — Renders a wrapper component that is `import`ed in real time.
+interface NonLeafRouteSegment<
+	LoadContext,
+	NavigationContext,
+	MetaContext extends Record<string, any>,
+	Props extends Record<string, any>,
+	LocationParameters extends Record<string, any> = Record<string, any>,
+	Cookies extends Record<string, any> = Record<string, any>
+> extends Partial<
+	RouteSegmentComponentPropertyShape
+>, Partial<
+	RouteSegmentGetComponentPropertyShape<
+		LoadContext,
+		NavigationContext,
+		MetaContext,
+		Props,
+		LocationParameters,
+		Cookies
+	>
+> {
+	// A route segment doesn't always have a `path` property.
+	//
+	// Specifically, a route segment only has a `path` property when it appends anything
+	// to the parent route segment's `path`.
+	// Example: `{ component: Wrapper, children: { path: '/', component: Home } }`.
+	//
+	// The only restriction is that a "leaf" route segment has to have a `path` in order to be discernable
+	// from the rest of the "leaf" route segments.
+	//
 	path?: string;
 
-	Component?: React.FC;
-	getComponent?: () => Promise<React.FC>;
+	// Because this is a non-"leaf" route segment, `children` are required.
+	children: Array<
+		NonLeafRouteSegment<
+			LoadContext,
+			NavigationContext,
+			MetaContext,
+			Props,
+			LocationParameters,
+			Cookies
+		> | LeafRouteSegment<
+			LoadContext,
+			NavigationContext,
+			MetaContext,
+			Props,
+			LocationParameters,
+			Cookies
+		>
+	>;
+}
 
-	meta?: (state: State) => object;
+// A route segment could be either a "leaf" or a non-"leaf" one.
+export type RouteSegment<
+	LoadContext,
+	NavigationContext,
+	MetaContext extends Record<string, any>,
+	Props extends Record<string, any>,
+	LocationParameters extends Record<string, any> = Record<string, any>,
+	Cookies extends Record<string, any> = Record<string, any>
+> =
+	| NonLeafRouteSegment<
+		LoadContext,
+		NavigationContext,
+		MetaContext,
+		Props,
+		LocationParameters,
+		Cookies
+	>
+	| LeafRouteSegment<
+		LoadContext,
+		NavigationContext,
+		MetaContext,
+		Props,
+		LocationParameters,
+		Cookies
+	>
 
-	load?: (parameters: {
-		dispatch: Dispatch<Action>,
-		useSelector: TypedUseSelectorHook<State>,
-		params: Record<string, string>,
+// `<meta/>` tag attribute value.
+type MetaAttributeValue = string | number | boolean;
+
+// `<meta/>` tags that get added on a page.
+export interface Meta {
+	// Objects are expanded: `{ a: { b: 'c' } }` becomes `<meta property="a:b" content="c"/>`.
+	// Arrays of values are expanded: `[{ a: 'b' }, { a: 'c' }]` becomes `<meta property="a" content="b"/>` and `<meta property="a" content="c"/>`.
+	// Arrays of objects are expanded: `[{ a: { b: 'c' } }, { a: { b: 'd' } }]` becomes `<meta property="a:b" content="c"/>` and `<meta property="a:b" content="d"/>`.
+	[key: string]: MetaAttributeValue | MetaAttributeValue[] | Meta | Meta[];
+}
+
+// A function that returns the `<meta/>` tags that should be added on a page.
+export type PageMetaFunction<
+	Props extends Record<string, any>,
+	MetaContext
+> = (
+	parameters: {
+		props: Props,
+		context: MetaContext
+	}
+) => Meta;
+
+// A function that returns the `props` that should be passed to the page component.
+// Or, it could redirect to some other page.
+export type PageLoadFunction<
+	LoadContext,
+	NavigationContext,
+	Props extends Record<string, any>,
+	LocationParameters extends Record<string, any> = Record<string, any>,
+	Cookies extends Record<string, any> = Record<string, any>
+> = (
+	parameters: {
+		context: LoadContext,
+		navigationContext: NavigationContext,
 		location: Location,
-		context?: LoadContext,
-		history: {
-			route: string,
-			action: string
-		}[],
+		locationParameters: LocationParameters,
 		server: boolean,
-		getCookie: (name: string) => string | undefined
-	}) => Promise<void>;
-
-	children?: RouteWithOrWithoutCodeSplit<State, Action, LoadContext>[];
-}
-
-export interface Settings<State, Action extends ReduxAction<string>, LoadContext> {
-	routes: RouteWithOrWithoutCodeSplit<State, Action, LoadContext>[];
-	reducers?: Record<string, Reducer>;
-	reduxMiddleware?: Middleware[];
-	reduxStoreEnhancers?: StoreEnhancer[];
-	reduxEventNaming?: (event: string) => string[];
-
-	http?: {
-    findAndConvertIsoDateStringsToDateInstances?: boolean,
-
-    transformUrl?: (url: string, { server: boolean }) => string,
-
-    onRequest?: (request: HttpRequest_, parameters: {
-    	url: string,
-    	originalUrl: string,
-    	useSelector: TypedUseSelectorHook<State>
-    }) => void,
-
-    onError?: (error: Error, parameters: {
-    	location: Location,
-    	url: string,
-    	redirect: (to: LocationInput) => void,
-    	dispatch: Dispatch<Action>,
-    	useSelector: TypedUseSelectorHook<State>
-    }) => boolean | undefined,
-
-    getErrorData?: (error: Error) => object,
-
-    catch?: (error: Error, retryCount: number, parameters: {
-    	getCookie: (name: string) => string | undefined,
-    	store: Store<State, Action>,
-    	http: HttpClient
-    }) => Promise<void>
-	};
-
-	onLoadError?(error: Error, parameters: {
-		location: Location,
-		url: string,
-		redirect: (to: LocationInput) => void,
-		dispatch: Dispatch<Action>,
-		useSelector: TypedUseSelectorHook<State>,
-		server: boolean
-	}): void;
-
-	// Deprecated?
-	getLocale?: (state: State) => string;
-
-	codeSplit?: true;
-}
-
-// import { LocationDescriptor } from '@catamphetamine/farce';
-// import { LocationDescriptor } from 'farce';
-// export interface Location extends LocationDescriptor {
-// 	origin: string;
-// }
-
-// // By defaul, `farce` and `found` use a location object
-// // that doesn't have a `query` object and has a `search` string instead.
-// // This library adds a `queryMiddleware` under the hood which parses `string` into `query`.
-// export interface LocationBasic {
-// 	origin: string;
-// 	pathname: string;
-// 	search?: string;
-// 	hash?: string;
-// }
-
-export interface Location {
-	// * `POP` for the initial location, or for any "back"/"forward"/"goto in history" navigation.
-	// * `PUSH` when navigating to a new location.
-	// * `REPLACE` when "redirecting" to a location via DOM API `history.replaceState()`.
-	action: 'POP' | 'PUSH' | 'REPLACE';
-
-	// `origin` is added by this library.
-	// Example: "http://localhost:1234".
-	origin: string;
-
-	// Mimicks the `pathname` part of the DOM `location`:
-	// everything after the `/` sign, including the `/` sign itself.
-	// Is always non-empty.
-	pathname: string;
-
-	// URL query parameters object.
-	//
-	// By default, `farce` and `found` use a location object
-	// that doesn't have a `query` object and has a `search` string instead.
-	// This library adds a `queryMiddleware` under the hood which parses `string` into `query`.
-	// The `queryMiddleware` is added into the list of middlewares when creating a Redux `store`.
-	//
-	query: Record<string, string>;
-
-	// Mimicks the `search` part of the DOM `location`:
-	// everything after the `?` sign, including the `?` sign itself.
-	// `search` seems to always be present.
-	// When there's no "hash" part of the URL, it's just an empty string `""`.
-	search: string;
-
-	// Mimicks the `hash` part of the DOM `location`:
-	// everything after the `#` sign, including the `#` sign itself.
-	// `hash` seems to always be present.
-	// When there's no "hash" part of the URL, it's just an empty string `""`.
-	hash: string;
-
-	// Mimicks the `href` property of the DOM `location`:
-	// The full location URL
-	href: string;
-
-	// `delta` is `+1` / `-1` / etc in case of a "goto in history" navigation like "back"/"forward".
-	// In other circumstances, it's gonna be `0`.
-	delta: number;
-
-	// Example: "1234".
-	port: string;
-
-	// Example: "http:".
-	protocol: string;
-
-	// I'd guess, this mimicks the `state` argument that was passed to DOM functions
-	// `history.pushState()` or `history.replaceState()`.
-	// https://developer.mozilla.org/en-US/docs/Web/API/History_API
-	// For example, they seem to store the scroll position in `location.state`.
-	// My guess would be that when navigating not to a `location: string` but to a
-	// `location: object`, one could pass the `state` as part of the `location`.
-	state?: any;
-
-	// The initial location has `key: undefined`.
-	// Any subsequent locations have a (supposedly unique? not guaranteed?) key.
-	// Example: "xdgl89:0".
-	key?: string;
-
-	// The index of the current location in the DOM (navigation) `history`.
-	// Is `0` for the initial location.
-	// Gets incremented for any subsequent "PUSH" navigation.
-	// Doesn't get incremented for "REPLACE" navigation.
-	index: number;
-}
-
-// The `location` argument that navigation functions accept.
-export type LocationInput = string | {
-	pathname: string;
-	// One could pass URL query parameters either in the form of a `search` string
-	// or in the form of a `query` object.
-	query?: Record<string, string>;
-	search?: string;
-	hash?: string;
-	state?: any;
-};
+		getCookies: () => Cookies
+	}
+) => Promise<{
+	props?: Props,
+	redirect?: {
+		url: string
+	}
+} | void>;
