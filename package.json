@@ -24,7 +24,7 @@
   "version": "0.9.0",
   "description": "A tiny framework for building a single-page React application",
   "dependencies": {
-    "navigation-stack": "^0.6.1"
+    "navigation-stack": "^0.6.2"
   },
   "devDependencies": {
     "@types/chai": "^5.2.3",
