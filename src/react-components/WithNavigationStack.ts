@@ -19,9 +19,10 @@ import NavigationContext, {
 } from './NavigationContext.js';
 
 import onLocationChangeHandler, {
-  type OnLocationChangeHandlerExecutionState,
-  type OnBeforeLocationChange
+  type OnLocationChangeHandlerExecutionState
 } from './onLocationChange.js';
+
+import type { OnBeforeLocationChange } from '../types.d.js'
 
 export default function WithNavigationStack<ScrollableContainer, ScrollPositionAnchor>({
   environment,

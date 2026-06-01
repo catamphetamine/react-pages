@@ -8,15 +8,20 @@ import type { Meta } from '../types.d.js'
 const browserDocument = new BrowserDocument()
 
 /**
- * Updates `<meta/>` tags (inside `<head/>`).
+ * Updates `<title/>` and `<meta/>` tags (inside `<head/>`).
  */
 export default function applyMeta(meta: Meta, document: Document = browserDocument) {
-	const { charset } = meta
+	const { title, charset } = meta
 	const metaAttributes = normalizeMeta(meta)
 
 	// Get all `<meta/>` tags.
 	// (will be mutated)
 	const metaTags = document.getMetaTags()
+
+	// Update `<title/>`.
+	if (title && document.getTitle() !== String(title)) {
+		document.setTitle(String(title))
+	}
 
 	// Update `<meta charset/>`.
 	if (charset) {

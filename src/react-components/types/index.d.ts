@@ -6,9 +6,10 @@ import type {
   Constructor,
   Environment,
   InputLocation,
-  Location,
   NavigationStackOptions,
 } from 'navigation-stack'
+
+import type { OnBeforeLocationChange } from '../../types.d.js'
 
 type WithNavigationStackComponentType = <ScrollableContainer, Anchor>(
   props: WithNavigationStackProps<ScrollableContainer, Anchor>,
@@ -20,10 +21,7 @@ interface WithNavigationStackProps<ScrollableContainer, Anchor>
   extends NavigationStackOptions<ScrollableContainer, Anchor> {
   environment: Constructor<Environment<ScrollableContainer, Anchor>>;
   initialLocation?: InputLocation;
-  onBeforeLocationChange?: (
-    location: Location,
-    prevLocation: Location | undefined,
-  ) => void | Promise<void>;
+  onBeforeLocationChange?: OnBeforeLocationChange;
   children?: React.ReactNode
 }
 

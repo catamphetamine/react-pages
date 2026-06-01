@@ -9,28 +9,34 @@ describe('getMetaTagsMarkup', () => {
 			charset: 'utf-8',
 			title: 'Test',
 			description: 'Testing metadata',
-			locale: 'ru',
-			locales: ['en', 'fr'],
+			'og:title': 'Test 2',
+			'og:description': 'Testing metadata 2',
+			'og:site_name': 'Testing',
+			'og:locale': 'ru',
+			'og:locale:alternate': ['en', 'fr'],
 			viewport: 'width=device-width, initial-scale=1',
 			keywords: 'react, redux, webpack',
 			author: '@catamphetamine'
 		})).to.deep.equal([
-			"<meta charset=\"utf-8\"/>",
-			"<meta property=\"og:title\" content=\"Test\"/>",
-			"<meta name=\"description\" content=\"Testing metadata\"/>",
-			"<meta property=\"og:description\" content=\"Testing metadata\"/>",
-			"<meta property=\"og:locale\" content=\"ru\"/>",
-			"<meta property=\"og:locale:alternate\" content=\"en\"/>",
-			"<meta property=\"og:locale:alternate\" content=\"fr\"/>",
-			"<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"/>",
-			"<meta name=\"keywords\" content=\"react, redux, webpack\"/>",
-			"<meta name=\"author\" content=\"@catamphetamine\"/>"
+			'<meta charset="utf-8"/>',
+			'<title>Test</title>',
+			'<meta name="description" content="Testing metadata"/>',
+			'<meta property="og:title" content="Test 2"/>',
+			'<meta property="og:description" content="Testing metadata 2"/>',
+			'<meta property="og:site_name" content="Testing"/>',
+			'<meta property="og:locale" content="ru"/>',
+			'<meta property="og:locale:alternate" content="en"/>',
+			'<meta property="og:locale:alternate" content="fr"/>',
+			'<meta name="viewport" content="width=device-width, initial-scale=1"/>',
+			'<meta name="keywords" content="react, redux, webpack"/>',
+			'<meta name="author" content="@catamphetamine"/>'
 		])
 	})
 
 	it(`should generate meta tags markup with default title and charset`, () => {
 		expect(getMetaTagsMarkup({})).to.deep.equal([
-			"<meta charset=\"utf-8\"/>"
+			'<meta charset="utf-8"/>',
+			'<title></title>'
 		])
 	})
 })

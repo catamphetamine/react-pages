@@ -1,4 +1,5 @@
 export default {
+	// Fixes character encoding.
 	charset: 'utf-8',
 
 	// Fixes CSS screen width on mobile devices.

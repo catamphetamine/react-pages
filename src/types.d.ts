@@ -1,5 +1,7 @@
 import type * as React from 'react'
 
+import type { Location } from 'navigation-stack'
+
 // A route segment could have a `component` property,
 // in which case the `component` will be rendered
 // and it will wrap any components of any child route segments.
@@ -134,6 +136,15 @@ export type PageLoadFunction<
 		url: string
 	}
 } | void>
+
+export interface CommonOptions {
+	basePath?: string;
+	onBeforeLocationChange?: OnBeforeLocationChange;
+}
+
+export type OnBeforeLocationChange = (location: Location, options: {
+	redirect: (toLocation: Location) => void
+}) => unknown
 
 // At the top of your file, right after your imports
 declare global {

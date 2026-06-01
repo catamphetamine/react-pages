@@ -1,5 +1,7 @@
 import { getLocationUrl, type NavigationStack, type Location } from 'navigation-stack';
 
+import type { OnBeforeLocationChange } from '../types.d.js';
+
 import isPromise from '../utility/isPromise.js'
 
 export default function onLocationChangeHandler(
@@ -90,7 +92,3 @@ export interface OnLocationChangeHandlerExecutionState {
   inProgress: boolean;
   cancelled: boolean;
 }
-
-export type OnBeforeLocationChange = (location: Location, options: {
-  redirect: (toLocation: Location) => void
-}) => unknown

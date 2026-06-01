@@ -104,7 +104,6 @@ export default function usePageState(key) {
 
 * Force-remount the page component every time when location changes (with potential override of this behavior using some form of `shouldUnmountPageOnLocationChange()` function parameter).
 * Add `state` parameter in `.meta()` function.
-* Don't automatically copy over the title to `og:title` and description to `og:description`, because all them are [different](https://d3creative.uk/blog/title-and-meta-description-vs-open-graph).
 * Should `getCookie()` parameter be removed from `load()` function? If yes then should the cookie be moved to navigation context object or something.
 * Add a parameter function that will be called when a `load()` function throws an error. That function should return an object of shape `{ redirect: ... }`. Write the name of that parameter function in the "Fetching Data From Server" section of the readme.
 * Add the relevant TypeScript types.
@@ -338,6 +337,8 @@ server.listen(3000, () => {
 node src/server.js
 ```
 
+And the client-side code should also be modified accordingly: the client-side `render()` function should be passed the same `Html` component as a parameter in place of the `to` DOM Element parameter. This will enable ["rehydration"](https://18.react.dev/reference/react-dom/client/hydrateRoot) instead of the default "from scratch" rendering.
+
 ## Fetching Data From Server
 
 To "load" a page before it gets rendered, define a static `load` property function on the page component.
@@ -488,19 +489,29 @@ Page.meta = ({ state, context }) => {
   const { bodyBuilder } = state
 
   return {
-    // `<meta property="og:site_name" .../>`
-    siteName: 'International Contest',
-
-    // Webpage `<title/>` will be replaced with this one
-    // and also `<meta property="og:title" .../>` will be added.
+    // Webpage `<title/>`
     title: bodyBuilder.name,
 
     // `<meta property="og:description" .../>`
     description: bodyBuilder.biography,
 
+    // `<meta property="og:title" .../>`
+    // Same as `title` but aimed towards social media sharing posts.
+    // https://d3creative.uk/blog/title-and-meta-description-vs-open-graph
+    'og:title': bodyBuilder.name,
+
+    // `<meta property="og:description" .../>`
+    // Same as `description` but aimed towards social media sharing posts.
+    // https://d3creative.uk/blog/title-and-meta-description-vs-open-graph
+    'og:description': bodyBuilder.biography,
+
+    // `<meta property="og:site_name" .../>`
+    'og:site_name': 'International Contest',
+
     // `<meta property="og:image" .../>`
     // https://iamturns.com/open-graph-image-size/
-    image: 'https://cdn.google.com/logo.png',
+		// https://indieweb.org/The-Open-Graph-protocol#How_to_set_image
+    'og:image': 'https://cdn.google.com/logo.png',
 
     // Objects are expanded.
     //
@@ -509,48 +520,36 @@ Page.meta = ({ state, context }) => {
     // `<meta property="og:image:height" content="100"/>`
     // `<meta property="og:image:type" content="image/png"/>`
     //
-    image: {
+    'og:image': {
       _: 'https://cdn.google.com/logo.png',
       width: 100,
       height: 100,
       type: 'image/png'
     },
 
-    // Arrays are expanded (including arrays of objects).
-    image: [{...}, {...}, ...],
+    // Array value will be expanded into multiple tags.
+    // (including the cases when value is an array of objects)
+    'og:image': [{...}, {...}, ...],
 
-    // `<meta property="og:audio" .../>`
-    audio: '...',
+    // `<meta property="og:locale" content="en_US"/>`
+    'og:locale': 'en_US',
 
-    // `<meta property="og:video" .../>`
-    video: '...',
-
-    // `<meta property="og:locale" content="ru_RU"/>`
-    locale: state.user.locale,
-
-    // `<meta property="og:locale:alternate" content="en_US"/>`
+    // Array value will be expanded into multiple tags.
     // `<meta property="og:locale:alternate" content="fr_FR"/>`
-    locales: ['ru_RU', 'en_US', 'fr_FR'],
-
-    // `<meta property="og:url" .../>`
-    url: 'https://google.com/',
-
-    // `<meta property="og:type" .../>`
-    type: 'profile',
+    // `<meta property="og:locale:alternate" content="ru_RU"/>`
+    'og:locale:alternate': ['fr_FR', 'ru_RU'],
 
     // `<meta charset="utf-8"/>` tag is added automatically.
     // The default "utf-8" encoding can be changed
     // by passing custom `charset` parameter.
-    charset: 'utf-16',
+    charset: 'utf-8',
 
     // `<meta name="viewport" content="width=device-width, initial-scale=1.0"/>`
-    // tag is added automatically
-    // (prevents downscaling on mobile devices).
-    // This default behaviour can be changed
-    // by passing custom `viewport` parameter.
+    // tag is added automatically because it prevents downscaling on mobile devices.
+    // This default behaviour can be overridden by passing custom `viewport` property.
     viewport: '...',
 
-    // All other properties will be transformed directly to
+    // Any other properties will be transformed directly to
     // either `<meta property="{property_name}" content="{property_value}/>`
     // or `<meta name="{property_name}" content="{property_value}/>`
   }
@@ -560,12 +559,10 @@ Page.meta = ({ state, context }) => {
 The parameters of a `meta` function are:
 
 * `props` — Any `props` returned from the `load()` function.
-* `useSelector` — A hook that could be used to access Redux state.
-* `usePageStateSelector` — A hook that could be used to access "page-specific" Redux state.
 
 If the root route component also has a `meta` function, the result of the page component's `meta` function will be merged on top of the result of the root route component's `meta` function.
 
-The `meta` will be applied on the web page and will overwrite any existing `<meta/>` tags. For example, if there were any `<meta/>` tags written by hand in `index.html` template then all of them will be dicarded when this library applies its own `meta`, so any "base" `<meta/>` tags should be moved from the `index.html` file to the root route component's `meta` function:
+`meta` will be applied on the web page and will overwrite any existing `<meta/>` tags. For example, if there were any `<meta/>` tags written by hand in `index.html` template then all of them will be dicarded when this library applies its own `meta`, so any "base" `<meta/>` tags should be moved from the `index.html` file to the root route component's `meta` function:
 
 ```js
 function App({ children }) {
@@ -585,11 +582,11 @@ App.meta = () => {
 }
 ```
 
-The `meta` function behaves like a React "hook": `<meta/>` tags will be updated if the values returned from `useSelector()` function calls do change.
+`meta` function behaves like a React "hook": `<meta/>` tags will be updated if the values returned from `useSelector()` function calls do change.
 
 <!-- There might also be "hacky" edge-cases when the application chooses to patch the `meta()` function of a component in real time for whatever reason. In those cases, a manual re-calculation and re-applying of the `meta()` is required after the patching. To do that, use the `refreshMeta()` function that is returned from the exported `useRefreshMeta()` hook. -->
 
-In some advanced cases, the `meta()` function might need to access some state that is local to the page component and is not stored in global Redux state. That could be done by setting `metaComponentProperty` property of a page component to `true` and then rendering the `<Meta/>` component manually inside the page component, where any properties passed to the `<Meta/>` component will be available in the `props` of the `meta()` function.
+In some advanced cases, `meta()` function might need to access some state that is local to the page component and is not stored in global Redux state. That could be done by setting `metaComponentProperty` property of a page component to `true` and then rendering the `<Meta/>` component manually inside the page component, where any properties passed to the `<Meta/>` component will be available in the `props` of the `meta()` function.
 
 ```js
 function Page({ Meta }) {

@@ -39,40 +39,17 @@ function getMetaKeyAliases(key: string): string[] {
 		// because it doesn't have `name` attribute.
 		case 'charset':
 			return []
-		// `<meta name="description"/>` is an older and
-		// more widely supported form than "og:description".
-		// In practice there's no need to duplicate
-		// `<meta name="description"/>` as "og:description".
-		// Still, to keep it fully-OpenGraph-compliant
-		// the description is duplicated as "og:description" here.
-		// https://indieweb.org/The-Open-Graph-protocol#How_to_set_description
-		case 'description':
-			return [key, `og:${key}`]
-		case 'siteName':
-			return [`og:site_name`]
-		case 'site_name':
-		// `title` property of `meta` object is
-		// handled specially via a `<title/>` tag.
-		// There would be no need to add `og:title`
-		// which duplicates the existing `<title/>`,
-		// and `title` property could be discarded here.
-		// For example, Facebook falls back to `<title/>` tag.
-		// Still, OpenGraph specs formally require an `og:title`.
-		// So, to keep it fully-OpenGraph-compliant
-		// the title is duplicated as "og:title" here.
-		// https://indieweb.org/The-Open-Graph-protocol#How_to_set_title
+		// `<title/>` is not a `<meta/>` tag.
 		case 'title':
-		// SVG images are not supported (boo).
-		// https://indieweb.org/The-Open-Graph-protocol#How_to_set_image
-		case 'image':
-		case 'locale':
-		case 'type':
-		case 'url':
-		case 'audio':
-		case 'video':
-			return [`og:${key}`]
-		case 'locales':
-			return ['og:locale:alternate']
+			return []
+		// `title` and `description` are not automatically copied to
+		// `og:title` and `og:description` because those're actually intended to be different.
+    // https://d3creative.uk/blog/title-and-meta-description-vs-open-graph
+		// https://indieweb.org/The-Open-Graph-protocol#How_to_set_title
+		// https://indieweb.org/The-Open-Graph-protocol#How_to_set_description
+		// case 'title':
+		// case 'description':
+		// 	return [key, `og:${key}`]
 		default:
 			return [key]
 	}

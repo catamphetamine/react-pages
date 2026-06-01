@@ -3,8 +3,7 @@ import { createRoot, hydrateRoot } from 'react-dom/client'
 
 import { WebBrowserEnvironment } from 'navigation-stack'
 
-import type { Routes } from '../types.d.js'
-import type { OnBeforeLocationChange } from '../react-components/onLocationChange.js'
+import type { Routes, CommonOptions, OnBeforeLocationChange } from '../types.d.js'
 
 import WithNavigationStack from '../react-components/WithNavigationStack.js'
 import RouteRenderer, { type RouteRendererProps } from '../react-components/RouteRenderer.js'
@@ -51,22 +50,35 @@ export default function render<
 	if (window.REACT_PAGES_SERVER_RENDER) {
 		// This flag will no longer be used.
 		delete window.REACT_PAGES_SERVER_RENDER
-		// Create an "<html>...</html>" wrapper.
-		if (!options.Html) {
-			throw new Error('When using server-side rendering, you must pass the same `Html` component as an option both to server-side `render()` and client-side `render()`')
+		if (isServerSideRenderOptions(options)) {
+			// Create an "<html>...</html>" wrapper.
+			const htmlElement = createElement(options.Html, { children: element })
+			// "Hydrate" the "<html>...</html>" wrapper.
+			hydrateRoot(document, htmlElement)
+		} else {
+			throw new Error(HTML_COMPONENT_NOT_PASSED_ERROR)
 		}
-		const htmlElement = createElement(options.Html, { children: element })
-		// "Hydrate" the "<html>...</html>" wrapper.
-		hydrateRoot(options.to, htmlElement)
 	} else {
+		if (isServerSideRenderOptions(options)) {
+			throw new Error('`window.REACT_PAGES_SERVER_RENDER` flag not found')
+		}
 		// Render the React element inside the given HTML DOM element.
 		createRoot(options.to).render(element)
 	}
 }
 
-interface Options {
-	to: HTMLElement;
-	basePath?: string;
-	onBeforeLocationChange?: OnBeforeLocationChange;
-	Html?: React.ElementType;
+function isServerSideRenderOptions(options: Options): options is OptionsServerSideRender {
+	return Boolean((options as OptionsServerSideRender).Html)
 }
+
+interface OptionsClientSideRender extends CommonOptions {
+	to: HTMLElement;
+}
+
+interface OptionsServerSideRender extends CommonOptions {
+	Html: React.ElementType;
+}
+
+type Options = OptionsClientSideRender | OptionsServerSideRender
+
+const HTML_COMPONENT_NOT_PASSED_ERROR = 'When using server-side rendering, you must pass the same `Html` component as an option both to server-side `render()` and client-side `render()`'

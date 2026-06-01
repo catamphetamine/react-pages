@@ -8,10 +8,10 @@ import BASE_META from './baseMeta.js'
 import type { Meta, MetaAttributeValue } from '../types.d.js'
 
 /**
- * Generates a list of `<meta/>` tags markup.
+ * Generates a list of `<title/>` and `<meta/>` tags markup.
  */
 export default function getMetaTagsMarkup(meta: Meta): string[] {
-	const { charset } = meta
+	const { title, charset } = meta
 	const metaAttributes = normalizeMeta(meta)
 
 	return [
@@ -19,7 +19,8 @@ export default function getMetaTagsMarkup(meta: Meta): string[] {
 		// because some browsers only read the first
 		// 1024 bytes when deciding on page encoding.
 		// (`<meta charset/>` is always present)
-		`<meta charset="${escapeHtml(String(charset || BASE_META.charset), { isAttributeValue: true })}"/>`
+		`<meta charset="${escapeHtml(String(charset || BASE_META.charset), { isAttributeValue: true })}"/>`,
+		`<title>${escapeHtml(String(title || ''), { isAttributeValue: false })}</title>`
 	]
 	.concat(
 		metaAttributes.map(([key, value]) => generateMetaTagMarkup(key, value))

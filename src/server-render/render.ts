@@ -10,8 +10,7 @@ import Stream from 'node:stream'
 
 import { ServerSideRenderEnvironment } from 'navigation-stack'
 
-import type { Routes } from '../types.d.js'
-import type { OnBeforeLocationChange } from '../react-components/onLocationChange.js'
+import type { Routes, OnBeforeLocationChange } from '../types.d.js'
 
 import WithNavigationStack from '../react-components/WithNavigationStack.js'
 import RouteRenderer, { type RouteRendererProps } from '../react-components/RouteRenderer.js'
