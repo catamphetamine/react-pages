@@ -134,3 +134,10 @@ export type PageLoadFunction<
 		url: string
 	}
 } | void>
+
+// At the top of your file, right after your imports
+declare global {
+  interface Window {
+    REACT_PAGES_SERVER_RENDER?: 'true';
+  }
+}

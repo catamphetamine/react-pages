@@ -7,7 +7,7 @@ import type { Routes } from '../types.d.js'
 import type { OnBeforeLocationChange } from '../react-components/onLocationChange.js'
 
 import WithNavigationStack from '../react-components/WithNavigationStack.js'
-import RouteRenderer from '../react-components/RouteRenderer.js'
+import RouteRenderer, { type RouteRendererProps } from '../react-components/RouteRenderer.js'
 
 export default function render<
 	LoadContext,
@@ -27,7 +27,16 @@ export default function render<
 		onBeforeLocationChange: options.onBeforeLocationChange,
 		manageScrollPosition: true,
 		scrollPositionSetter: undefined,
-		children: createElement(RouteRenderer, { routes }),
+		children: createElement<
+			RouteRendererProps<
+				LoadContext,
+				NavigationContext,
+				MetaContext,
+				Props,
+				LocationParameters,
+				Cookies
+			>
+		>(RouteRenderer, { routes }),
 	})
 
 	// If the application was rendered on server side

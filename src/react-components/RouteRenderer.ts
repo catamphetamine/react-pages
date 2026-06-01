@@ -73,7 +73,7 @@ interface RouteSegment {
 	component?: React.ElementType | (() => Promise<React.ElementType>);
 }
 
-interface RouteRendererProps<
+export interface RouteRendererProps<
 	LoadContext,
 	NavigationContext,
 	MetaContext extends Record<string, any>,
