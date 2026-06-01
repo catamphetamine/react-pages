@@ -2,8 +2,9 @@
   "compilerOptions": {
     "rootDir": "./src",
     "outDir": "./lib",
-    "allowJs": true,
-    "target": "es2016"
+    "allowJs": false,
+    "target": "es2017"
   },
-  "include": ["src"]
+  "include": ["src"],
+  "exclude": ["src/server-render"]
 }

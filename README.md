@@ -18,12 +18,14 @@ This readme is for the latest yet-unreleased "rewrite-from-scratch-in-progress" 
 
 * Write the code as `*.ts` files in `src` directory and compile it to `*.js`/`*.d.ts` files in `lib` directory.
 * Merge [`navigation-stack-react`](https://gitlab.com/catamphetamine/navigation-stack-react) repository code in this package.
-* Add a link to `react-pages` in `navigation-stack-react` readme.
-* Add `/html-meta-tags` module with an exported function `addMetaTags(meta[])` which returns a "remove the added meta tags" function. Add functions: `getMetaTags(meta[])`, `removeMetaTags(meta[])`.
-* Add `/route-segments` module with an exported function `getRoute(routes, pathname)` which returns an array of `RouteSegment`s (automatically strips trailing slashes, if present). "Routes" are a tree consisting of objects of shape: `{ path: string, segment: any, children?: ... }`. `react-pages` automatically transforms its routes by moving everything except `path` and `children` into properties of a `segment` object. Also add a function `excludeOverlappingRouteSegments(route1, route2)` which would exclude overlapping route segments from `route1`. Mark this function as unused because it won't really be used because the `load` function is only supported on the leaf route segment. Validate that only the leaf route segment has a `load` function defined. Support `path: "*"` as a fallback route (validate that it has no `children`). Support `.status` numeric property on a page component. Reduce a tree of route segments to a map of routes by router path (throw an error if a route is already defined at a given path (with trailing slash trimmed, if present, or better throw an error if it's present)). Create a RegExp for matching each route path.
-* Add `/render` export with just a default export of the client-side `render({ routes, url: window.location.href })` function.
-* Add `/server-render` export with just a default export of the server-side `render({ routes, url })` function.
+* Add a link to `react-pages` in `navigation-stack` readme.
+* When calling `applyMeta()` function, also store the argument value in some kind of "context". This value should be passed later to `patchMeta()` function.
+* In `/meta-tags` folder, add a function `addMetaTags(meta[])` which returns a "remove the added meta tags" function. Add functions: `getMetaTags(meta[])`, `removeMetaTags(meta[])`. These functions will be used in `<RouteRenderer/>` component when rendering initial page and rendering new pages.
+* In `/route-matcher` folder, validate that there's only one route with `path: "*"` Use `RouteMatcher` class from `/route-matcher` folder to get `RouteSegment[]` array for a given `location.pathname` on client side and server side. Also add a function `excludeOverlappingRouteSegments(route1, route2)` which would exclude overlapping route segments from `route1`. Mark this function as unused because it won't really be used because the `load` function is only supported on the leaf route segment. Validate that only the leaf route segment has a `load` function defined. Support `path: "*"` as a fallback route. Support `.status` numeric property on a page component. Validate that a `path` doesn't have leading or trailing slashes (also explain in the error message that instead of "/" just leave the `path` unspecified).
+* In `./server-render/render.ts`, calculate the actual HTTP status code and `<meta/>` tags. Emit the status code before React rendering. Insert the `<meta/>` tags in `Html` component's `<head/>` before React rendering. Update the README example to show the correct usage of status code and `<meta/>` tags.
+* In `./browser-render/render.ts`, calculate the `<meta/>` tags. Insert the `<meta/>` tags in `Html` component's `<head/>` before React "hydration".
 * Add some `context` parameter to `.meta()` function. From there, it might read the user's selected `language` and output translated labels.
+* In routes configuration, `component` could be a component or a function like `() => import('.../Component')`.
 * Add `useReplaceUrlQuery()` hook which doesn't trigger a transition from one page to another.
 * Add `usePageState()` hook. If `.load()` function returns `state` property, it becomes the initial value for the page state. The hook accepts an optional `key` argument. Wrap each route segment `component` in a `<RouteSegmentContextProvider/>` which provides `RouteSegmentContext` to each route segment `component` (accessible via hook `useRouteSegmentContext()`). The context has the `component` itself.
   * Document `usePageState()` hook. Document that the page state persists throughout "Back"/"Forward" navigation: in that case, `.load()` function is not called and any pre-existing state is reused.
@@ -254,7 +256,7 @@ Item.meta = ({ state }) => ({
 export default Item
 ```
 
-After all routes have been defined, all that's left is to call `render()` function with the `routes` parameter at application start.
+After all routes have been defined, all that's left is to call `render()` function with the `routes` argument at application start.
 
 #### ./src/index.js
 
@@ -262,7 +264,7 @@ After all routes have been defined, all that's left is to call `render()` functi
 import render from 'react-pages/render'
 import routes from './routes.js'
 
-render({ routes })
+render(routes, { to: document.getElementById('root') })
 ```
 
 #### ./index.html
@@ -297,14 +299,36 @@ import http from 'http'
 import render from 'react-pages/server-render'
 import routes from './routes.js'
 
-const indexHtml = fs.readFileSync('./index.html', 'utf8')
+// A React component that renders a full HTML page.
+// `children` will be the rendered route.
+const Html = ({ children }) => (
+  <html>
+    <head>
+      <title>Example</title>
+    </head>
+    <body>
+      {children}
+    </body>
+  </html>
+)
 
+// Create an HTTP server.
 const server = http.createServer((req, res) => {
-  const html = render({ routes, url: req.url })
+  const htmlStream = await render(routes, {
+    // The requested URL (relative).
+    url: req.url,
+    // The React component that render a full HTML page.
+    Html,
+    // The application bundle *.js file.
+    scriptUrl: '/bundle.js'
+  })
+  // Output status code and content type.
   res.writeHead(200, { 'Content-Type': 'text/html' })
-  res.end(indexHtml.replace('<body>', '<body>' + html))
+  // Stream the rendered HTML.
+  htmlStream.pipe(res)
 })
 
+// Start the HTTP server.
 server.listen(3000, () => {
   console.log('Server running at http://localhost:3000')
 })

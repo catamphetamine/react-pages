@@ -7,28 +7,27 @@
   "exports": {
     ".": {
       "import": "./lib/index.js",
-      "require": "./lib/index.cjs",
       "types": "./lib/index.d.ts"
     },
     "./server-render": {
-      "import": "./lib/server-render.js",
-      "require": "./lib/server-render.cjs",
-      "types": "./lib/server-render.d.ts"
+      "import": "./lib/server-render/index.js",
+      "types": "./lib/server-render/index.d.ts"
     },
     "./render": {
-      "import": "./lib/render.js",
-      "require": "./lib/render.cjs",
-      "types": "./lib/render.d.ts"
+      "import": "./lib/browser-render/index.js",
+      "types": "./lib/browser-render/index.d.ts"
     }
   },
   "version": "0.9.0",
   "description": "A tiny framework for building a single-page React application",
   "dependencies": {
-    "navigation-stack": "^0.6.2"
+    "es-toolkit": "^1.47.0",
+    "navigation-stack": "^0.6.12"
   },
   "devDependencies": {
     "@types/chai": "^5.2.3",
     "@types/mocha": "^10.0.10",
+    "@types/node": "^25.9.1",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "chai": "^6.2.2",
@@ -38,6 +37,7 @@
     "react": "^19.2.6",
     "react-dom": "^19.2.6",
     "rimraf": "^6.1.3",
+    "tsx": "^4.22.4",
     "typescript": "^6.0.3"
   },
   "peerDependencies": {
@@ -45,8 +45,8 @@
     "react-dom": ">= 18"
   },
   "scripts": {
-    "test": "mocha --bail \"src/**/*.test.js\" \"test/*.test.js\" \"test/!(exports)/**/*.test.js\"",
-    "test:exports": "mocha --bail \"test/exports/**/*.test.js\"",
+    "test": "mocha --node-option import=tsx --bail \"src/**/*.test.ts\" \"test/*.test.ts\" \"test/!(exports)/**/*.test.js\"",
+    "test:exports": "mocha --bail \"test/exports/**/*.test.ts\"",
     "build:clean": "rimraf --glob ./lib/**/*",
     "build:typescript": "npx tsc",
     "build": "npm-run-all build:clean build:typescript",

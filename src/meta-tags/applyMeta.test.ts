@@ -3,7 +3,7 @@ import { expect } from 'chai'
 
 import applyMeta from './applyMeta.js'
 
-import TestDocument from './TestDocument.js'
+import TestDocument from './document/TestDocument.js'
 
 describe(`meta`, () => {
 	it(`should update meta`, () => {
@@ -36,8 +36,6 @@ describe(`meta`, () => {
 			['keywords', 'react, redux, webpack'],
 			['author', '@catamphetamine']
 		])
-
-		expect(document.getTitle()).to.equal('Test')
 	})
 
 	it(`should transform "siteName" to "site_name"`, () => {
@@ -55,11 +53,10 @@ describe(`meta`, () => {
 		])
 	})
 
-	it(`should update meta without title and charset`, () => {
+	it(`should update to meta without any charset`, () => {
 		const document = new TestDocument()
 		applyMeta({}, document)
 		expect(document.getMetaTags()).to.deep.equal([])
-		expect(document.getTitle()).to.be.undefined
 	})
 
 	it(`should update charset`, () => {

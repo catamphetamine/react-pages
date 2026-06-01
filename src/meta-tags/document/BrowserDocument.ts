@@ -10,18 +10,18 @@ export default class BrowserDocument implements Document<HTMLMetaElement> {
 		return document.title
 	}
 
-	setTitle(title) {
+	setTitle(title: string) {
 		document.title = title
 	}
 
-	addMetaTag(name, value) {
+	addMetaTag(name: string, value: string) {
 		document.head.appendChild(this.createMetaTag(name, value))
 	}
 
 	/**
 	 * Creates `<meta/>` tag with a `value`.
 	 */
-	createMetaTag(name, value) {
+	createMetaTag(name: string, value: string) {
 		const meta = document.createElement('meta')
 		if (name === 'charset') {
 			meta.setAttribute('charset', value)
@@ -32,29 +32,31 @@ export default class BrowserDocument implements Document<HTMLMetaElement> {
 		return meta
 	}
 
-	isMetaTag(meta, name) {
+	isMetaTag(element: HTMLMetaElement, name: string) {
 		if (name === 'charset') {
-			return meta.hasAttribute('charset')
+			return element.hasAttribute('charset')
 		}
-		return meta.getAttribute(getMetaAttributeFor(name)) === name
+		return element.getAttribute(getMetaAttributeFor(name)) === name
 	}
 
-	getMetaTagValue(meta) {
-		if (meta.getAttribute('charset')) {
-			return meta.getAttribute('charset')
+	getMetaTagValue(element: HTMLMetaElement) {
+		if (element.hasAttribute('charset')) {
+			return element.getAttribute('charset') || undefined
 		}
-		return meta.getAttribute('content')
+		return element.getAttribute('content') || undefined
 	}
 
-	setMetaTagValue(meta, value) {
-		if (meta.getAttribute('charset')) {
-			return meta.setAttribute('charset', value)
+	setMetaTagValue(element: HTMLMetaElement, value: string) {
+		if (element.hasAttribute('charset')) {
+			return element.setAttribute('charset', value)
 		}
-		meta.setAttribute('content', value)
+		element.setAttribute('content', value)
 	}
 
-	removeMetaTag(meta) {
-		meta.parentNode.removeChild(meta)
+	removeMetaTag(element: HTMLMetaElement) {
+		if (element.parentNode) {
+			element.parentNode.removeChild(element)
+		}
 	}
 }
 

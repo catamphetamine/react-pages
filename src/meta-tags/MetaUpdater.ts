@@ -1,5 +1,4 @@
-// import { isEqual } from 'lodash-es'
-import isEqual from 'lodash/isEqual.js'
+import { isEqual } from 'es-toolkit'
 
 import mergeMeta from './mergeMeta.js'
 import applyMeta from './applyMeta.js'
@@ -8,7 +7,7 @@ import { getFromContext } from '../context/context.js'
 
 import type PageRouteData from '../data/PageRouteData.js'
 
-import type { PageMetaFunction } from '../../types.d.js'
+import type { PageMetaFunction } from '../types.d.js'
 
 export default function MetaUpdater({
 	meta,
@@ -17,11 +16,6 @@ export default function MetaUpdater({
 	props,
 	customProps
 }: Props) {
-	// `meta()` function uses `useSelector()` hook,
-
-	// Calculate `newMeta` even if `InitialMetaHasBeenApplied` flag is `false`,
-	// so that it calls the `useSelector()` hook which will trigger a rerender later
-	// when the value returned by that `useSelector()` hook changes.
 	let newMeta = meta({
 		props: {
 			...props,

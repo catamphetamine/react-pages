@@ -16,7 +16,6 @@ describe('getMetaTagsMarkup', () => {
 			author: '@catamphetamine'
 		})).to.deep.equal([
 			"<meta charset=\"utf-8\"/>",
-			"<title>Test</title>",
 			"<meta property=\"og:title\" content=\"Test\"/>",
 			"<meta name=\"description\" content=\"Testing metadata\"/>",
 			"<meta property=\"og:description\" content=\"Testing metadata\"/>",
@@ -31,8 +30,7 @@ describe('getMetaTagsMarkup', () => {
 
 	it(`should generate meta tags markup with default title and charset`, () => {
 		expect(getMetaTagsMarkup({})).to.deep.equal([
-			"<meta charset=\"utf-8\"/>",
-			"<title></title>"
+			"<meta charset=\"utf-8\"/>"
 		])
 	})
 })

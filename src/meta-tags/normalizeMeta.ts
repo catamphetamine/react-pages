@@ -1,9 +1,6 @@
-import type { Meta } from '../../types.d.js'
+import type { Meta } from '../types.d.js'
 
-// import { flatten } from 'lodash-es'
-import flatten from 'lodash/flatten.js'
-
-import escapeHtml from '../utility/escapeHtml.js'
+import flatten from '../utility/flatten.js'
 
 import expandArrays from './expandArrays.js'
 import expandObjects from './expandObjects.js'
@@ -22,9 +19,9 @@ export default function normalizeMeta(meta: Meta): MetaAttributeKeyValuePair[] {
  * @return Array of arrays having shape `[key, value]`.
  */
 export function convertMetaObject(meta: Meta): MetaKeyValuePair[] {
-	return Object.keys(meta).reduce((all, key) => {
+	return Object.entries(meta).reduce((all: MetaKeyValuePair[], [key, value]) => {
 		for (const alias of getMetaKeyAliases(key)) {
-			all.push([alias, meta[key]])
+			all.push([alias, value])
 		}
 		return all
 	}, [])
@@ -36,7 +33,7 @@ export function convertMetaObject(meta: Meta): MetaKeyValuePair[] {
  * Also filters out `charset`.
  * @return {string}
  */
-function getMetaKeyAliases(key): string[] {
+function getMetaKeyAliases(key: string): string[] {
 	switch (key) {
 		// `<meta charset/>` is handled specially
 		// because it doesn't have `name` attribute.
@@ -77,7 +74,7 @@ function getMetaKeyAliases(key): string[] {
 		case 'locales':
 			return ['og:locale:alternate']
 		default:
-			return [escapeHtml(key)]
+			return [key]
 	}
 }
 
@@ -88,7 +85,7 @@ function getMetaKeyAliases(key): string[] {
 export function flattenMeta(meta: MetaKeyValuePair[]): MetaAttributeKeyValuePair[] {
 	// Convert meta object to an array of arrays having shape `[key, value]`.
 	if (!Array.isArray(meta)) {
-		meta = Object.keys(meta).map(key => [key, meta[key]])
+		meta = Object.entries(meta)
 	}
 	return flatten(
 		meta.map((keyValue) => {

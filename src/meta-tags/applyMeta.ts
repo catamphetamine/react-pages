@@ -1,38 +1,22 @@
-// import { compact } from 'lodash-es'
-import compact from 'lodash/compact.js'
-
-import BrowserDocument from './BrowserDocument.js'
+import BrowserDocument from './document/BrowserDocument.js'
 import normalizeMeta from './normalizeMeta.js'
 
-import { setInContext } from '../context/context.js'
+import type { Document } from './document/Document.d.js'
 
-import type { Document } from './Document.d.js'
-
-import type { Meta } from '../../types.d.js'
+import type { Meta } from '../types.d.js'
 
 const browserDocument = new BrowserDocument()
 
 /**
- * Updates `<title/>` and `<meta/>` tags (inside `<head/>`).
+ * Updates `<meta/>` tags (inside `<head/>`).
  */
 export default function applyMeta(meta: Meta, document: Document = browserDocument) {
-	// Tests don't have a `window` global variable.
-	if (typeof window !== 'undefined') {
-		// `patchMeta()` function uses the latest applied meta snapshot.
-		setInContext('App/LatestAppliedMeta', meta)
-	}
-
-	const { title, charset } = meta
+	const { charset } = meta
 	const metaAttributes = normalizeMeta(meta)
 
 	// Get all `<meta/>` tags.
 	// (will be mutated)
 	const metaTags = document.getMetaTags()
-
-	// Update `<title/>`.
-	if (title && document.getTitle() !== String(title)) {
-		document.setTitle(String(title))
-	}
 
 	// Update `<meta charset/>`.
 	if (charset) {
@@ -41,13 +25,14 @@ export default function applyMeta(meta: Meta, document: Document = browserDocume
 
 	// Update existing `<meta/>` tags.
 	// (removing them from `metaTags` array)
-	const newMetaTags = compact(
+	const newMetaTags =
 		metaAttributes.map(([key, value]) => {
 			if (!updateMetaTag(document, metaTags, key, value)) {
 				return [key, value]
 			}
-		})
-	)
+		}).filter(
+			(metaTag): metaTag is string[] => Boolean(metaTag)
+		)
 
 	// Delete no longer existent `<meta/>` tags.
 	metaTags.forEach(document.removeMetaTag)

@@ -1,4 +1,4 @@
-import type { Meta, PageMetaFunction, UseSelector } from '../../types.d.js'
+import type { Meta, PageMetaFunction } from '../types.d.js'
 
 import BASE_META from './baseMeta.js'
 
@@ -6,10 +6,8 @@ import dropUndefinedProperties from './dropUndefinedProperties.js'
 
 import type PageRouteData from '../data/PageRouteData.js'
 
-import { usePageStateSelectorWithCustomUseSelector } from '../redux/usePageStateSelector.js'
-
 /**
- * Gathers `<title/>` and `<meta/>` tags (inside `<head/>`)
+ * Gathers `<meta/>` tags (inside `<head/>`)
  * defined for this route (`components` array).
  * @param {object[]} meta — An array of meta objects.
  * @return {object}
@@ -22,10 +20,6 @@ export default function mergeMeta<State>({
 	useSelector,
 	pageRouteData
 }: Parameters<State>) {
-	const usePageStateSelector = (reducerName, selectorFromReducerState) => {
-		return usePageStateSelectorWithCustomUseSelector(reducerName, selectorFromReducerState, useSelector)
-	}
-
 	// // `Object.assign` is not supported in Internet Explorer.
 	// let meta = Object.assign({}, BASE_META, ...)
 
@@ -33,8 +27,6 @@ export default function mergeMeta<State>({
 
 	if (rootMeta) {
 		rootMetaData = rootMeta({
-			useSelector,
-			usePageStateSelector,
 			props: pageRouteData.getRootRouteComponentProps() || {}
 		})
 		if (rootMetaData) {
@@ -50,8 +42,6 @@ export default function mergeMeta<State>({
 
 	if (pageMeta) {
 		pageMetaData = pageMeta({
-			useSelector,
-			usePageStateSelector,
 			props: pageRouteData.getPageRouteComponentProps() || {}
 		})
 		if (pageMetaData) {

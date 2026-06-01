@@ -1,17 +1,17 @@
 import escapeHtml from '../utility/escapeHtml.js'
 
-import { getMetaAttributeFor } from './BrowserDocument.js'
+import { getMetaAttributeFor } from './document/BrowserDocument.js'
 import normalizeMeta from './normalizeMeta.js'
 
 import BASE_META from './baseMeta.js'
 
-import type { Meta } from '../../types.d.js'
+import type { Meta, MetaAttributeValue } from '../types.d.js'
 
 /**
- * Generates a list of `<title/>` and `<meta/>` tags markup.
+ * Generates a list of `<meta/>` tags markup.
  */
 export default function getMetaTagsMarkup(meta: Meta): string[] {
-	const { title, charset } = meta
+	const { charset } = meta
 	const metaAttributes = normalizeMeta(meta)
 
 	return [
@@ -19,8 +19,7 @@ export default function getMetaTagsMarkup(meta: Meta): string[] {
 		// because some browsers only read the first
 		// 1024 bytes when deciding on page encoding.
 		// (`<meta charset/>` is always present)
-		`<meta charset="${escapeHtml(charset || BASE_META.charset)}"/>`,
-		`<title>${escapeHtml(title || '')}</title>`
+		`<meta charset="${escapeHtml(String(charset || BASE_META.charset), { isAttributeValue: true })}"/>`
 	]
 	.concat(
 		metaAttributes.map(([key, value]) => generateMetaTagMarkup(key, value))
@@ -30,11 +29,11 @@ export default function getMetaTagsMarkup(meta: Meta): string[] {
 /**
  * Generates `<meta/>` tag HTML markup.
  */
-function generateMetaTagMarkup(name: string, value: string): string {
+function generateMetaTagMarkup(name: string, value: MetaAttributeValue): string {
 	if (typeof value === 'boolean' || typeof value === 'number') {
 		value = String(value)
 	} else {
-		value = escapeHtml(String(value))
+		value = escapeHtml(String(value), { isAttributeValue: true })
 	}
 	return `<meta ${getMetaAttributeFor(name)}="${name}" content="${value}"/>`
 }

@@ -1,6 +1,4 @@
-import type { Meta } from '../../types.d.js'
-
-import { getFromContext } from '../context/context.js'
+import type { Meta } from '../types.d.js'
 
 import applyMeta from './applyMeta.js'
 
@@ -31,12 +29,12 @@ import applyMeta from './applyMeta.js'
  * Or, for example, when `<title/>` gets updated with the count of
  * unread notifications.
  */
-export default function patchMeta(newMeta: Meta) {
+export default function patchMeta(latestMeta: Meta, newMeta: Meta) {
 	if (typeof window === 'undefined') {
 		throw new Error('[react-pages] `patchMeta()` could only be called on client side')
 	}
 	applyMeta({
-		...getFromContext('App/LatestAppliedMeta'),
+		...latestMeta,
 		...newMeta
 	})
 }

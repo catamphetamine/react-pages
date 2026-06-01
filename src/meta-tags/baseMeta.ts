@@ -1,5 +1,6 @@
 export default {
 	charset: 'utf-8',
+
 	// Fixes CSS screen width on mobile devices.
 	// Otherwise media queries would not be applied initially
 	// and it would show desktop version design.

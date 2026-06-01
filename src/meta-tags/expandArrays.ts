@@ -1,4 +1,4 @@
-import type { MetaAttributeValue, Meta } from '../../types.d.js'
+import type { MetaAttributeValue, Meta } from '../types.d.js'
 
 import type { MetaKeyValuePair } from './normalizeMeta.js'
 
